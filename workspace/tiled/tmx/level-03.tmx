@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="16" tileheight="16" infinite="1" nextlayerid="10" nextobjectid="26">
+ <tileset firstgid="1" source="../tsx/level-03-overworld.tsx"/>
+ <tileset firstgid="1441" source="../tsx/level-03-objects.tsx"/>
+ <layer id="4" name="Ground" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   <chunk x="0" y="0" width="16" height="16">
+   eJybxsjAMG0Uj+JBiisZGBiqgLiagTz9C4H6FgGxJCN55sD0LyLTnJNAdZ/QzICZQ4oZp7CYI0liWGBzCwAD0Zaw
+  </chunk>
+   <chunk x="16" y="0" width="16" height="16">
+   eJybxsjAMG0UDzlcycDAUMVAvv6FQL2LRvUPuH5QHFaTYQ5MPwhLMpJuDkw/ADtulp8=
+  </chunk>
+   <chunk x="32" y="0" width="16" height="16">
+   eJybxsjAMG0UDxiuYmBgqGYgX/8ioN7Fo/pH9ZOpHwC11ZeX
+  </chunk>
+   <chunk x="48" y="0" width="16" height="16">
+   eJybxsjAMG0Uj+JRPCIxAELBlwE=
+  </chunk>
+   <chunk x="0" y="16" width="16" height="16">
+   eJybxsjAMI0EfJKBgeEUEH8C4kUMpOnFZg65+kfxKB7FxOFKYD6rwoEBm+KXZQ==
+  </chunk>
+   <chunk x="16" y="16" width="16" height="16">
+   eJxbxMDAsAiKJRkZGKqB9DRGwnghVM8nJP2kmAHTfxKHGVUM+M2B6QexQWacItEcZP0wjM0tuMzBph+fW9DDBpd+QubA3CLFiF8/IT8tImA/sX4iRj8+t5CiH5tbSNWP7hZy9cPMoEQ/NTAoLVCCAb9CmVw=
+  </chunk>
+   <chunk x="32" y="16" width="16" height="16">
+   eJxbxMDAsBiIpzFiYkFWBgZnFuxyMLwIj35LoP5sCvQTg0f1U65fEkhXk2kGSD+pZnwGqvsCxYsYSDdDGohloHgRGWYg6z8FVPuJRDOQ9YP4J0k0A10/CC9kIN4vyPqrGCBYCktY4DIDWT8AQASLnQ==
+  </chunk>
+   <chunk x="48" y="16" width="16" height="16">
+   eJzLZGRgmMGCiWcC8TRGwng/UN0sIJ4NxAeA+DCUPkiC/tlIZsDMySVSfw5Q3SEoPgClD5No/yEkfTCaFPuR3T0Liom1H+Z+mL4DJPo/C6jOihUTvyRSP6X4CwN2/JWBOP0yOLAskfYPtP5sUBxSoH8yEE9B0wsy0xVNXSUwPKuguJoBt/tx6ZUC0osYIHgxkn4Ad5mJxQ==
+  </chunk>
+   <chunk x="0" y="32" width="16" height="16">
+   eJybxsjAMI0AXsjAwLAIByakF4RPAtWdAuJPZOrH5o6PUDPJ1b+YRL2j+gePflDcn6ZAPzl2gzAsHZNj92DFACIjm3c=
+  </chunk>
+   <chunk x="16" y="32" width="16" height="16">
+   eJxbxMDAsGgA8SkK8TTGUTyKRzG5GAA3AZuR
+  </chunk>
+   <chunk x="32" y="32" width="16" height="16">
+   eJxbxMDAsIgAlmRkYKgC0tVAPA3IdgbiHCCWYSSsF90cmBnSUP2nGLDjTzjMWAzEQG1gN7gwQszChk/iMAfdL4QwIXOIMQOfOcTqRzbnEwX60d1Cjn5kcyjRP4oHHgMAzzOYHw==
+  </chunk>
+   <chunk x="48" y="32" width="16" height="16">
+   eJyTYWRgkIHibCB2BeI8FgaGaUC6koGBoQqIpYDsRQwIvJgBIj8NSS8Iy0LFZkL1ouvDpt8FCbtC9eYB8UIs+rDpR8Yw92JzMy791QwIvfj04NIvyUjYPnz6idWDjCWR3I1N/iMQn4LiTwTccIoBE59mgMQDSP4kFnmYGmxxAMOgOMwE4iw8agjh58B0+JKFfP2jmDAGAAZzk/8=
+  </chunk>
+  </data>
+ </layer>
+ <layer id="6" name="Trees" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   <chunk x="0" y="0" width="16" height="16">
+   eJxjYBgFlII2JgaGdiby9a8D6l3PRD1zBjMYDavBBQAz3gnJ
+  </chunk>
+   <chunk x="16" y="0" width="16" height="16">
+   eJxjYBgFQwm0MTEwtDORr38dUO96CvSPguEFAE67AnM=
+  </chunk>
+   <chunk x="32" y="0" width="16" height="16">
+   eJxjYBgF5ABbdgYGO3by9ccB9cYj6X/LxsDwjo188/iAZvFT4J5RMDIBAI3+A2c=
+  </chunk>
+   <chunk x="48" y="0" width="16" height="16">
+   eJxjYBgF6KCNiYGhnYl8/euAetcTqd+SnYHBip18u6KAeqOB+DUbA8MbNvLN4QGawUuBO0bB0AQAO5AFwQ==
+  </chunk>
+   <chunk x="0" y="16" width="16" height="16">
+   eJxjYBgFo2AU0Bu0MTEwtDORr38dUO96CvTDAADzYAJz
+  </chunk>
+   <chunk x="32" y="16" width="16" height="16">
+   eJxjYBgFo4D64CsbA8M3NvL1i7EzMIizU889owA7AACTuwIz
+  </chunk>
+   <chunk x="48" y="16" width="16" height="16">
+   eJxjYBgFo2AU0AK8ZWNgeMdGvn4+dgYGfnby9Z8B4rNAfA6PGgCVbQR6
+  </chunk>
+   <chunk x="0" y="32" width="16" height="16">
+   eJxjYKAP2MrKwLCNlXz914B6r1OgfxSMAlqCncC0uYuC9HkLqPf2AKRvANN0Bmk=
+  </chunk>
+   <chunk x="16" y="32" width="16" height="16">
+   eJxjYBgFo2BkgDYmBoZ2JvL1rwPqXU+B/sEIAEnWAnM=
+  </chunk>
+   <chunk x="48" y="32" width="16" height="16">
+   eJxjYBgFIx20MTEwtDORr38dUO96CvQjg7dsDAzvgPgMkH0WiM+RqJ+PnYGBn506bhkJAADDsAbs
+  </chunk>
+  </data>
+ </layer>
+ <layer id="5" name="Houses" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   <chunk x="0" y="0" width="16" height="16">
+   eJzty7sRgCAABFEyf8UoWgwKxSBajIpNuh04lxGwMy9cY2ql1qBFhx6D+I+YYDFjEX+HFRs8gvhH7Eg4cIr/hRsPMl7xr/33ATkmCLI=
+  </chunk>
+   <chunk x="0" y="16" width="16" height="16">
+   eJzty7ERgCAUBFEyUYsBsRhFixGlGFCaZEPSnzrczItuVqm+vn9vgMaICbOwN7BY4LAK+w07PA6cwv5CwI0HUdgnZLz4UJqvAhW5CLI=
+  </chunk>
+   <chunk x="48" y="16" width="16" height="16">
+   eJzty8kJgDAUANHk5FaMWzFuxcRoMUm0GLUjpwLhBwQPDrzjKPWNjFZqhtVxv+PzCJH/wXfiivz/3itBigw5CuFfokKNBq3w79BjwIhJ+BvMsFiwCn8Hj4ANu/B/6gYPBw6j
+  </chunk>
+   <chunk x="0" y="32" width="16" height="16">
+   eJzty00RgCAABWEC+BdG0TAohEE0jIoR3QbOu3FgZ77jGlOr/degRYceg/iPmGAxYxF/hxUbPIL4R+xIOHCK/4UbDzJe8S+1DxwuCS8=
+  </chunk>
+   <chunk x="48" y="32" width="16" height="16">
+   eJzty9ENQDAABuEOoBimyjBFh6kyDGpEt8KfiKde8j2eMbUva2DRokMv/g4DPEZM4h8wY8GKKP4JGzJ2HOJ/4sKNgkf8a//2AttnCS8=
+  </chunk>
+  </data>
+ </layer>
+ <layer id="7" name="Objects" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   <chunk x="0" y="0" width="16" height="16">
+   eJxjYBgFo2DwgnWsA+2C4Q0A+hsAtA==
+  </chunk>
+   <chunk x="0" y="16" width="16" height="16">
+   eJxjYBgFo2AUDGewipWBYTUrdjkAJ5oBYA==
+  </chunk>
+   <chunk x="48" y="16" width="16" height="16">
+   eJxjYBgFo2AUDBVwgZWB4SIr+fo/AvV+QtIPAKD4A5k=
+  </chunk>
+   <chunk x="0" y="32" width="16" height="16">
+   eJxjYBgFo2AUkAJWsTIwrGYdaFdQBwAAGPkBYA==
+  </chunk>
+  </data>
+ </layer>
+ <objectgroup id="8" name="Places">
+  <object id="1" name="StartPosition" x="512" y="116">
+   <point/>
+  </object>
+  <object id="2" type="Obstacle" x="117.333" y="109.333" width="66.6667" height="64"/>
+  <object id="5" type="Obstacle" x="838" y="610">
+   <polygon points="0,0 69,-2 72,74 1,93"/>
+  </object>
+  <object id="6" type="Obstacle" x="984" y="502">
+   <polygon points="0,0 -1,-73 -66,-73 -98,-24 -98,7"/>
+  </object>
+  <object id="7" type="Obstacle" x="146" y="448" width="73" height="63"/>
+  <object id="8" type="Obstacle" x="798" y="287" width="50" height="50">
+   <ellipse/>
+  </object>
+  <object id="9" type="Obstacle" x="609" y="401" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="10" type="Obstacle" x="436" y="690" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="11" type="Obstacle" x="226" y="466" width="29" height="29">
+   <ellipse/>
+  </object>
+  <object id="12" type="Obstacle" x="19" y="81" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="13" type="Obstacle" x="33" y="722" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="14" type="Obstacle" x="51" y="96" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="16" type="Obstacle" x="198" y="139" width="70.6955" height="29.616" rotation="23"/>
+  <object id="17" type="Obstacle" x="733" y="415">
+   <polygon points="0,0 132,-1 133,64 89,104 87,127 15,129 1,99"/>
+  </object>
+  <object id="18" type="Obstacle" x="737" y="62" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="19" type="Obstacle" x="769" y="93" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="20" type="Obstacle" x="851" y="66" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="21" type="Obstacle" x="785" y="641" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="22" type="Obstacle" x="448" y="96" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="23" type="Obstacle" x="801" y="117" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="24" type="Obstacle" x="545" y="98" width="28" height="28">
+   <ellipse/>
+  </object>
+  <object id="25" type="Obstacle" x="164" y="649" width="73" height="70"/>
+ </objectgroup>
+</map>

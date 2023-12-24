@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="12" nextobjectid="79">
+ <tileset firstgid="1" source="../tsx/level-01.tsx"/>
+ <layer id="1" name="Ground" width="100" height="100">
+  <data encoding="base64" compression="zstd">
+   KLUv/WBAm20YAEJKGBhQjTIcGBO2jii1WDIzM7nqif911j4/ZQoMk5GROUOU//3v/5X3fr/shoqhKlARqAZUAv+EUB1UASoA1UPlWMJnoVKoEitLg5oge0nhZc7Rdvb7vO2FVeQhHKgGSt6qoyqBaqjhOgUp7XPRBZbMlF2YdBLgEJgIEAYkiEiChiKIOIIIIUgwAgRDKAQhpyST2IUDSQK6W3xNwMrGMXeKVscLtdFT2IC3FeKKxeWp7MNdCQs9yd1WFXMXW9aHVETZuQ7L0Remw/ZVmK0n4Fi3ClPBgHbrdRVm4s82DOMjO65jo/kKuE41vLJXqm6nRyhmzXH1obNlYtdTJPrW83pAlzVSSS+HoJQtuqtW1HvoOaifwyVSTeeiGhRNmLdWkTUXVVh+6tIzSPpK11xUb/mpXAkndSs4dgyZVjadQ/ewOtvrFjuKhpP39szYbL/HyZXUSuv0SUZju+0wY5d94npntrfO1sBcsOvkpf9AivFzGW3PXZowGeG3T2YI3E7o+cO1pr16YpNVrwLke/ixdOZbbmeempVu0vCb5MZC6PMwP+5uURyjNcsTDoLf0gRXAj2pSU4fynI/gzq9OGq9eByG92yYtTVLU/JArzX/4Ssht7QcmtSs7mtSH/F5vpfL6leBh9okNhMeht5Z/FFDxibMIkZTznaxDl+Tp5c7ow+pBd3fZHqYd0/o6GJPfafzK0M8lSjB1lMprCYfMfsw+aGYFKK/qVzpbIrCMkK6yaZDsgl6oMnRXTyXGxMXR5h2kvd4mRQz7+XivOE88PtkEA/203L2+cJZk3Pt4R9X5fk73/s5Ce+PY4Zjp5vHvGspJzGos59xdk6vMJ5Sgv020dHrpivXzLHUlkU8qEzKXKTHvDLXtOmgKOj/sE+KGtRxU8KZqQyZ1KL8K6TMc128jtcsqEzyzPd65mn31WWn9Nb5HIY7k1zMIocvvGhkHd700/b+PPvnbdu8G/jliUttWNXlHo4TJ1J4jxcOJkXnIOyYMCdhiJ97pAPnTeKIow6BtUr6IpksGZwMqMp2Og0=
+  </data>
+ </layer>
+ <objectgroup color="#5500ff" id="5" name="Places">
+  <object id="1" name="HouseEnter" type="Sensor" x="1377.33" y="2497.33" width="346.667" height="81.3337"/>
+  <object id="3" name="SchoolEnter" type="Sensor" x="289" y="290" width="93" height="44.6667"/>
+  <object id="13" name="StartPosition" x="338" y="490">
+   <point/>
+  </object>
+  <object id="72" name="Rect" x="832" y="412" width="182" height="90" rotation="24"/>
+  <object id="69" name="Teleport_1" type="Sensor" x="1057" y="593" width="100" height="100">
+   <ellipse/>
+  </object>
+  <object id="42" name="Teleport_2" type="Sensor" x="3077.33" y="3030.66" width="90" height="90">
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <group id="10" name="Thinks">
+  <layer id="2" name="FirstFloor" width="100" height="100" offsetx="-1.33333" offsety="0">
+   <data encoding="base64" compression="zstd">
+   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
+  </data>
+  </layer>
+  <layer id="3" name="SecondFloot" width="100" height="100">
+   <data encoding="base64" compression="zstd">
+   KLUv/WBAm60CAJQCALkAAAC6uwDBAAAAwsMAyQAAAMrLACQAAAAlJgA5AQAALAAAACIjAC0PIBDSuQfBEtCBcDK9QTcmr2AOFd+dOaj4RL+h4od6DRUf6jWq+FCpIRs=
+  </data>
+  </layer>
+  <group id="11" name="Decor">
+   <layer id="4" name="HouseDecore" width="100" height="100">
+    <data encoding="base64" compression="zstd">
+   KLUv/WBAmzUHAHQCADsBPAGgAEMBRAFEoKg7Q5pEoq+3mqKgoKionaWtAAAArrUAAAC2VaBweTXwAqLRggI1Bq2rD+IvZtjVkWYch+RPaJ6WpmrgCfKJzmg2LQQ1sQX5AJ3nGRoA/kbng+ijGRoG5eh8AvU0RDNRJbMqomo4KyqCGvi5pkiiUU94fz1O7++qmkr1UdPITy20HHliA79Qh4F0o3S8phEQttHC1aZRIG+zGVfyoj1Tw3O0C6msupNtSfWZyBDtXZO0UbSMqc8QmZM8V0xVt2elO6mU+sk7ll57N6zlYYCOPWt/KAM2QkEC
+  </data>
+   </layer>
+  </group>
+ </group>
+ <objectgroup id="8" name="Obstacles">
+  <object id="14" type="Obstacle" x="416.333" y="1173.67" width="95" height="95">
+   <ellipse/>
+  </object>
+  <object id="16" type="Obstacle" x="3077.34" y="1013.34" width="90" height="90">
+   <ellipse/>
+  </object>
+  <object id="17" type="Obstacle" x="929" y="104" width="54" height="54">
+   <ellipse/>
+  </object>
+  <object id="18" type="Obstacle" x="777.667" y="139.333" width="42" height="42">
+   <ellipse/>
+  </object>
+  <object id="20" type="Obstacle" x="928.667" y="291.667" width="30" height="30">
+   <ellipse/>
+  </object>
+  <object id="22" type="Obstacle" x="1064.67" y="146.667" width="50" height="50">
+   <ellipse/>
+  </object>
+  <object id="25" type="Obstacle" x="866.333" y="359.333" width="25.3333" height="21"/>
+  <object id="29" type="Obstacle" x="2883.34" y="1958.34" width="54" height="54">
+   <ellipse/>
+  </object>
+  <object id="30" type="Obstacle" x="2978" y="2884" width="54" height="54">
+   <ellipse/>
+  </object>
+  <object id="31" type="Obstacle" x="580.167" y="2503.33" width="52" height="52">
+   <ellipse/>
+  </object>
+  <object id="32" type="Obstacle" x="97.3333" y="2966.67" width="90" height="90">
+   <ellipse/>
+  </object>
+  <object id="36" type="Obstacle" x="3.0303" y="937" width="281.818" height="53.9091"/>
+  <object id="37" type="Obstacle" x="1247.55" y="966.667" width="1373.05" height="27.2727"/>
+  <object id="38" type="Obstacle" x="2686.85" y="969.697" width="512.591" height="24.2424"/>
+  <object id="44" type="Obstacle" x="866" y="36" width="61" height="22"/>
+  <object id="45" type="Obstacle" x="961" y="38" width="64" height="20"/>
+  <object id="46" type="Obstacle" x="1057" y="41" width="64" height="20"/>
+  <object id="47" type="Obstacle" x="767" y="38" width="61" height="20"/>
+  <object id="48" type="Obstacle" x="1152" y="358" width="31" height="27"/>
+  <object id="51" type="Obstacle" x="383" y="937" width="861" height="53"/>
+  <object id="52" type="Obstacle" x="1183.67" y="2.66667" width="60.5" height="934.667"/>
+  <object id="53" type="Obstacle" x="862.333" y="1518" width="1407.67" height="980"/>
+  <object id="54" type="Obstacle" x="862.667" y="2497.33" width="513.333" height="159"/>
+  <object id="55" type="Obstacle" x="1725" y="2498" width="545.333" height="157.333"/>
+  <object id="57" type="Obstacle" x="131.856" y="397.602" width="114.873" height="122.184" rotation="46.6174"/>
+  <object id="58" type="Obstacle" x="384" y="288.667" width="320.667" height="96.3333"/>
+  <object id="59" type="Obstacle" x="1" y="0" width="287" height="382.667"/>
+  <object id="60" type="Obstacle" x="287" y="1.33333" width="417.667" height="286.667"/>
+  <object id="61" name="Invalid Obstacle" type="Obstacle" x="589.482" y="1301.33" rotation="-34">
+   <polygon points="0,0 231.851,1.59353 309.027,89.9184 88.4061,50.6667 133.427,163.365 -2.81574,117.399"/>
+  </object>
+  <object id="62" type="Obstacle" x="430.667" y="1404.51">
+   <polygon points="-4,50.6667 -4,159.879 82.6667,247.495 226.667,198.808 236,37.899 88,-47.1717"/>
+  </object>
+  <object id="63" type="Obstacle" x="704.667" y="351.667" width="27.3333" height="27"/>
+  <object id="68" x="49" y="1184" width="293" height="148" rotation="20">
+   <ellipse/>
+  </object>
+  <object id="73" x="1075.76" y="1209.09">
+   <polyline points="0,0 260.606,-30.303 442.424,30.303 639.394,-33.3333"/>
+  </object>
+  <object id="74" type="Obstacle" x="-17.1364" y="0.537879" width="16.6212" height="3199.6"/>
+  <object id="75" type="Obstacle" x="0.0643939" y="-17.3333" width="3199.51" height="16.9697"/>
+  <object id="76" type="Obstacle" x="3200.94" y="0.954545" width="22.5455" height="3199.55"/>
+  <object id="78" type="Obstacle" x="-0.0454545" y="3200.18" width="3199.53" height="25.6061"/>
+ </objectgroup>
+ <imagelayer id="6" name="Images" parallaxx="0" parallaxy="0">
+  <image source="../img/emoji/1F600_color.png" width="32" height="32"/>
+ </imagelayer>
+</map>

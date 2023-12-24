@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspace>
+    <engine
+        frame_rate="60"
+        log_level="trace"
+    />
+    <application
+        name="My Game"
+        script="main.lua"
+        log_level="trace"
+    />
+</workspace>
