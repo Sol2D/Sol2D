@@ -54,8 +54,9 @@ BodyPrototype & Scene::createBodyPrototype()
 
 void Scene::render(const SDL_FRect & _viewport)
 {
-    SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 0);
+    SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 0); // TODO: from Lua
     SDL_RenderClear(&mr_renderer);
-    mp_level->render(_viewport);
+    if(mp_level)
+        mp_level->render(_viewport);
     SDL_RenderPresent(&mr_renderer);
 }

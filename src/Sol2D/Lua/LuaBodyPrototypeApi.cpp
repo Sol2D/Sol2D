@@ -29,7 +29,6 @@ namespace {
 const char * gc_meta_body_proto_api = "sol.BodyPrototype";
 
 void luaPushBodyPrototypeApiMetatableOntoStack(lua_State * _lua);
-int luaApi_LoadSprite(lua_State * _lua);
 int luaApi_LoadSpriteSheet(lua_State * _lua);
 int luaApi_AttachScript(lua_State * _lua);
 
@@ -52,7 +51,6 @@ void luaPushBodyPrototypeApiMetatableOntoStack(lua_State * _lua)
     lua_pop(_lua, 1);
 
     luaL_Reg funcs[] = {
-        { "loadSprite", luaApi_LoadSprite },
         { "loadSpriteSheet", luaApi_LoadSpriteSheet },
         { "attachScript", luaApi_AttachScript },
         { nullptr, nullptr }
@@ -67,18 +65,6 @@ void luaPushBodyPrototypeApiMetatableOntoStack(lua_State * _lua)
 
 // 1 self
 // 2 file path
-int luaApi_LoadSprite(lua_State * _lua)
-{
-    Self * self = static_cast<Self *>(luaL_checkudata(_lua, 1, gc_meta_body_proto_api));
-    const char * arg_path = lua_tolstring(_lua, 2, nullptr);
-    luaL_argcheck(_lua, arg_path != nullptr, 2, "texture path expected");
-    SpriteIndex result = self->lproto.proto.loadSprite(self->workspace.toAbsolutePath(arg_path));
-    lua_pushnumber(_lua, result + 1);
-    return 1;
-}
-
-// 1 self
-// 2 file path
 // 3 settings
 int luaApi_LoadSpriteSheet(lua_State * _lua)
 {
@@ -88,38 +74,52 @@ int luaApi_LoadSpriteSheet(lua_State * _lua)
 
     SpriteSheetSettings settings = { };
 
-    lua_pushstring(_lua, "row_count");
+    lua_pushstring(_lua, "spriteWidth");
     if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.row_count = static_cast<uint16_t>(lua_tonumber(_lua, -1));
+        settings.sprite_width = static_cast<uint32_t>(lua_tonumber(_lua, -1));
     else
-        return luaL_error(_lua, "row_count required");
+        return luaL_error(_lua, "spriteWidth required");
     lua_pop(_lua, 1);
 
-    lua_pushstring(_lua, "col_count");
+    lua_pushstring(_lua, "spriteHeight");
     if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.col_count = static_cast<uint16_t>(lua_tonumber(_lua, -1));
+        settings.sprite_height = static_cast<uint32_t>(lua_tonumber(_lua, -1));
     else
-        return luaL_error(_lua, "col_count required");
+        return luaL_error(_lua, "spriteHeight");
     lua_pop(_lua, 1);
 
-    lua_pushstring(_lua, "padding_top");
+    lua_pushstring(_lua, "rowCount");
     if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.padding_top = static_cast<uint16_t>(lua_tonumber(_lua, -1));
+        settings.row_count = static_cast<uint32_t>(lua_tonumber(_lua, -1));
+    else
+        return luaL_error(_lua, "rowCount required");
     lua_pop(_lua, 1);
 
-    lua_pushstring(_lua, "padding_right");
+    lua_pushstring(_lua, "colCount");
     if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.padding_right = static_cast<uint16_t>(lua_tonumber(_lua, -1));
+        settings.col_count = static_cast<uint32_t>(lua_tonumber(_lua, -1));
+    else
+        return luaL_error(_lua, "colCount required");
     lua_pop(_lua, 1);
 
-    lua_pushstring(_lua, "padding_bottom");
+    lua_pushstring(_lua, "marginTop");
     if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.padding_bottom = static_cast<uint16_t>(lua_tonumber(_lua, -1));
+        settings.margin_top = static_cast<uint32_t>(lua_tonumber(_lua, -1));
     lua_pop(_lua, 1);
 
-    lua_pushstring(_lua, "padding_left");
+    lua_pushstring(_lua, "marginLeft");
     if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.padding_left = static_cast<uint16_t>(lua_tonumber(_lua, -1));
+        settings.margin_left = static_cast<uint32_t>(lua_tonumber(_lua, -1));
+    lua_pop(_lua, 1);
+
+    lua_pushstring(_lua, "horizontalSpacing");
+    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
+        settings.horizintal_spacing = static_cast<uint32_t>(lua_tonumber(_lua, -1));
+    lua_pop(_lua, 1);
+
+    lua_pushstring(_lua, "verticalSpacing");
+    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
+        settings.vertical_spacing = static_cast<uint32_t>(lua_tonumber(_lua, -1));
     lua_pop(_lua, 1);
 
     lua_pushstring(_lua, "ignores");
@@ -135,7 +135,7 @@ int luaApi_LoadSpriteSheet(lua_State * _lua)
     }
     lua_pop(_lua, 1);
 
-    lua_pushstring(_lua, "color_to_alpha");
+    lua_pushstring(_lua, "colorToAlpha");
     lua_gettable(_lua, 3);
     {
         SDL_Color * color;
@@ -144,8 +144,8 @@ int luaApi_LoadSpriteSheet(lua_State * _lua)
     }
     lua_pop(_lua, 1);
 
-    SpriteIndex result = self->lproto.proto.loadSpriteSheet(self->workspace.toAbsolutePath(path), settings);
-    lua_pushnumber(_lua, result + 1);
+    bool result = self->lproto.proto.loadSpriteSheet(self->workspace.toAbsolutePath(path), settings);
+    lua_pushboolean(_lua, result);
     return 1;
 }
 

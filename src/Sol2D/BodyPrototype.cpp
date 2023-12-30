@@ -16,14 +16,15 @@
 
 #include <Sol2D/BodyPrototype.h>
 #include <SDL3_image/SDL_image.h>
-#include <algorithm>
 
 using namespace Sol2D;
 
 namespace fs = std::filesystem;
 
 BodyPrototype::BodyPrototype(SDL_Renderer & _renderer) :
-    mr_renderer(_renderer)
+    mr_renderer(_renderer),
+    m_sprite_width{0},
+    m_sprite_height{0}
 {
 }
 
@@ -33,32 +34,14 @@ BodyPrototype::~BodyPrototype()
         SDL_DestroyTexture(texture);
 }
 
-SpriteIndex BodyPrototype::loadSprite(const fs::path & _file)
+bool BodyPrototype::loadSpriteSheet(const fs::path & _path, const SpriteSheetSettings & _settings)
 {
-    SDL_Surface * surface = IMG_Load(_file.c_str());
-    if(!surface)
-        return INVALID_SPRITE_INDEX;
-    SDL_Texture * texture = SDL_CreateTextureFromSurface(&mr_renderer, surface);
-    int width = surface->w;
-    int height = surface->h;
-    SDL_DestroySurface(surface);
-    if(!texture)
-        return INVALID_SPRITE_INDEX;
-    m_textures.push_back(texture);
-    m_sprites.push_back(Sprite {
-        .texture = texture,
-        .rect = { 0, 0, width, height }
-    });
-    return m_sprites.size() - 1;
-}
-
-SpriteIndex BodyPrototype::loadSpriteSheet(const fs::path & _path, const SpriteSheetSettings & _settings)
-{
-    if(_settings.col_count == 0 || _settings.row_count == 0)
-        return INVALID_SPRITE_INDEX;
+    m_sprites.clear();
+    if(!_settings.row_count || !_settings.col_count || !_settings.sprite_width || !_settings.sprite_height)
+        return false;
     SDL_Surface * surface = IMG_Load(_path.c_str());
     if(!surface)
-        return INVALID_SPRITE_INDEX;
+        return false;
     if(_settings.color_to_alpha.has_value())
     {
         SDL_Color color = _settings.color_to_alpha.value();
@@ -68,33 +51,31 @@ SpriteIndex BodyPrototype::loadSpriteSheet(const fs::path & _path, const SpriteS
             SDL_MapRGBA(surface->format, color.r, color.g, color.b, color.a)
         );
     }
-    int image_width = surface->w;
-    int image_height = surface->h;
     SDL_Texture * texture = SDL_CreateTextureFromSurface(&mr_renderer, surface);
     m_textures.push_back(texture);
     SDL_DestroySurface(surface);
-    int sprite_width = (image_width - _settings.padding_left - _settings.padding_right) / _settings.col_count;
-    int sprite_height = (image_height - _settings.padding_top - _settings.padding_bottom) / _settings.row_count;
-    if(sprite_width == 0 || sprite_height == 0)
-        return INVALID_SPRITE_INDEX;
-    SpriteIndex result = m_sprites.size();
     size_t index = 0;
+    SDL_Rect rect = {
+        .x = 0,
+        .y = 0,
+        .w = static_cast<int>(_settings.sprite_width),
+        .h = static_cast<int>(_settings.sprite_height)
+    };
+    m_sprite_width = _settings.sprite_width;
+    m_sprite_height = _settings.sprite_height;
     for(uint16_t row = 0; row < _settings.row_count; ++row)
     {
+        rect.y = _settings.margin_top + row * _settings.sprite_height + row * _settings.vertical_spacing;
         for(uint16_t col = 0; col < _settings.col_count; ++col)
         {
             if(_settings.ignores.contains(index++))
                 continue;
+            rect.x = _settings.margin_left + col * _settings.sprite_width + col * _settings.horizintal_spacing;
             m_sprites.push_back(Sprite {
                 .texture = texture,
-                .rect = {
-                    _settings.padding_left + col * sprite_width,
-                    _settings.padding_top + row * sprite_height,
-                    sprite_width,
-                    sprite_height
-                }
+                .rect = rect
             });
         }
     }
-    return result;
+    return true;
 }

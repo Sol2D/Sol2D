@@ -23,8 +23,8 @@ Body::Body(const BodyPrototype & _proto, Box2D & _box2d) :
     mr_proto(_proto),
     mr_box2d(_box2d),
     m_active_sprite_index(INVALID_SPRITE_INDEX),
-    m_width(48), // TODO: from proto
-    m_height(48), // TODO: from proto
+    m_width(_proto.getSpriteWidth()),
+    m_height(_proto.getSpriteHeight()),
     m_flip(SDL_FLIP_NONE),
     mp_b2body(_box2d.createDynamicBody(*this))
 {
@@ -43,8 +43,8 @@ const Sprite * Body::getActiveSprite() const
 void Body::move(int _delta_x, int _delta_y) // TODO: refactor using a force vector
 {
     mp_b2body->SetLinearVelocity(b2Vec2 {0, 0});
-    const float base_force = 1500.f; // TODO: from b2FrictionJoint?
-    const float force_multiplier = 900.0f;
+    const float base_force = 800.f; // TODO: from b2FrictionJoint?
+    const float force_multiplier = 500.0f;
 
     float force_x = _delta_x * force_multiplier;
     if(force_x > 0) force_x += base_force;

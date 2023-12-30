@@ -28,12 +28,14 @@ namespace Sol2D {
 
 struct SpriteSheetSettings
 {
-    uint16_t row_count;
-    uint16_t col_count;
-    uint16_t padding_top;
-    uint16_t padding_right;
-    uint16_t padding_bottom;
-    uint16_t padding_left;
+    uint32_t sprite_width;
+    uint32_t sprite_height;
+    uint32_t row_count;
+    uint32_t col_count;
+    uint32_t margin_top;
+    uint32_t margin_left;
+    uint32_t horizintal_spacing;
+    uint32_t vertical_spacing;
     std::set<SpriteIndex> ignores; // TODO: delete
     std::optional<SDL_Color> color_to_alpha;
 };
@@ -45,19 +47,32 @@ class BodyPrototype
 public:
     explicit BodyPrototype(SDL_Renderer & _renderer);
     ~BodyPrototype();
-    SpriteIndex loadSprite(const std::filesystem::path & _file);
-    SpriteIndex loadSpriteSheet(const std::filesystem::path & _path, const SpriteSheetSettings & _settings);
+    bool loadSpriteSheet(const std::filesystem::path & _path, const SpriteSheetSettings & _settings);
     const std::vector<Sprite> & getSprites() const;
+    uint32_t getSpriteWidth() const;
+    uint32_t getSpriteHeight() const;
 
 private:
     SDL_Renderer & mr_renderer;
     std::vector<Sprite> m_sprites;
     std::vector<SDL_Texture *> m_textures;
+    uint32_t m_sprite_width;
+    uint32_t m_sprite_height;
 };
 
 inline const std::vector<Sprite> & BodyPrototype::getSprites() const
 {
     return m_sprites;
+}
+
+inline uint32_t BodyPrototype::getSpriteWidth() const
+{
+    return m_sprite_width;
+}
+
+inline uint32_t BodyPrototype::getSpriteHeight() const
+{
+    return m_sprite_height;
 }
 
 } // namespace Sol2D

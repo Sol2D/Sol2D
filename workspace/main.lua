@@ -1,8 +1,14 @@
 local function createPlayerPrototype()
     local player_proto = sol.scene:createBodyPrototype()
     player_proto:loadSpriteSheet('assets/player/george.png', {
-        row_count = 4,
-        col_count = 4
+        spriteWidth = 32,
+        spriteHeight = 36,
+        rowCount = 4,
+        colCount = 4,
+        marginTop = 8,
+        marginLeft = 8,
+        horizontalSpacing = 16,
+        verticalSpacing = 12
     })
     player_proto:attachScript('player.lua')
     return player_proto;
