@@ -36,6 +36,7 @@ public:
     SpriteIndex getActiveSpriteIndex() const;
     void setPosition(int _x, int _y);
     SDL_FPoint getPosition() const;
+    float getAngle() const;
     uint32_t getWidth() const { return m_width; }
     uint32_t getHeight() const { return m_height; }
     void move(int _delta_x, int _delta_y); // TODO: applyForce
@@ -68,6 +69,11 @@ inline void Body::setActiveSprite(SpriteIndex _index)
 inline SpriteIndex Body::getActiveSpriteIndex() const
 {
     return m_active_sprite_index;
+}
+
+inline float Body::getAngle() const
+{
+    return mp_b2body->GetAngle();
 }
 
 inline SDL_RendererFlip Body::getFlip() const

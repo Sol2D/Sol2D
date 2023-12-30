@@ -18,6 +18,8 @@
 #include <Sol2D/Box2D.h>
 #include <Sol2D/Tiles/Tmx.h>
 
+#include <iostream>
+
 using namespace Sol2D;
 using namespace Sol2D::Tiles;
 
@@ -299,7 +301,15 @@ void Level::drawBody(const Body & _body) const
         .w = static_cast<float>(sprite->rect.w),
         .h = static_cast<float>(sprite->rect.h)
     };
-    SDL_RenderTextureRotated(mp_renderer, sprite->texture, &sprite_rect, &dest_rect, 0.0, nullptr, _body.getFlip());
+    SDL_RenderTextureRotated(
+        mp_renderer,
+        sprite->texture,
+        &sprite_rect,
+        &dest_rect,
+        radiansToDegrees(_body.getAngle()),
+        nullptr,
+        _body.getFlip()
+    );
 }
 
 void Level::drawBox2D()
@@ -319,26 +329,44 @@ void Level::drawBox2D()
             case b2Shape::e_polygon:
             {
                 b2PolygonShape * polygon = dynamic_cast<b2PolygonShape *>(shape);
+                float angle = body->GetAngle();
+                std::unique_ptr<VectorRotator> rotator;
+                if(angle)
+                    rotator.reset(new VectorRotator(angle));
                 for(int32 i = 1; i < polygon->m_count; ++i)
                 {
-                    SDL_FPoint a = toAbsoluteCoords(
-                        (polygon->m_vertices[i - 1].x + body_pos.x) * scale_factor,
-                        (polygon->m_vertices[i - 1].y + body_pos.y) * scale_factor
-                    );
-                    SDL_FPoint b = toAbsoluteCoords(
-                        (polygon->m_vertices[i].x + body_pos.x) * scale_factor,
-                        (polygon->m_vertices[i].y + body_pos.y) * scale_factor
-                    );
+                    SDL_FPoint a {
+                        .x = polygon->m_vertices[i - 1].x,
+                        .y = polygon->m_vertices[i - 1].y
+                    };
+                    SDL_FPoint b {
+                        .x = polygon->m_vertices[i].x,
+                        .y = polygon->m_vertices[i].y
+                    };
+                    if(rotator)
+                    {
+                        a = rotator->rotate(a);
+                        b = rotator->rotate(b);
+                    }
+                    a = toAbsoluteCoords((a.x + body_pos.x) * scale_factor, (a.y + body_pos.y) * scale_factor);
+                    b = toAbsoluteCoords((b.x + body_pos.x) * scale_factor, (b.y + body_pos.y) * scale_factor);
                     SDL_RenderLine(mp_renderer, a.x, a.y, b.x, b.y);
                 }
-                SDL_FPoint a = toAbsoluteCoords(
-                    (polygon->m_vertices[0].x + body_pos.x) * scale_factor,
-                    (polygon->m_vertices[0].y + body_pos.y) * scale_factor
-                );
-                SDL_FPoint b = toAbsoluteCoords(
-                    (polygon->m_vertices[polygon->m_count - 1].x + body_pos.x) * scale_factor,
-                    (polygon->m_vertices[polygon->m_count - 1].y + body_pos.y) * scale_factor
-                );
+                SDL_FPoint a {
+                    .x = polygon->m_vertices[0].x,
+                    .y = polygon->m_vertices[0].y
+                };
+                SDL_FPoint b {
+                    .x = polygon->m_vertices[polygon->m_count - 1].x,
+                    .y = polygon->m_vertices[polygon->m_count - 1].y
+                };
+                if(rotator)
+                {
+                    a = rotator->rotate(a);
+                    b = rotator->rotate(b);
+                }
+                a = toAbsoluteCoords((a.x + body_pos.x) * scale_factor, (a.y + body_pos.y) * scale_factor);
+                b = toAbsoluteCoords((b.x + body_pos.x) * scale_factor, (b.y + body_pos.y) * scale_factor);
                 SDL_RenderLine(mp_renderer, a.x, a.y, b.x, b.y);
                 break;
             }

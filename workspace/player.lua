@@ -34,7 +34,7 @@ sol.heartbeat.subscribe(function ()
         frames_per_sprite = 3
         step = 2
     else
-        frames_per_sprite = 6
+        frames_per_sprite = 4
     end
 
     if left then

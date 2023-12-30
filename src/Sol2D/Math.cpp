@@ -15,29 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Math.h>
-#include <numbers>
-#include <cmath>
-
-double Sol2D::degreesToRadians(double _degrees)
-{
-    constexpr double deg_360 = 360.0;
-    double deg = _degrees;
-    if(deg > deg_360) deg -= deg_360 * floor(deg / deg_360);
-    if(deg < 0) deg += deg_360 * floor(fabs(deg) / deg_360);
-    return (deg * std::numbers::pi) / 180;
-}
 
 void Sol2D::rotateVectors(std::vector<SDL_FPoint> & _vectors, double _angle_rad)
 {
-    const double sine = sin(_angle_rad);
-    const double cosine = cos(_angle_rad);
-    const size_t size = _vectors.size();
-    float x, y;
-    for(size_t i = 0; i < size; ++i)
-    {
-        x = _vectors[i].x;
-        y = _vectors[i].y;
-        _vectors[i].x = cosine * x - sine * y;
-        _vectors[i].y  = sine * x + cosine * y;
-    }
+    VectorRotator rotator(_angle_rad);
+    for(size_t i = 0; i < _vectors.size(); ++i)
+        _vectors[i] = rotator.rotate(_vectors[i]);
 }

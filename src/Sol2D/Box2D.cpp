@@ -151,8 +151,10 @@ b2Body * Box2D::createDynamicBody(Body & _body)
     b2_body_def.position.Set(
         half_width / m_scale_factor,
         half_height / m_scale_factor
-        );
+    );
     b2_body_def.linearDamping = 100; // TODO: for top-down
+    b2_body_def.angularDamping = 100; // TODO: must be controlled by user (prevent infinite rotation)
+    b2_body_def.fixedRotation = true; // TODO: must be controlled by user
     b2Body * b2_body = mp_world->CreateBody(&b2_body_def); // TODO: destroy among with the Body object
     b2PolygonShape shape;
     shape.SetAsBox(half_width, half_height);
