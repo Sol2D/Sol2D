@@ -200,7 +200,7 @@ int luaApi_CreateBox2dObstaclesFromObjects(lua_State * _lua)
     Self * self = static_cast<Self *>(luaL_checkudata(_lua, 1, gc_mtable_level));
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, "a class name expected");
     std::string cls(lua_tostring(_lua, 2));
-    self->level->createBox2dStaticBodies(cls, Box2D::StaticObjectKind::obstacle);
+    self->level->createBox2dStaticBodies(cls, Box2D::StaticObjectKind::Obstacle);
     return 0;
 }
 
@@ -211,7 +211,7 @@ int luaApi_CreateBox2dSensorsFromObjects(lua_State * _lua)
     Self * self = static_cast<Self *>(luaL_checkudata(_lua, 1, gc_mtable_level));
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, "a class name expected");
     std::string cls(lua_tostring(_lua, 2));
-    self->level->createBox2dStaticBodies(cls, Box2D::StaticObjectKind::sensor);
+    self->level->createBox2dStaticBodies(cls, Box2D::StaticObjectKind::Sensor);
     return 0;
 }
 

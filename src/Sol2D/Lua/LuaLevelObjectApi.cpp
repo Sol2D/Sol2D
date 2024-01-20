@@ -36,15 +36,15 @@ const char * mapObjectType(TileMapObjectType _type)
 {
     switch(_type)
     {
-    case TileMapObjectType::polygon:
+    case TileMapObjectType::Polygon:
         return gc_obj_type_polygon;
-    case TileMapObjectType::polyline:
+    case TileMapObjectType::Polyline:
         return gc_obj_type_polyline;
-    case TileMapObjectType::circle:
+    case TileMapObjectType::Circle:
         return gc_obj_type_ellipse;
-    case TileMapObjectType::point:
+    case TileMapObjectType::Point:
         return gc_obj_type_point;
-    case TileMapObjectType::text:
+    case TileMapObjectType::Text:
         return gc_obj_type_text;
     default:
         return gc_obj_type_none;

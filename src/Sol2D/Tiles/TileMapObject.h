@@ -28,11 +28,11 @@ namespace Sol2D::Tiles {
 
 enum class TileMapObjectType
 {
-    circle,
-    point,
-    polygon,
-    polyline,
-    text
+    Circle,
+    Point,
+    Polygon,
+    Polyline,
+    Text
 };
 
 
@@ -125,7 +125,7 @@ class TileMapCircle : public TileMapObject
 {
 public:
     explicit TileMapCircle(const TileMapObjectDef & _def) :
-        TileMapObject(TileMapObjectType::circle, _def),
+        TileMapObject(TileMapObjectType::Circle, _def),
         m_radius(0)
     {
     }
@@ -141,7 +141,7 @@ private:
 class TileMapPoint : public TileMapObject
 {
 public:
-    explicit TileMapPoint(const TileMapObjectDef & _def) : TileMapObject(TileMapObjectType::point, _def) { }
+    explicit TileMapPoint(const TileMapObjectDef & _def) : TileMapObject(TileMapObjectType::Point, _def) { }
 };
 
 
@@ -168,7 +168,7 @@ class TileMapPolygon : public TileMapPolyX
 {
 public:
     explicit TileMapPolygon(const TileMapObjectDef & _def) :
-        TileMapPolyX(TileMapObjectType::polygon, _def)
+        TileMapPolyX(TileMapObjectType::Polygon, _def)
     {
     }
 
@@ -181,7 +181,7 @@ class TileMapPolyline : public TileMapPolyX
 {
 public:
     explicit TileMapPolyline(const TileMapObjectDef & _def) :
-        TileMapPolyX(TileMapObjectType::polyline, _def)
+        TileMapPolyX(TileMapObjectType::Polyline, _def)
     {
     }
 };
@@ -192,22 +192,22 @@ class TileMapText : public TileMapObjectWithWidthAndHeight
 public:
     enum class HAlignment
     {
-        left,
-        right,
-        center,
-        justify
+        Left,
+        Right,
+        Center,
+        Justify
     };
 
     enum class VAlignment
     {
-        top,
-        bottom,
-        center
+        Top,
+        Bottom,
+        Center
     };
 
 public:
     explicit TileMapText(const TileMapObjectDef & _def) :
-        TileMapObjectWithWidthAndHeight(TileMapObjectType::text, _def),
+        TileMapObjectWithWidthAndHeight(TileMapObjectType::Text, _def),
         m_font_family("sans-serif"),
         m_font_size(16),
         m_is_word_wrap_enabled(false),
@@ -217,8 +217,8 @@ public:
         m_is_underlined(false),
         m_is_struck_out(false),
         m_is_kerning_enabled(true),
-        m_h_alignment(HAlignment::left),
-        m_v_alignment(VAlignment::top)
+        m_h_alignment(HAlignment::Left),
+        m_v_alignment(VAlignment::Top)
     {
     }
 

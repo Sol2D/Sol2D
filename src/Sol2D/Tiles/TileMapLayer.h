@@ -191,10 +191,10 @@ private:
 
 enum class TileMapLayerType
 {
-    tile,
-    object,
-    image,
-    group
+    Tile,
+    Object,
+    Image,
+    Group
 };
 
 class TileMapLayer
@@ -256,7 +256,7 @@ class TileMapImageLayer : public TileMapLayer
 {
 public:
     TileMapImageLayer(uint32_t _id, const std::string & _name) :
-        TileMapLayer(_id, _name, TileMapLayerType::image)
+        TileMapLayer(_id, _name, TileMapLayerType::Image)
     {
     }
 
@@ -272,7 +272,7 @@ class TileMapObjectLayer : public TileMapLayer
 {
 public:
     TileMapObjectLayer(const ObjectHeap & _heap, uint32_t _id, const std::string & _name) :
-        TileMapLayer(_id, _name, TileMapLayerType::object),
+        TileMapLayer(_id, _name, TileMapLayerType::Object),
         mr_heap(_heap)
     {
     }
@@ -362,7 +362,7 @@ inline TileMapTileLayer::TileMapTileLayer(const TileHeap & _tile_heap,
                                           int32_t _y,
                                           uint32_t _width,
                                           uint32_t _height) :
-    TileMapLayer(_id, _name, TileMapLayerType::tile),
+    TileMapLayer(_id, _name, TileMapLayerType::Tile),
     mr_tile_heap(_tile_heap),
     m_tile_width(_tile_width),
     m_tile_height(_tile_height),
@@ -381,7 +381,7 @@ public:
                       const std::string & _name,
                       const TileHeap & _tile_heap,
                       const ObjectHeap & _object_heap) :
-        TileMapLayer(_id, _name, TileMapLayerType::group),
+        TileMapLayer(_id, _name, TileMapLayerType::Group),
         TileMapLayerContainer(_tile_heap, _object_heap)
     {
     }

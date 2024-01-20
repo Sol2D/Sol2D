@@ -112,16 +112,16 @@ void Level::drawLayersAndBodies(const TileMapLayerContainer & _container,
         if(!__layer.isVisible()) return;
         switch(__layer.getType())
         {
-        case TileMapLayerType::tile:
+        case TileMapLayerType::Tile:
             drawTileLayer(_viewport, dynamic_cast<const TileMapTileLayer &>(__layer));
             break;
-        case TileMapLayerType::object:
+        case TileMapLayerType::Object:
             drawObjectLayer(dynamic_cast<const TileMapObjectLayer &>(__layer)); // TODO: _viewport
             break;
-        case TileMapLayerType::image:
+        case TileMapLayerType::Image:
             drawImageLayer(dynamic_cast<const TileMapImageLayer &>(__layer)); // TODO: _viewport
             break;
-        case TileMapLayerType::group:
+        case TileMapLayerType::Group:
         {
             const TileMapGroupLayer & group = dynamic_cast<const TileMapGroupLayer &>(__layer);
             if(group.isVisible())
@@ -148,13 +148,13 @@ void Level::drawObjectLayer(const TileMapObjectLayer & _layer)
         // TODO: if in viewport
         switch (__object.getObjectType())
         {
-        case TileMapObjectType::polygon:
+        case TileMapObjectType::Polygon:
             drawPolyXObject(dynamic_cast<const TileMapPolygon &>(__object), true);
             break;
-        case TileMapObjectType::polyline:
+        case TileMapObjectType::Polyline:
             drawPolyXObject(dynamic_cast<const TileMapPolyline &>(__object), false);
             break;
-        case TileMapObjectType::circle:
+        case TileMapObjectType::Circle:
             drawCircle(dynamic_cast<const TileMapCircle &>(__object));
             break;
         default:

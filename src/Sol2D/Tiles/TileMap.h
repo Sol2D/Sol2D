@@ -28,37 +28,37 @@ class TileMap final : public TileMapLayerContainer
 public:
     enum class Orientation
     {
-        orthogonal,
-        isometric,
-        staggered,
-        hexagonal
+        Orthogonal,
+        Isometric,
+        Staggered,
+        Hexagonal
     };
 
     enum class RenderOrder
     {
-        right_down,
-        right_up,
-        left_down,
-        left_up
+        RightDown,
+        RightUp,
+        LeftDown,
+        LeftUp
     };
 
     enum class StaggerIndex
     {
-        even,
-        odd
+        Even,
+        Odd
     };
 
     enum Axis
     {
-        x,
-        y
+        X,
+        Y
     };
 
 public:
     TileMap(const TileHeap & _tile_heap, const ObjectHeap & _object_heap) :
         TileMapLayerContainer(_tile_heap, _object_heap),
-        m_orientation(Orientation::orthogonal),
-        m_render_order(RenderOrder::right_down),
+        m_orientation(Orientation::Orthogonal),
+        m_render_order(RenderOrder::RightDown),
         m_x(0),
         m_y(0),
         m_width(0),
@@ -66,8 +66,8 @@ public:
         m_tile_width(0),
         m_tile_height(0),
         m_hex_side_length(0),
-        m_stagger_axis(Axis::y),
-        m_stagger_index(StaggerIndex::odd),
+        m_stagger_axis(Axis::Y),
+        m_stagger_index(StaggerIndex::Odd),
         m_parallax_origin_x(0),
         m_parallax_origin_y(0),
         m_background_color{ 0, 0, 0, 0 }

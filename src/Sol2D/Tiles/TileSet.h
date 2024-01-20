@@ -27,28 +27,28 @@ class TileSet
 public:
     enum class ObjectAlignment
     {
-        unspecified,
-        top_left,
-        top,
-        top_right,
-        left,
-        center,
-        right,
-        bottom_left,
-        bottom,
-        bottom_right
+        Unspecified,
+        TopLeft,
+        Top,
+        TopRight,
+        Left,
+        Center,
+        Right,
+        BottomLeft,
+        Bottom,
+        BottomRight
     };
 
     enum class TileRenderSize
     {
-        tile,
-        grid
+        Tile,
+        Grid
     };
 
     enum class FillMode
     {
-        stretch,
-        preserve_aspect_fit
+        Stretch,
+        PreserveAspectFit
     };
 
 public:
@@ -57,9 +57,9 @@ public:
     TileSet() :
         m_tile_width(0),
         m_tile_height(0),
-        m_object_aligment(ObjectAlignment::unspecified),
-        m_tile_render_size(TileRenderSize::tile),
-        m_fill_mode(FillMode::stretch)
+        m_object_aligment(ObjectAlignment::Unspecified),
+        m_tile_render_size(TileRenderSize::Tile),
+        m_fill_mode(FillMode::Stretch)
     {
     }
 

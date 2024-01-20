@@ -175,9 +175,9 @@ b2Body * Box2D::createStaticBody(Tiles::TileMapObject & _tile_map_object, Static
 
     switch(_tile_map_object.getObjectType())
     {
-    case TileMapObjectType::polygon:
+    case TileMapObjectType::Polygon:
         return createPolygonStaticBody(dynamic_cast<TileMapPolygon &>(_tile_map_object), _kind);
-    case TileMapObjectType::circle:
+    case TileMapObjectType::Circle:
         return createCircleStaticBody(dynamic_cast<TileMapCircle &>(_tile_map_object), _kind);
     default:
         break;
@@ -205,7 +205,7 @@ b2Body * Box2D::createPolygonStaticBody(Tiles::TileMapPolygon & _polygon, Static
     b2Body * body = mp_world->CreateBody(&bd);
     b2FixtureDef fx_def;
     fx_def.shape = &shape;
-    fx_def.isSensor = _kind == StaticObjectKind::sensor;
+    fx_def.isSensor = _kind == StaticObjectKind::Sensor;
     FixtureUserData * fixture_user_data = new FixtureUserData { };
     fixture_user_data->tile_map_object = &_polygon;
     fx_def.userData.pointer = reinterpret_cast<uintptr_t>(fixture_user_data);
@@ -229,7 +229,7 @@ b2Body * Box2D::createCircleStaticBody(Tiles::TileMapCircle & _circle, StaticObj
     shape.m_radius = radius;
     b2FixtureDef fx_def;
     fx_def.shape = &shape;
-    fx_def.isSensor = _kind == StaticObjectKind::sensor;
+    fx_def.isSensor = _kind == StaticObjectKind::Sensor;
     FixtureUserData * fixture_user_data = new FixtureUserData { };
     fixture_user_data->tile_map_object = &_circle;
     fx_def.userData.pointer = reinterpret_cast<uintptr_t>(fixture_user_data);

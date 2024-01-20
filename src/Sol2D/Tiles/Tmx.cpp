@@ -421,27 +421,27 @@ void TileMapXmlLoader::loadFromXml(const XMLDocument & _xml)
     if(const char * render_order = xmap->Attribute("renderorder"))
     {
         if(strcmp("right-down", render_order) == 0)
-            mr_map.setRenderOrder(TileMap::RenderOrder::right_down);
+            mr_map.setRenderOrder(TileMap::RenderOrder::RightDown);
         else if(strcmp("right-up", render_order) == 0)
-            mr_map.setRenderOrder(TileMap::RenderOrder::right_up);
+            mr_map.setRenderOrder(TileMap::RenderOrder::RightUp);
         else if(strcmp("left-down", render_order) == 0)
-            mr_map.setRenderOrder(TileMap::RenderOrder::left_down);
+            mr_map.setRenderOrder(TileMap::RenderOrder::LeftDown);
         else if(strcmp("left-up", render_order) == 0)
-            mr_map.setRenderOrder(TileMap::RenderOrder::left_up);
+            mr_map.setRenderOrder(TileMap::RenderOrder::LeftUp);
     }
     if(const char * stagger_axis = xmap->Attribute("staggeraxis"))
     {
         if(strcmp("x", stagger_axis))
-            mr_map.setStaggerAxis(TileMap::Axis::x);
+            mr_map.setStaggerAxis(TileMap::Axis::X);
         else if(strcmp("y", stagger_axis))
-            mr_map.setStaggerAxis(TileMap::Axis::y);
+            mr_map.setStaggerAxis(TileMap::Axis::Y);
     }
     if(const char * stagger_index = xmap->Attribute("staggerindex"))
     {
         if(strcmp("even", stagger_index) == 0)
-            mr_map.setStaggerIndex(TileMap::StaggerIndex::even);
+            mr_map.setStaggerIndex(TileMap::StaggerIndex::Even);
         else if(strcmp("odd", stagger_index) == 0)
-            mr_map.setStaggerIndex(TileMap::StaggerIndex::odd);
+            mr_map.setStaggerIndex(TileMap::StaggerIndex::Odd);
     }
     {
         SDL_Color color;
@@ -629,11 +629,11 @@ void TileMapXmlLoader::loadTileLayerDataBase64(const XMLElement & _xml,
     {
         if(strcmp("zlib", _compression) == 0)
         {
-            data = zlibDecompress(ZlibAlgorithm::zlib, *data);
+            data = zlibDecompress(ZlibAlgorithm::Zlib, *data);
         }
         else if(strcmp("gzip", _compression) == 0)
         {
-            data = zlibDecompress(ZlibAlgorithm::gzip, *data);
+            data = zlibDecompress(ZlibAlgorithm::GZip, *data);
         }
         else if(strcmp("zstd", _compression) == 0)
         {
@@ -825,22 +825,22 @@ void TileMapXmlLoader::loadText(const XMLElement & _xml, TileMapText & _text)
     if(const char * halign = _xml.Attribute("halign"))
     {
         if(strcmp("left", halign) == 0)
-            _text.setHorizontalAlignment(TileMapText::HAlignment::center);
+            _text.setHorizontalAlignment(TileMapText::HAlignment::Center);
         else if(strcmp("center", halign) == 0)
-            _text.setHorizontalAlignment(TileMapText::HAlignment::center);
+            _text.setHorizontalAlignment(TileMapText::HAlignment::Center);
         else if(strcmp("right", halign) == 0)
-            _text.setHorizontalAlignment(TileMapText::HAlignment::right);
+            _text.setHorizontalAlignment(TileMapText::HAlignment::Right);
         else if(strcmp("justify", halign) == 0)
-            _text.setHorizontalAlignment(TileMapText::HAlignment::justify);
+            _text.setHorizontalAlignment(TileMapText::HAlignment::Justify);
     }
     if(const char * valign = _xml.Attribute("valign"))
     {
         if(strcmp("top", valign) == 0)
-            _text.setVerticalAlignment(TileMapText::VAlignment::top);
+            _text.setVerticalAlignment(TileMapText::VAlignment::Top);
         else if(strcmp("center", valign) == 0)
-            _text.setVerticalAlignment(TileMapText::VAlignment::center);
+            _text.setVerticalAlignment(TileMapText::VAlignment::Center);
         else if(strcmp("bottom", valign) == 0)
-            _text.setVerticalAlignment(TileMapText::VAlignment::bottom);
+            _text.setVerticalAlignment(TileMapText::VAlignment::Bottom);
     }
 }
 
@@ -899,39 +899,39 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
     if(const char * object_alignment = _xml.Attribute("objectalignment"))
     {
         if(strcmp("unspecified", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::unspecified);
+            set.setObjectAlignment(TileSet::ObjectAlignment::Unspecified);
         else if(strcmp("topleft", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::top_left);
+            set.setObjectAlignment(TileSet::ObjectAlignment::TopLeft);
         else if(strcmp("top", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::top);
+            set.setObjectAlignment(TileSet::ObjectAlignment::Top);
         else if(strcmp("topright", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::top_right);
+            set.setObjectAlignment(TileSet::ObjectAlignment::TopRight);
         else if(strcmp("left", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::left);
+            set.setObjectAlignment(TileSet::ObjectAlignment::Left);
         else if(strcmp("center", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::center);
+            set.setObjectAlignment(TileSet::ObjectAlignment::Center);
         else if(strcmp("right", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::right);
+            set.setObjectAlignment(TileSet::ObjectAlignment::Right);
         else if(strcmp("bottomleft", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::bottom_left);
+            set.setObjectAlignment(TileSet::ObjectAlignment::BottomLeft);
         else if(strcmp("bottom", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::bottom);
+            set.setObjectAlignment(TileSet::ObjectAlignment::Bottom);
         else if(strcmp("bottomright", object_alignment) == 0)
-            set.setObjectAlignment(TileSet::ObjectAlignment::bottom_right);
+            set.setObjectAlignment(TileSet::ObjectAlignment::BottomRight);
     }
     if(const char * tile_render_size = _xml.Attribute("tilerendersize"))
     {
         if(strcmp("grid", tile_render_size) == 0)
-            set.setTileRenderSize(TileSet::TileRenderSize::grid);
+            set.setTileRenderSize(TileSet::TileRenderSize::Grid);
         else if(strcmp("tile", tile_render_size) == 0)
-            set.setTileRenderSize(TileSet::TileRenderSize::tile);
+            set.setTileRenderSize(TileSet::TileRenderSize::Tile);
     }
     if(const char * fill_mode = _xml.Attribute("fillmode"))
     {
         if(strcmp("preserve-aspect-fit", fill_mode) == 0)
-            set.setFillMode(TileSet::FillMode::preserve_aspect_fit);
+            set.setFillMode(TileSet::FillMode::PreserveAspectFit);
         else if(strcmp("stretch", fill_mode) == 0)
-            set.setFillMode(TileSet::FillMode::stretch);
+            set.setFillMode(TileSet::FillMode::Stretch);
     }
 
     if(const XMLElement * xml_image = _xml.FirstChildElement("image"))

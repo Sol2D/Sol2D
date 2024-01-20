@@ -27,8 +27,8 @@ std::shared_ptr<std::vector<uint8_t>> Sol2D::Utils::zlibDecompress(
     stream.zalloc = Z_NULL;
     stream.zfree = Z_NULL;
     stream.opaque = Z_NULL;
-
-    if(inflateInit2(&stream, _algorithm == ZlibAlgorithm::zlib ? MAX_WBITS : MAX_WBITS + 16) != Z_OK)
+    
+    if(inflateInit2(&stream, _algorithm == ZlibAlgorithm::Zlib ? MAX_WBITS : MAX_WBITS + 16) != Z_OK)
         return nullptr;
 
     static const uint32_t buffer_size = 16384;

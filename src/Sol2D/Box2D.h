@@ -50,8 +50,8 @@ private:
 public:
     enum class StaticObjectKind
     {
-        obstacle,
-        sensor
+        Obstacle,
+        Sensor
     };
 
 public:
