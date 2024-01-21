@@ -17,7 +17,7 @@
 #include <Sol2D/Lua/LuaLibrary.h>
 #include <Sol2D/Lua/LuaKeyboardApi.h>
 #include <Sol2D/Lua/LuaColorApi.h>
-#include <Sol2D/Lua/LuaSceneApi.h>
+#include <Sol2D/Lua/LuaWorldApi.h>
 #include <Sol2D/Lua/LuaHeartbeatApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaRectApi.h>
@@ -67,7 +67,7 @@ LuaCallObject::~LuaCallObject()
     luaSetCallObject(mp_lua, m_key, false);
 }
 
-void Sol2D::Lua::luaRegisterLibrary(lua_State * _lua, const Workspace & _workspace, Scene & _scene)
+void Sol2D::Lua::luaRegisterLibrary(lua_State * _lua, const Workspace & _workspace, World & _world)
 {
     lua_newuserdata(_lua, 1);
 
@@ -76,8 +76,8 @@ void Sol2D::Lua::luaRegisterLibrary(lua_State * _lua, const Workspace & _workspa
     lua_pushvalue(_lua, -2);
     lua_settable(_lua, -3);
 
-    luaAddSublibrary(_lua, "scene",
-        std::bind(luaPushSceneApiOntoStack, _lua, std::cref(_workspace), std::ref(_scene)));
+    luaAddSublibrary(_lua, "world",
+                     std::bind(luaPushWorldApiOntoStack, _lua, std::cref(_workspace), std::ref(_world)));
     luaAddSublibrary(_lua, "keyboard", std::bind(luaPushKeyboardApiOntoStack, _lua));
     luaAddSublibrary(_lua, "color", std::bind(luaPushColorApiOntoStack, _lua));
     luaAddSublibrary(_lua, "heartbeat", std::bind(luaPushHeartbeatApiOntoStack, _lua));

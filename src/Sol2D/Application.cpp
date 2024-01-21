@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Workspace.h>
-#include <Sol2D/Lua/LuaSceneController.h>
+#include <Sol2D/Lua/LuaWorldController.h>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <memory>
@@ -48,8 +48,8 @@ private:
     SDL_Window * mp_window;
     SDL_Renderer * mp_renderer;
     const Workspace & mr_workspace;
-    Scene * mp_scene;
-    LuaSceneController * mp_controller;
+    World * mp_world;
+    LuaWorldController * mp_controller;
 };
 
 } // namespace
@@ -59,7 +59,7 @@ Application::Application(const Workspace & _workspace) :
     mp_window(nullptr),
     mp_renderer(nullptr),
     mr_workspace(_workspace),
-    mp_scene(nullptr),
+    mp_world(nullptr),
     mp_controller(nullptr)
 {
 }
@@ -73,7 +73,7 @@ Application::~Application()
     IMG_Quit();
     SDL_Quit();
     delete mp_controller;
-    delete mp_scene;
+    delete mp_world;
 }
 
 bool Application::run(const Workspace & _workspace)
@@ -114,8 +114,8 @@ bool Application::initialize()
         mr_workspace.getMainLogger().critical("Unable to create renderer. {}", SDL_GetError());
         return false;
     }
-    mp_scene = new Scene(*mp_renderer, mr_workspace);
-    mp_controller = new LuaSceneController(mr_workspace, *mp_scene);
+    mp_world = new World(*mp_renderer, mr_workspace);
+    mp_controller = new LuaWorldController(mr_workspace, *mp_world);
     mp_controller->prepare();
     return true;
 }

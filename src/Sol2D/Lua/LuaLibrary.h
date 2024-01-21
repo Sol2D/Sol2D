@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Scene.h>
+#include <Sol2D/World.h>
 #include <Sol2D/Workspace.h>
 #include <lua.hpp>
 #include <memory>
@@ -34,7 +34,7 @@ private:
     std::string m_key;
 };
 
-void luaRegisterLibrary(lua_State * _lua, const Sol2D::Workspace & _workspace, Sol2D::Scene & _scene);
+void luaRegisterLibrary(lua_State * _lua, const Sol2D::Workspace & _workspace, Sol2D::World & _world);
 
 // [-1, +0]
 std::unique_ptr<LuaCallObject> luaUseCallObject(lua_State * _lua, const std::string & _key);

@@ -1,5 +1,5 @@
 local function createPlayerPrototype()
-    local player_proto = sol.scene:createBodyPrototype()
+    local player_proto = sol.world:createBodyPrototype()
     player_proto:loadSpriteSheet('assets/player/george.png', {
         spriteWidth = 32,
         spriteHeight = 36,
@@ -18,7 +18,7 @@ local function setupLevel01(player_proto)
     local teleport_1 = 'Teleport_1'
     local teleport_2 = 'Teleport_2'
     local disabled_teleport = ''
-    local level = sol.scene:loadLevelFromTmx('tiled/tmx/level-01.tmx')
+    local level = sol.world:loadLevelFromTmx('tiled/tmx/level-01.tmx')
     if not level then
         print('Unable to load level')
         return

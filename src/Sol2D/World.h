@@ -17,26 +17,33 @@
 #pragma once
 
 #include <Sol2D/Workspace.h>
-#include <Sol2D/Scene.h>
-#include <lua.hpp>
+#include <Sol2D/BodyPrototype.h>
+#include <Sol2D/Level.h>
+#include <Sol2D/Def.h>
+#include <SDL3/SDL.h>
+#include <vector>
 
-namespace Sol2D::Lua {
 
-class LuaSceneController final
+namespace Sol2D {
+
+class World final
 {
+    DISABLE_COPY_AND_MOVE(World)
+
 public:
-    explicit LuaSceneController(const Workspace & _workspace, Scene & _secene);
-    ~LuaSceneController();
-    void prepare();
+    World(SDL_Renderer & _renderer, const Workspace & _workspace);
+    ~World();
+    bool loadLevelFromTmx(const std::filesystem::path & _tmx_file);
+    Level * getLevel();
+    BodyPrototype & createBodyPrototype();
+    Uint8 * getKeyboardState() const;
     void render(const SDL_FRect & _viewport);
 
 private:
-    void executeMainScript();
-
-private:
-    lua_State * mp_lua;
-    const Sol2D::Workspace & mr_workspace;
-    Sol2D::Scene & mr_secene;
+    SDL_Renderer & mr_renderer;
+    const Workspace & mr_workspace;
+    std::vector<BodyPrototype *> m_body_prototypes;
+    Level * mp_level;
 };
 
-} // namespace Sol2D::Lua
+} // namespace Sol2D

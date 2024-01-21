@@ -16,32 +16,32 @@
 
 #include <Sol2D/Lua/LuaLibrary.h>
 #include <Sol2D/Lua/LuaHeartbeatApi.h>
-#include <Sol2D/Lua/LuaSceneController.h>
+#include <Sol2D/Lua/LuaWorldController.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 namespace fs = std::filesystem;
 
-LuaSceneController::LuaSceneController(const Workspace & _workspace, Scene & _scene) :
+LuaWorldController::LuaWorldController(const Workspace & _workspace, World & _world) :
     mp_lua(luaL_newstate()),
     mr_workspace(_workspace),
-    mr_secene(_scene)
+    mr_world(_world)
 {
     luaL_openlibs(mp_lua);
 }
 
-LuaSceneController::~LuaSceneController()
+LuaWorldController::~LuaWorldController()
 {
     lua_close(mp_lua);
 }
 
-void LuaSceneController::prepare()
+void LuaWorldController::prepare()
 {
-    luaRegisterLibrary(mp_lua, mr_workspace, mr_secene);
+    luaRegisterLibrary(mp_lua, mr_workspace, mr_world);
     executeMainScript();
 }
 
-void LuaSceneController::executeMainScript()
+void LuaWorldController::executeMainScript()
 {
     luaL_loadfile(mp_lua, mr_workspace.getMainScriptPath().c_str());
     if(lua_pcall(mp_lua, 0, LUA_MULTRET, 0) != LUA_OK)
@@ -49,8 +49,8 @@ void LuaSceneController::executeMainScript()
 }
 
 
-void LuaSceneController::render(const SDL_FRect & _viewport)
+void LuaWorldController::render(const SDL_FRect & _viewport)
 {
     luaDoHeartbeat(mp_lua, mr_workspace);
-    mr_secene.render(_viewport);
+    mr_world.render(_viewport);
 }
