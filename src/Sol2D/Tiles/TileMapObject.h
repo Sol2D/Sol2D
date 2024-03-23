@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Math.h>
+#include <Sol2D/Utils/Math.h>
 #include <Sol2D/Def.h>
 #include <string>
 #include <cstdint>
@@ -60,7 +60,7 @@ protected:
     }
 
 public:
-    DEFAULT_COPY(TileMapObject)
+    S2_DEFAULT_COPY(TileMapObject)
 
     virtual ~TileMapObject() { }
     TileMapObjectType getObjectType() const { return m_type; }
@@ -157,7 +157,7 @@ public:
     const std::vector<SDL_FPoint> & getPoints() const { return m_points; }
     std::vector<SDL_FPoint> & getPoints() { return m_points; }
     void addPoint(const SDL_FPoint & _point) { m_points.push_back(_point); }
-    void rotate(float _angle_rad) { rotateVectors(m_points, _angle_rad); }
+    void rotate(float _angle_rad) { Utils::rotateVectors(m_points, _angle_rad); }
 
 private:
     std::vector<SDL_FPoint> m_points;

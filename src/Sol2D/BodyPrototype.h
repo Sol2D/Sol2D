@@ -16,63 +16,70 @@
 
 #pragma once
 
-#include <Sol2D/Body.h>
-#include <Sol2D/Sprite.h>
-#include <Sol2D/Def.h>
-#include <filesystem>
-#include <vector>
-#include <set>
-#include <optional>
+#include <Sol2D/BodyShapePrototype.h>
+#include <Sol2D/BodyType.h>
+#include <Sol2D/Utils/KeyValueStorage.h>
+#include <functional>
 
 namespace Sol2D {
 
-struct SpriteSheetSettings
+class BodyPrototype final
 {
-    uint32_t sprite_width;
-    uint32_t sprite_height;
-    uint32_t row_count;
-    uint32_t col_count;
-    uint32_t margin_top;
-    uint32_t margin_left;
-    uint32_t horizintal_spacing;
-    uint32_t vertical_spacing;
-    std::set<SpriteIndex> ignores; // TODO: delete
-    std::optional<SDL_Color> color_to_alpha;
-};
-
-class BodyPrototype
-{
-    DISABLE_COPY(BodyPrototype)
+    S2_DISABLE_COPY_AND_MOVE(BodyPrototype)
 
 public:
-    explicit BodyPrototype(SDL_Renderer & _renderer);
-    ~BodyPrototype();
-    bool loadSpriteSheet(const std::filesystem::path & _path, const SpriteSheetSettings & _settings);
-    const std::vector<Sprite> & getSprites() const;
-    uint32_t getSpriteWidth() const;
-    uint32_t getSpriteHeight() const;
+    explicit BodyPrototype(BodyType _type);
+    BodyType getType() const;
+    BodyCircleShapePrototype & createCircleShape(const std::string & _key, SDL_FPoint _position, float _radius);
+    BodyPolygonShapePrototype & createPolygonShape(const std::string & _key, const SDL_FRect & _rect);
+    BodyPolygonShapePrototype & createPolygonShape(const std::string & _key, const std::vector<SDL_FPoint> & _points);
+    void forEachShape(std::function<void (const std::string &, const BodyShapePrototype &)> _callback) const;
 
 private:
-    SDL_Renderer & mr_renderer;
-    std::vector<Sprite> m_sprites;
-    std::vector<SDL_Texture *> m_textures;
-    uint32_t m_sprite_width;
-    uint32_t m_sprite_height;
+    BodyType m_type;
+    Utils::KeyValueStorage<std::string, BodyShapePrototype> m_shapes;
 };
 
-inline const std::vector<Sprite> & BodyPrototype::getSprites() const
+inline BodyPrototype::BodyPrototype(BodyType _type) :
+    m_type(_type)
 {
-    return m_sprites;
 }
 
-inline uint32_t BodyPrototype::getSpriteWidth() const
+inline BodyType BodyPrototype::getType() const
 {
-    return m_sprite_width;
+    return m_type;
 }
 
-inline uint32_t BodyPrototype::getSpriteHeight() const
+inline BodyCircleShapePrototype & BodyPrototype::createCircleShape(
+    const std::string & _key,
+    SDL_FPoint _position, float _radius)
 {
-    return m_sprite_height;
+    BodyCircleShapePrototype * shape = new BodyCircleShapePrototype(_position, _radius);
+    m_shapes.addOrReplaceItem(_key, shape);
+    return *shape;
+}
+
+inline BodyPolygonShapePrototype & BodyPrototype::createPolygonShape(const std::string & _key, const SDL_FRect & _rect)
+{
+    BodyPolygonShapePrototype * shape = new BodyPolygonShapePrototype(_rect);
+    m_shapes.addOrReplaceItem(_key, shape);
+    return *shape;
+}
+
+inline BodyPolygonShapePrototype & BodyPrototype::createPolygonShape(
+    const std::string & _key,
+    const std::vector<SDL_FPoint> & _points)
+{
+    BodyPolygonShapePrototype * shape = new BodyPolygonShapePrototype(_points);
+    m_shapes.addOrReplaceItem(_key, shape);
+    return *shape;
+}
+
+inline void BodyPrototype::forEachShape(
+    std::function<void(const std::string & _key, const BodyShapePrototype &)> _callback) const
+{
+    for(const auto & pair : m_shapes)
+        _callback(pair.first, *pair.second);
 }
 
 } // namespace Sol2D

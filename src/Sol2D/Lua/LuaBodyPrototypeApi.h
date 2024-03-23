@@ -18,9 +18,7 @@
 
 #include <Sol2D/BodyPrototype.h>
 #include <Sol2D/Workspace.h>
-#include <lua.hpp>
-#include <filesystem>
-#include <optional>
+#include <Sol2D/Lua/LuaForward.h>
 
 namespace Sol2D::Lua {
 
@@ -35,8 +33,8 @@ struct LuaBodyPrototype
     std::optional<std::filesystem::path> script_path;
 };
 
-void luaPushBodyPrototypeApiOntoStack(lua_State * _lua, const Sol2D::Workspace & _workspace, Sol2D::BodyPrototype & _proto);
+void pushBodyPrototypeApi(lua_State * _lua, BodyPrototype & _body_prototype);
 
-bool luaTryGetBodyPrototype(lua_State * _lua, int _idx, LuaBodyPrototype ** _lproto);
+LuaBodyPrototype & getBodyPrototype(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

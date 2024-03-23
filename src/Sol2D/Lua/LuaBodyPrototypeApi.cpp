@@ -15,137 +15,84 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaBodyPrototypeApi.h>
-#include <Sol2D/Lua/LuaBodyApi.h>
-#include <Sol2D/Lua/LuaColorApi.h>
-#include <new>
+#include <Sol2D/Lua/LuaBodyShapePrototypeApi.h>
+#include <Sol2D/Lua/LuaPointApi.h>
+#include <Sol2D/Lua/LuaRectApi.h>
+#include <Sol2D/Lua/LuaAux.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 
-namespace fs = std::filesystem;
-
 namespace {
 
-const char * gc_meta_body_proto_api = "sol.BodyPrototype";
+const char gc_metatable_body_prototype[] = "sol.BodyPrototype";
+const char gc_message_shape_key_expected[] = "a shape key expected";
 
-void luaPushBodyPrototypeApiMetatableOntoStack(lua_State * _lua);
-int luaApi_LoadSpriteSheet(lua_State * _lua);
-int luaApi_AttachScript(lua_State * _lua);
-
-struct Self
+struct Self : LuaBodyPrototype, LuaUserData<Self, gc_metatable_body_prototype>
 {
-    Self(const Workspace & _workspace, BodyPrototype & _proto) :
-        workspace(_workspace),
-        lproto(_proto)
-    {
-    }
-
-    const Workspace & workspace;
-    LuaBodyPrototype lproto;
 };
 
-void luaPushBodyPrototypeApiMetatableOntoStack(lua_State * _lua)
+// 1 self
+int luaApi_GetType(lua_State * _lua)
 {
-    if(luaL_getmetatable(_lua, gc_meta_body_proto_api))
-        return;
-    lua_pop(_lua, 1);
-
-    luaL_Reg funcs[] = {
-        { "loadSpriteSheet", luaApi_LoadSpriteSheet },
-        { "attachScript", luaApi_AttachScript },
-        { nullptr, nullptr }
-    };
-
-    luaL_newmetatable(_lua, gc_meta_body_proto_api);
-    lua_pushstring(_lua, "__index");
-    lua_pushvalue(_lua, -2);
-    lua_settable(_lua, -3);
-    luaL_setfuncs(_lua, funcs, 0);
+    Self * self = Self::getUserData(_lua, 1);
+    BodyType type = self->proto.getType();
+    lua_pushinteger(_lua, static_cast<lua_Integer>(type));
+    return 1;
 }
 
 // 1 self
-// 2 file path
-// 3 settings
-int luaApi_LoadSpriteSheet(lua_State * _lua)
+// 2 key
+// 3 position
+// 4 radius
+int luaApi_CreateCircleShape(lua_State * _lua)
 {
-    Self * self = static_cast<Self *>(luaL_checkudata(_lua, 1, gc_meta_body_proto_api));
-    const char * path = lua_tolstring(_lua, 2, nullptr);
-    luaL_argcheck(_lua, path != nullptr, 2, "sprite sheet path expected");
+    Self * self = Self::getUserData(_lua, 1);
+    const char * key = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, key != nullptr, 2, gc_message_shape_key_expected);
+    SDL_FPoint position;
+    luaL_argcheck(_lua, tryGetPoint(_lua, 3, position), 3, "the circle center position expected");
+    luaL_argcheck(_lua, lua_isnumber(_lua, 4), 4, "the circle radius expected");
+    float radius = static_cast<float>(lua_tonumber(_lua, 4));
+    pushBodyShapePrototypeApi(_lua, self->proto.createCircleShape(key, position, radius));
+    return 1;
+}
 
-    SpriteSheetSettings settings = { };
-
-    lua_pushstring(_lua, "spriteWidth");
-    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.sprite_width = static_cast<uint32_t>(lua_tonumber(_lua, -1));
-    else
-        return luaL_error(_lua, "spriteWidth required");
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "spriteHeight");
-    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.sprite_height = static_cast<uint32_t>(lua_tonumber(_lua, -1));
-    else
-        return luaL_error(_lua, "spriteHeight");
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "rowCount");
-    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.row_count = static_cast<uint32_t>(lua_tonumber(_lua, -1));
-    else
-        return luaL_error(_lua, "rowCount required");
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "colCount");
-    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.col_count = static_cast<uint32_t>(lua_tonumber(_lua, -1));
-    else
-        return luaL_error(_lua, "colCount required");
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "marginTop");
-    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.margin_top = static_cast<uint32_t>(lua_tonumber(_lua, -1));
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "marginLeft");
-    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.margin_left = static_cast<uint32_t>(lua_tonumber(_lua, -1));
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "horizontalSpacing");
-    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.horizintal_spacing = static_cast<uint32_t>(lua_tonumber(_lua, -1));
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "verticalSpacing");
-    if(lua_gettable(_lua, 3) == LUA_TNUMBER)
-        settings.vertical_spacing = static_cast<uint32_t>(lua_tonumber(_lua, -1));
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "ignores");
-    if(lua_gettable(_lua, 3) == LUA_TTABLE)
+// 1 self
+// 2 key
+// 3 rect | or ... points
+int luaApi_CreatePolygonShape(lua_State * _lua) // TODO: split up: createBoxShape, replace points with array
+{
+    Self * self = Self::getUserData(_lua, 1);
+    const char * key = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, key != nullptr, 2, gc_message_shape_key_expected);
+    SDL_FRect rect;
+    SDL_FPoint point;
+    BodyShapePrototype * shape_prototype = nullptr;
+    if(tryGetRect(_lua, 3, rect))
     {
-        lua_Unsigned length = lua_rawlen(_lua, -1);
-        for(lua_Unsigned i = 1; i <= length; ++i)
+        shape_prototype = &self->proto.createPolygonShape(key, rect);
+    }
+    else if(tryGetPoint(_lua, 3, point))
+    {
+        int points_count = lua_gettop(_lua) - 1;
+        if(points_count < 3)
+            luaL_error(_lua, "a polygon requires at least 3 points, %d provided", points_count);
+        std::vector<SDL_FPoint> points(points_count);
+        points[0] = point;
+        for(int i = 1; i < points_count; ++i)
         {
-            if(lua_rawgeti(_lua, -1, i) == LUA_TNUMBER)
-                settings.ignores.insert(lua_tonumber(_lua, -1) - 1);
-            lua_pop(_lua, 1);
+            int idx = i + 2;
+            luaL_argcheck(_lua, tryGetPoint(_lua, idx, point), idx, "a point expected");
+            points[i] = point;
         }
+        shape_prototype = &self->proto.createPolygonShape(key, points);
     }
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "colorToAlpha");
-    lua_gettable(_lua, 3);
+    else
     {
-        SDL_Color * color;
-        if(luaTryGetColor(_lua, -1, &color))
-            settings.color_to_alpha = *color;
+        luaL_argcheck(_lua, false, 3, "a rect or position expected");
     }
-    lua_pop(_lua, 1);
-
-    bool result = self->lproto.proto.loadSpriteSheet(self->workspace.toAbsolutePath(path), settings);
-    lua_pushboolean(_lua, result);
+    pushBodyShapePrototypeApi(_lua, *shape_prototype);
     return 1;
 }
 
@@ -153,28 +100,35 @@ int luaApi_LoadSpriteSheet(lua_State * _lua)
 // 2 script file
 int luaApi_AttachScript(lua_State * _lua)
 {
-    Self * self = static_cast<Self *>(luaL_checkudata(_lua, 1, gc_meta_body_proto_api));
+    Self * self = Self::getUserData(_lua, 1);
     const char * path = lua_tolstring(_lua, 2, nullptr);
-    luaL_argcheck(_lua, path != nullptr, 2, "script file path expected");
-    self->lproto.script_path = self->workspace.toAbsolutePath(path);
+    luaL_argcheck(_lua, path != nullptr, 2, "a script file path expected");
+    self->script_path = path;
     return 0;
 }
 
-} // namespace
+} // namespace name
 
-void Sol2D::Lua::luaPushBodyPrototypeApiOntoStack(lua_State * _lua, const Workspace & _workspace, BodyPrototype & _proto)
+void Sol2D::Lua::pushBodyPrototypeApi(lua_State * _lua, BodyPrototype & _body_prototype)
 {
-    void * self = lua_newuserdata(_lua, sizeof(Self));
-    new(self) Self(_workspace, _proto);
-    luaPushBodyPrototypeApiMetatableOntoStack(_lua);
+    Self * self = Self::pushUserData(_lua);
+    new(self) Self(_body_prototype);
+    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    {
+        luaL_Reg funcs[] = {
+            { "getType", luaApi_GetType },
+            { "createCircleShape", luaApi_CreateCircleShape },
+            { "createPolygonShape", luaApi_CreatePolygonShape },
+            { "attachScript", luaApi_AttachScript },
+            { nullptr, nullptr }
+        };
+        luaL_setfuncs(_lua, funcs, 0);
+    }
     lua_setmetatable(_lua, -2);
 }
 
-bool Sol2D::Lua::luaTryGetBodyPrototype(lua_State * _lua, int _idx, LuaBodyPrototype ** _lproto)
+LuaBodyPrototype & Sol2D::Lua::getBodyPrototype(lua_State * _lua, int _idx)
 {
-    if(luaL_testudata(_lua, _idx, gc_meta_body_proto_api) == nullptr)
-        return false;
-    Self * self = static_cast<Self *>(lua_touserdata(_lua, _idx));
-    *_lproto = &self->lproto;
-    return true;
+    Self * self = Self::getUserData(_lua, _idx);
+    return *self;
 }

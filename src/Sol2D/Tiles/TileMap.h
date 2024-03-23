@@ -23,7 +23,7 @@ namespace Sol2D::Tiles {
 
 class TileMap final : public TileMapLayerContainer
 {
-    DISABLE_COPY_AND_MOVE(TileMap)
+    S2_DISABLE_COPY_AND_MOVE(TileMap)
 
 public:
     enum class Orientation

@@ -1,4 +1,5 @@
 /build
 CMakeLists.txt.user
 *.tiled-session
-.kdev*/
+*.kdev*
+.cache

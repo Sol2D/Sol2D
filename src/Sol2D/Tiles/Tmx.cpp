@@ -66,7 +66,7 @@ struct TileMapLayerDefinition
 
 class XmlLoader
 {
-    DISABLE_COPY_AND_MOVE(XmlLoader)
+    S2_DISABLE_COPY_AND_MOVE(XmlLoader)
 
 protected:
     XmlLoader(SDL_Renderer & _renderer, TileHeap & _heap,

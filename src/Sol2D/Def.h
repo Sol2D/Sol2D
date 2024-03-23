@@ -16,24 +16,27 @@
 
 #pragma once
 
-#define DISABLE_COPY(classname) \
+#define S2_DISABLE_COPY(classname) \
     classname(const classname &) = delete; \
     classname & operator = (const classname &) = delete;
 
-#define DISABLE_COPY_AND_MOVE(classname) \
-    classname(const classname &) = delete; \
+#define S2_DISABLE_MOVE(classname) \
     classname(classname &&) = delete; \
-    classname & operator = (const classname &) = delete; \
     classname & operator = (classname &&) = delete;
 
-#define DEFAULT_COPY(classname) \
+#define S2_DISABLE_COPY_AND_MOVE(classname) S2_DISABLE_COPY(classname) \
+    S2_DISABLE_MOVE(classname)
+
+#define S2_DEFAULT_COPY(classname) \
     classname(const classname &) = default; \
     classname & operator = (const classname &) = default;
 
-#define DEFAULT_COPY_AND_MOVE(classname) \
-classname(const classname &) = default; \
+#define S2_DEFAULT_MOVE(classname) \
     classname(classname &&) = default; \
-    classname & operator = (const classname &) = default; \
     classname & operator = (classname &&) = default;
 
-#define NOT_USED(var) ((void)var)
+#define S2_DEFAULT_COPY_AND_MOVE(classname) \
+    S2_DEFAULT_COPY(classname) \
+    S2_DEFAULT_MOVE(classname)
+
+#define S2_UNUSED(var) ((void)var);

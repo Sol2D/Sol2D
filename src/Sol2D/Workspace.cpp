@@ -63,7 +63,7 @@ std::unique_ptr<Workspace> Workspace::load(const std::filesystem::path & _path)
         if(const char * log_level = xapp->Attribute("log_level"))
             workspace->m_lua_logger_ptr->set_level(spdlog::level::from_str(log_level));
         if(const char * script = xapp->Attribute("script"))
-            workspace->m_main_script_path = workspace->toAbsolutePath(script);
+            workspace->m_main_script_path = script;
     }
     return workspace;
 }

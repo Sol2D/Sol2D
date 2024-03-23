@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Workspace.h>
-#include <Sol2D/Lua/LuaWorldController.h>
+#include <Sol2D/Lua/LuaLibrary.h>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <memory>
@@ -36,7 +36,7 @@ private:
 public:
     ~Application();
     static bool run(const Workspace & _workspace);
-    void render();
+    void render(std::chrono::milliseconds _time_passed);
 
 private:
     bool initialize();
@@ -49,7 +49,7 @@ private:
     SDL_Renderer * mp_renderer;
     const Workspace & mr_workspace;
     World * mp_world;
-    LuaWorldController * mp_controller;
+    LuaLibrary * mp_lua;
 };
 
 } // namespace
@@ -60,7 +60,7 @@ Application::Application(const Workspace & _workspace) :
     mp_renderer(nullptr),
     mr_workspace(_workspace),
     mp_world(nullptr),
-    mp_controller(nullptr)
+    mp_lua(nullptr)
 {
 }
 
@@ -72,7 +72,7 @@ Application::~Application()
         SDL_DestroyWindow(mp_window);
     IMG_Quit();
     SDL_Quit();
-    delete mp_controller;
+    delete mp_lua;
     delete mp_world;
 }
 
@@ -115,31 +115,32 @@ bool Application::initialize()
         return false;
     }
     mp_world = new World(*mp_renderer, mr_workspace);
-    mp_controller = new LuaWorldController(mr_workspace, *mp_world);
-    mp_controller->prepare();
+    mp_lua = new LuaLibrary(mr_workspace, *mp_world);
+    mp_lua->executeMainScript();
     return true;
 }
 
 void Application::runMainLoop()
 {
-    Uint32 render_frame_delay = floor(1000 / mr_workspace.getFrameRate());
-    Uint32 next_render_ticks = SDL_GetTicks() + render_frame_delay;
+    const Uint32 render_frame_delay = floor(1000 / mr_workspace.getFrameRate());
     Uint32 now_ticks;
+    Uint32 last_rendering_ticks = SDL_GetTicks();
+    Uint32 passed_ticks;
     SDL_Event event;
     for(;;)
     {
         while(SDL_PollEvent(&event))
-           if(handleEvent(event)) return;
+            if(handleEvent(event)) return;
         now_ticks = SDL_GetTicks();
-        int delta_next = next_render_ticks - now_ticks;
-        if(delta_next <= 0)
+        passed_ticks = now_ticks - last_rendering_ticks;
+        if(passed_ticks >= render_frame_delay)
         {
-           render();
-           next_render_ticks += render_frame_delay;
+            last_rendering_ticks = now_ticks;
+            render(std::chrono::milliseconds(passed_ticks));
         }
-        else if(delta_next > 5)
+        if(render_frame_delay - passed_ticks > 5)
         {
-           SDL_Delay(5); // Reduce CPU usage
+            SDL_Delay(5); // Reduce CPU usage
         }
     }
 }
@@ -156,11 +157,13 @@ bool Application::handleEvent(const SDL_Event & _event)
     return false;
 }
 
-void Application::render()
+void Application::render(std::chrono::milliseconds _time_passed)
 {
     int width, height;
     SDL_GetCurrentRenderOutputSize(mp_renderer, &width, &height);
-    mp_controller->render(SDL_FRect { 20.0f, 20.0f, static_cast<float>(width) - 40, static_cast<float>(height) - 40 }); // TODO: it is the test viewport
+    SDL_FRect viewport{ 20.0f, 20.0f, static_cast<float>(width) - 40, static_cast<float>(height) - 40 }; // TODO: it is the test viewport
+    mp_world->render(viewport, _time_passed);
+    mp_lua->step(viewport, _time_passed);
 }
 
 int main(int _argc, const char ** _argv)

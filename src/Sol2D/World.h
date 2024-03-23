@@ -18,32 +18,55 @@
 
 #include <Sol2D/Workspace.h>
 #include <Sol2D/BodyPrototype.h>
-#include <Sol2D/Level.h>
-#include <Sol2D/Def.h>
+#include <Sol2D/Scene.h>
+#include <Sol2D/Utils/KeyValueStorage.h>
+#include <Sol2D/Larder.h>
 #include <SDL3/SDL.h>
-#include <vector>
-
+#include <unordered_map>
 
 namespace Sol2D {
 
 class World final
 {
-    DISABLE_COPY_AND_MOVE(World)
+    S2_DISABLE_COPY_AND_MOVE(World)
 
 public:
     World(SDL_Renderer & _renderer, const Workspace & _workspace);
     ~World();
+    Scene & createScene(const std::string & _name);
+    Scene * getScene(const std::string & _name);
     bool loadLevelFromTmx(const std::filesystem::path & _tmx_file);
-    Level * getLevel();
-    BodyPrototype & createBodyPrototype();
+    Larder & createLarder(const std::string & _key);
+    Larder * getLarder(const std::string & _key);
+    const Larder * getLarder(const std::string _key) const;
+    bool deleteLarder(const std::string & _key);
     Uint8 * getKeyboardState() const;
-    void render(const SDL_FRect & _viewport);
+    void render(const SDL_FRect & _viewport, std::chrono::milliseconds /*_time_passed*/);
 
 private:
     SDL_Renderer & mr_renderer;
     const Workspace & mr_workspace;
-    std::vector<BodyPrototype *> m_body_prototypes;
-    Level * mp_level;
+    std::unordered_multimap<std::string, Scene *> m_scenes;
+    Utils::KeyValueStorage<std::string, Larder> m_larders;
 };
+
+inline Larder & World::createLarder(const std::string & _key)
+{
+    return m_larders.addOrReplaceItem(_key, new Larder(mr_renderer));
+}
+
+inline Larder * World::getLarder(const std::string & _key)
+{
+    return m_larders.getItem(_key);
+}
+
+inline const Larder * World::getLarder(const std::string _key) const
+{
+    return m_larders.getItem(_key);
+}
+inline bool World::deleteLarder(const std::string & _key)
+{
+    return m_larders.deleteItem(_key);
+}
 
 } // namespace Sol2D

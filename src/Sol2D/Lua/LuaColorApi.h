@@ -16,13 +16,11 @@
 
 #pragma once
 
-#include <SDL3/SDL.h>
-#include <lua.hpp>
+#include <Sol2D/Lua/LuaForward.h>
+#include <SDL3/SDL_pixels.h>
 
 namespace Sol2D::Lua {
 
-void luaPushColorApiOntoStack(lua_State * _lua);
-
-bool luaTryGetColor(lua_State * _lua, int _idx, SDL_Color ** _color);
+bool tryGetColor(lua_State * _lua, int _idx, SDL_Color & _color);
 
 } // namespace Sol2D::Lua

@@ -30,6 +30,7 @@ namespace Sol2D::Tiles {
 
 template<typename T>
 concept TileMapObjectConcept =
+    std::same_as<T, TileMapObject> ||
     std::same_as<T, TileMapCircle> ||
     std::same_as<T, TileMapPoint> ||
     std::same_as<T, TileMapPolygon> ||
@@ -39,7 +40,7 @@ concept TileMapObjectConcept =
 
 class ObjectHeap final
 {
-    DISABLE_COPY_AND_MOVE(ObjectHeap)
+    S2_DISABLE_COPY_AND_MOVE(ObjectHeap)
 
 private:
     struct ObjectIdTag {};

@@ -199,7 +199,7 @@ enum class TileMapLayerType
 
 class TileMapLayer
 {
-    DISABLE_COPY_AND_MOVE(TileMapLayer)
+    S2_DISABLE_COPY_AND_MOVE(TileMapLayer)
 
 public:
     TileMapLayer(const uint32_t _id, const std::string & _name, TileMapLayerType _type) :

@@ -16,14 +16,11 @@
 
 #pragma once
 
-#include <lua.hpp>
+#include <Sol2D/Lua/LuaForward.h>
+#include <SDL3/SDL_rect.h>
 
 namespace Sol2D::Lua {
 
-void luaPushRectApiOntoStack(lua_State * _lua);
-
-void luaPushRectOntoStack(lua_State * _lua, float _x, float _y, float _width, float _height);
-
-bool luaTryGetRect(lua_State * _lua, int _idx, float * _x, float * _y, float * _width, float * _height);
+bool tryGetRect(lua_State * _lua, int _idx, SDL_FRect & _rect);
 
 } // namespace Sol2D::Lua

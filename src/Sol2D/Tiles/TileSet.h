@@ -52,7 +52,7 @@ public:
     };
 
 public:
-    DEFAULT_COPY(TileSet)
+    S2_DEFAULT_COPY(TileSet)
 
     TileSet() :
         m_tile_width(0),

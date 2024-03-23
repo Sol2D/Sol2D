@@ -25,7 +25,7 @@ namespace Sol2D::Tiles {
 class Tile final
 {
 public:
-    DEFAULT_COPY_AND_MOVE(Tile)
+    S2_DEFAULT_COPY_AND_MOVE(Tile)
 
     Tile(const TileSet & _set, SDL_TexturePtr _source, int32_t _src_x, int32_t _src_y, uint32_t _width, uint32_t _height) :
         mp_set(&_set),

@@ -16,27 +16,24 @@
 
 #pragma once
 
-#include <Sol2D/World.h>
+#include <Sol2D/Lua/LuaForward.h>
 #include <Sol2D/Workspace.h>
-#include <lua.hpp>
-#include <memory>
+#include <Sol2D/World.h>
 
 namespace Sol2D::Lua {
 
-class LuaCallObject final
+class LuaLibrary final
 {
 public:
-    LuaCallObject(lua_State * _lua, const std::string & _name);
-    ~LuaCallObject();
+    S2_DISABLE_COPY_AND_MOVE(LuaLibrary)
+    LuaLibrary(const Workspace & _workspace, World & _world);
+    ~LuaLibrary();
+    void executeMainScript();
+    void step(const SDL_FRect & _viewport, std::chrono::milliseconds _time_passed);
 
 private:
     lua_State * mp_lua;
-    std::string m_key;
+    const Workspace & mr_workspace;
 };
-
-void luaRegisterLibrary(lua_State * _lua, const Sol2D::Workspace & _workspace, Sol2D::World & _world);
-
-// [-1, +0]
-std::unique_ptr<LuaCallObject> luaUseCallObject(lua_State * _lua, const std::string & _key);
 
 } // namespace Sol2D::Lua

@@ -15,78 +15,52 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaHeartbeatApi.h>
+#include <Sol2D/Lua/LuaAux.h>
+
+using namespace Sol2D;
+using namespace Sol2D::Lua;
 
 namespace {
 
-const char * gc_mtable_heartbeat = "sol.Heartbeat";
-const char gc_key_heartbeat_callbacks_value = '\0';
-constexpr void * gc_key_heartbeat_callbacks = (void *)&gc_key_heartbeat_callbacks_value;
+const char gc_metatable_heartbeat[] = "sol.Heartbeat";
+char __gc_registry_key_heartbeat_anchor = '\0';
+constexpr void * gc_registry_key_heartbeat = static_cast<void *>(&__gc_registry_key_heartbeat_anchor);
 
-void luaPushApiMetatableHeartbeatOntoStack(lua_State * _lua);
-void pushCallbackStorageTableOntoStack(lua_State * _lua);
-void initializeCallbackStorageTable(lua_State * _lua);
-int luaApi_Subscribe(lua_State * _lua);
+struct Self : LuaUserData<Self, gc_metatable_heartbeat> { };
 
-void luaPushApiMetatableHeartbeatOntoStack(lua_State * _lua)
-{
-    if(luaL_getmetatable(_lua, gc_mtable_heartbeat) == LUA_TTABLE)
-        return;
-    lua_pop(_lua, 1);
-
-    luaL_Reg funcs[] = {
-        { "subscribe", luaApi_Subscribe },
-        { nullptr, nullptr }
-    };
-
-    luaL_newmetatable(_lua, gc_mtable_heartbeat);
-    lua_pushstring(_lua, "__index");
-    lua_pushvalue(_lua, -2);
-    lua_settable(_lua, -3);
-    luaL_setfuncs(_lua, funcs, 0);
-}
-
-// 1 callback
+// 1 self
+// 2 callback
 int luaApi_Subscribe(lua_State * _lua)
 {
-    luaL_argcheck(_lua, lua_isfunction(_lua, 1), lua_absindex(_lua, 1), "callback function is required");
-    pushCallbackStorageTableOntoStack(_lua);
-    lua_Unsigned callbacks_count = lua_rawlen(_lua, 2);
-    lua_pushvalue(_lua, 1);
-    lua_rawseti(_lua, 2, callbacks_count + 1);
+    Self::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isfunction(_lua, 2), lua_absindex(_lua, 1), "callback function is required");
+    pushTableFromRegistry(_lua, gc_registry_key_heartbeat);
+    lua_Unsigned callbacks_count = lua_rawlen(_lua, 3);
+    lua_pushvalue(_lua, 2);
+    lua_rawseti(_lua, 3, callbacks_count + 1);
     lua_pop(_lua, 1);
     return 0;
 }
 
-void pushCallbackStorageTableOntoStack(lua_State * _lua)
-{
-    lua_pushlightuserdata(_lua, gc_key_heartbeat_callbacks);
-    if(lua_gettable(_lua, LUA_REGISTRYINDEX) == LUA_TTABLE)
-        return;
-
-    lua_pop(_lua, 1);
-    initializeCallbackStorageTable(_lua);
-    pushCallbackStorageTableOntoStack(_lua);
-}
-
-void initializeCallbackStorageTable(lua_State * _lua)
-{
-    lua_pushlightuserdata(_lua, gc_key_heartbeat_callbacks);
-    lua_newtable(_lua);
-    lua_settable(_lua, LUA_REGISTRYINDEX);
-}
-
 } // namespace
 
-void Sol2D::Lua::luaPushHeartbeatApiOntoStack(lua_State * _lua)
+void Sol2D::Lua::pushHeartbeatApi(lua_State * _lua)
 {
-    lua_newuserdata(_lua, 1);
-    luaPushApiMetatableHeartbeatOntoStack(_lua);
+    Self::pushUserData(_lua);
+    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    {
+        luaL_Reg funcs[] = {
+            { "subscribe", luaApi_Subscribe },
+            { nullptr, nullptr }
+        };
+        luaL_setfuncs(_lua, funcs, 0);
+    }
     lua_setmetatable(_lua, -2);
 }
 
-void Sol2D::Lua::luaDoHeartbeat(lua_State * _lua, const Workspace & _workspace)
+void Sol2D::Lua::doHeartbeat(lua_State * _lua, const Workspace & _workspace)
 {
-    pushCallbackStorageTableOntoStack(_lua);
+    pushTableFromRegistry(_lua, gc_registry_key_heartbeat);
     lua_Unsigned callbacks_count = lua_rawlen(_lua, -1);
     for(lua_Unsigned i = 1; i <= callbacks_count; ++i)
     {

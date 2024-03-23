@@ -16,18 +16,57 @@
 
 #pragma once
 
-#include <SDL3/SDL.h>
+#include <Sol2D/SpriteRenderOptions.h>
+#include <Sol2D/SDL.h>
+#include <Sol2D/Def.h>
+#include <filesystem>
+#include <optional>
 
 namespace Sol2D {
 
-struct Sprite
+struct SpriteOptions
 {
-    SDL_Texture * texture;
-    SDL_Rect rect;
+    std::optional<SDL_FRect> rect;
+    std::optional<SDL_Color> color_to_alpha;
 };
 
-typedef size_t SpriteIndex;
+class Sprite final
+{
+public:
+    S2_DEFAULT_COPY_AND_MOVE(Sprite)
 
-constexpr SpriteIndex INVALID_SPRITE_INDEX = static_cast<SpriteIndex>(-1);
+    explicit Sprite(SDL_Renderer & _renderer);
+    bool loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options = SpriteOptions());
+    bool isValid() const;
+    SDL_TexturePtr getTexture() const;
+    const SDL_FRect & getRect() const;
+    void render(const SDL_FPoint & _point, SpriteRenderOptions _options = SpriteRenderOptions());
+
+private:
+    SDL_Renderer * mp_renderer;
+    SDL_TexturePtr m_texture_ptr;
+    SDL_FRect m_source_rect;
+};
+
+inline Sprite::Sprite(SDL_Renderer & _renderer) :
+    mp_renderer(&_renderer),
+    m_source_rect({ .0f, .0f, .0f, .0f })
+{
+}
+
+inline bool Sprite::isValid() const
+{
+    return m_texture_ptr != nullptr;
+}
+
+inline SDL_TexturePtr Sprite::getTexture() const
+{
+    return m_texture_ptr;
+}
+
+inline const SDL_FRect & Sprite::getRect() const
+{
+    return m_source_rect;
+}
 
 } // namespace Sol2D

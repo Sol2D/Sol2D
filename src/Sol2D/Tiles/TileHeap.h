@@ -25,7 +25,7 @@ namespace Sol2D::Tiles {
 
 class TileHeap final
 {
-    DISABLE_COPY(TileHeap)
+    S2_DISABLE_COPY(TileHeap)
 
 public:
     TileHeap();

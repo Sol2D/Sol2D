@@ -28,7 +28,7 @@ DEFINE_EXCEPTION(TiledXmlException)
 
 struct Tmx
 {
-    DISABLE_COPY(Tmx)
+    S2_DISABLE_COPY(Tmx)
 
     Tmx(std::unique_ptr<TileHeap> && _tile_heap,
         std::unique_ptr<ObjectHeap> _object_heap,

@@ -16,13 +16,12 @@
 
 #pragma once
 
-#include <lua.hpp>
+#include <Sol2D/Lua/LuaForward.h>
 #include <Sol2D/Workspace.h>
 
 namespace Sol2D::Lua {
 
-void luaPushHeartbeatApiOntoStack(lua_State * _lua);
-
-void luaDoHeartbeat(lua_State * _lua, const Sol2D::Workspace & _workspace);
+void pushHeartbeatApi(lua_State * _lua);
+void doHeartbeat(lua_State * _lua, const Workspace & _workspace);
 
 } // namespace Sol2D::Lua

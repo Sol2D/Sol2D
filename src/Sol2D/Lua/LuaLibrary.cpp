@@ -15,12 +15,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaLibrary.h>
-#include <Sol2D/Lua/LuaKeyboardApi.h>
-#include <Sol2D/Lua/LuaColorApi.h>
+#include <Sol2D/Lua/LuaAux.h>
 #include <Sol2D/Lua/LuaWorldApi.h>
 #include <Sol2D/Lua/LuaHeartbeatApi.h>
-#include <Sol2D/Lua/LuaPointApi.h>
-#include <Sol2D/Lua/LuaRectApi.h>
+#include <Sol2D/Lua/LuaScancodeApi.h>
+#include <Sol2D/Lua/LuaBodyTypeApi.h>
+#include <Sol2D/Lua/LuaBodyShapePrototypeApi.h>
+#include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
+#include <Sol2D/Lua/LuaKeyboardApi.h>
+#include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <functional>
 
 using namespace Sol2D;
@@ -28,66 +31,52 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-const char * gc_lib_mtable = "sol.Library";
+const char * gc_metatable_lib = "sol.Library";
 
-void luaAddSublibrary(lua_State * _lua, const char * _sublib_name, std::function<void()> _push_sublib_onto_stack)
+void addSublibrary(lua_State * _lua, const char * _sublib_name, std::function<void()> _push_sublib)
 {
-    int self = lua_gettop(_lua);
+    int library_table_idx = lua_gettop(_lua);
     lua_pushstring(_lua, _sublib_name);
-    _push_sublib_onto_stack();
-    lua_settable(_lua, self);
+    _push_sublib();
+    lua_settable(_lua, library_table_idx);
 }
 
-// If _set is true, object at the top of the stack will be set as object and popped from the stack,
-// otherwise nil will be set.
-void luaSetCallObject(lua_State * _lua, const std::string & _key, bool _set)
+} // namespace name
+
+LuaLibrary::LuaLibrary(const Workspace & _workspace, World & _world) :
+    mp_lua(luaL_newstate()),
+    mr_workspace(_workspace)
 {
-    luaL_getmetatable(_lua, gc_lib_mtable);
-    lua_pushstring(_lua, _key.c_str());
-    if(_set)
-        lua_pushvalue(_lua, -3);
-    else
-        lua_pushnil(_lua);
-    lua_settable(_lua, -3);
-    lua_pop(_lua, _set ? 2 : 1);
+    luaL_openlibs(mp_lua);
+    lua_newuserdata(mp_lua, 1);
+    if(pushMetatable(mp_lua, gc_metatable_lib) == MetatablePushResult::Created)
+    {
+        addSublibrary(mp_lua, "world", [this, &_world]() { pushWorldApi(mp_lua, mr_workspace, _world); });
+        addSublibrary(mp_lua, "heartbeat", [this]() { pushHeartbeatApi(mp_lua); });
+        addSublibrary(mp_lua, "keyboard", [this]() { pushKeyboardApiOntoStack(mp_lua); });
+        addSublibrary(mp_lua, "Scancode", [this]() { pushScancodeEnum(mp_lua); });
+        addSublibrary(mp_lua, "BodyType", [this]() { pushBodyTypeEnum(mp_lua); });
+        addSublibrary(mp_lua, "BodyShapeType", [this]() { pushBodyShapeTypeEnum(mp_lua); });
+        addSublibrary(mp_lua, "TileMapObjectType", [this]() { pushTileMapObjectTypeEnum(mp_lua); });
+    }
+    lua_setmetatable(mp_lua, -2);
+    lua_setglobal(mp_lua, "sol");
 }
 
-} // namespace
-
-
-LuaCallObject::LuaCallObject(lua_State * _lua, const std::string & _key) :
-    mp_lua(_lua),
-    m_key(_key)
+LuaLibrary::~LuaLibrary()
 {
-    luaSetCallObject(_lua, m_key, true);
+    lua_close(mp_lua);
 }
 
-LuaCallObject::~LuaCallObject()
+void LuaLibrary::executeMainScript()
 {
-    luaSetCallObject(mp_lua, m_key, false);
+    executeScript(mp_lua, mr_workspace, mr_workspace.getMainScriptPath());
 }
 
-void Sol2D::Lua::luaRegisterLibrary(lua_State * _lua, const Workspace & _workspace, World & _world)
+void LuaLibrary::step(const SDL_FRect & _viewport, std::chrono::milliseconds _time_passed)
 {
-    lua_newuserdata(_lua, 1);
+    S2_UNUSED(_viewport)
+    S2_UNUSED(_time_passed)
 
-    luaL_newmetatable(_lua, gc_lib_mtable);
-    lua_pushstring(_lua, "__index");
-    lua_pushvalue(_lua, -2);
-    lua_settable(_lua, -3);
-
-    luaAddSublibrary(_lua, "world",
-                     std::bind(luaPushWorldApiOntoStack, _lua, std::cref(_workspace), std::ref(_world)));
-    luaAddSublibrary(_lua, "keyboard", std::bind(luaPushKeyboardApiOntoStack, _lua));
-    luaAddSublibrary(_lua, "color", std::bind(luaPushColorApiOntoStack, _lua));
-    luaAddSublibrary(_lua, "heartbeat", std::bind(luaPushHeartbeatApiOntoStack, _lua));
-    luaAddSublibrary(_lua, "point", std::bind(luaPushPointApiOntoStack, _lua));
-    luaAddSublibrary(_lua, "rect", std::bind(luaPushRectApiOntoStack, _lua));
-    lua_setmetatable(_lua, -2);
-    lua_setglobal(_lua, "sol");
-}
-
-std::unique_ptr<LuaCallObject> Sol2D::Lua::luaUseCallObject(lua_State * _lua, const std::string & _key)
-{
-    return std::make_unique<LuaCallObject>(_lua, _key);
+    doHeartbeat(mp_lua, mr_workspace);
 }

@@ -16,14 +16,12 @@
 
 #pragma once
 
-#include <lua.hpp>
+#include <Sol2D/Lua/LuaForward.h>
+#include <SDL3/SDL_rect.h>
 
 namespace Sol2D::Lua {
 
-void luaPushPointApiOntoStack(lua_State * _lua);
-
-void luaPushPointOntoStack(lua_State * _lua, float _x, float _y);
-
-bool luaTryGetPoint(lua_State * _lua, int _idx, float * _x, float * _y);
+bool tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point);
+void pushPoint(lua_State * _lua, float _x, float _y);
 
 } // namespace Sol2D::Lua

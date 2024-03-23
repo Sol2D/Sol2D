@@ -15,79 +15,90 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaWorldApi.h>
-#include <Sol2D/Lua/LuaBodyPrototypeApi.h>
-#include <Sol2D/Lua/LuaLevelApi.h>
+#include <Sol2D/Lua/LuaSceneApi.h>
+#include <Sol2D/Lua/LuaLarderApi.h>
+#include <Sol2D/Lua/LuaAux.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 
 namespace {
 
-const char * gc_mtable_world = "sol.World";
+const char gc_metatable_world[] = "sol.World";
+const char gc_message_larder_key_expected[] = "a larder key expected";
 
-void luaPushWorldApiMetatableOntoStack(lua_State * _lua);
-int luaApi_LoadLevelFromTmx(lua_State * _lua);
-int luaApi_CreateBodyPrototype(lua_State * _lua);
-
-struct Self final
+struct Self : LuaUserData<Self, gc_metatable_world>
 {
-    Self(World & _world, const Sol2D::Workspace & _workspace) :
-        world(_world),
-        workspace(_workspace)
-    {
-    }
-    
-    World & world;
-    const Sol2D::Workspace & workspace;
+    World * world;
+    const Workspace * workspace;
 };
 
-void luaPushWorldApiMetatableOntoStack(lua_State * _lua)
-{
-    if(luaL_getmetatable(_lua, gc_mtable_world) == LUA_TTABLE)
-        return;
-    lua_pop(_lua, 1);
-
-    luaL_Reg funcs[] = {
-        { "loadLevelFromTmx", luaApi_LoadLevelFromTmx },
-        { "createBodyPrototype", luaApi_CreateBodyPrototype },
-        { nullptr, nullptr }
-    };
-
-    luaL_newmetatable(_lua, gc_mtable_world);
-    lua_pushstring(_lua, "__index");
-    lua_pushvalue(_lua, -2);
-    lua_settable(_lua, -3);
-    luaL_setfuncs(_lua, funcs, 0);
-}
-
 // 1 self
-// 2 *.tmx file path
-int luaApi_LoadLevelFromTmx(lua_State * _lua)
+// 2 name
+int luaApi_CreateScene(lua_State * _lua)
 {
-    Self * self = static_cast<Self *>(luaL_checkudata(_lua, 1, gc_mtable_world));
-    const char * tmx_file = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, tmx_file != nullptr, 2, "the TMX file path expected");
-    bool result = self->world.loadLevelFromTmx(self->workspace.toAbsolutePath(tmx_file));
-    lua_pushboolean(_lua, result);
-    Level * level = self->world.getLevel();
-    luaCreateLevelApiAndPushOntoStack(_lua, self->workspace, *level);
+    Self * self = Self::getUserData(_lua, 1);
+    const char * name = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, name != nullptr, 2, "the scene name expected");
+    pushSceneApi(_lua, *self->workspace, self->world->createScene(name));
     return 1;
 }
 
 // 1 self
-int luaApi_CreateBodyPrototype(lua_State * _lua)
+// 2 key
+int luaApi_CreateLarder(lua_State * _lua)
 {
-    Self * self = static_cast<Self *>(luaL_checkudata(_lua, 1, gc_mtable_world));
-    luaPushBodyPrototypeApiOntoStack(_lua, self->workspace, self->world.createBodyPrototype());
+    Self * self = Self::getUserData(_lua, 1);
+    const char * key = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, key != nullptr, 2, gc_message_larder_key_expected);
+    Larder & larder = self->world->createLarder(key);
+    pushLarderApi(_lua, *self->workspace, larder);
+    return 1;
+}
+
+// 1 self
+// 2 key
+int luaApi_GetLarder(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    const char * key = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, key != nullptr, 2, gc_message_larder_key_expected);
+    Larder * larder = self->world->getLarder(key);
+    if(larder)
+        pushLarderApi(_lua, *self->workspace, *larder);
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 key
+int luaApi_DeleteLarder(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    const char * key = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, key != nullptr, 2, gc_message_larder_key_expected);
+    lua_pushboolean(_lua, self->world->deleteLarder(key));
     return 1;
 }
 
 } // namespace
 
-void Sol2D::Lua::luaPushWorldApiOntoStack(lua_State * _lua, const Workspace & _workspace, World & _world)
+void Sol2D::Lua::pushWorldApi(lua_State * _lua, const Workspace & _workspace, World & _world)
 {
-    void * self = lua_newuserdata(_lua, sizeof(Self));
-    new(self) Self(_world, _workspace);
-    luaPushWorldApiMetatableOntoStack(_lua);
+    Self * self = Self::pushUserData(_lua);
+    self->world = &_world;
+    self->workspace = &_workspace;
+    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    {
+        luaL_Reg funcs[] = {
+            { "createScene", luaApi_CreateScene },
+            { "createLarder", luaApi_CreateLarder },
+            { "getLarder", luaApi_GetLarder },
+            { "deleteLarder", luaApi_DeleteLarder },
+            { nullptr, nullptr }
+        };
+        luaL_setfuncs(_lua, funcs, 0);
+    }
     lua_setmetatable(_lua, -2);
 }

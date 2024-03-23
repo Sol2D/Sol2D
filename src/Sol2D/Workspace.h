@@ -25,7 +25,7 @@ namespace Sol2D {
 
 class Workspace final
 {
-    DISABLE_COPY_AND_MOVE(Workspace)
+    S2_DISABLE_COPY_AND_MOVE(Workspace)
 
 private:
     explicit Workspace(const std::filesystem::path & _path);

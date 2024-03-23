@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <lua.hpp>
+#include <Sol2D/Lua/LuaForward.h>
 
 namespace Sol2D::Lua {
 
-void luaPushKeyboardApiOntoStack(lua_State * _lua);
+void pushKeyboardApiOntoStack(lua_State * _lua);
 
 } // namespace Sol2D::Lua

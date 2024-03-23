@@ -21,42 +21,36 @@ using namespace Sol2D;
 
 World::World(SDL_Renderer & _renderer, const Workspace & _workspace) :
     mr_renderer(_renderer),
-    mr_workspace(_workspace),
-    mp_level(nullptr)
+    mr_workspace(_workspace)
 {
 }
 
 World::~World()
 {
-    delete mp_level;
-    for(BodyPrototype * proto : m_body_prototypes)
-        delete proto;
+    for(auto & pair : m_scenes)
+        delete pair.second;
 }
 
-bool World::loadLevelFromTmx(const std::filesystem::path & _tmx_file)
+Scene & World::createScene(const std::string & _name)
 {
-    if(!mp_level)
-        mp_level = new Level(mr_renderer, mr_workspace);
-    return mp_level->loadFromTmx(_tmx_file);
+    Scene * scene = new Scene(mr_workspace, mr_renderer);
+    m_scenes.insert(std::make_pair(_name, scene));
+    return *scene;
 }
 
-Level * World::getLevel()
+Scene * World::getScene(const std::string & _name)
 {
-    return mp_level;
+    auto it = m_scenes.find(_name);
+    return it == m_scenes.end() ? nullptr : it->second;
 }
 
-BodyPrototype & World::createBodyPrototype()
-{
-    BodyPrototype * proto = new BodyPrototype(mr_renderer);
-    m_body_prototypes.push_back(proto);
-    return *proto;
-}
-
-void World::render(const SDL_FRect & _viewport)
+void World::render(const SDL_FRect & _viewport, std::chrono::milliseconds _time_passed)
 {
     SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 0); // TODO: from Lua
     SDL_RenderClear(&mr_renderer);
-    if(mp_level)
-        mp_level->render(_viewport);
+
+    for(auto & pair : m_scenes) // TODO: layer order, position(?)
+        pair.second->render(_viewport, _time_passed);
+
     SDL_RenderPresent(&mr_renderer);
 }
