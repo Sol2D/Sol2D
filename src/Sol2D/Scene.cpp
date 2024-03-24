@@ -759,54 +759,27 @@ void Scene::drawCircle(const TileMapCircle & _circle)
 
 void Scene::drawTileLayer(const SDL_FRect & _viewport, const TileMapTileLayer & _layer)
 {
-    SDL_FRect layer_rect {
-        .x = m_world_offset.x,
-        .y = m_world_offset.y,
-        .w = _viewport.w,
-        .h = _viewport.h
+    const SDL_FRect camera { .x = m_world_offset.x, .y = m_world_offset.y, .w = _viewport.w, .h = _viewport.h };
+    const float first_col = std::floor(camera.x / m_tile_map_ptr->getTileWidth());
+    const float first_row = std::floor(camera.y / m_tile_map_ptr->getTileHeight());
+    const float last_col = std::ceil((camera.x + camera.w) / m_tile_map_ptr->getTileWidth());
+    const float last_row = std::ceil((camera.y + camera.h) / m_tile_map_ptr->getTileHeight());
+    const float start_x = first_col * m_tile_map_ptr->getTileWidth() -  camera.x;
+    const float start_y = first_row * m_tile_map_ptr->getTileHeight() - camera.y;
+
+    SDL_FRect src_rect;
+    SDL_FRect dest_rect {
+        .x = .0f,
+        .y = .0f,
+        .w = static_cast<float>(m_tile_map_ptr->getTileWidth()),
+        .h = static_cast<float>(m_tile_map_ptr->getTileHeight())
     };
-    float dest_x = .0f;
-    float dest_y = .0f;
-    const uint32_t tile_width = m_tile_map_ptr->getTileWidth();
-    const uint32_t tile_height = m_tile_map_ptr->getTileHeight();
-    if(tile_width == 0 || tile_height == 0)
-        return;
 
-    const int32_t layer_x = _layer.getX() * tile_width;
-    uint32_t delta_x_abs = std::abs(layer_rect.x - layer_x);
-    uint32_t skip_tiles_x = delta_x_abs / tile_width;
-    uint32_t first_tile_x_remainder = delta_x_abs % tile_width;
-    if(layer_rect.x < layer_x)
+    for(int32_t row = static_cast<int32_t>(first_row), dest_row = 0; row <= static_cast<int32_t>(last_row); ++row, ++dest_row)
     {
-        dest_x = skip_tiles_x * tile_width + first_tile_x_remainder;
-        skip_tiles_x = 0;
-    }
-    int32_t first_tile_x = _layer.getX() + skip_tiles_x;
-    int32_t max_columns = layer_rect.w / tile_width + 2;
-
-    const int32_t layer_y = _layer.getY() * tile_height;
-    uint32_t delta_y_abs = std::abs(layer_rect.y - layer_y);
-    uint32_t skip_tiles_y = delta_y_abs / tile_height;
-    uint32_t first_tile_y_remainder = delta_y_abs % tile_height;
-    if(layer_rect.y < layer_y)
-    {
-        dest_y = skip_tiles_y * tile_height + first_tile_y_remainder;
-        skip_tiles_y = 0;
-    }
-    int32_t first_tile_y = _layer.getY() + skip_tiles_y;
-    int32_t max_rows = layer_rect.h / tile_height + 2;
-
-    int32_t last_tile_x = _layer.getX() + _layer.getWidth();
-    int32_t last_tile_y = _layer.getY() + _layer.getHeight();
-
-    SDL_FRect src_rect, dest_rect;
-    const Tile * tile;
-
-    for(int32_t tile_y = first_tile_y, row = 0; row <= max_rows && tile_y <= last_tile_y; ++tile_y, ++row)
-    {
-        for(int32_t tile_x = first_tile_x, col = 0; col <= max_columns && tile_x <= last_tile_x; ++tile_x, ++col)
+        for(int32_t col = static_cast<int32_t>(first_col), dest_col = 0; col <= static_cast<int32_t>(last_col); ++col, ++dest_col)
         {
-            tile = _layer.getTile(tile_x, tile_y);
+            const Tile * tile = _layer.getTile(col, row);
             if(!tile) continue;
 
             src_rect.x = tile->getSourceX();
@@ -814,24 +787,8 @@ void Scene::drawTileLayer(const SDL_FRect & _viewport, const TileMapTileLayer & 
             src_rect.w = tile->getWidth();
             src_rect.h = tile->getHeight();
 
-            if(col == 0 && first_tile_x_remainder)
-            {
-                src_rect.x += first_tile_x_remainder;
-                src_rect.w -= first_tile_x_remainder;
-            }
-            if(row == 0 && first_tile_y_remainder)
-            {
-                src_rect.y += first_tile_y_remainder;
-                src_rect.h -= first_tile_y_remainder;
-            }
-
-            dest_rect.x = (dest_x + col) * tile_width;
-            dest_rect.y = (dest_y + row) * tile_height;
-            dest_rect.w = src_rect.w;
-            dest_rect.h = src_rect.h;
-
-            if(col != 0) dest_rect.x -= first_tile_x_remainder;
-            if(row != 0) dest_rect.y -= first_tile_y_remainder;
+            dest_rect.x = start_x + dest_col * m_tile_map_ptr->getTileWidth();
+            dest_rect.y = start_y + dest_row * m_tile_map_ptr->getTileHeight();
 
             SDL_RenderTexture(&mr_renderer, &tile->getSource(), &src_rect, &dest_rect);
         }
