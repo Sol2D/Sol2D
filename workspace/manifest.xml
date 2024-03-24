@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspace>
     <engine
-        frame_rate="60"
+        frame_rate="120"
         log_level="trace"
     />
     <application

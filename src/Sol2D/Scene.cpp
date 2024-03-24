@@ -571,7 +571,7 @@ void Scene::render(const SDL_FRect & _viewport, std::chrono::milliseconds _time_
         return;
     }
     executeDefers();
-    mp_b2_world->Step(1.0f / 60.0f, 8, 3); // TODO: from user settings
+    mp_b2_world->Step(_time_passed.count() / 1000.0f, 8, 3); // TODO: stable rate from user settings (1.0f / 60.0f)
     syncWorldWithFollowedBody(_viewport);
     // TODO: cache texture https://discourse.libsdl.org/t/cost-of-creating-textures-vs-holding-onto-them/38339/2
     SDL_Texture * texture = SDL_CreateTexture(
@@ -764,7 +764,7 @@ void Scene::drawTileLayer(const SDL_FRect & _viewport, const TileMapTileLayer & 
     const float first_row = std::floor(camera.y / m_tile_map_ptr->getTileHeight());
     const float last_col = std::ceil((camera.x + camera.w) / m_tile_map_ptr->getTileWidth());
     const float last_row = std::ceil((camera.y + camera.h) / m_tile_map_ptr->getTileHeight());
-    const float start_x = first_col * m_tile_map_ptr->getTileWidth() -  camera.x;
+    const float start_x = first_col * m_tile_map_ptr->getTileWidth() - camera.x;
     const float start_y = first_row * m_tile_map_ptr->getTileHeight() - camera.y;
 
     SDL_FRect src_rect;

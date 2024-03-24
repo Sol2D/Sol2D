@@ -1,6 +1,8 @@
 local scene = sol.world:createScene('main')
 local larder = sol.world:createLarder('main')
 scene:loadTileMap('tiled/tmx/level-01.tmx')
+-- scene:loadTileMap('tiled/tmx/level-03.tmx')
+-- scene:loadTileMap('tiled/tmx/test2.tmx')
 scene:createBodiesFromMapObjects('Obstacle')
 scene:createBodiesFromMapObjects('Sensor', nil, { isSensor = true })
 
