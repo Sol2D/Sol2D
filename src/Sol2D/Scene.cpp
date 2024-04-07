@@ -17,6 +17,7 @@
 #include <Sol2D/Scene.h>
 #include <Sol2D/Tiles/Tmx.h>
 #include <Sol2D/Utils/Observable.h>
+#include <Sol2D/AStar.h>
 #include <box2d/box2d.h>
 
 using namespace Sol2D;
@@ -482,7 +483,7 @@ void Scene::destroyBody(b2Body * _body)
     delete body;
 }
 
-b2Body * Scene::findBody(uint64_t _body_id)
+b2Body * Scene::findBody(uint64_t _body_id) const
 {
     auto it = m_bodies.find(_body_id);
     return it == m_bodies.end() ? nullptr : it->second;
@@ -571,7 +572,7 @@ void Scene::render(const SDL_FRect & _viewport, std::chrono::milliseconds _time_
         return;
     }
     executeDefers();
-    mp_b2_world->Step(_time_passed.count() / 1000.0f, 8, 3); // TODO: stable rate from user settings (1.0f / 60.0f)
+    mp_b2_world->Step(_time_passed.count() / 1000.0f, 8, 3); // TODO: stable rate (1.0f / 60.0f), all from user settings
     syncWorldWithFollowedBody(_viewport);
     // TODO: cache texture https://discourse.libsdl.org/t/cost-of-creating-textures-vs-holding-onto-them/38339/2
     SDL_Texture * texture = SDL_CreateTexture(
@@ -906,6 +907,16 @@ void Scene::setBodyPosition(uint64_t _body_id, const SDL_FPoint & _position)
         body->SetTransform(b2Vec2(_position.x / m_scale_factor, _position.y / m_scale_factor), body->GetAngle());
 }
 
+std::optional<SDL_FPoint> Scene::getBodyPosition(uint64_t _body_id) const
+{
+    if(b2Body * body = findBody(_body_id))
+    {
+        b2Vec2 pos = body->GetPosition();
+        return SDL_FPoint { .x = pos.x * m_scale_factor, .y = pos.y * m_scale_factor };
+    }
+    return std::optional<SDL_FPoint>();
+}
+
 void Scene::addContactObserver(ContactObserver & _observer)
 {
     mp_contact_listener->addObserver(_observer);
@@ -914,4 +925,31 @@ void Scene::addContactObserver(ContactObserver & _observer)
 void Scene::removeContactObserver(ContactObserver & _observer)
 {
     mp_contact_listener->removeObserver(_observer);
+}
+
+std::optional<std::vector<SDL_FPoint>> Scene::findPath(
+    uint64_t _body_id,
+    const SDL_FPoint & _destination,
+    bool _allow_diagonal_steps,
+    bool _avoid_sensors) const
+{
+    const b2Body * body = findBody(_body_id);
+    if(!body)
+        return std::optional<std::vector<SDL_FPoint>>();
+    b2Vec2 dest(_destination.x / m_scale_factor, _destination.y / m_scale_factor);
+    AStarOptions options;
+    options.allow_diagonal_steps = _allow_diagonal_steps;
+    options.avoid_sensors = _avoid_sensors;
+    auto b2_result = aStarFindPath(*mp_b2_world, *body, dest, options);
+    if(!b2_result.has_value())
+        return std::optional<std::vector<SDL_FPoint>>();
+    std::vector<SDL_FPoint> result(b2_result.value().size());
+    for(size_t i = 0; i < b2_result.value().size(); ++i)
+    {
+        result[i] = SDL_FPoint {
+            .x = b2_result.value()[i].x * m_scale_factor,
+            .y = b2_result.value()[i].y * m_scale_factor
+        };
+    }
+    return result;
 }

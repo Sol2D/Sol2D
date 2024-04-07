@@ -8,10 +8,15 @@
 ---@field heartbeat sol.Heartbeat
 ---@field keyboard sol.Keyboard
 ---@field TileMapObjectType sol.TileMapObjectType
-sol = {}
+sol = nil
 
----@type any
-self = {}
+---@type BodyContext
+self = nil
+
+---@class BodyContext
+---@field bodyId integer
+---@field scene sol.Scene
+---@field arg? any
 
 ---@class Point
 ---@field x number
@@ -98,10 +103,11 @@ function __scene:getTileMapObjectById(id) end
 ---@return TileMapObject | nil
 function __scene:getTileMapObjectByName(name) end
 
----@param position Point
+---@param position Point | nil
 ---@param body_prototype sol.BodyPrototype
+---@param argument? any
 ---@return integer
-function __scene:createBody(position, body_prototype) end
+function __scene:createBody(position, body_prototype, argument) end
 
 ---@param class string
 ---@param body_options BodyOptions?
@@ -115,6 +121,10 @@ function __scene:applyForce(body_id, force_vector) end
 ---@param body_id integer
 ---@param position Point
 function __scene:setBodyPosition(body_id, position) end
+
+---@param body_id integer
+---@returns Point | nil
+function __scene:getBodyPosition(body_id) end
 
 ---@param body_id integer
 ---@return boolean
@@ -148,6 +158,11 @@ function __scene:subscribeToBeginContact(callback) end
 
 ---@param callback ContactCallback
 function __scene:subscribeToEndContact(callback) end
+
+---@param body_id integer
+---@param destination Point
+---@return Point[] | nil
+function __scene:findPath(body_id, destination) end
 
 ---@class Contact
 ---@field sideA ContactSide

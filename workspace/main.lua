@@ -55,13 +55,14 @@ local function createPlayer()
         horizontalSpacing = 16,
         verticalSpacing = 12
     }) then
-        print('Sprite sheet loaded')
+        print('Player sprite sheet loaded')
     else
-        print('Sprite sheet is not loaded')
+        print('Player sprite sheet is not loaded')
+        return
     end
     local frame_duration = 200
-    local animtion_idle = larder:createSpriteAnimation('player_idle') -- TODO: Load a sprite form a sheet, animation is overhead
-    animtion_idle:addFrameFromSpriteSheet(0, sprite_sheet, 0)
+    local animation_idle = larder:createSpriteAnimation('player_idle') -- TODO: Load a sprite form a sheet, animation is overhead
+    animation_idle:addFrameFromSpriteSheet(0, sprite_sheet, 0)
     local animation_right = larder:createSpriteAnimation('player_right')
     animation_right:addFrames(frame_duration, sprite_sheet, { 3, 7, 11, 15 })
     local animation_left = larder:createSpriteAnimation('player_left')
@@ -70,7 +71,7 @@ local function createPlayer()
     animation_up:addFrames(frame_duration, sprite_sheet, { 2, 6, 10, 14 })
     local animation_down = larder:createSpriteAnimation('player_down')
     animation_down:addFrames(frame_duration, sprite_sheet, { 0, 4, 8, 12 })
-    shape_proto:addSpriteAnimation('idle', animtion_idle, { position = position })
+    shape_proto:addSpriteAnimation('idle', animation_idle, { position = position })
     shape_proto:addSpriteAnimation('right', animation_right, { position = position })
     shape_proto:addSpriteAnimation('left', animation_left, { position = position })
     shape_proto:addSpriteAnimation('up', animation_up, { position = position })
@@ -78,15 +79,66 @@ local function createPlayer()
     return scene:createBody(getStartPosition(), body_proto)
 end
 
+local function createSkeleton()
+    local body_proto = larder:createBodyPrototype('skeleton', sol.BodyType.DYNAMIC)
+    body_proto:attachScript('skeleton.lua')
+    local size = { w = 34, h = 50 }
+    local position = { x = -(size.w / 2), y = -(size.h / 2) }
+    local shape_proto = body_proto:createPolygonShape('main', { x = position.x, y = position.y, w = size.w, h = size.h })
+    local sprite_sheet = larder:createSpriteSheet('skeleton-walkcycle')
+    if sprite_sheet:loadFromFile('assets/skeleton/walkcycle.png', {
+        spriteWidth = size.w,
+        spriteHeight = size.h,
+        rowCount = 4,
+        colCount = 9,
+        marginTop = 14,
+        marginLeft = 15,
+        horizontalSpacing = 30,
+        verticalSpacing = 14
+    }) then
+        print('Skeleton sprite sheet loaded')
+    else
+        print('Skeleton sprite sheet is not loaded')
+        return
+    end
+    local frame_duration = 80;
+    local animation_idle = larder:createSpriteAnimation('skeleton_idle')
+    animation_idle:addFrameFromSpriteSheet(0, sprite_sheet, 18)
+    local animation_up = larder:createSpriteAnimation('skeleton_up')
+    animation_up:addFrames(frame_duration, sprite_sheet, { 1, 2, 3, 4, 5, 6, 7, 8 })
+    local animation_left = larder:createSpriteAnimation('skeleton_left')
+    animation_left:addFrames(frame_duration, sprite_sheet, { 10, 11, 12, 13, 14, 15, 16, 17 })
+    local animation_down = larder:createSpriteAnimation('skeleton_down')
+    animation_down:addFrames(frame_duration, sprite_sheet, { 19, 20, 21, 22, 23, 24, 25, 26 })
+    local animation_right = larder:createSpriteAnimation('skeleton_right')
+    animation_right:addFrames(frame_duration, sprite_sheet, { 28, 29, 30, 31, 32, 33, 34, 35 })
+    shape_proto:addSpriteAnimation('idle', animation_idle, { position = position })
+    shape_proto:addSpriteAnimation('right', animation_right, { position = position })
+    shape_proto:addSpriteAnimation('left', animation_left, { position = position })
+    shape_proto:addSpriteAnimation('up', animation_up, { position = position })
+    shape_proto:addSpriteAnimation('down', animation_down, { position = position })
+    -- scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 2 })
+    -- scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 3 })
+    -- scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 4 })
+    return scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 1 })
+end
+
 -- local body_id = createSpacesheep()
-local body_id = createPlayer()
-scene:setBodyLayer(body_id, 'Ground')
-scene:setFolowedBody(body_id)
+local player_body_id = createPlayer()
+local skeleton_body_id = createSkeleton()
+if player_body_id == nil or skeleton_body_id == nil then
+    return;
+end
+scene:setBodyLayer(player_body_id, 'Ground')
+scene:setBodyLayer(skeleton_body_id, 'Ground')
+-- scene:setFolowedBody(player_body_id)
+scene:setFolowedBody(skeleton_body_id)
 
 local FORCE_MULTIPLYER = 100
 
 local graphic = 'idle'
-scene:setBodyShapeCurrentGraphic(body_id, 'main', graphic)
+scene:setBodyShapeCurrentGraphic(player_body_id, 'main', graphic)
+scene:setBodyShapeCurrentGraphic(skeleton_body_id, 'main', graphic)
 
 scene:subscribeToBeginContact(function (contact)
     print('Contact')
@@ -97,9 +149,9 @@ scene:subscribeToBeginContact(function (contact)
     print('    Shape B',  contact.sideB.shapeKey)
     print('    Object B', contact.sideB.tileMapObjectId)
 
-    if (body_id == contact.sideA.bodyId and contact.sideB.shapeKey == 'Sensor') or
-            (body_id == contact.sideB.bodyId and contact.sideA.shapeKey == 'Sensor') then
-        scene:setBodyPosition(body_id, getStartPosition())
+    if (player_body_id == contact.sideA.bodyId and contact.sideB.shapeKey == 'Sensor') or
+            (player_body_id == contact.sideB.bodyId and contact.sideA.shapeKey == 'Sensor') then
+        scene:setBodyPosition(player_body_id, getStartPosition())
     end
 
 end)
@@ -137,7 +189,7 @@ sol.heartbeat:subscribe(function ()
         new_graphic = 'idle'
     end
     if new_graphic ~= graphic then
-        scene:setBodyShapeCurrentGraphic(body_id, 'main', new_graphic)
+        scene:setBodyShapeCurrentGraphic(player_body_id, 'main', new_graphic)
         graphic = new_graphic
     end
 
@@ -156,5 +208,5 @@ sol.heartbeat:subscribe(function ()
         force.y = force.y * 4
     end
 
-    scene:applyForce(body_id, force)
+    scene:applyForce(player_body_id, force)
 end)

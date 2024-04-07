@@ -69,8 +69,14 @@ public:
     void render(const SDL_FRect & _viewport, std::chrono::milliseconds _time_passed);
     void applyForce(uint64_t _body_id, const SDL_FPoint & _force);
     void setBodyPosition(uint64_t _body_id, const SDL_FPoint & _position);
+    std::optional<SDL_FPoint> getBodyPosition(uint64_t _body_id) const;
     void addContactObserver(ContactObserver & _observer);
     void removeContactObserver(ContactObserver & _observer);
+    std::optional<std::vector<SDL_FPoint>> findPath(
+        uint64_t _body_id,
+        const SDL_FPoint & _destination,
+        bool _allow_diagonal_steps,
+        bool _avoid_sensors) const;
 
 private:
     void deinitialize();
@@ -82,7 +88,7 @@ private:
                              const SDL_FRect & _viewport,
                              std::unordered_set<uint64_t> & _bodies_to_render,
                              std::chrono::milliseconds _time_passed);
-    b2Body * findBody(uint64_t _body_id);
+    b2Body * findBody(uint64_t _body_id) const;
     void drawBody(b2Body & _body, std::chrono::milliseconds _time_passed);
     void drawObjectLayer(const Tiles::TileMapObjectLayer & _layer);
     void drawPolyXObject(const Tiles::TileMapPolyX & _poly, bool _close);

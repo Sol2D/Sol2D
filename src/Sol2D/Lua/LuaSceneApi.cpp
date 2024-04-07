@@ -165,20 +165,30 @@ int luaApi_GetTileMapObjectByName(lua_State * _lua)
 }
 
 // 1 self
-// 2 position
+// 2 position or nil
 // 3 body prototype
+// 4 script argument (optional)
 int luaApi_CreateBody(lua_State * _lua)
 {
+    bool has_script_argument = lua_gettop(_lua) >= 4;
     Self * self = Self::getUserData(_lua, 1);
-    SDL_FPoint position;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "body position expected");
+    SDL_FPoint position = { .0f, .0f };
+    if(!lua_isnil(_lua, 2))
+        luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "body position expected");
     LuaBodyPrototype & lua_proto = getBodyPrototype(_lua, 3);
     uint64_t body_id = self->scene->createBody(position, lua_proto.proto);
     lua_pushinteger(_lua, body_id);
 
     if(lua_proto.script_path.has_value())
     {
-        lua_pushinteger(_lua, body_id);
+        LuaTopStackTable table = LuaTopStackTable::pushNew(_lua);
+        table.setIntegerValue("bodyId", body_id);
+        lua_pushvalue(_lua, 1);
+        table.setValueFromTop("scene");
+        if(has_script_argument) {
+            lua_pushvalue(_lua, 4);
+            table.setValueFromTop("arg");
+        }
         executeScriptWithContext(_lua, *self->workspace, lua_proto.script_path.value());
     }
 
@@ -234,6 +244,21 @@ int luaApi_SetBodyPosition(lua_State * _lua)
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, position), 3, "a position expected");
     self->scene->setBodyPosition(body_id, position);
     return 0;
+}
+
+// 1 self
+// 2 body id
+int luaApi_GetBodyPosition(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
+    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    std::optional<SDL_FPoint> position = self->scene->getBodyPosition(body_id);
+    if(position.has_value())
+        pushPoint(_lua, position.value().x, position.value().y);
+    else
+        lua_pushnil(_lua);
+    return 1;
 }
 
 // 1 self
@@ -336,10 +361,40 @@ int luaApi_SubscribeToBeginContact(lua_State * _lua)
     return registerCallback(_lua, self->key_observers_begin_contact);
 }
 
+// 1 self
+// 2 callback
 int luaApi_SubscribeToEndContact(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
     return registerCallback(_lua, self->key_observers_end_contact);
+}
+
+// 1 self
+// 2 body id
+// 3 destination
+// TODO: options
+int luaApi_FindPath(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
+    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    SDL_FPoint destination;
+    luaL_argcheck(_lua, tryGetPoint(_lua, 3, destination), 3, "a destination point expected");
+    auto result = self->scene->findPath(body_id, destination, false, false);
+    if(result.has_value())
+    {
+        lua_newtable(_lua);
+        for(size_t i = 0; i < result.value().size(); ++i)
+        {
+            pushPoint(_lua, result.value()[i].x, result.value()[i].y);
+            lua_rawseti(_lua, -2, i + 1);
+        }
+    }
+    else
+    {
+        lua_pushnil(_lua);
+    }
+    return 1;
 }
 
 } // namespace
@@ -374,6 +429,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, Sc
             { "createBodiesFromMapObjects", luaApi_CreateBodiesFromMapObjects },
             { "applyForce", luaApi_ApplyForce },
             { "setBodyPosition", luaApi_SetBodyPosition },
+            { "getBodyPosition", luaApi_GetBodyPosition },
             { "setFolowedBody", luaApi_SetFolowedBody },
             { "resetFolowedBody", luaApi_ResetFolowedBody },
             { "setBodyLayer", luaApi_SetBodyLayer },
@@ -381,6 +437,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, Sc
             { "flipBodyShapeGraphic", luaApi_FlipBodyShapeGraphic },
             { "subscribeToBeginContact", luaApi_SubscribeToBeginContact },
             { "subscribeToEndContact", luaApi_SubscribeToEndContact },
+            { "findPath", luaApi_FindPath },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);

@@ -64,7 +64,7 @@ void Sol2D::Lua::pushTileMapObject(lua_State * _lua, const TileMapObject & _obje
              {
                  const SDL_FPoint & point = points[i];
                  pushPoint(_lua, point.x, point.y);
-                 lua_rawseti(_lua, -2, i);
+                 lua_rawseti(_lua, -2, i + 1);
              }
              table.setValueFromTop("points");
          }

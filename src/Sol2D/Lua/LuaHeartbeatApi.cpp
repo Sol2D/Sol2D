@@ -50,7 +50,7 @@ void Sol2D::Lua::pushHeartbeatApi(lua_State * _lua)
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
-            { "subscribe", luaApi_Subscribe },
+            { "subscribe", luaApi_Subscribe }, // TODO: how to unsubscribe when the body is dead? The only on callback must exist?
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);
