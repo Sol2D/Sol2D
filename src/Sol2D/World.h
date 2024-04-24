@@ -21,10 +21,13 @@
 #include <Sol2D/Scene.h>
 #include <Sol2D/Utils/KeyValueStorage.h>
 #include <Sol2D/Larder.h>
-#include <SDL3/SDL.h>
+#include <Sol2D/Outlet.h>
 #include <unordered_map>
+#include <list>
 
 namespace Sol2D {
+
+using FragmentID = uint16_t;
 
 class World final
 {
@@ -32,7 +35,6 @@ class World final
 
 public:
     World(SDL_Renderer & _renderer, const Workspace & _workspace);
-    ~World();
     Scene & createScene(const std::string & _name);
     Scene * getScene(const std::string & _name);
     bool loadLevelFromTmx(const std::filesystem::path & _tmx_file);
@@ -40,14 +42,27 @@ public:
     Larder * getLarder(const std::string & _key);
     const Larder * getLarder(const std::string _key) const;
     bool deleteLarder(const std::string & _key);
+    FragmentID createFragment(const Fragment & _fragment);
+    const Fragment * getFragment(FragmentID _id) const;
+    bool updateFragment(FragmentID _id, const Fragment & _fragment);
+    bool deleteFragment(FragmentID _id);
+    bool bindFragment(FragmentID _fragment_id, const std::string & _scene_name);
     Uint8 * getKeyboardState() const;
-    void render(const SDL_FRect & _viewport, std::chrono::milliseconds /*_time_passed*/);
+    void resize();
+    void render(std::chrono::milliseconds /*_time_passed*/);
+
+private:
+    void emplaceOrderedOutlet(Outlet * _outlet);
+    void eraseOrderedOutlet(Outlet * _outlet);
 
 private:
     SDL_Renderer & mr_renderer;
     const Workspace & mr_workspace;
-    std::unordered_multimap<std::string, Scene *> m_scenes;
     Utils::KeyValueStorage<std::string, Larder> m_larders;
+    Utils::KeyValueStorage<std::string, Scene> m_scenes;
+    FragmentID m_next_fragment_id;
+    Utils::KeyValueStorage<FragmentID, Outlet> m_outlets;
+    std::list<Outlet *> m_ordered_outlets;
 };
 
 inline Larder & World::createLarder(const std::string & _key)

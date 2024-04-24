@@ -21,36 +21,100 @@ using namespace Sol2D;
 
 World::World(SDL_Renderer & _renderer, const Workspace & _workspace) :
     mr_renderer(_renderer),
-    mr_workspace(_workspace)
+    mr_workspace(_workspace),
+    m_next_fragment_id(1)
 {
-}
-
-World::~World()
-{
-    for(auto & pair : m_scenes)
-        delete pair.second;
 }
 
 Scene & World::createScene(const std::string & _name)
 {
     Scene * scene = new Scene(mr_workspace, mr_renderer);
-    m_scenes.insert(std::make_pair(_name, scene));
+    m_scenes.addOrReplaceItem(_name, scene);
     return *scene;
 }
 
 Scene * World::getScene(const std::string & _name)
 {
-    auto it = m_scenes.find(_name);
-    return it == m_scenes.end() ? nullptr : it->second;
+    return m_scenes.getItem(_name);
 }
 
-void World::render(const SDL_FRect & _viewport, std::chrono::milliseconds _time_passed)
+FragmentID World::createFragment(const Fragment & _fragment)
+{
+    FragmentID id = m_next_fragment_id++;
+    Outlet * outlet = new Outlet(_fragment, mr_renderer);
+    m_outlets.addOrReplaceItem(id, outlet);
+    emplaceOrderedOutlet(outlet);
+    return id;
+}
+
+const Fragment * World::getFragment(FragmentID _id) const
+{
+    const Outlet * outlet = m_outlets.getItem(_id);
+    return outlet ? &outlet->getFragment() : nullptr;
+}
+
+bool World::updateFragment(FragmentID _id, const Fragment & _fragment)
+{
+    Outlet * outlet = m_outlets.getItem(_id);
+    if(!outlet)
+        return false;
+    bool need_to_reorder = _fragment.z_index != outlet->getFragment().z_index;
+    outlet->reconfigure(_fragment);
+    if(need_to_reorder)
+    {
+        eraseOrderedOutlet(outlet);
+        emplaceOrderedOutlet(outlet);
+    }
+    return true;
+}
+
+void World::emplaceOrderedOutlet(Outlet * _outlet)
+{
+    uint16_t z_index = _outlet->getFragment().z_index;
+    auto it = std::find_if(
+        m_ordered_outlets.begin(),
+        m_ordered_outlets.end(),
+        [z_index](Outlet * __outlet) { return z_index < __outlet->getFragment().z_index; });
+    m_ordered_outlets.insert(it, _outlet);
+}
+
+void World::eraseOrderedOutlet(Outlet * _outlet)
+{
+    auto it = std::find(m_ordered_outlets.begin(), m_ordered_outlets.end(), _outlet);
+    if(it != m_ordered_outlets.end())
+        m_ordered_outlets.erase(it);
+}
+
+bool World::deleteFragment(FragmentID _id)
+{
+    Outlet * outlet = m_outlets.getItem(_id);
+    if(!outlet) return false;
+    eraseOrderedOutlet(outlet);
+    m_outlets.deleteItem(_id);
+    return true;
+}
+
+bool World::bindFragment(FragmentID _fragment_id, const std::string & _scene_name)
+{
+    Outlet * outlet = m_outlets.getItem(_fragment_id);
+    if(!outlet) return false;
+    Scene * scene = m_scenes.getItem(_scene_name);
+    if(!scene) return false;
+    outlet->bind(*scene);
+    return true;
+}
+
+void World::resize()
+{
+    for(auto & pair : m_outlets)
+        pair.second->resize();
+}
+
+void World::render(std::chrono::milliseconds _time_passed)
 {
     SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 0); // TODO: from Lua
     SDL_RenderClear(&mr_renderer);
-
-    for(auto & pair : m_scenes) // TODO: layer order, position(?)
-        pair.second->render(_viewport, _time_passed);
-
+    for(auto & pair : m_outlets)
+        pair.second->render(_time_passed);
     SDL_RenderPresent(&mr_renderer);
 }

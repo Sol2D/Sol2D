@@ -31,7 +31,7 @@ struct SpriteRenderOptions
     }
 
     double angle_rad;
-    SDL_RendererFlip flip;
+    SDL_FlipMode flip;
     std::optional<SDL_FPoint> flip_center;
     std::optional<SDL_FPoint> size;
 };

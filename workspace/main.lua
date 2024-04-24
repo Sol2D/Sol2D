@@ -1,10 +1,24 @@
-local scene = sol.world:createScene('main')
+local main_scene_name = 'main'
+local scene = sol.world:createScene(main_scene_name)
 local larder = sol.world:createLarder('main')
 scene:loadTileMap('tiled/tmx/level-01.tmx')
 -- scene:loadTileMap('tiled/tmx/level-03.tmx')
 -- scene:loadTileMap('tiled/tmx/test2.tmx')
 scene:createBodiesFromMapObjects('Obstacle')
 scene:createBodiesFromMapObjects('Sensor', nil, { isSensor = true })
+
+local main_fragment_id = sol.world:createFragment({
+    top = { unit = sol.FragmentSizeUnit.PIXEL, value = 50 }
+})
+sol.world:bindFragment(main_fragment_id, main_scene_name)
+
+local score_scene_name = 'score'
+local score_scene = sol.world:createScene(score_scene_name)
+score_scene:loadTileMap('tiled/tmx/test2.tmx')
+local score_fragment_id = sol.world:createFragment({
+    height = { unit = sol.FragmentSizeUnit.PIXEL, value = 50 }
+})
+sol.world:bindFragment(score_fragment_id, score_scene_name)
 
 local function createSpacesheep()
     local body_proto = larder:createBodyPrototype('spaceship', sol.BodyType.DYNAMIC)
@@ -131,8 +145,8 @@ if player_body_id == nil or skeleton_body_id == nil then
 end
 scene:setBodyLayer(player_body_id, 'Ground')
 scene:setBodyLayer(skeleton_body_id, 'Ground')
--- scene:setFolowedBody(player_body_id)
-scene:setFolowedBody(skeleton_body_id)
+scene:setFolowedBody(player_body_id)
+-- scene:setFolowedBody(skeleton_body_id)
 
 local FORCE_MULTIPLYER = 100
 

@@ -16,24 +16,15 @@
 
 #pragma once
 
+#include <Sol2D/Fragment.h>
 #include <Sol2D/Lua/LuaForward.h>
-#include <Sol2D/Workspace.h>
-#include <Sol2D/World.h>
 
 namespace Sol2D::Lua {
 
-class LuaLibrary final
-{
-public:
-    S2_DISABLE_COPY_AND_MOVE(LuaLibrary)
-    LuaLibrary(const Workspace & _workspace, World & _world);
-    ~LuaLibrary();
-    void executeMainScript();
-    void step(std::chrono::milliseconds _time_passed);
+void pushFragment(lua_State * _lua, const Fragment & _fragment);
 
-private:
-    lua_State * mp_lua;
-    const Workspace & mr_workspace;
-};
+bool tryGetFragment(lua_State * _lua, int _idx, Fragment & _fragment);
+
+void pushFragmentSizeUnitEnum(lua_State * _lua);
 
 } // namespace Sol2D::Lua

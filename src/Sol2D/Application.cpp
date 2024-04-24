@@ -43,6 +43,7 @@ private:
     void initializeLibTmx();
     void runMainLoop();
     bool handleEvent(const SDL_Event & _event);
+    void onWindowResized(const SDL_WindowEvent & _event);
 
 private:
     SDL_Window * mp_window;
@@ -108,7 +109,7 @@ bool Application::initialize()
         mr_workspace.getMainLogger().critical("Unable to create window. {}", SDL_GetError());
         return false;
     }
-    mp_renderer = SDL_CreateRenderer(mp_window, nullptr, SDL_RENDERER_ACCELERATED);
+    mp_renderer = SDL_CreateRenderer(mp_window, nullptr, 0); // TODO: select driver
     if(!mp_renderer)
     {
         mr_workspace.getMainLogger().critical("Unable to create renderer. {}", SDL_GetError());
@@ -151,19 +152,26 @@ bool Application::handleEvent(const SDL_Event & _event)
     {
     case SDL_EVENT_QUIT:
         return true;
+    case SDL_EVENT_WINDOW_RESIZED:
+        onWindowResized(_event.window);
+        break;
     default:
         break;
     }
     return false;
 }
 
+void Application::onWindowResized(const SDL_WindowEvent & /*_event*/)
+{
+    mp_world->resize();
+}
+
 void Application::render(std::chrono::milliseconds _time_passed)
 {
     int width, height;
     SDL_GetCurrentRenderOutputSize(mp_renderer, &width, &height);
-    SDL_FRect viewport{ 20.0f, 20.0f, static_cast<float>(width) - 40, static_cast<float>(height) - 40 }; // TODO: it is the test viewport
-    mp_world->render(viewport, _time_passed);
-    mp_lua->step(viewport, _time_passed);
+    mp_world->render(_time_passed);
+    mp_lua->step(_time_passed);
 }
 
 int main(int _argc, const char ** _argv)

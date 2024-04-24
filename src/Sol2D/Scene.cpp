@@ -565,7 +565,7 @@ bool Scene::loadTileMap(const std::filesystem::path & _file_path)
     return m_tile_map_ptr != nullptr; // TODO: only exceptions
 }
 
-void Scene::render(const SDL_FRect & _viewport, std::chrono::milliseconds _time_passed)
+void Scene::render(std::chrono::milliseconds _time_passed)
 {
     if(!m_tile_map_ptr)
     {
@@ -573,16 +573,7 @@ void Scene::render(const SDL_FRect & _viewport, std::chrono::milliseconds _time_
     }
     executeDefers();
     mp_b2_world->Step(_time_passed.count() / 1000.0f, 8, 3); // TODO: stable rate (1.0f / 60.0f), all from user settings
-    syncWorldWithFollowedBody(_viewport);
-    // TODO: cache texture https://discourse.libsdl.org/t/cost-of-creating-textures-vs-holding-onto-them/38339/2
-    SDL_Texture * texture = SDL_CreateTexture(
-        &mr_renderer,
-        SDL_PIXELFORMAT_RGBA32,
-        SDL_TEXTUREACCESS_TARGET,
-        _viewport.w,
-        _viewport.h
-    );
-    SDL_SetRenderTarget(&mr_renderer, texture);
+    syncWorldWithFollowedBody();
     const SDL_Color & bg_color = m_tile_map_ptr->getBackgroundColor();
     SDL_SetRenderDrawColor(&mr_renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
     SDL_RenderClear(&mr_renderer);
@@ -590,15 +581,11 @@ void Scene::render(const SDL_FRect & _viewport, std::chrono::milliseconds _time_
     std::unordered_set<uint64_t> bodies_to_render(m_bodies.size());
     for(const auto & pair : m_bodies)
         bodies_to_render.insert(pair.first);
-    drawLayersAndBodies(*m_tile_map_ptr, _viewport, bodies_to_render, _time_passed);
+    drawLayersAndBodies(*m_tile_map_ptr, bodies_to_render, _time_passed);
     for(const uint64_t body_id : bodies_to_render)
         drawBody(*m_bodies[body_id], _time_passed);
 
     drawBox2D();
-    SDL_SetRenderTarget(&mr_renderer, nullptr);
-    SDL_FRect src_rect { .0f, .0f, _viewport.w, _viewport.h };
-    SDL_RenderTexture(&mr_renderer, texture, &src_rect, &_viewport);
-    SDL_DestroyTexture(texture);
 }
 
 void Scene::executeDefers()
@@ -611,15 +598,17 @@ void Scene::executeDefers()
     }
 }
 
-void Scene::syncWorldWithFollowedBody(const SDL_FRect & _viewport)
+void Scene::syncWorldWithFollowedBody()
 {
     if(mp_followed_body == nullptr)
     {
         return;
     }
+    int output_width, output_height;
+    SDL_GetCurrentRenderOutputSize(&mr_renderer, &output_width, &output_height);
     b2Vec2 followed_body_position = mp_followed_body->GetPosition();
-    m_world_offset.x = followed_body_position.x * m_scale_factor - static_cast<float>(_viewport.w) / 2;
-    m_world_offset.y = followed_body_position.y * m_scale_factor - static_cast<float>(_viewport.h) / 2;
+    m_world_offset.x = followed_body_position.x * m_scale_factor - static_cast<float>(output_width) / 2;
+    m_world_offset.y = followed_body_position.y * m_scale_factor - static_cast<float>(output_height) / 2;
     const int32_t map_x = m_tile_map_ptr->getX() * m_tile_map_ptr->getTileWidth();
     const int32_t map_y = m_tile_map_ptr->getY() * m_tile_map_ptr->getTileHeight();
     if(m_world_offset.x < map_x)
@@ -628,7 +617,7 @@ void Scene::syncWorldWithFollowedBody(const SDL_FRect & _viewport)
     }
     else
     {
-        int32_t max_offset_x = m_tile_map_ptr->getWidth() * m_tile_map_ptr->getTileWidth() - _viewport.w;
+        int32_t max_offset_x = m_tile_map_ptr->getWidth() * m_tile_map_ptr->getTileWidth() - output_width;
         if(m_world_offset.x > max_offset_x)
             m_world_offset.x = max_offset_x;
     }
@@ -638,7 +627,7 @@ void Scene::syncWorldWithFollowedBody(const SDL_FRect & _viewport)
     }
     else
     {
-        int32_t max_offset_y = m_tile_map_ptr->getHeight() * m_tile_map_ptr->getTileHeight() - _viewport.h;
+        int32_t max_offset_y = m_tile_map_ptr->getHeight() * m_tile_map_ptr->getTileHeight() - output_height;
         if(m_world_offset.y > max_offset_y)
             m_world_offset.y = max_offset_y;
     }
@@ -673,16 +662,15 @@ void Scene::drawBody(b2Body & _body, std::chrono::milliseconds _time_passed)
 
 void Scene::drawLayersAndBodies(
     const TileMapLayerContainer & _container,
-    const SDL_FRect & _viewport,
     std::unordered_set<uint64_t> & _bodies_to_render,
     std::chrono::milliseconds _time_passed)
 {
-    _container.forEachLayer([&_viewport, &_bodies_to_render, _time_passed, this](const TileMapLayer & __layer) {
+    _container.forEachLayer([&_bodies_to_render, _time_passed, this](const TileMapLayer & __layer) {
         if(!__layer.isVisible()) return;
         switch(__layer.getType())
         {
         case TileMapLayerType::Tile:
-            drawTileLayer(_viewport, dynamic_cast<const TileMapTileLayer &>(__layer));
+            drawTileLayer(dynamic_cast<const TileMapTileLayer &>(__layer));
             break;
         case TileMapLayerType::Object:
             drawObjectLayer(dynamic_cast<const TileMapObjectLayer &>(__layer)); // TODO: _viewport
@@ -694,7 +682,7 @@ void Scene::drawLayersAndBodies(
         {
             const TileMapGroupLayer & group = dynamic_cast<const TileMapGroupLayer &>(__layer);
             if(group.isVisible())
-                drawLayersAndBodies(group, _viewport, _bodies_to_render, _time_passed);
+                drawLayersAndBodies(group, _bodies_to_render, _time_passed);
             break;
         }}
         for(const auto & pair : m_bodies)
@@ -758,9 +746,18 @@ void Scene::drawCircle(const TileMapCircle & _circle)
     sdlRenderCircle(&mr_renderer, position, _circle.getRadius());
 }
 
-void Scene::drawTileLayer(const SDL_FRect & _viewport, const TileMapTileLayer & _layer)
+void Scene::drawTileLayer(const TileMapTileLayer & _layer)
 {
-    const SDL_FRect camera { .x = m_world_offset.x, .y = m_world_offset.y, .w = _viewport.w, .h = _viewport.h };
+    SDL_FRect camera;
+    camera.x = m_world_offset.x;
+    camera.y = m_world_offset.y;
+    {
+        int w, h;
+        SDL_GetCurrentRenderOutputSize(&mr_renderer, &w, &h);
+        camera.w = static_cast<float>(w);
+        camera.h = static_cast<float>(h);
+    }
+
     const float first_col = std::floor(camera.x / m_tile_map_ptr->getTileWidth());
     const float first_row = std::floor(camera.y / m_tile_map_ptr->getTileHeight());
     const float last_col = std::ceil((camera.x + camera.w) / m_tile_map_ptr->getTileWidth());

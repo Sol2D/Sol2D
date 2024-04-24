@@ -70,9 +70,15 @@ public:
         return LuaTopStackTable(_lua);
     }
 
+    lua_State * getLua() const
+    {
+        return mp_lua;
+    }
+
     void setValueFromTop(const char * _key);
     void setIntegerValue(const char * _key, lua_Integer _value) const;
     void setNumberValue(const char * _key, lua_Number _value) const;
+    void setBooleanValue(const char * _key, bool _value) const;
     void setStringValue(const char * _key, const char * _value) const;
     void setNullValue(const char * _key) const;
 

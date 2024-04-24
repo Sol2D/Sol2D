@@ -66,7 +66,7 @@ public:
     bool loadTileMap(const std::filesystem::path & _file_path);
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(std::string _name) const;
-    void render(const SDL_FRect & _viewport, std::chrono::milliseconds _time_passed);
+    void render(std::chrono::milliseconds _time_passed);
     void applyForce(uint64_t _body_id, const SDL_FPoint & _force);
     void setBodyPosition(uint64_t _body_id, const SDL_FPoint & _position);
     std::optional<SDL_FPoint> getBodyPosition(uint64_t _body_id) const;
@@ -83,9 +83,8 @@ private:
     void destroyBody(b2Body * _body);
     static b2BodyType mapBodyType(BodyType _type);
     void executeDefers();
-    void syncWorldWithFollowedBody(const SDL_FRect & _viewport);
+    void syncWorldWithFollowedBody();
     void drawLayersAndBodies(const Tiles::TileMapLayerContainer & _container,
-                             const SDL_FRect & _viewport,
                              std::unordered_set<uint64_t> & _bodies_to_render,
                              std::chrono::milliseconds _time_passed);
     b2Body * findBody(uint64_t _body_id) const;
@@ -93,7 +92,7 @@ private:
     void drawObjectLayer(const Tiles::TileMapObjectLayer & _layer);
     void drawPolyXObject(const Tiles::TileMapPolyX & _poly, bool _close);
     void drawCircle(const Tiles::TileMapCircle & _circle);
-    void drawTileLayer(const SDL_FRect & _viewport, const Tiles::TileMapTileLayer & _layer);
+    void drawTileLayer(const Tiles::TileMapTileLayer & _layer);
     void drawImageLayer(const Tiles::TileMapImageLayer & _layer);
     void drawBox2D();
     SDL_FPoint toAbsoluteCoords(float _world_x, float _world_y) const;

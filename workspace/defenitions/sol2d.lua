@@ -8,6 +8,7 @@
 ---@field heartbeat sol.Heartbeat
 ---@field keyboard sol.Keyboard
 ---@field TileMapObjectType sol.TileMapObjectType
+---@field FragmentSizeUnit sol.FragmentSizeUnit
 sol = nil
 
 ---@type BodyContext
@@ -87,6 +88,46 @@ function __world:getLarder(key) end
 ---@param key string
 ---@return boolean
 function __world:deleteLarder(key) end
+
+---@param fragment Fragment
+---@return integer
+function __world:createFragment(fragment) end
+
+---@param fragment_id integer
+---@param fragment Fragment
+---@return boolean
+function __world:updateFragment(fragment_id, fragment) end
+
+---@param fragment_id integer
+---@return Fragment?
+function __world:getFragment(fragment_id) end
+
+---@param fragment_id integer
+---@return boolean
+function __world:deleteFragment(fragment_id) end
+
+---@param fragment_id integer
+---@param scene_name string
+---@return boolean
+function __world:bindFragment(fragment_id, scene_name) end
+
+---@class Fragment
+---@field top? FragmentSize
+---@field right? FragmentSize
+---@field left? FragmentSize
+---@field bottom? FragmentSize
+---@field width? FragmentSize
+---@field height? FragmentSize
+---@field zIndex? integer default: 0
+---@field isVisible? boolean default: true
+
+---@class FragmentSize
+---@field unit integer
+---@field value integer
+
+---@class sol.FragmentSizeUnit
+---@field PIXEL integer
+---@field PERCENT integer
 
 ---@class sol.Scene
 local __scene

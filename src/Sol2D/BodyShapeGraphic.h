@@ -37,12 +37,12 @@ struct BodyShapeGraphicOptions
     bool is_flipped_horizontally;
     bool is_flipped_vertically;
 
-    SDL_RendererFlip getFlip() const
+    SDL_FlipMode getFlip() const
     {
         int flip = SDL_FLIP_NONE;
         if(is_flipped_horizontally) flip |= SDL_FLIP_HORIZONTAL;
         if(is_flipped_vertically) flip |= SDL_FLIP_VERTICAL;
-        return static_cast<SDL_RendererFlip>(flip);
+        return static_cast<SDL_FlipMode>(flip);
     }
 };
 

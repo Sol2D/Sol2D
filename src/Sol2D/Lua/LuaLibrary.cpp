@@ -24,6 +24,7 @@
 #include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
 #include <Sol2D/Lua/LuaKeyboardApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
+#include <Sol2D/Lua/LuaFragmentApi.h>
 #include <functional>
 
 using namespace Sol2D;
@@ -58,6 +59,7 @@ LuaLibrary::LuaLibrary(const Workspace & _workspace, World & _world) :
         addSublibrary(mp_lua, "BodyType", [this]() { pushBodyTypeEnum(mp_lua); });
         addSublibrary(mp_lua, "BodyShapeType", [this]() { pushBodyShapeTypeEnum(mp_lua); });
         addSublibrary(mp_lua, "TileMapObjectType", [this]() { pushTileMapObjectTypeEnum(mp_lua); });
+        addSublibrary(mp_lua, "FragmentSizeUnit", [this]() { pushFragmentSizeUnitEnum(mp_lua); });
     }
     lua_setmetatable(mp_lua, -2);
     lua_setglobal(mp_lua, "sol");
@@ -73,9 +75,8 @@ void LuaLibrary::executeMainScript()
     executeScript(mp_lua, mr_workspace, mr_workspace.getMainScriptPath());
 }
 
-void LuaLibrary::step(const SDL_FRect & _viewport, std::chrono::milliseconds _time_passed)
+void LuaLibrary::step(std::chrono::milliseconds _time_passed)
 {
-    S2_UNUSED(_viewport)
     S2_UNUSED(_time_passed)
 
     doHeartbeat(mp_lua, mr_workspace);

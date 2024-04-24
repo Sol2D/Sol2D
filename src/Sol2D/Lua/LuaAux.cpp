@@ -127,6 +127,13 @@ void LuaTopStackTable::setNumberValue(const char * _key, lua_Number _value) cons
     lua_settable(mp_lua, -3);
 }
 
+void LuaTopStackTable::setBooleanValue(const char * _key, bool _value) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_pushboolean(mp_lua, _value);
+    lua_settable(mp_lua, -3);
+}
+
 void LuaTopStackTable::setStringValue(const char * _key, const char * _value) const
 {
     lua_pushstring(mp_lua, _key);

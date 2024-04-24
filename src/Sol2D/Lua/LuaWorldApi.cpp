@@ -17,6 +17,7 @@
 #include <Sol2D/Lua/LuaWorldApi.h>
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/LuaLarderApi.h>
+#include <Sol2D/Lua/LuaFragmentApi.h>
 #include <Sol2D/Lua/LuaAux.h>
 
 using namespace Sol2D;
@@ -26,6 +27,8 @@ namespace {
 
 const char gc_metatable_world[] = "sol.World";
 const char gc_message_larder_key_expected[] = "a larder key expected";
+const char gc_message_fragment_id_expected[] = "a fragment ID expected";
+const char gc_message_scene_name_expected[] = "a scene name expected";
 
 struct Self : LuaUserData<Self, gc_metatable_world>
 {
@@ -82,6 +85,71 @@ int luaApi_DeleteLarder(lua_State * _lua)
     return 1;
 }
 
+// 1 self
+// 2 fragment
+int luaApi_CreateFragment(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    Fragment fragment;
+    luaL_argcheck(_lua, tryGetFragment(_lua, 2, fragment), 2, "");
+    lua_pushinteger(_lua, self->world->createFragment(fragment));
+    return 1;
+}
+
+// 1 self
+// 2 fragment ID
+// 3 fragment
+int luaApi_UpdateFragment(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
+    FragmentID fragment_id = static_cast<FragmentID>(lua_tointeger(_lua, 2));
+    Fragment fragment;
+    luaL_argcheck(_lua, tryGetFragment(_lua, 3, fragment), 3, "");
+    lua_pushboolean(_lua, self->world->updateFragment(fragment_id, fragment));
+    return 1;
+}
+
+// 1 self
+// 2 fragment ID
+int luaApi_GetFragment(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
+    FragmentID fragment_id = static_cast<FragmentID>(lua_tointeger(_lua, 2));
+    const Fragment * fragment = self->world->getFragment(fragment_id);
+    if(fragment)
+        pushFragment(_lua, *fragment);
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 fragment ID
+int luaApi_DeleteFragment(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
+    FragmentID fragment_id = static_cast<FragmentID>(lua_tointeger(_lua, 2));
+    lua_pushboolean(_lua, self->world->deleteFragment(fragment_id));
+    return 1;
+}
+
+// 1 self
+// 2 fragment ID
+// 3 scene key
+int luaApi_BindFragment(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
+    FragmentID fragment_id = static_cast<FragmentID>(lua_tointeger(_lua, 2));
+    luaL_argcheck(_lua, lua_isstring(_lua, 3), 3, gc_message_scene_name_expected);
+    std::string scene_name(lua_tostring(_lua, 3));
+    lua_pushboolean(_lua, self->world->bindFragment(fragment_id, scene_name));
+    return 1;
+}
+
 } // namespace
 
 void Sol2D::Lua::pushWorldApi(lua_State * _lua, const Workspace & _workspace, World & _world)
@@ -96,6 +164,11 @@ void Sol2D::Lua::pushWorldApi(lua_State * _lua, const Workspace & _workspace, Wo
             { "createLarder", luaApi_CreateLarder },
             { "getLarder", luaApi_GetLarder },
             { "deleteLarder", luaApi_DeleteLarder },
+            { "createFragment", luaApi_CreateFragment },
+            { "updateFragment", luaApi_UpdateFragment },
+            { "getFragment", luaApi_GetFragment },
+            { "deleteFragment", luaApi_DeleteFragment },
+            { "bindFragment", luaApi_BindFragment },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);

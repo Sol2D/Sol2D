@@ -16,24 +16,36 @@
 
 #pragma once
 
-#include <Sol2D/Lua/LuaForward.h>
-#include <Sol2D/Workspace.h>
-#include <Sol2D/World.h>
+#include <Sol2D/SDL.h>
+#include <Sol2D/Fragment.h>
+#include <Sol2D/Scene.h>
+#include <chrono>
 
-namespace Sol2D::Lua {
+namespace Sol2D {
 
-class LuaLibrary final
+class Outlet final
 {
+    S2_DISABLE_COPY_AND_MOVE(Outlet)
+
 public:
-    S2_DISABLE_COPY_AND_MOVE(LuaLibrary)
-    LuaLibrary(const Workspace & _workspace, World & _world);
-    ~LuaLibrary();
-    void executeMainScript();
-    void step(std::chrono::milliseconds _time_passed);
+    Outlet(const Fragment & _fragmet, SDL_Renderer & _renderer);
+    void resize();
+    void bind(Scene & _scene);
+    void reconfigure(const Fragment & _fragment);
+    void render(std::chrono::milliseconds _time_passed);
+    const Fragment & getFragment() const;
 
 private:
-    lua_State * mp_lua;
-    const Workspace & mr_workspace;
+    Fragment m_fragment;
+    SDL_Renderer & mr_renderer;
+    SDL_FRect m_rect;
+    Scene * mp_scene;
+    SDL_TexturePtr m_texture_ptr;
 };
 
-} // namespace Sol2D::Lua
+inline const Fragment & Outlet::getFragment() const
+{
+    return m_fragment;
+}
+
+} // namespace Sol2D
