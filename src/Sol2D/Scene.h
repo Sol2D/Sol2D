@@ -20,6 +20,7 @@
 #include <Sol2D/BodyOptions.h>
 #include <Sol2D/BodyShapeOptions.h>
 #include <Sol2D/Contact.h>
+#include <Sol2D/Canvas.h>
 #include <Sol2D/Workspace.h>
 #include <Sol2D/Tiles/TileMap.h>
 #include <box2d/b2_world.h>
@@ -37,13 +38,11 @@ class SceneContactListener;
 
 } // namespace Private
 
-class Scene final // TODO: rename to Surface
+class Scene final : public Canvas
 {
 public:
-    S2_DISABLE_COPY_AND_MOVE(Scene)
-
     Scene(const Workspace & _workspace, SDL_Renderer & _renderer);
-    ~Scene();
+    ~Scene() override;
     uint64_t createBody(const SDL_FPoint & _position, const BodyPrototype & _prototype);
     void createBodiesFromMapObjects(
         const std::string & _class,
@@ -66,7 +65,7 @@ public:
     bool loadTileMap(const std::filesystem::path & _file_path);
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(std::string _name) const;
-    void render(std::chrono::milliseconds _time_passed);
+    void render(std::chrono::milliseconds _time_passed) override;
     void applyForce(uint64_t _body_id, const SDL_FPoint & _force);
     void setBodyPosition(uint64_t _body_id, const SDL_FPoint & _position);
     std::optional<SDL_FPoint> getBodyPosition(uint64_t _body_id) const;

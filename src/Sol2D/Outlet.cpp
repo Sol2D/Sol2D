@@ -22,13 +22,13 @@ Outlet::Outlet(const Fragment & _fragmet, SDL_Renderer & _renderer) :
     m_fragment(_fragmet),
     mr_renderer(_renderer),
     m_rect{.0f, .0f, .0f, .0f},
-    mp_scene(nullptr)
+    mp_canvas(nullptr)
 {
 }
 
 void Outlet::resize()
 {
-    if(!mp_scene || !m_fragment.is_visible)
+    if(!mp_canvas || !m_fragment.is_visible)
         return;
 
     int viewport_w, viewport_h;
@@ -113,9 +113,9 @@ void Outlet::resize()
     }
 }
 
-void Outlet::bind(Scene & _scene)
+void Outlet::bind(Canvas & _canvas)
 {
-    mp_scene = &_scene;
+    mp_canvas = &_canvas;
     resize();
 }
 
@@ -129,10 +129,10 @@ void Outlet::reconfigure(const Fragment & _fragment)
 
 void Outlet::render(std::chrono::milliseconds _time_passed)
 {
-    if(!mp_scene || !m_texture_ptr)
+    if(!mp_canvas || !m_texture_ptr)
         return;
     SDL_SetRenderTarget(&mr_renderer, m_texture_ptr.get());
-    mp_scene->render(_time_passed);
+    mp_canvas->render(_time_passed);
     SDL_SetRenderTarget(&mr_renderer, nullptr);
     SDL_RenderTexture(&mr_renderer, m_texture_ptr.get(), nullptr, &m_rect);
 }

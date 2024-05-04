@@ -16,36 +16,19 @@
 
 #pragma once
 
-#include <Sol2D/SDL.h>
-#include <Sol2D/Fragment.h>
-#include <Sol2D/Canvas.h>
+#include <Sol2D/Def.h>
 #include <chrono>
 
 namespace Sol2D {
 
-class Outlet final
+class Canvas
 {
-    S2_DISABLE_COPY_AND_MOVE(Outlet)
+    S2_DISABLE_COPY_AND_MOVE(Canvas)
 
 public:
-    Outlet(const Fragment & _fragmet, SDL_Renderer & _renderer);
-    void resize();
-    void bind(Canvas & _canvas);
-    void reconfigure(const Fragment & _fragment);
-    void render(std::chrono::milliseconds _time_passed);
-    const Fragment & getFragment() const;
-
-private:
-    Fragment m_fragment;
-    SDL_Renderer & mr_renderer;
-    SDL_FRect m_rect;
-    Canvas * mp_canvas;
-    SDL_TexturePtr m_texture_ptr;
+    Canvas() { }
+    virtual ~Canvas() { }
+    virtual void render(std::chrono::milliseconds _time_passed) = 0;
 };
-
-inline const Fragment & Outlet::getFragment() const
-{
-    return m_fragment;
-}
 
 } // namespace Sol2D
