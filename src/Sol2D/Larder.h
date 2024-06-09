@@ -19,8 +19,11 @@
 #include <Sol2D/SpriteAnimation.h>
 #include <Sol2D/BodyPrototype.h>
 #include <Sol2D/Utils/KeyValueStorage.h>
+#include <Sol2D/Workspace.h>
+#include <Sol2D/SDL/TTF.h>
 #include <SDL3/SDL_render.h>
 #include <string>
+#include <filesystem>
 
 namespace Sol2D {
 
@@ -30,13 +33,13 @@ class Larder final
 
 public:
     explicit Larder(SDL_Renderer & _renderer) :
-        mp_renderer(&_renderer)
+        mr_renderer(_renderer)
     {
     }
 
     Sprite & createSprite(const std::string & _key)
     {
-        return m_sprites.addOrReplaceItem(_key, new Sprite(*mp_renderer));
+        return m_sprites.addOrReplaceItem(_key, new Sprite(mr_renderer));
     }
 
     bool deleteSprite(const std::string & _key)
@@ -56,7 +59,7 @@ public:
 
     SpriteSheet & createSpriteSheet(const std::string & _key)
     {
-        return m_sprite_sheets.addOrReplaceItem(_key, new SpriteSheet(*mp_renderer));
+        return m_sprite_sheets.addOrReplaceItem(_key, new SpriteSheet(mr_renderer));
     }
 
     bool deleteSpriteSheet(const std::string & _key)
@@ -76,7 +79,7 @@ public:
 
     SpriteAnimation & createSpriteAnimation(const std::string & _key)
     {
-        return m_animations.addOrReplaceItem(_key, new SpriteAnimation(*mp_renderer));
+        return m_animations.addOrReplaceItem(_key, new SpriteAnimation(mr_renderer));
     }
 
     bool deleteSpriteAnimation(const std::string & _key)
@@ -114,12 +117,17 @@ public:
         return m_body_prototypes.getItem(_key);
     }
 
+    SDL::FontPtr getFont(const std::filesystem::path & _file_path, uint16_t _size);
+
+    void freeFont(const std::filesystem::path & _file_path, uint16_t _size);
+
 private:
-    SDL_Renderer * mp_renderer;
+    SDL_Renderer & mr_renderer;
     Utils::KeyValueStorage<std::string, Sprite> m_sprites;
     Utils::KeyValueStorage<std::string, SpriteSheet> m_sprite_sheets;
     Utils::KeyValueStorage<std::string, SpriteAnimation> m_animations;
     Utils::KeyValueStorage<std::string, BodyPrototype> m_body_prototypes;
+    std::unordered_map<std::string, SDL::FontPtr> m_fonts;
 };
 
 } // namespace Sol2D

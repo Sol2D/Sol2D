@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/SDL.h>
+#include <Sol2D/SDL/SDL.h>
 #include <vector>
 #include <cmath>
 
-void Sol2D::sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, uint32_t _radius) // TODO: float radius
+void Sol2D::SDL::sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, uint32_t _radius) // TODO: float radius
 {
     constexpr double pi = std::numbers::pi;
     constexpr uint16_t min_points_count_per_quarter = 2;
@@ -69,4 +69,12 @@ void Sol2D::sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center
     }
 
     SDL_RenderLines(_renderer, q1, points.size());
+}
+
+bool operator == (const SDL_Color & _color1, const SDL_Color & _color2)
+{
+    return _color1.r == _color2.r &&
+           _color1.g == _color2.g &&
+           _color1.b == _color2.b &&
+           _color1.a == _color2.a;
 }

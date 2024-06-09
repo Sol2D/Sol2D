@@ -18,6 +18,7 @@
 #include <Sol2D/Lua/LuaLibrary.h>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <memory>
 #include <iostream>
 
@@ -36,7 +37,7 @@ private:
 public:
     ~Application();
     static bool run(const Workspace & _workspace);
-    void render(std::chrono::milliseconds _time_passed);
+    void render();
 
 private:
     bool initialize();
@@ -44,11 +45,14 @@ private:
     void runMainLoop();
     bool handleEvent(const SDL_Event & _event);
     void onWindowResized(const SDL_WindowEvent & _event);
+    void onMouseButtonDown(const SDL_MouseButtonEvent & _event);
+    void onMouseButtonUp(const SDL_MouseButtonEvent & _event);
 
 private:
     SDL_Window * mp_window;
     SDL_Renderer * mp_renderer;
     const Workspace & mr_workspace;
+    RenderState m_render_state;
     World * mp_world;
     LuaLibrary * mp_lua;
 };
@@ -60,6 +64,7 @@ Application::Application(const Workspace & _workspace) :
     mp_window(nullptr),
     mp_renderer(nullptr),
     mr_workspace(_workspace),
+    m_render_state{},
     mp_world(nullptr),
     mp_lua(nullptr)
 {
@@ -72,6 +77,7 @@ Application::~Application()
     if(mp_window)
         SDL_DestroyWindow(mp_window);
     IMG_Quit();
+    TTF_Quit();
     SDL_Quit();
     delete mp_lua;
     delete mp_world;
@@ -98,18 +104,25 @@ bool Application::initialize()
         mr_workspace.getMainLogger().critical("SDL_Image initialization failed. {}", SDL_GetError());
         return false;
     }
+    if(TTF_Init() != 0)
+    {
+        mr_workspace.getMainLogger().critical("SDL_TTF initialization failed. {}", SDL_GetError());
+        return false;
+    }
     // TODO: SDL_WINDOW_VULKAN from manifest
     mp_window = SDL_CreateWindow(
         mr_workspace.getApplicationName().c_str(),
         800,
         600,
-        SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_VULKAN /*| SDL_WINDOW_FULLSCREEN*/);
+        SDL_WINDOW_RESIZABLE | /*SDL_WINDOW_HIGH_PIXEL_DENSITY | */SDL_WINDOW_VULKAN /*| SDL_WINDOW_FULLSCREEN*/
+        // TODO: "vulkan" renderer cannot be created with SDL_WINDOW_HIGH_PIXEL_DENSITY
+    );
     if(!mp_window)
     {
         mr_workspace.getMainLogger().critical("Unable to create window. {}", SDL_GetError());
         return false;
     }
-    mp_renderer = SDL_CreateRenderer(mp_window, nullptr, 0); // TODO: select driver
+    mp_renderer = SDL_CreateRenderer(mp_window, nullptr); // TODO: select driver
     if(!mp_renderer)
     {
         mr_workspace.getMainLogger().critical("Unable to create renderer. {}", SDL_GetError());
@@ -137,7 +150,17 @@ void Application::runMainLoop()
         if(passed_ticks >= render_frame_delay)
         {
             last_rendering_ticks = now_ticks;
-            render(std::chrono::milliseconds(passed_ticks));
+            m_render_state.time_passed = std::chrono::milliseconds(passed_ticks);
+            m_render_state.mouse_state.buttons = SDL_GetMouseState(
+                &m_render_state.mouse_state.position.x,
+                &m_render_state.mouse_state.position.y);
+            render();
+            if(m_render_state.mouse_state.lb_click.state == MouseClickState::Finished)
+                m_render_state.mouse_state.lb_click.state = MouseClickState::None;
+            if(m_render_state.mouse_state.rb_click.state == MouseClickState::Finished)
+                m_render_state.mouse_state.rb_click.state = MouseClickState::None;
+            if(m_render_state.mouse_state.mb_click.state == MouseClickState::Finished)
+                m_render_state.mouse_state.mb_click.state = MouseClickState::None;
         }
         if(render_frame_delay - passed_ticks > 5)
         {
@@ -150,28 +173,72 @@ bool Application::handleEvent(const SDL_Event & _event)
 {
     switch (_event.type)
     {
-    case SDL_EVENT_QUIT:
-        return true;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        onMouseButtonDown(_event.button);
+        break;
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+        onMouseButtonUp(_event.button);
+        break;
     case SDL_EVENT_WINDOW_RESIZED:
         onWindowResized(_event.window);
         break;
+    case SDL_EVENT_QUIT:
+        return true;
     default:
         break;
     }
     return false;
 }
 
-void Application::onWindowResized(const SDL_WindowEvent & /*_event*/)
+inline void Application::onWindowResized(const SDL_WindowEvent & /*_event*/)
 {
     mp_world->resize();
 }
 
-void Application::render(std::chrono::milliseconds _time_passed)
+inline void Application::onMouseButtonDown(const SDL_MouseButtonEvent & _event)
+{
+    switch(_event.button)
+    {
+    case SDL_BUTTON_LEFT:
+        m_render_state.mouse_state.lb_click.state = MouseClickState::Started;
+        m_render_state.mouse_state.lb_click.start = SDL_FPoint { .x = _event.x, .y = _event.y };
+        break;
+    case SDL_BUTTON_RIGHT:
+        m_render_state.mouse_state.rb_click.state = MouseClickState::Started;
+        m_render_state.mouse_state.rb_click.start = SDL_FPoint { .x = _event.x, .y = _event.y };
+        break;
+    case SDL_BUTTON_MIDDLE:
+        m_render_state.mouse_state.mb_click.state = MouseClickState::Started;
+        m_render_state.mouse_state.mb_click.start = SDL_FPoint { .x = _event.x, .y = _event.y };
+        break;
+    }
+}
+
+inline void Application::onMouseButtonUp(const SDL_MouseButtonEvent & _event)
+{
+    switch(_event.button)
+    {
+    case SDL_BUTTON_LEFT:
+        m_render_state.mouse_state.lb_click.state = MouseClickState::Finished;
+        m_render_state.mouse_state.lb_click.finish = SDL_FPoint { .x = _event.x, .y = _event.y };
+        break;
+    case SDL_BUTTON_RIGHT:
+        m_render_state.mouse_state.rb_click.state = MouseClickState::Finished;
+        m_render_state.mouse_state.rb_click.finish = SDL_FPoint { .x = _event.x, .y = _event.y };
+        break;
+    case SDL_BUTTON_MIDDLE:
+        m_render_state.mouse_state.mb_click.state = MouseClickState::Finished;
+        m_render_state.mouse_state.mb_click.finish = SDL_FPoint { .x = _event.x, .y = _event.y };
+        break;
+    }
+}
+
+void Application::render()
 {
     int width, height;
     SDL_GetCurrentRenderOutputSize(mp_renderer, &width, &height);
-    mp_world->render(_time_passed);
-    mp_lua->step(_time_passed);
+    mp_world->render(m_render_state);
+    mp_lua->step(m_render_state);
 }
 
 int main(int _argc, const char ** _argv)

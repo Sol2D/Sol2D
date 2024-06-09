@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/LuaAux.h>
 #include <Sol2D/Lua/LuaScancodeApi.h>
+#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <SDL3/SDL_scancode.h>
 
 using namespace Sol2D::Lua;
+using namespace Sol2D::Lua::Aux;
 
 namespace {
 

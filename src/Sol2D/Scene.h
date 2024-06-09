@@ -65,7 +65,7 @@ public:
     bool loadTileMap(const std::filesystem::path & _file_path);
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(std::string _name) const;
-    void render(std::chrono::milliseconds _time_passed) override;
+    void render(const RenderState & _state) override;
     void applyForce(uint64_t _body_id, const SDL_FPoint & _force);
     void setBodyPosition(uint64_t _body_id, const SDL_FPoint & _position);
     std::optional<SDL_FPoint> getBodyPosition(uint64_t _body_id) const;

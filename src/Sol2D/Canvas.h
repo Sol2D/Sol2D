@@ -17,7 +17,7 @@
 #pragma once
 
 #include <Sol2D/Def.h>
-#include <chrono>
+#include <Sol2D/RenderState.h>
 
 namespace Sol2D {
 
@@ -28,7 +28,45 @@ class Canvas
 public:
     Canvas() { }
     virtual ~Canvas() { }
-    virtual void render(std::chrono::milliseconds _time_passed) = 0;
+    void reconfigure(const SDL_FRect & _rect);
+    float getWidth() const;
+    float getHeight() const;
+    virtual void render(const RenderState & _state) = 0;
+    SDL_FPoint getTranslatedPoint(float _x, float _y) const;
+    void translatePoint(float * _x, float * _y) const;
+
+private:
+    SDL_FRect m_rect;
 };
+
+inline void Canvas::reconfigure(const SDL_FRect & _rect)
+{
+    m_rect = _rect;
+}
+
+inline float Canvas::getWidth() const
+{
+    return m_rect.w;
+}
+
+inline float Canvas::getHeight() const
+{
+    return m_rect.h;
+}
+
+inline SDL_FPoint Canvas::getTranslatedPoint(float _x, float _y) const
+{
+    return SDL_FPoint
+    {
+        .x = _x - m_rect.x,
+        .y = _y - m_rect.y
+    };
+}
+
+inline void Canvas::translatePoint(float * _x, float * _y) const
+{
+    *_x -= m_rect.x;
+    *_y -= m_rect.y;
+}
 
 } // namespace Sol2D

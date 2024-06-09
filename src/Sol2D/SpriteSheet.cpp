@@ -18,6 +18,7 @@
 #include <SDL3_image/SDL_image.h>
 
 using namespace Sol2D;
+using namespace Sol2D::SDL;
 
 SpriteSheet::SpriteSheet(SDL_Renderer & _renderer) :
     mp_renderer(&_renderer),

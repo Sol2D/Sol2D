@@ -18,10 +18,11 @@
 #include <Sol2D/Lua/LuaBodyShapePrototypeApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaRectApi.h>
-#include <Sol2D/Lua/LuaAux.h>
+#include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
+using namespace Sol2D::Lua::Aux;
 
 namespace {
 

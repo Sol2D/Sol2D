@@ -21,6 +21,7 @@
 #include <box2d/box2d.h>
 
 using namespace Sol2D;
+using namespace Sol2D::SDL;
 using namespace Sol2D::Tiles;
 using namespace Sol2D::Utils;
 
@@ -219,11 +220,7 @@ void SceneContactListener::BeginContact(b2Contact * _contact)
         return;
     Contact contact;
     if(tryGetContact(*_contact, contact))
-    {
-        callObservers([&contact](ContactObserver & __observer) {
-            __observer.beginContact(contact);
-        });
-    }
+        callObservers(&ContactObserver::beginContact, contact);
 }
 
 bool SceneContactListener::tryGetContact(b2Contact & _b2_contact, Contact & _contact)
@@ -257,11 +254,7 @@ void SceneContactListener::EndContact(b2Contact * _contact)
 {
     Contact contact;
     if(tryGetContact(*_contact, contact))
-    {
-        callObservers([&contact](ContactObserver & __observer) {
-            __observer.endContact(contact);
-        });
-    }
+        callObservers(&ContactObserver::endContact, contact);
 }
 
 } // namespace Sol2D::Private
@@ -565,14 +558,14 @@ bool Scene::loadTileMap(const std::filesystem::path & _file_path)
     return m_tile_map_ptr != nullptr; // TODO: only exceptions
 }
 
-void Scene::render(std::chrono::milliseconds _time_passed)
+void Scene::render(const RenderState & _state)
 {
     if(!m_tile_map_ptr)
     {
         return;
     }
     executeDefers();
-    mp_b2_world->Step(_time_passed.count() / 1000.0f, 8, 3); // TODO: stable rate (1.0f / 60.0f), all from user settings
+    mp_b2_world->Step(_state.time_passed.count() / 1000.0f, 8, 3); // TODO: stable rate (1.0f / 60.0f), all from user settings
     syncWorldWithFollowedBody();
     const SDL_Color & bg_color = m_tile_map_ptr->getBackgroundColor();
     SDL_SetRenderDrawColor(&mr_renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
@@ -581,9 +574,9 @@ void Scene::render(std::chrono::milliseconds _time_passed)
     std::unordered_set<uint64_t> bodies_to_render(m_bodies.size());
     for(const auto & pair : m_bodies)
         bodies_to_render.insert(pair.first);
-    drawLayersAndBodies(*m_tile_map_ptr, bodies_to_render, _time_passed);
+    drawLayersAndBodies(*m_tile_map_ptr, bodies_to_render, _state.time_passed);
     for(const uint64_t body_id : bodies_to_render)
-        drawBody(*m_bodies[body_id], _time_passed);
+        drawBody(*m_bodies[body_id], _state.time_passed);
 
     drawBox2D();
 }
@@ -795,7 +788,7 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
 
 void Scene::drawImageLayer(const TileMapImageLayer & _layer)
 {
-    SDL_TexturePtr image = _layer.getImage();
+    TexturePtr image = _layer.getImage();
     int width, height;
     SDL_QueryTexture(image.get(), NULL, NULL, &width, &height);
     SDL_FRect dim { .0f, .0f, static_cast<float>(width), static_cast<float>(height) };

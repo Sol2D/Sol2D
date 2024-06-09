@@ -25,6 +25,4 @@ void pushFragment(lua_State * _lua, const Fragment & _fragment);
 
 bool tryGetFragment(lua_State * _lua, int _idx, Fragment & _fragment);
 
-void pushFragmentSizeUnitEnum(lua_State * _lua);
-
 } // namespace Sol2D::Lua

@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaLibrary.h>
-#include <Sol2D/Lua/LuaAux.h>
 #include <Sol2D/Lua/LuaWorldApi.h>
 #include <Sol2D/Lua/LuaHeartbeatApi.h>
 #include <Sol2D/Lua/LuaScancodeApi.h>
@@ -25,10 +24,16 @@
 #include <Sol2D/Lua/LuaKeyboardApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaFragmentApi.h>
+#include <Sol2D/Lua/LuaDimensionApi.h>
+#include <Sol2D/Lua/LuaWidgetlApi.h>
+#include <Sol2D/Lua/LuaTextAlignmentApi.h>
+#include <Sol2D/Lua/Aux/LuaScript.h>
+#include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <functional>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
+using namespace Sol2D::Lua::Aux;
 
 namespace {
 
@@ -59,7 +64,10 @@ LuaLibrary::LuaLibrary(const Workspace & _workspace, World & _world) :
         addSublibrary(mp_lua, "BodyType", [this]() { pushBodyTypeEnum(mp_lua); });
         addSublibrary(mp_lua, "BodyShapeType", [this]() { pushBodyShapeTypeEnum(mp_lua); });
         addSublibrary(mp_lua, "TileMapObjectType", [this]() { pushTileMapObjectTypeEnum(mp_lua); });
-        addSublibrary(mp_lua, "FragmentSizeUnit", [this]() { pushFragmentSizeUnitEnum(mp_lua); });
+        addSublibrary(mp_lua, "DimensionUnit", [this]() { pushDimensionUnitEnum(mp_lua); });
+        addSublibrary(mp_lua, "WidgetState", [this]() { pushWidgetStateEnum(mp_lua); });
+        addSublibrary(mp_lua, "VerticalTextAlignment", [this]() { pushVerticalTextAlignmentEmum(mp_lua); });
+        addSublibrary(mp_lua, "HorizontalTextAlignment", [this]() { pushHorizontalTextAlignmentEmum(mp_lua); });
     }
     lua_setmetatable(mp_lua, -2);
     lua_setglobal(mp_lua, "sol");
@@ -75,9 +83,9 @@ void LuaLibrary::executeMainScript()
     executeScript(mp_lua, mr_workspace, mr_workspace.getMainScriptPath());
 }
 
-void LuaLibrary::step(std::chrono::milliseconds _time_passed)
+void LuaLibrary::step(const RenderState & _state)
 {
-    S2_UNUSED(_time_passed)
+    S2_UNUSED(_state)
 
     doHeartbeat(mp_lua, mr_workspace);
 }

@@ -16,40 +16,12 @@
 
 #pragma once
 
+#include <Sol2D/Dimension.h>
 #include <Sol2D/Def.h>
 #include <cstdint>
 #include <optional>
 
 namespace Sol2D {
-
-enum class FragmentSizeUnit
-{
-    Pixel,
-    Percent
-};
-
-template<std::integral Int>
-struct FragmentSize
-{
-    FragmentSize(Int _value, FragmentSizeUnit _unit) :
-        value(_value),
-        unit(_unit)
-    {
-    }
-
-    static FragmentSize fromPixels(Int _pixels)
-    {
-        return FragmentSize(_pixels, FragmentSizeUnit::Pixel);
-    }
-
-    static FragmentSize fromPercents(Int _percents)
-    {
-        return FragmentSize(_percents, FragmentSizeUnit::Percent);
-    }
-
-    Int value;
-    FragmentSizeUnit unit;
-};
 
 struct Fragment
 {
@@ -61,12 +33,12 @@ struct Fragment
     {
     }
 
-    std::optional<FragmentSize<int32_t>> top;
-    std::optional<FragmentSize<int32_t>> right;
-    std::optional<FragmentSize<int32_t>> left;
-    std::optional<FragmentSize<int32_t>> bottom;
-    std::optional<FragmentSize<uint32_t>> width;
-    std::optional<FragmentSize<uint32_t>> height;
+    std::optional<Dimension<int32_t>> top;
+    std::optional<Dimension<int32_t>> right;
+    std::optional<Dimension<int32_t>> left;
+    std::optional<Dimension<int32_t>> bottom;
+    std::optional<Dimension<uint32_t>> width;
+    std::optional<Dimension<uint32_t>> height;
     uint16_t z_index;
     bool is_visible;
 };

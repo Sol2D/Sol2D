@@ -18,11 +18,12 @@
 #include <Sol2D/Utils/Math.h>
 
 using namespace Sol2D;
+using namespace Sol2D::SDL;
 using namespace Sol2D::Utils;
 
 struct SpriteAnimation::Frame
 {
-    SDL_TexturePtr texture;
+    TexturePtr texture;
     SDL_FRect rect;
     std::chrono::milliseconds duration;
 };

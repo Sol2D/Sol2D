@@ -17,7 +17,7 @@
 #include <Sol2D/Lua/LuaSpriteOptionsApi.h>
 #include <Sol2D/Lua/LuaRectApi.h>
 #include <Sol2D/Lua/LuaColorApi.h>
-#include <Sol2D/Lua/LuaAux.h>
+#include <lua.hpp>
 
 using namespace Sol2D::Lua;
 

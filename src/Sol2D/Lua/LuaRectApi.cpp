@@ -15,9 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaRectApi.h>
-#include <Sol2D/Lua/LuaAux.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D::Lua;
+using namespace Sol2D::Lua::Aux;
 
 namespace {
 

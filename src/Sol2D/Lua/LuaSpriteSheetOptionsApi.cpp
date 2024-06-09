@@ -16,9 +16,10 @@
 
 #include <Sol2D/Lua/LuaSpriteSheetOptionsApi.h>
 #include <Sol2D/Lua/LuaColorApi.h>
-#include <Sol2D/Lua/LuaAux.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D;
+using namespace Sol2D::Lua::Aux;
 
 namespace {
 

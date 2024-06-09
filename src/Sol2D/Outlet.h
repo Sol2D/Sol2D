@@ -16,10 +16,9 @@
 
 #pragma once
 
-#include <Sol2D/SDL.h>
+#include <Sol2D/SDL/SDL.h>
 #include <Sol2D/Fragment.h>
 #include <Sol2D/Canvas.h>
-#include <chrono>
 
 namespace Sol2D {
 
@@ -32,7 +31,7 @@ public:
     void resize();
     void bind(Canvas & _canvas);
     void reconfigure(const Fragment & _fragment);
-    void render(std::chrono::milliseconds _time_passed);
+    void render(const RenderState & _state);
     const Fragment & getFragment() const;
 
 private:
@@ -40,7 +39,7 @@ private:
     SDL_Renderer & mr_renderer;
     SDL_FRect m_rect;
     Canvas * mp_canvas;
-    SDL_TexturePtr m_texture_ptr;
+    SDL::TexturePtr m_texture_ptr;
 };
 
 inline const Fragment & Outlet::getFragment() const

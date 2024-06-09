@@ -15,8 +15,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
-#include <Sol2D/Lua/LuaAux.h>
+#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/BodyShapeType.h>
+
+using namespace Sol2D::Lua::Aux;
 
 namespace {
 

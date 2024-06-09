@@ -8,7 +8,10 @@
 ---@field heartbeat sol.Heartbeat
 ---@field keyboard sol.Keyboard
 ---@field TileMapObjectType sol.TileMapObjectType
----@field FragmentSizeUnit sol.FragmentSizeUnit
+---@field DimensionUnit sol.DimensionUnit
+---@field WidgetState sol.WidgetState
+---@field HorizontalTextAlignment sol.HorizontalTextAlignment
+---@field VerticalTextAlignment sol.VerticalTextAlignment
 sol = nil
 
 ---@type BodyContext
@@ -77,6 +80,10 @@ local __world
 ---@return sol.Scene
 function __world:createScene(name) end
 
+---@param name string
+---@return sol.Form
+function __world:createForm(name) end
+
 ---@param key string
 ---@return sol.Larder
 function __world:createLarder(key) end
@@ -107,25 +114,27 @@ function __world:getFragment(fragment_id) end
 function __world:deleteFragment(fragment_id) end
 
 ---@param fragment_id integer
----@param scene_name string
+---@param name string A name of the scene or form
 ---@return boolean
-function __world:bindFragment(fragment_id, scene_name) end
+function __world:bindFragment(fragment_id, name) end
 
 ---@class Fragment
----@field top? FragmentSize
----@field right? FragmentSize
----@field left? FragmentSize
----@field bottom? FragmentSize
----@field width? FragmentSize
----@field height? FragmentSize
+---@field top? Dimension
+---@field right? Dimension
+---@field left? Dimension
+---@field bottom? Dimension
+---@field width? Dimension
+---@field height? Dimension
 ---@field zIndex? integer default: 0
 ---@field isVisible? boolean default: true
 
----@class FragmentSize
+---@class DimensionTable
 ---@field unit integer
 ---@field value integer
 
----@class sol.FragmentSizeUnit
+---@alias Dimension DimensionTable | string | number
+
+---@class sol.DimensionUnit
 ---@field PIXEL integer
 ---@field PERCENT integer
 
@@ -195,15 +204,126 @@ function __scene:flipBodyShapeGraphic(body_id, shape_key, graphic_key, flip_hori
 ---@alias ContactCallback fun(contact: Contact)
 
 ---@param callback ContactCallback
+---@return integer subscription ID
 function __scene:subscribeToBeginContact(callback) end
 
+---@param subscription_id integer
+function __scene:unsubscribeFromBeginContact(subscription_id) end
+
 ---@param callback ContactCallback
+---@return integer subscription ID
 function __scene:subscribeToEndContact(callback) end
+
+---@param subscription_id integer
+function __scene:unsubscribeFromEndContact(subscription_id) end
 
 ---@param body_id integer
 ---@param destination Point
 ---@return Point[] | nil
 function __scene:findPath(body_id, destination) end
+
+---@class sol.Form
+local __form
+
+---@param text string?
+---@return sol.Label
+function __form:createLabel(text) end
+
+---@param text string?
+---@return sol.Button
+function __form:createButton(text) end
+
+---@class sol.WidgetState
+---@field DEFAULT integer
+---@field FOCUSED integer
+---@field ACTIVATED integer
+
+---@class sol.HorizontalTextAlignment
+---@field NONE integer
+---@field BEGIN integer
+---@field CENTER integer
+---@field END integer
+
+---@class sol.VerticalTextAlignment
+---@field NONE integer
+---@field TOP integer
+---@field CENTER integer
+---@field BOTTOM integer
+
+---@class WidgetPadding
+---@field top Dimension?
+---@field right Dimension?
+---@field bottom Dimension?
+---@field left Dimension?
+
+---@class sol.Widget
+local __widget
+
+---@param value Dimension
+function __widget:setX(value) end
+
+---@param value Dimension
+function __widget:setY(value) end
+
+---@param value Dimension
+function __widget:setWidth(value) end
+
+---@param value Dimension
+function __widget:setHeight(value) end
+
+---@param color Color
+---@param widget_state integer?
+---@see sol.WidgetState
+function __widget:setBackgroundColor(color, widget_state) end
+
+---@param color Color
+---@param widget_state integer?
+---@see sol.WidgetState
+function __widget:setForegroundColor(color, widget_state) end
+
+---@param color Color
+---@param widget_state integer?
+---@see sol.WidgetState
+function __widget:setBorderColor(color, widget_state) end
+
+---@param width number
+---@param widget_state integer?
+---@see sol.WidgetState
+function __widget:setBorderWidth(width, widget_state) end
+
+---@param padding WidgetPadding | Dimension
+---@param widget_state integer?
+---@see sol.WidgetState
+function __widget:setPadding(padding, widget_state) end
+
+---@class sol.Label: sol.Widget
+local __label
+
+---@param text string?
+function __label:setText(text) end
+
+---@param font sol.Font
+function __label:setFont(font) end
+
+---@param alignment integer
+---@param widget_state integer?
+---@see sol.HorizontalTextAlignment
+function __label:setHorizontalTextAlignment(alignment, widget_state) end
+
+---@param alignment integer
+---@param widget_state integer?
+---@see sol.VerticalTextAlignment
+function __label:setVerticalTextAlignment(alignment, widget_state) end
+
+---@class sol.Button: sol.Label
+local __button
+
+---@param callback function
+---@return integer subscription ID
+function __button:subscribeOnClick(callback) end
+
+---@param subscription_id integer
+function __button:unsubscribeOnClick(subscription_id) end
 
 ---@class Contact
 ---@field sideA ContactSide
@@ -266,6 +386,15 @@ function __larder:getSpriteAnimation(key) end
 ---@param key string
 ---@return boolean
 function __larder:deleteSpriteAnimation(key) end
+
+---@param file_path string
+---@param size integer
+---@return sol.Font | nil
+function __larder:getFont(file_path, size) end
+
+---@param file_path string
+---@param size integer
+function __larder:freeFont(file_path, size) end
 
 ---@class sol.BodyPrototype
 local __body_prototype
@@ -514,3 +643,6 @@ function __heartbeat:subscribe(callback) end
 ---@field type integer
 ---@field position Point
 ---@field points? Point[]
+
+---@class sol.Font
+local __font

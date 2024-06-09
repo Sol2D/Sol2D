@@ -17,8 +17,8 @@
 #pragma once
 
 #include <Sol2D/SpriteRenderOptions.h>
-#include <Sol2D/SDL.h>
 #include <Sol2D/Def.h>
+#include <Sol2D/SDL/SDL.h>
 #include <filesystem>
 #include <optional>
 
@@ -38,13 +38,13 @@ public:
     explicit Sprite(SDL_Renderer & _renderer);
     bool loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options = SpriteOptions());
     bool isValid() const;
-    SDL_TexturePtr getTexture() const;
+    SDL::TexturePtr getTexture() const;
     const SDL_FRect & getRect() const;
     void render(const SDL_FPoint & _point, SpriteRenderOptions _options = SpriteRenderOptions());
 
 private:
     SDL_Renderer * mp_renderer;
-    SDL_TexturePtr m_texture_ptr;
+    SDL::TexturePtr m_texture_ptr;
     SDL_FRect m_source_rect;
 };
 
@@ -59,7 +59,7 @@ inline bool Sprite::isValid() const
     return m_texture_ptr != nullptr;
 }
 
-inline SDL_TexturePtr Sprite::getTexture() const
+inline SDL::TexturePtr Sprite::getTexture() const
 {
     return m_texture_ptr;
 }

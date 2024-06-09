@@ -16,12 +16,14 @@
 
 #include <Sol2D/Lua/LuaWorldApi.h>
 #include <Sol2D/Lua/LuaSceneApi.h>
+#include <Sol2D/Lua/LuaFormApi.h>
 #include <Sol2D/Lua/LuaLarderApi.h>
 #include <Sol2D/Lua/LuaFragmentApi.h>
-#include <Sol2D/Lua/LuaAux.h>
+#include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
+using namespace Sol2D::Lua::Aux;
 
 namespace {
 
@@ -44,6 +46,17 @@ int luaApi_CreateScene(lua_State * _lua)
     const char * name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, name != nullptr, 2, "the scene name expected");
     pushSceneApi(_lua, *self->workspace, self->world->createScene(name));
+    return 1;
+}
+
+// 1 self
+// 2 name
+int luaApi_CreateForm(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    const char * name = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, name != nullptr, 2, "the scene name expected");
+    pushFormApi(_lua, *self->workspace, self->world->createForm(name));
     return 1;
 }
 
@@ -161,6 +174,11 @@ void Sol2D::Lua::pushWorldApi(lua_State * _lua, const Workspace & _workspace, Wo
     {
         luaL_Reg funcs[] = {
             { "createScene", luaApi_CreateScene },
+            // TODO: getScene
+            // TODO: deleteScene
+            { "createForm", luaApi_CreateForm },
+            // TODO: getForm
+            // TODO: deleteForm
             { "createLarder", luaApi_CreateLarder },
             { "getLarder", luaApi_GetLarder },
             { "deleteLarder", luaApi_DeleteLarder },

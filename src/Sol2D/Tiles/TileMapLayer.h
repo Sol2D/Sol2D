@@ -19,7 +19,7 @@
 #include <Sol2D/Tiles/TileHeap.h>
 #include <Sol2D/Tiles/ObjectHeap.h>
 #include <Sol2D/Def.h>
-#include <Sol2D/SDL.h>
+#include <Sol2D/SDL/SDL.h>
 #include <unordered_map>
 #include <string>
 #include <cstdint>
@@ -260,11 +260,11 @@ public:
     {
     }
 
-    void setImage(SDL_TexturePtr _image) { m_image = _image; }
-    const SDL_TexturePtr getImage() const { return m_image; }
+    void setImage(SDL::TexturePtr _image) { m_image = _image; }
+    const SDL::TexturePtr getImage() const { return m_image; }
 
 private:
-    SDL_TexturePtr m_image;
+    SDL::TexturePtr m_image;
 };
 
 

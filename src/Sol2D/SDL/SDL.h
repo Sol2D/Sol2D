@@ -19,9 +19,9 @@
 #include <SDL3/SDL.h>
 #include <memory>
 
-namespace Sol2D {
+namespace Sol2D::SDL {
 
-using SDL_TexturePtr = std::shared_ptr<SDL_Texture>;
+using TexturePtr = std::shared_ptr<SDL_Texture>;
 
 class SdlTextureDeleter final
 {
@@ -32,11 +32,13 @@ public:
     }
 };
 
-inline SDL_TexturePtr wrapSdlTexturePtr(SDL_Texture * _texture)
+inline TexturePtr wrapSdlTexturePtr(SDL_Texture * _texture)
 {
     return std::shared_ptr<SDL_Texture>(_texture, SdlTextureDeleter());
 }
 
 void sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, uint32_t _radius);
 
-} // namespace Sol2D
+} // namespace Sol2D::SDL
+
+bool operator == (const SDL_Color & _color1, const SDL_Color & _color2);

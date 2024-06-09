@@ -17,6 +17,7 @@
 #include <Sol2D/Outlet.h>
 
 using namespace Sol2D;
+using namespace Sol2D::SDL;
 
 Outlet::Outlet(const Fragment & _fragmet, SDL_Renderer & _renderer) :
     m_fragment(_fragmet),
@@ -33,43 +34,16 @@ void Outlet::resize()
 
     int viewport_w, viewport_h;
     SDL_GetRenderOutputSize(&mr_renderer, &viewport_w, &viewport_h);
-
-    if(m_fragment.left.has_value())
-    {
-        if(m_fragment.left.value().unit == FragmentSizeUnit::Percent)
-            m_rect.x = viewport_w / 100.0f * m_fragment.left.value().value;
-        else
-            m_rect.x = static_cast<float>(m_fragment.left.value().value);
-    }
-    else
-    {
-        m_rect.x = .0f;
-    }
-
-    if(m_fragment.top.has_value())
-    {
-        if(m_fragment.top.value().unit == FragmentSizeUnit::Percent)
-            m_rect.y = viewport_h / 100.0f * m_fragment.top.value().value;
-        else
-            m_rect.y = static_cast<float>(m_fragment.top.value().value);
-    }
-    else
-    {
-        m_rect.y = .0f;
-    }
+    m_rect.x = m_fragment.left.has_value() ? m_fragment.left.value().getPixels(viewport_w) : .0f;
+    m_rect.y = m_fragment.top.has_value() ? m_fragment.top.value().getPixels(viewport_h): .0f;
 
     if(m_fragment.width.has_value())
     {
-        if(m_fragment.width.value().unit == FragmentSizeUnit::Percent)
-            m_rect.w = viewport_w / 100.0f * m_fragment.width.value().value;
-        else
-            m_rect.w = static_cast<float>(m_fragment.width.value().value);
+        m_rect.w = m_fragment.width.value().getPixels(viewport_w);
     }
     else if(m_fragment.right.has_value())
     {
-        float right_margin = static_cast<float>(m_fragment.right.value().value);
-        if(m_fragment.right.value().unit == FragmentSizeUnit::Percent)
-            right_margin = viewport_w / 100.0f * right_margin;
+        float right_margin = m_fragment.right.value().getPixels(viewport_w);
         m_rect.w = viewport_w - (m_rect.x + right_margin);
     }
     else
@@ -79,16 +53,11 @@ void Outlet::resize()
 
     if(m_fragment.height.has_value())
     {
-        if(m_fragment.height.value().unit == FragmentSizeUnit::Percent)
-            m_rect.h = viewport_h / 100.0f * m_fragment.height.value().value;
-        else
-            m_rect.h = static_cast<float>(m_fragment.height.value().value);
+        m_rect.h = m_fragment.height.value().getPixels(viewport_h);
     }
     else if(m_fragment.bottom.has_value())
     {
-        float bottom_margin = static_cast<float>(m_fragment.bottom.value().value);
-        if(m_fragment.bottom.value().unit == FragmentSizeUnit::Percent)
-            bottom_margin = viewport_h / 100.0f * bottom_margin;
+        float bottom_margin = m_fragment.bottom.value().getPixels(viewport_h);
         m_rect.h = viewport_h - (m_rect.y + bottom_margin);
     }
     else
@@ -111,6 +80,7 @@ void Outlet::resize()
         );
         m_texture_ptr = wrapSdlTexturePtr(texture);
     }
+    mp_canvas->reconfigure(m_rect);
 }
 
 void Outlet::bind(Canvas & _canvas)
@@ -127,12 +97,12 @@ void Outlet::reconfigure(const Fragment & _fragment)
     resize();
 }
 
-void Outlet::render(std::chrono::milliseconds _time_passed)
+void Outlet::render(const RenderState & _state)
 {
     if(!mp_canvas || !m_texture_ptr)
         return;
     SDL_SetRenderTarget(&mr_renderer, m_texture_ptr.get());
-    mp_canvas->render(_time_passed);
+    mp_canvas->render(_state);
     SDL_SetRenderTarget(&mr_renderer, nullptr);
     SDL_RenderTexture(&mr_renderer, m_texture_ptr.get(), nullptr, &m_rect);
 }

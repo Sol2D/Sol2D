@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/SDL.h>
+#include <Sol2D/SDL/SDL.h>
 #include <Sol2D/Def.h>
 #include <vector>
 #include <optional>
@@ -48,11 +48,11 @@ public:
     bool isValid() const;
     size_t getSpriteCount() const;
     const std::vector<SDL_FRect> & getRects() const;
-    SDL_TexturePtr getTexture() const;
+    SDL::TexturePtr getTexture() const;
 
 private:
     SDL_Renderer * mp_renderer;
-    SDL_TexturePtr m_texture_ptr;
+    SDL::TexturePtr m_texture_ptr;
     std::vector<SDL_FRect> m_rects;
 };
 
@@ -71,7 +71,7 @@ inline const std::vector<SDL_FRect> & SpriteSheet::getRects() const
     return m_rects;
 }
 
-inline SDL_TexturePtr SpriteSheet::getTexture() const
+inline SDL::TexturePtr SpriteSheet::getTexture() const
 {
     return m_texture_ptr;
 }

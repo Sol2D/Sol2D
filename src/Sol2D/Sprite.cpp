@@ -19,6 +19,7 @@
 #include <Sol2D/Utils/Math.h>
 
 using namespace Sol2D;
+using namespace Sol2D::SDL;
 using namespace Sol2D::Utils;
 
 bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options /*= SpriteOptions()*/)

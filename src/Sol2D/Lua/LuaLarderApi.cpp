@@ -19,10 +19,12 @@
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
 #include <Sol2D/Lua/LuaSpriteAnimationApi.h>
-#include <Sol2D/Lua/LuaAux.h>
+#include <Sol2D/Lua/LuaFontApi.h>
+#include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
+using namespace Sol2D::Lua::Aux;
 
 namespace {
 
@@ -31,6 +33,8 @@ const char gc_message_body_prototype_key_expected[] = "a body prototype key expe
 const char gc_message_sprite_key_expected[] = "a sprite key expected";
 const char gc_message_sprite_sheet_key_expected[] = "a sprite sheet key expected";
 const char gc_message_sprite_animation_key_expected[] = "a sprite animation key expected";
+const char gc_message_font_file_path_expected[] = "a font file path expected";
+const char gc_message_font_size_expected[] = "a font size expected";
 
 struct Self : LuaUserData<Self, gc_metatable_larder>
 {
@@ -195,6 +199,42 @@ int luaApi_DeleteSpriteAnimation(lua_State * _lua)
     return 1;
 }
 
+// 1 self
+// 2 file path
+// 3 font size
+int luaApi_GetFont(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    const char * path = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, path != nullptr, 2, gc_message_font_file_path_expected);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, gc_message_font_size_expected);
+    SDL::FontPtr font = self->larder->getFont(
+        self->workspace->toAbsolutePath(std::filesystem::path(path)),
+        static_cast<uint16_t>(lua_tointeger(_lua, 3))
+    );
+    if(font == nullptr)
+        lua_pushnil(_lua);
+    else
+        pushFontApi(_lua, font);
+    return 1;
+}
+
+// 1 self
+// 2 file path
+// 3 font size
+int luaApi_FreeFont(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    const char * path = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, path != nullptr, 2, gc_message_font_file_path_expected);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, gc_message_font_size_expected);
+    self->larder->freeFont(
+        self->workspace->toAbsolutePath(std::filesystem::path(path)),
+        static_cast<uint16_t>(lua_tointeger(_lua, 3))
+    );
+    return 0;
+}
+
 } // namespace name
 
 void Sol2D::Lua::pushLarderApi(lua_State * _lua,  const Workspace & _workspace, Larder & _larder)
@@ -217,6 +257,8 @@ void Sol2D::Lua::pushLarderApi(lua_State * _lua,  const Workspace & _workspace, 
             { "createSpriteAnimation", luaApi_CreateSpriteAnimation },
             { "getSpriteAnimation", luaApi_GetSpriteAnimation },
             { "deleteSpriteAnimation", luaApi_DeleteSpriteAnimation },
+            { "getFont", luaApi_GetFont },
+            { "freeFont", luaApi_FreeFont },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);

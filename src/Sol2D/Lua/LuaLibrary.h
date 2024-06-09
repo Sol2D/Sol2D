@@ -29,7 +29,7 @@ public:
     LuaLibrary(const Workspace & _workspace, World & _world);
     ~LuaLibrary();
     void executeMainScript();
-    void step(std::chrono::milliseconds _time_passed);
+    void step(const RenderState & _state);
 
 private:
     lua_State * mp_lua;

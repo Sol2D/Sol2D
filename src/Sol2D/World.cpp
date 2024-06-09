@@ -18,6 +18,7 @@
 #include <SDL3_image/SDL_image.h>
 
 using namespace Sol2D;
+using namespace Sol2D::Forms;
 
 World::World(SDL_Renderer & _renderer, const Workspace & _workspace) :
     mr_renderer(_renderer),
@@ -29,13 +30,29 @@ World::World(SDL_Renderer & _renderer, const Workspace & _workspace) :
 Scene & World::createScene(const std::string & _name)
 {
     Scene * scene = new Scene(mr_workspace, mr_renderer);
-    m_scenes.addOrReplaceItem(_name, scene);
+    Renderable * renderable = new Renderable(scene);
+    m_renderables.addOrReplaceItem(_name, renderable);
     return *scene;
 }
 
 Scene * World::getScene(const std::string & _name)
 {
-    return m_scenes.getItem(_name);
+    Renderable * renderable = m_renderables.getItem(_name);
+    return renderable ? renderable->tryGetScene() : nullptr;
+}
+
+Form & World::createForm(const std::string & _name)
+{
+    Form * form = new Form(mr_renderer);
+    Renderable * renderable = new Renderable(form);
+    m_renderables.addOrReplaceItem(_name, renderable);
+    return *form;
+}
+
+Form * World::getFrom(const std::string & _name)
+{
+    Renderable * renderable = m_renderables.getItem(_name);
+    return renderable ? renderable->tryGetForm() : nullptr;
 }
 
 FragmentID World::createFragment(const Fragment & _fragment)
@@ -94,13 +111,13 @@ bool World::deleteFragment(FragmentID _id)
     return true;
 }
 
-bool World::bindFragment(FragmentID _fragment_id, const std::string & _scene_name)
+bool World::bindFragment(FragmentID _fragment_id, const std::string & _name)
 {
     Outlet * outlet = m_outlets.getItem(_fragment_id);
     if(!outlet) return false;
-    Scene * scene = m_scenes.getItem(_scene_name);
-    if(!scene) return false;
-    outlet->bind(*scene);
+    Renderable * renderable = m_renderables.getItem(_name);
+    if(!renderable) return false;
+    outlet->bind(*renderable->getCanvas());
     return true;
 }
 
@@ -110,11 +127,11 @@ void World::resize()
         pair.second->resize();
 }
 
-void World::render(std::chrono::milliseconds _time_passed)
+void World::render(const RenderState & _state)
 {
     SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 0); // TODO: from Lua
     SDL_RenderClear(&mr_renderer);
     for(auto & pair : m_outlets)
-        pair.second->render(_time_passed);
+        pair.second->render(_state);
     SDL_RenderPresent(&mr_renderer);
 }

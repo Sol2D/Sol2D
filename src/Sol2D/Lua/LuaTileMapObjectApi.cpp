@@ -16,9 +16,11 @@
 
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
-#include <Sol2D/Lua/LuaAux.h>
+#include <Sol2D/Lua/Aux/LuaMetatable.h>
+#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
 
 using namespace Sol2D::Tiles;
+using namespace Sol2D::Lua::Aux;
 
 namespace {
 

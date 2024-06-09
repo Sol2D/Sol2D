@@ -25,6 +25,7 @@
 #include <list>
 
 using namespace Sol2D;
+using namespace Sol2D::SDL;
 using namespace Sol2D::Tiles;
 using namespace Sol2D::Utils;
 using namespace tinyxml2;
@@ -79,7 +80,7 @@ protected:
     std::string formatFileReadErrorMessage(const fs::path & _path) const;
     std::string formatXmlRootElemetErrorMessage(const char * _expected) const;
     bool tryParseColor(const char * _value, SDL_Color & _color) const;
-    SDL_TexturePtr parseImage(const XMLElement & _xml);
+    TexturePtr parseImage(const XMLElement & _xml);
 
 protected:
     SDL_Renderer & mr_renderer;
@@ -143,7 +144,7 @@ public:
     void loadFromXml(const XMLElement & _xml, uint32_t _first_gid);
 
 private:
-    void makeTiles(SDL_TexturePtr _texture, TileSet & _set, uint32_t _first_gid, uint32_t _tile_width,
+    void makeTiles(TexturePtr _texture, TileSet & _set, uint32_t _first_gid, uint32_t _tile_width,
                    uint32_t _tile_height, uint32_t _spacing, uint32_t _margin);
 
 public:
@@ -349,7 +350,7 @@ bool XmlLoader::tryParseColor(const char * _value, SDL_Color & _color) const
     return true;
 }
 
-SDL_TexturePtr XmlLoader::parseImage(const XMLElement & _xml)
+TexturePtr XmlLoader::parseImage(const XMLElement & _xml)
 {
     SDL_Surface * surface = nullptr;
     if(const char * source = _xml.Attribute("source"))
@@ -936,7 +937,7 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
 
     if(const XMLElement * xml_image = _xml.FirstChildElement("image"))
     {
-        SDL_TexturePtr texture = parseImage(*xml_image);
+        TexturePtr texture = parseImage(*xml_image);
         makeTiles(texture, set, _first_gid, tile_width, tile_height, spacing, margin);
     }
     else
@@ -952,7 +953,7 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
     // TODO: <transformations>
 }
 
-void TileSetXmlLoader::makeTiles(SDL_TexturePtr _texture,
+void TileSetXmlLoader::makeTiles(TexturePtr _texture,
                                  TileSet & _set,
                                  uint32_t _first_gid,
                                  uint32_t _tile_width,

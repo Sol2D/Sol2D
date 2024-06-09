@@ -17,6 +17,7 @@
 #include <Sol2D/Tiles/TileHeap.h>
 
 using namespace Sol2D::Tiles;
+using namespace Sol2D::SDL;
 
 TileHeap::~TileHeap()
 {
@@ -33,7 +34,7 @@ TileSet & TileHeap::createTileSet()
     return *set;
 }
 
-Tile * TileHeap::createTile(uint32_t _gid, const TileSet & _set, SDL_TexturePtr _source,
+Tile * TileHeap::createTile(uint32_t _gid, const TileSet & _set, TexturePtr _source,
                  int32_t _src_x, int32_t _src_y, uint32_t _width, uint32_t _height)
 {
     if(m_tiles.contains(_gid))

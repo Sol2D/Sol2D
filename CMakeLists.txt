@@ -50,6 +50,7 @@ source_group("Workspace" ${SOL2D_WORKSPACE_DIR})
 
 add_subdirectory(third_party/SDL)
 add_subdirectory(third_party/SDL_image)
+add_subdirectory(third_party/SDL_ttf)
 
 find_package(ZLIB REQUIRED)
 find_package(box2d REQUIRED)
@@ -71,6 +72,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL_image/include
+    PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL_ttf/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/spdlog/include
     PRIVATE ${ZSTD_INCLUDEDIR}
     PRIVATE ${SDL3_INCLUDE_DIR}
@@ -84,6 +86,7 @@ target_link_libraries(${PROJECT_NAME}
     ZLIB::ZLIB
     SDL3::SDL3
     SDL3_image::SDL3_image
+    SDL3_ttf::SDL3_ttf
     tinyxml2::tinyxml2
     box2d::box2d
     spdlog::spdlog

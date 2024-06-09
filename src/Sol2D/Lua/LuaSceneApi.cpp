@@ -21,103 +21,83 @@
 #include <Sol2D/Lua/LuaBodyShapeOptionsApi.h>
 #include <Sol2D/Lua/LuaContactApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
-#include <Sol2D/Lua/LuaAux.h>
+#include <Sol2D/Lua/Aux/LuaUserData.h>
+#include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
+#include <Sol2D/Lua/Aux/LuaWeakRegistryStorage.h>
+#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaScript.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
+using namespace Sol2D::Lua::Aux;
 
 namespace {
-
-char __g_scene_weak_registry_key[] = "";
-constexpr void * gc_scene_weak_registry_key = static_cast<void *>(__g_scene_weak_registry_key);
 
 const char gc_metatable_scene[] = "sol.Scene";
 const char gc_message_body_id_expected[] = "a body ID expected";
 const char gc_message_shape_key_expected[] = "a shape key expected";
 const char gc_message_graphic_key_expected[] = "a graphic key expected";
+const char gc_message_subscription_id_expected[] = "a subscriptin ID expected";
 
 struct Self : LuaUserData<Self, gc_metatable_scene>
 {
     Scene * scene;
     const Workspace * workspace;
     ContactObserver * contact_observer;
-    int key_observers_begin_contact;
-    int key_observers_end_contact;
+    uint32_t callback_set_id_begin_contact;
+    uint32_t callback_set_id_end_contact;
 };
 
 class LuaContactObserver : public ContactObserver
 {
 public:
-    LuaContactObserver(lua_State * _lua, const Workspace & _workspace, int _key_begin_contact, int _key_end_contact);
+    LuaContactObserver(
+        lua_State * _lua,
+        const Workspace & _workspace,
+        uint32_t _callback_set_id_begin_contact,
+        uint32_t _callback_set_id_end_contact);
     void beginContact(Contact & _contact);
     void endContact(Contact & _contact);
 
 private:
-    void callCallbacks(int _registry_key, Contact & _contact);
-
-private:
     lua_State * mp_lua;
     const Workspace & mr_workspace;
-    int m_key_begin_contact;
-    int m_key_end_contact;
+    uint32_t m_callback_set_id_begin_contact;
+    uint32_t m_callback_set_id_end_contact;
 };
 
 LuaContactObserver::LuaContactObserver(
     lua_State * _lua,
     const Workspace & _workspace,
-    int _key_begin_contact,
-    int _key_end_contact
+    uint32_t _callback_set_id_begin_contact,
+    uint32_t _callback_set_id_end_contact
 ) :
     mp_lua(_lua),
     mr_workspace(_workspace),
-    m_key_begin_contact(_key_begin_contact),
-    m_key_end_contact(_key_end_contact)
+    m_callback_set_id_begin_contact(_callback_set_id_begin_contact),
+    m_callback_set_id_end_contact(_callback_set_id_end_contact)
 {
 }
 
 void LuaContactObserver::beginContact(Contact & _contact)
 {
-    callCallbacks(m_key_begin_contact, _contact);
+    pushContact(mp_lua, _contact);
+    LuaCallbackStorage(mp_lua).callSet(mr_workspace, m_callback_set_id_begin_contact, 1);
 }
 
 void LuaContactObserver::endContact(Contact & _contact)
 {
-    callCallbacks(m_key_end_contact, _contact);
-}
-
-void LuaContactObserver::callCallbacks(int _registry_key, Contact & _contact)
-{
-    if(lua_rawgeti(mp_lua, LUA_REGISTRYINDEX, _registry_key) != LUA_TTABLE)
-        return;
-    lua_Integer count = static_cast<lua_Integer>(lua_rawlen(mp_lua, -1));
-    if(count == 0)
-        return;
     pushContact(mp_lua, _contact);
-    int contact_idx = lua_gettop(mp_lua);
-    for(lua_Integer i = 1; i <= count; ++i)
-    {
-        lua_rawgeti(mp_lua, -2, i);
-        if(!lua_isfunction(mp_lua, -1))
-        {
-            lua_pop(mp_lua, 1);
-            continue;
-        }
-        lua_pushvalue(mp_lua, contact_idx);
-        if(lua_pcall(mp_lua, 1, 0, 0) != LUA_OK)
-        {
-            mr_workspace.getMainLogger().error(lua_tostring(mp_lua, -1));
-            lua_pop(mp_lua, 1);
-        }
-    }
-    lua_pop(mp_lua, 1);
+    LuaCallbackStorage(mp_lua).callSet(mr_workspace, m_callback_set_id_end_contact, 1);
 }
 
 // 1 self
 int luaApi_GC(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    luaL_unref(_lua, LUA_REGISTRYINDEX, self->key_observers_begin_contact);
-    luaL_unref(_lua, LUA_REGISTRYINDEX, self->key_observers_end_contact);
+    LuaCallbackStorage storage(_lua);
+    storage.destroyCallbackSet(self->callback_set_id_begin_contact);
+    storage.destroyCallbackSet(self->callback_set_id_end_contact);
     self->scene->removeContactObserver(*self->contact_observer);
     delete self->contact_observer;
     return 0;
@@ -340,25 +320,25 @@ int luaApi_FlipBodyShapeGraphic(lua_State * _lua)
 
 // 1 self
 // 2 callback
-int registerCallback(lua_State * _lua, int _storage_key)
-{
-    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, "callback expected");
-    if(lua_rawgeti(_lua, LUA_REGISTRYINDEX, _storage_key) == LUA_TTABLE)
-    {
-        lua_Integer count = static_cast<lua_Integer>(lua_rawlen(_lua, -1));
-        lua_pushvalue(_lua, 2);
-        lua_rawseti(_lua, -2, count + 1);
-    }
-    lua_pop(_lua, 1);
-    return 0;
-}
-
-// 1 self
-// 2 callback
 int luaApi_SubscribeToBeginContact(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    return registerCallback(_lua, self->key_observers_begin_contact);
+    LuaCallbackStorage storage(_lua);
+    uint32_t id = storage.addCallback(self->callback_set_id_begin_contact, 2);
+    lua_pushinteger(_lua, static_cast<lua_Integer>(id));
+    return 1;
+}
+
+// 1 self
+// 2 subscription ID
+int luaApi_UnsubscribeFromBeginContact(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
+    LuaCallbackStorage storage(_lua);
+    storage.removeCallback(self->callback_set_id_begin_contact, subscription_id);
+    return 0;
 }
 
 // 1 self
@@ -366,7 +346,22 @@ int luaApi_SubscribeToBeginContact(lua_State * _lua)
 int luaApi_SubscribeToEndContact(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    return registerCallback(_lua, self->key_observers_end_contact);
+    LuaCallbackStorage storage(_lua);
+    uint32_t id = storage.addCallback(self->callback_set_id_end_contact, 2);
+    lua_pushinteger(_lua, static_cast<lua_Integer>(id));
+    return 1;
+}
+
+// 1 self
+// 2 subscription ID
+int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
+    LuaCallbackStorage storage(_lua);
+    storage.removeCallback(self->callback_set_id_end_contact, subscription_id);
+    return 0;
 }
 
 // 1 self
@@ -401,22 +396,20 @@ int luaApi_FindPath(lua_State * _lua)
 
 void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, Scene & _scene)
 {
-    WeakRegistryStorage weak_registry(_lua, gc_scene_weak_registry_key);
+    LuaWeakRegistryStorage weak_registry(_lua);
     if(weak_registry.tryGet(&_scene, LUA_TUSERDATA))
         return;
 
     Self * self = Self::pushUserData(_lua);
     self->scene = &_scene;
     self->workspace = &_workspace;
-    lua_newtable(_lua);
-    self->key_observers_begin_contact = luaL_ref(_lua, LUA_REGISTRYINDEX);
-    lua_newtable(_lua);
-    self->key_observers_end_contact = luaL_ref(_lua, LUA_REGISTRYINDEX);
+    self->callback_set_id_begin_contact = LuaCallbackStorage::generateUniqueSetId();
+    self->callback_set_id_end_contact = LuaCallbackStorage::generateUniqueSetId();
     self->contact_observer = new LuaContactObserver(
         _lua,
         _workspace,
-        self->key_observers_begin_contact,
-        self->key_observers_end_contact);
+        self->callback_set_id_begin_contact,
+        self->callback_set_id_end_contact);
     self->scene->addContactObserver(*self->contact_observer);
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
@@ -436,7 +429,9 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, Sc
             { "setBodyShapeCurrentGraphic", luaApi_SetBodyShapeCurrentGraphic },
             { "flipBodyShapeGraphic", luaApi_FlipBodyShapeGraphic },
             { "subscribeToBeginContact", luaApi_SubscribeToBeginContact },
+            { "unsubscribeFromBeginContact", luaApi_UnsubscribeFromBeginContact },
             { "subscribeToEndContact", luaApi_SubscribeToEndContact },
+            { "unsubscribeFromEndContact", luaApi_UnsubscribeFromEndContact },
             { "findPath", luaApi_FindPath },
             { nullptr, nullptr }
         };

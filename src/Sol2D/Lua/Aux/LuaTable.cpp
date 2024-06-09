@@ -1,0 +1,63 @@
+// Sol2D Game Engine
+// Copyright (C) 2023-2024 Sergey Smolyannikov aka brainstream
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option) any
+// later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Lesser Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+#include <Sol2D/Lua/Aux/LuaTable.h>
+
+using namespace Sol2D::Lua::Aux;
+
+bool LuaTable::tryGetNumber(const char * _key, lua_Number * _value) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_gettable(mp_lua, m_idx);
+    bool result = lua_isnumber(mp_lua, -1);
+    if(result)
+        *_value = lua_tonumber(mp_lua, -1);
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
+bool LuaTable::tryGetInteger(const char * _key, lua_Integer * _value) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_gettable(mp_lua, m_idx);
+    bool result = lua_isinteger(mp_lua, -1);
+    if(result)
+        *_value = lua_tointeger(mp_lua, -1);
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
+bool LuaTable::tryGetBoolean(const char * _key, bool * _value) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_gettable(mp_lua, m_idx);
+    bool result = lua_isboolean(mp_lua, -1);
+    if(result)
+        *_value = lua_toboolean(mp_lua, -1);
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
+bool LuaTable::tryGetValue(const char * _key)
+{
+    lua_pushstring(mp_lua, _key);
+    if(lua_gettable(mp_lua, m_idx) == LUA_TNIL)
+    {
+        lua_pop(mp_lua, 1);
+        return false;
+    }
+    return true;
+}

@@ -18,7 +18,7 @@
 
 #include <Sol2D/Tiles/TileSet.h>
 #include <Sol2D/Def.h>
-#include <Sol2D/SDL.h>
+#include <Sol2D/SDL/SDL.h>
 
 namespace Sol2D::Tiles {
 
@@ -27,7 +27,7 @@ class Tile final
 public:
     S2_DEFAULT_COPY_AND_MOVE(Tile)
 
-    Tile(const TileSet & _set, SDL_TexturePtr _source, int32_t _src_x, int32_t _src_y, uint32_t _width, uint32_t _height) :
+    Tile(const TileSet & _set, SDL::TexturePtr _source, int32_t _src_x, int32_t _src_y, uint32_t _width, uint32_t _height) :
         mp_set(&_set),
         m_x(_src_x),
         m_y(_src_y),
@@ -49,7 +49,7 @@ private:
     const TileSet * mp_set;
     int32_t m_x, m_y;
     uint32_t m_width, m_height;
-    SDL_TexturePtr m_source_ptr;
+    SDL::TexturePtr m_source_ptr;
 };
 
 } // namespace Sol2D::Tiles

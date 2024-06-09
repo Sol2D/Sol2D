@@ -17,10 +17,11 @@
 #pragma once
 
 #include <boost/container/slist.hpp>
-#include <functional>
-#include <algorithm>
 
 namespace Sol2D::Utils {
+
+template<typename Method>
+concept ObserverMethodConcept = std::is_member_function_pointer<Method>::value;
 
 template<typename Observer>
 class Observable
@@ -30,8 +31,8 @@ public:
     void addObserver(Observer & _observer);
     bool removeObserver(Observer & _observer);
 
-protected:
-    void callObservers(std::function<void(Observer &)> _callback);
+    template<ObserverMethodConcept Method, typename ...Args>
+    void callObservers(Method _method, Args ... _args);
 
 private:
     boost::container::slist<Observer *> m_observers;
@@ -55,11 +56,13 @@ bool Observable<Observer>::removeObserver(Observer & _observer)
     return false;
 }
 
+
 template<typename Observer>
-inline void Observable<Observer>::callObservers(std::function<void(Observer &)> _callback)
+template<ObserverMethodConcept Method, typename ...Args>
+inline void Observable<Observer>::callObservers(Method _method, Args... _args)
 {
     for(auto & observer : m_observers)
-        _callback(*observer);
+        (observer->*_method)(_args...);
 }
 
 } // namespace Sol2D::Utils
