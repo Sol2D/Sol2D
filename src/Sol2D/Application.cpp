@@ -76,11 +76,11 @@ Application::~Application()
         SDL_DestroyRenderer(mp_renderer);
     if(mp_window)
         SDL_DestroyWindow(mp_window);
+    delete mp_lua;
+    delete mp_world;
     IMG_Quit();
     TTF_Quit();
     SDL_Quit();
-    delete mp_lua;
-    delete mp_world;
 }
 
 bool Application::run(const Workspace & _workspace)
