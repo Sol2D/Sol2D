@@ -16,7 +16,6 @@
 
 #include <Sol2D/Lua/LuaSizeApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
 
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
@@ -49,7 +48,7 @@ bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, SDL_FPoint & _size)
 
 void Sol2D::Lua::pushSize(lua_State * _lua, float _w, float _h)
 {
-    LuaTopStackTable table = LuaTopStackTable::pushNew(_lua);
+    LuaTable table = LuaTable::pushNew(_lua);
     table.setNumberValue(gc_key_h, _h);
     table.setNumberValue(gc_key_w, _w);
 }

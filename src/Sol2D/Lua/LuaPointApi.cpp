@@ -16,7 +16,6 @@
 
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
 
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
@@ -49,7 +48,7 @@ bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point)
 
 void Sol2D::Lua::pushPoint(lua_State * _lua, float _x, float _y)
 {
-    LuaTopStackTable table = LuaTopStackTable::pushNew(_lua);
+    LuaTable table = LuaTable::pushNew(_lua);
     table.setNumberValue(gc_key_x, _x);
     table.setNumberValue(gc_key_y, _y);
 }

@@ -16,7 +16,6 @@
 
 #include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <cstring>
 
@@ -45,7 +44,7 @@ void Sol2D::Lua::pushDimensionUnitEnum(lua_State * _lua)
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, gc_metatable_dimension_unit_type) == MetatablePushResult::Created)
     {
-        LuaTopStackTable table(_lua);
+        LuaTable table(_lua);
         table.setIntegerValue("PIXEL", static_cast<lua_Integer>(DimensionUnit::Pixel));
         table.setIntegerValue("PERCENT", static_cast<lua_Integer>(DimensionUnit::Percent));
     }

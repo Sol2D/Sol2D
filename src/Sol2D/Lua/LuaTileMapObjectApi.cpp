@@ -17,7 +17,7 @@
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D::Tiles;
 using namespace Sol2D::Lua::Aux;
@@ -33,7 +33,7 @@ void Sol2D::Lua::pushTileMapObjectTypeEnum(lua_State * _lua)
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, gc_metatable_tile_map_object_type) == MetatablePushResult::Created)
     {
-        LuaTopStackTable table(_lua);
+        LuaTable table(_lua);
         table.setIntegerValue("CIRCLE", static_cast<lua_Integer>(TileMapObjectType::Circle));
         table.setIntegerValue("POINT", static_cast<lua_Integer>(TileMapObjectType::Point));
         table.setIntegerValue("POLYGON", static_cast<lua_Integer>(TileMapObjectType::Polygon));
@@ -45,7 +45,7 @@ void Sol2D::Lua::pushTileMapObjectTypeEnum(lua_State * _lua)
 
 void Sol2D::Lua::pushTileMapObject(lua_State * _lua, const TileMapObject & _object)
 {
-    LuaTopStackTable table = LuaTopStackTable::pushNew(_lua);
+    LuaTable table = LuaTable::pushNew(_lua);
     table.setIntegerValue("id", _object.getId());
     std::optional<uint32_t> gid = _object.getTileGid();
     if(gid.has_value())

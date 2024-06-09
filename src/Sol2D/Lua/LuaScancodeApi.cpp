@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaScancodeApi.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <SDL3/SDL_scancode.h>
 
@@ -33,7 +33,7 @@ void Sol2D::Lua::pushScancodeEnum(lua_State * _lua)
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, gc_metatable_scancode) == MetatablePushResult::Created)
     {
-        LuaTopStackTable table(_lua);
+        LuaTable table(_lua);
         table.setIntegerValue("RIGHT_ARROW", SDL_SCANCODE_RIGHT);
         table.setIntegerValue("LEFT_ARROW", SDL_SCANCODE_LEFT);
         table.setIntegerValue("UP_ARROW", SDL_SCANCODE_UP);

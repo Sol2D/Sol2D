@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/BodyShapeType.h>
 
@@ -32,7 +32,7 @@ void Sol2D::Lua::pushBodyShapeTypeEnum(lua_State * _lua)
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, gc_metatable_body_shape_type) == MetatablePushResult::Created)
     {
-        LuaTopStackTable table(_lua);
+        LuaTable table(_lua);
         table.setIntegerValue("CIRCLE", static_cast<lua_Integer>(BodyShapeType::Circle));
         table.setIntegerValue("POLYGON", static_cast<lua_Integer>(BodyShapeType::Polygon));
     }

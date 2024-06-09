@@ -24,7 +24,7 @@
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 #include <Sol2D/Lua/Aux/LuaWeakRegistryStorage.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaScript.h>
 
 using namespace Sol2D;
@@ -161,7 +161,7 @@ int luaApi_CreateBody(lua_State * _lua)
 
     if(lua_proto.script_path.has_value())
     {
-        LuaTopStackTable table = LuaTopStackTable::pushNew(_lua);
+        LuaTable table = LuaTable::pushNew(_lua);
         table.setIntegerValue("bodyId", body_id);
         lua_pushvalue(_lua, 1);
         table.setValueFromTop("scene");

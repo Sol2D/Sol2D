@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 
 using namespace Sol2D;
@@ -32,7 +32,7 @@ uint32_t LuaCallbackStorage::addCallback(uint32_t _unique_set_id, int _callback_
     getIndexTable();
     if(!tryGetCallbackTableFromIndexTable(_unique_set_id))
     {
-        LuaTopStackTable callback_table = LuaTopStackTable::pushNew(mp_lua);
+        LuaTable callback_table = LuaTable::pushNew(mp_lua);
         callback_table.setStringValue("__mode", "v");
         lua_pushinteger(mp_lua, static_cast<lua_Integer>(_unique_set_id));
         lua_pushvalue(mp_lua, -2);

@@ -61,3 +61,46 @@ bool LuaTable::tryGetValue(const char * _key)
     }
     return true;
 }
+
+void LuaTable::setValueFromTop(const char * _key)
+{
+    lua_pushstring(mp_lua, _key);
+    int top = lua_gettop(mp_lua);
+    lua_insert(mp_lua, top -1);
+    lua_settable(mp_lua, m_idx);
+}
+
+void LuaTable::setIntegerValue(const char * _key, lua_Integer _value) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_pushinteger(mp_lua, _value);
+    lua_settable(mp_lua, m_idx);
+}
+
+void LuaTable::setNumberValue(const char * _key, lua_Number _value) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_pushnumber(mp_lua, _value);
+    lua_settable(mp_lua, m_idx);
+}
+
+void LuaTable::setBooleanValue(const char * _key, bool _value) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_pushboolean(mp_lua, _value);
+    lua_settable(mp_lua, m_idx);
+}
+
+void LuaTable::setStringValue(const char * _key, const char * _value) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_pushstring(mp_lua, _value);
+    lua_settable(mp_lua, m_idx);
+}
+
+void LuaTable::setNullValue(const char * _key) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_pushnil(mp_lua);
+    lua_settable(mp_lua, m_idx);
+}

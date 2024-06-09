@@ -16,7 +16,7 @@
 
 #include <Sol2D/BodyType.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
 
 using namespace Sol2D;
@@ -34,7 +34,7 @@ void Sol2D::Lua::pushBodyTypeEnum(lua_State * _lua)
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, gc_metatable_body_type) == MetatablePushResult::Created)
     {
-        LuaTopStackTable table(_lua);
+        LuaTable table(_lua);
         table.setIntegerValue("DYNAMIC", static_cast<lua_Integer>(BodyType::Dynamic));
         table.setIntegerValue("STATIC", static_cast<lua_Integer>(BodyType::Static));
         table.setIntegerValue("KINEMATIC", static_cast<lua_Integer>(BodyType::Kinematic));

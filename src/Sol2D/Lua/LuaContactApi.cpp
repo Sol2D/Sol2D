@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaContactApi.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -29,7 +29,7 @@ void pushContactSide(lua_State * _lua, const ContactSide & _side)
     static const char key_shape[] = "shapeKey";
     static const char key_tile_map_object_id[] = "tileMapObjectId";
 
-    LuaTopStackTable side_a_table = LuaTopStackTable::pushNew(_lua);
+    LuaTable side_a_table = LuaTable::pushNew(_lua);
     side_a_table.setIntegerValue(key_body, _side.body_id);
     side_a_table.setStringValue(key_shape, _side.shape_key);
     if(_side.tile_map_object_id.has_value())
@@ -40,7 +40,7 @@ void pushContactSide(lua_State * _lua, const ContactSide & _side)
 
 void Sol2D::Lua::pushContact(lua_State * _lua, Contact & _contact)
 {
-    LuaTopStackTable contact_table = LuaTopStackTable::pushNew(_lua);
+    LuaTable contact_table = LuaTable::pushNew(_lua);
     pushContactSide(_lua, _contact.side_a);
     contact_table.setValueFromTop("sideA");
     pushContactSide(_lua, _contact.side_b);

@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaFragmentApi.h>
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D;
@@ -36,11 +35,11 @@ const char gc_key_z_index[] = "zIndex";
 const char gc_key_is_visible[] = "isVisible";
 
 template<std::integral Int>
-void setDimension(LuaTopStackTable & table, const char * _key, const std::optional<Dimension<Int>> & _dimension)
+void setDimension(LuaTable & table, const char * _key, const std::optional<Dimension<Int>> & _dimension)
 {
     if(_dimension.has_value())
     {
-        LuaTopStackTable dimension_table = LuaTopStackTable::pushNew(table.getLua());
+        LuaTable dimension_table = LuaTable::pushNew(table.getLua());
         dimension_table.setIntegerValue(gc_key_dimension_unit, static_cast<lua_Integer>(_dimension.value().unit));
         dimension_table.setIntegerValue(gc_key_dimension_value, _dimension.value().value);
         table.setValueFromTop(_key);
@@ -84,7 +83,7 @@ std::optional<Dimension<Int>> tryGetDimension(lua_State * _lua, int _table_idx, 
 
 void Sol2D::Lua::pushFragment(lua_State * _lua, const Fragment & _fragment)
 {
-    LuaTopStackTable table = LuaTopStackTable::pushNew(_lua);
+    LuaTable table = LuaTable::pushNew(_lua);
     setDimension(table, gc_key_top, _fragment.top);
     setDimension(table, gc_key_right, _fragment.right);
     setDimension(table, gc_key_bottom, _fragment.bottom);

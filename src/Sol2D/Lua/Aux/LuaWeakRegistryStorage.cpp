@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/Aux/LuaTopStackTable.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaWeakRegistryStorage.h>
 
 using namespace Sol2D::Lua::Aux;
@@ -27,7 +27,7 @@ void LuaWeakRegistryStorage::save(void * _key, int _idx)
     if(lua_rawgetp(mp_lua, LUA_REGISTRYINDEX, &sc_storage_key) != LUA_TTABLE)
     {
         lua_pop(mp_lua, 1);
-        LuaTopStackTable table = LuaTopStackTable::pushNew(mp_lua);
+        LuaTable table = LuaTable::pushNew(mp_lua);
         table.setStringValue("__mode", "v");
         lua_pushvalue(mp_lua, -1);
         lua_rawsetp(mp_lua, LUA_REGISTRYINDEX, &sc_storage_key);
