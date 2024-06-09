@@ -32,61 +32,56 @@ local score_form_name = 'score'
 local form = sol.world:createForm(score_form_name)
 
 local function createScoreLabel()
-    local score_label = form:createLabel(score:formatMessage())
+    local label = form:createLabel(score:formatMessage())
     local default_fg = { r = 200, g = 255, b = 255 }
     local focused_fg = { r = 255, g = 100, b = 100 }
     local activated_fg = { r = 100, g = 255, b = 100 }
-    score_label:setFont(fontRoboto)
-    score_label:setX('40%')
-    score_label:setY('8px')
-    score_label:setWidth(300);
-    score_label:setHeight(34);
-    score_label:setBackgroundColor({ r = 0, g = 100, b = 30 }, sol.WidgetState.FOCUSED)
-    score_label:setForegroundColor(default_fg)
-    score_label:setForegroundColor(focused_fg, sol.WidgetState.FOCUSED)
-    score_label:setForegroundColor(activated_fg, sol.WidgetState.ACTIVATED)
-    score_label:setBorderColor(default_fg)
-    score_label:setBorderColor(focused_fg, sol.WidgetState.FOCUSED)
-    score_label:setBorderColor(activated_fg, sol.WidgetState.ACTIVATED)
-    score_label:setBorderWidth(6)
-    score_label:setVerticalTextAlignment(sol.VerticalTextAlignment.CENTER)
-    score_label:setHorizontalTextAlignment(sol.HorizontalTextAlignment.BEGIN)
-    score_label:setPadding({ left = 15 })
-    return score_label
+    label:setFont(fontRoboto)
+    label:setX('40%')
+    label:setY('8px')
+    label:setWidth(300);
+    label:setHeight(34);
+    label:setBackgroundColor({ r = 0, g = 100, b = 30 }, sol.WidgetState.FOCUSED)
+    label:setForegroundColor(default_fg)
+    label:setForegroundColor(focused_fg, sol.WidgetState.FOCUSED)
+    label:setForegroundColor(activated_fg, sol.WidgetState.ACTIVATED)
+    label:setBorderColor(default_fg)
+    label:setBorderColor(focused_fg, sol.WidgetState.FOCUSED)
+    label:setBorderColor(activated_fg, sol.WidgetState.ACTIVATED)
+    label:setBorderWidth(6)
+    label:setVerticalTextAlignment(sol.VerticalTextAlignment.CENTER)
+    label:setHorizontalTextAlignment(sol.HorizontalTextAlignment.BEGIN)
+    label:setPadding({ left = 15 })
+    return label
 end
 
 local score_label = createScoreLabel()
 
-local function createScoreButton()
-    local score_button = form:createButton('Click Me!')
+local function createSwitchViewButton()
+    local button = form:createButton('Switch View')
     local default_fg = { r = 200, g = 255, b = 255 }
     local focused_fg = { r = 255, g = 100, b = 100 }
     local activated_fg = { r = 100, g = 255, b = 100 }
-    score_button:setFont(fontRoboto)
-    score_button:setX(5)
-    score_button:setY(8)
-    score_button:setWidth('39%');
-    score_button:setHeight(34);
-    score_button:setBackgroundColor({ r = 0, g = 100, b = 30 }, sol.WidgetState.FOCUSED)
-    score_button:setForegroundColor(default_fg)
-    score_button:setForegroundColor(focused_fg, sol.WidgetState.FOCUSED)
-    score_button:setForegroundColor(activated_fg, sol.WidgetState.ACTIVATED)
-    score_button:setBorderColor(default_fg)
-    score_button:setBorderColor(focused_fg, sol.WidgetState.FOCUSED)
-    score_button:setBorderColor(activated_fg, sol.WidgetState.ACTIVATED)
-    score_button:setBorderWidth(6)
-    score_button:setVerticalTextAlignment(sol.VerticalTextAlignment.CENTER)
-    score_button:setHorizontalTextAlignment(sol.HorizontalTextAlignment.CENTER)
-    score_button:setPadding({ left = 15 })
-    score_button:subscribeOnClick(function ()
-        print('Click')
-        score:increment()
-        score_label:setText(score:formatMessage())
-    end)
-    return score_button
+    button:setFont(fontRoboto)
+    button:setX(5)
+    button:setY(8)
+    button:setWidth('39%');
+    button:setHeight(34);
+    button:setBackgroundColor({ r = 0, g = 100, b = 30 }, sol.WidgetState.FOCUSED)
+    button:setForegroundColor(default_fg)
+    button:setForegroundColor(focused_fg, sol.WidgetState.FOCUSED)
+    button:setForegroundColor(activated_fg, sol.WidgetState.ACTIVATED)
+    button:setBorderColor(default_fg)
+    button:setBorderColor(focused_fg, sol.WidgetState.FOCUSED)
+    button:setBorderColor(activated_fg, sol.WidgetState.ACTIVATED)
+    button:setBorderWidth(6)
+    button:setVerticalTextAlignment(sol.VerticalTextAlignment.CENTER)
+    button:setHorizontalTextAlignment(sol.HorizontalTextAlignment.CENTER)
+    button:setPadding({ left = 15 })
+    return button
 end
 
-createScoreButton()
+local switch_view_button = createSwitchViewButton()
 
 local score_fragment_id = sol.world:createFragment({
     height = { unit = sol.DimensionUnit.PIXEL, value = 50 }
@@ -218,8 +213,8 @@ if player_body_id == nil or skeleton_body_id == nil then
 end
 scene:setBodyLayer(player_body_id, 'Ground')
 scene:setBodyLayer(skeleton_body_id, 'Ground')
-scene:setFolowedBody(player_body_id)
--- scene:setFolowedBody(skeleton_body_id)
+local followed_body_id = player_body_id;
+scene:setFollowedBody(followed_body_id)
 
 local FORCE_MULTIPLYER = 100
 
@@ -253,6 +248,16 @@ scene:subscribeToEndContact(function(contact)
     print('    Body B:', contact.sideB.bodyId)
     print('    Shape B', contact.sideB.shapeKey)
     print('    Object B', contact.sideB.tileMapObjectId)
+end)
+
+
+switch_view_button:subscribeOnClick(function()
+    if followed_body_id == player_body_id then
+        followed_body_id = skeleton_body_id
+    else
+        followed_body_id = player_body_id
+    end
+    scene:setFollowedBody(followed_body_id)
 end)
 
 sol.heartbeat:subscribe(function()

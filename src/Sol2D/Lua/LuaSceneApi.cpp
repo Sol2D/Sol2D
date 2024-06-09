@@ -243,7 +243,7 @@ int luaApi_GetBodyPosition(lua_State * _lua)
 
 // 1 self
 // 2 body id
-int luaApi_SetFolowedBody(lua_State * _lua)
+int luaApi_SetFollowedBody(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
@@ -253,7 +253,7 @@ int luaApi_SetFolowedBody(lua_State * _lua)
 }
 
 // 1 self
-int luaApi_ResetFolowedBody(lua_State * _lua)
+int luaApi_ResetFollowedBody(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
     self->scene->resetFollowedBody();
@@ -423,8 +423,8 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, Sc
             { "applyForce", luaApi_ApplyForce },
             { "setBodyPosition", luaApi_SetBodyPosition },
             { "getBodyPosition", luaApi_GetBodyPosition },
-            { "setFolowedBody", luaApi_SetFolowedBody },
-            { "resetFolowedBody", luaApi_ResetFolowedBody },
+            { "setFollowedBody", luaApi_SetFollowedBody },
+            { "resetFollowedBody", luaApi_ResetFollowedBody },
             { "setBodyLayer", luaApi_SetBodyLayer },
             { "setBodyShapeCurrentGraphic", luaApi_SetBodyShapeCurrentGraphic },
             { "flipBodyShapeGraphic", luaApi_FlipBodyShapeGraphic },

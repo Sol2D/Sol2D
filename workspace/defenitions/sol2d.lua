@@ -178,9 +178,9 @@ function __scene:getBodyPosition(body_id) end
 
 ---@param body_id integer
 ---@return boolean
-function __scene:setFolowedBody(body_id) end
+function __scene:setFollowedBody(body_id) end
 
-function __scene:resetFolowedBody() end
+function __scene:resetFollowedBody() end
 
 ---@param body_id integer
 ---@param layer string
