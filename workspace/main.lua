@@ -122,7 +122,7 @@ end
 
 local function createPlayer()
     local body_proto = larder:createBodyPrototype('player', sol.BodyType.DYNAMIC)
-    body_proto:attachScript('experimental_player.lua')
+    body_proto:attachScript('player.lua')
     local size = { w = 32, h = 36 }
     local position = { x = -(size.w / 2), y = -(size.h / 2) }
     local shape_proto = body_proto:createPolygonShape('main', { x = position.x, y = position.y, w = size.w, h = size.h })
