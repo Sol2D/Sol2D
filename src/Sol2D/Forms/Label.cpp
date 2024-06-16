@@ -78,7 +78,6 @@ bool Label::setState(WidgetState _state)
 
 void Label::render(const RenderState & _state)
 {
-    Widget::render(_state);
     FontPtr font = this->font[m_state];
     if(!font)
         return;
@@ -94,10 +93,17 @@ void Label::render(const RenderState & _state)
     const float padding_right = padding.right.getPixels(canvas_width);
     const float padding_top = padding.top.getPixels(canvas_height);
     const float padding_bottom = padding.bottom.getPixels(canvas_height);
-    const float draw_area_x = m_x.getPixels(getParent().getWidth()) + padding_left + border_width;
-    const float draw_area_y = m_y.getPixels(getParent().getHeight()) + padding_top + border_width;
-    const float draw_area_width = m_width.getPixels(canvas_width) - border_width_x_2 - padding_left - padding_right;
-    const float draw_area_height = m_height.getPixels(canvas_height) - border_width_x_2 - padding_top - padding_bottom;
+    const SDL_FRect control_rect =
+    {
+        .x = m_x.getPixels(getParent().getWidth()),
+        .y = m_y.getPixels(getParent().getHeight()),
+        .w = m_width.getPixels(canvas_width),
+        .h = m_height.getPixels(canvas_height)
+    };
+    const float draw_area_x = control_rect.x + padding_left + border_width;
+    const float draw_area_y = control_rect.y + padding_top + border_width;
+    const float draw_area_width = control_rect.w - border_width_x_2 - padding_left - padding_right;
+    const float draw_area_height = control_rect.h - border_width_x_2 - padding_top - padding_bottom;
     const HorizontalTextAlignment horizontal_text_alignment = this->horizontal_text_alignment[m_state];
     const VerticalTextAlignment vertical_text_alignment = this->vertical_text_alignment[m_state];
 
@@ -148,7 +154,16 @@ void Label::render(const RenderState & _state)
     if(dest_rect.y < draw_area_y)
         dest_rect.y = draw_area_y;
 
+    SDL_Color bg_color = background_color[m_state];
+    if (bg_color.a != 255)
+    {
+        SDL_SetRenderDrawColor(&mr_renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
+        SDL_RenderFillRect(&mr_renderer, &control_rect);
+    }
+
     SDL_RenderTexture(&mr_renderer, mp_texture, &src_rect, &dest_rect);
+
+    Widget::render(_state);
 }
 
 void Label::createTexture(TTF_Font * _font)
