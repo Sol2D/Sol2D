@@ -23,18 +23,9 @@ namespace Sol2D::SDL {
 
 using TexturePtr = std::shared_ptr<SDL_Texture>;
 
-class SdlTextureDeleter final
-{
-public:
-    void operator () (SDL_Texture * _texture) const noexcept
-    {
-        SDL_DestroyTexture(_texture);
-    }
-};
-
 inline TexturePtr wrapSdlTexturePtr(SDL_Texture * _texture)
 {
-    return std::shared_ptr<SDL_Texture>(_texture, SdlTextureDeleter());
+    return std::shared_ptr<SDL_Texture>(_texture, SDL_DestroyTexture);
 }
 
 void sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, uint32_t _radius);

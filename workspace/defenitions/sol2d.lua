@@ -396,6 +396,13 @@ function __larder:getFont(file_path, size) end
 ---@param size integer
 function __larder:freeFont(file_path, size) end
 
+---@param file_path string
+---@return sol.SoundEffect | nil
+function __larder:getSoundEffect(file_path) end
+
+---@param file_path string
+function __larder:freeSoundEffect(file_path) end
+
 ---@class sol.BodyPrototype
 local __body_prototype
 
@@ -646,3 +653,15 @@ function __heartbeat:subscribe(callback) end
 
 ---@class sol.Font
 local __font
+
+---@class sol.SoundEffect
+local __sound_effect
+
+---@param channel integer?
+---@return boolean
+function __sound_effect:play(channel) end
+
+---@param iteration_count integer
+---@param channel integer?
+---@return boolean
+function __sound_effect:loop(iteration_count, channel) end

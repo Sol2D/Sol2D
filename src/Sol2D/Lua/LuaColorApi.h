@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Lua/LuaForward.h>
+#include <Sol2D/Lua/Aux/LuaForward.h>
 #include <SDL3/SDL_pixels.h>
 
 namespace Sol2D::Lua {

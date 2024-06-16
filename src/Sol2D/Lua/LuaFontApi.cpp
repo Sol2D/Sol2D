@@ -32,6 +32,14 @@ struct Self : LuaUserData<Self, gc_metatable_font>
     FontPtr font;
 };
 
+// 1 self
+int luaApi_GC(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    self->font.reset();
+    return 0;
+}
+
 } // namespace name
 
 void Sol2D::Lua::pushFontApi(lua_State * _lua, SDL::FontPtr _font)
@@ -40,7 +48,12 @@ void Sol2D::Lua::pushFontApi(lua_State * _lua, SDL::FontPtr _font)
     self->font = _font;
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        // TODO: expose TTF API
+        luaL_Reg funcs[] =
+        {
+            { "__gc", luaApi_GC },
+            { nullptr, nullptr }
+        };
+        luaL_setfuncs(_lua, funcs, 0);
     }
     lua_setmetatable(_lua, -2);
 }

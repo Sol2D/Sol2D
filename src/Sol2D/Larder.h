@@ -21,6 +21,7 @@
 #include <Sol2D/Utils/KeyValueStorage.h>
 #include <Sol2D/Workspace.h>
 #include <Sol2D/SDL/TTF.h>
+#include <Sol2D/SDL/Mixer.h>
 #include <SDL3/SDL_render.h>
 #include <string>
 #include <filesystem>
@@ -121,6 +122,10 @@ public:
 
     void freeFont(const std::filesystem::path & _file_path, uint16_t _size);
 
+    SDL::SoundChunkPtr getSoundChunk(const std::filesystem::path & _file_path);
+
+    void freeSoundChunk(const std::filesystem::path & _file_path);
+
 private:
     SDL_Renderer & mr_renderer;
     Utils::KeyValueStorage<std::string, Sprite> m_sprites;
@@ -128,6 +133,7 @@ private:
     Utils::KeyValueStorage<std::string, SpriteAnimation> m_animations;
     Utils::KeyValueStorage<std::string, BodyPrototype> m_body_prototypes;
     std::unordered_map<std::string, SDL::FontPtr> m_fonts;
+    std::unordered_map<std::string, SDL::SoundChunkPtr> m_sound_chunks;
 };
 
 } // namespace Sol2D

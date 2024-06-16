@@ -16,12 +16,22 @@
 
 #pragma once
 
-#include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Workspace.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <memory>
 
-namespace Sol2D::Lua {
+namespace Sol2D::SDL {
 
-void pushHeartbeatApi(lua_State * _lua);
-void doHeartbeat(lua_State * _lua, const Workspace & _workspace);
+using SoundChunkPtr = std::shared_ptr<Mix_Chunk>;
+using MusicPtr = std::shared_ptr<Mix_Music>;
 
-} // namespace Sol2D::Lua
+inline SoundChunkPtr wrapSoundChunk(Mix_Chunk * _chunk)
+{
+    return std::shared_ptr<Mix_Chunk>(_chunk, Mix_FreeChunk);
+}
+
+inline MusicPtr wrapMusic(Mix_Music * _music)
+{
+    return std::shared_ptr<Mix_Music>(_music, Mix_FreeMusic);
+}
+
+} // namespace Sol2D::SDL

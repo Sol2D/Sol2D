@@ -12,9 +12,15 @@ local main_fragment_id = sol.world:createFragment({
 })
 sol.world:bindFragment(main_fragment_id, main_scene_name)
 
-local fontRoboto = larder:getFont('fonts/Roboto/Roboto-Bold.ttf', 18)
-if fontRoboto == nil then
+local font_roboto = larder:getFont('fonts/Roboto/Roboto-Bold.ttf', 18)
+if font_roboto == nil then
     print('Font is not loaded')
+    return
+end
+
+local teleport_sound_effect = larder:getSoundEffect('sounds/teleport/teleport.wav')
+if teleport_sound_effect == nil then
+    print('Sound effect is not loaded')
     return
 end
 
@@ -36,7 +42,7 @@ local function createScoreLabel()
     local default_fg = { r = 200, g = 255, b = 255 }
     local focused_fg = { r = 255, g = 100, b = 100 }
     local activated_fg = { r = 100, g = 255, b = 100 }
-    label:setFont(fontRoboto)
+    label:setFont(font_roboto)
     label:setX('40%')
     label:setY('8px')
     label:setWidth(300);
@@ -62,7 +68,7 @@ local function createSwitchViewButton()
     local default_fg = { r = 200, g = 255, b = 255 }
     local focused_fg = { r = 255, g = 100, b = 100 }
     local activated_fg = { r = 100, g = 255, b = 100 }
-    button:setFont(fontRoboto)
+    button:setFont(font_roboto)
     button:setX(5)
     button:setY(8)
     button:setWidth('39%');
@@ -233,6 +239,7 @@ scene:subscribeToBeginContact(function(contact)
 
     if (player_body_id == contact.sideA.bodyId and contact.sideB.shapeKey == 'Sensor') or
         (player_body_id == contact.sideB.bodyId and contact.sideA.shapeKey == 'Sensor') then
+        teleport_sound_effect:play()
         scene:setBodyPosition(player_body_id, getStartPosition())
     else
         score:increment()

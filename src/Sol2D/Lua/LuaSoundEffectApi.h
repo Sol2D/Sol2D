@@ -17,11 +17,10 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Workspace.h>
+#include <Sol2D/SDL/Mixer.h>
 
 namespace Sol2D::Lua {
 
-void pushHeartbeatApi(lua_State * _lua);
-void doHeartbeat(lua_State * _lua, const Workspace & _workspace);
+void pushSoundEffectApi(lua_State * _lua, SDL::SoundChunkPtr _chunk);
 
 } // namespace Sol2D::Lua

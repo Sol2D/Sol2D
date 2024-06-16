@@ -23,18 +23,9 @@ namespace Sol2D::SDL {
 
 using FontPtr = std::shared_ptr<TTF_Font>;
 
-class TtfFontDeleter final
-{
-public:
-    void operator () (TTF_Font * _font) const noexcept
-    {
-        TTF_CloseFont(_font);
-    }
-};
-
 inline FontPtr wrapTtfFont(TTF_Font * _font)
 {
-    return std::shared_ptr<TTF_Font>(_font, TtfFontDeleter());
+    return std::shared_ptr<TTF_Font>(_font, TTF_CloseFont);
 }
 
 } // namespace Sol2D::SDL

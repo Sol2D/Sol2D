@@ -19,6 +19,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3_mixer/SDL_mixer.h>
 #include <memory>
 #include <iostream>
 
@@ -57,6 +58,11 @@ private:
     LuaLibrary * mp_lua;
 };
 
+SDL_AssertState SDLCALL sdlAssertionHandler (const SDL_AssertData * _data, void * /*_userdata*/)
+{
+    throw std::runtime_error(std::format("SDL Assertion failed: {}", _data->condition));
+}
+
 } // namespace
 
 
@@ -80,6 +86,7 @@ Application::~Application()
     delete mp_world;
     IMG_Quit();
     TTF_Quit();
+    Mix_Quit();
     SDL_Quit();
 }
 
@@ -109,6 +116,12 @@ bool Application::initialize()
         mr_workspace.getMainLogger().critical("SDL_TTF initialization failed. {}", SDL_GetError());
         return false;
     }
+    if(Mix_OpenAudio(0, nullptr) != 0) // TODO: allow user to select a device
+    {
+        mr_workspace.getMainLogger().critical("SDL_Mixer initialization failed. {}", SDL_GetError());
+        return false;
+    }
+    SDL_SetAssertionHandler(sdlAssertionHandler, nullptr);
     // TODO: SDL_WINDOW_VULKAN from manifest
     mp_window = SDL_CreateWindow(
         mr_workspace.getApplicationName().c_str(),

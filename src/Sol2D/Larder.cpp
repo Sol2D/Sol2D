@@ -31,9 +31,11 @@ inline std::string makeFontKey(const std::filesystem::path & _file_path, uint16_
 FontPtr Larder::getFont(const std::filesystem::path & _file_path, uint16_t _size)
 {
     const std::string key = makeFontKey(_file_path, _size);
-    auto it = m_fonts.find(key);
-    if(it != m_fonts.end())
-        return it->second;
+    {
+        auto it = m_fonts.find(key);
+        if(it != m_fonts.end())
+            return it->second;
+    }
     TTF_Font * font = TTF_OpenFont(_file_path.c_str(), _size);
     if(font)
     {
@@ -48,4 +50,26 @@ void Larder::freeFont(const std::filesystem::path & _file_path, uint16_t _size)
 {
     const std::string key = makeFontKey(_file_path, _size);
     m_fonts.erase(key);
+}
+
+SDL::SoundChunkPtr Larder::getSoundChunk(const std::filesystem::path & _file_path)
+{
+    {
+        auto it = m_sound_chunks.find(_file_path.string());
+        if(it != m_sound_chunks.end())
+            return it->second;
+    }
+    Mix_Chunk * chunk = Mix_LoadWAV(_file_path.c_str());
+    if(chunk)
+    {
+        SDL::SoundChunkPtr ptr = SDL::wrapSoundChunk(chunk);
+        m_sound_chunks[_file_path.string()] = ptr;
+        return ptr;
+    }
+    return nullptr;
+}
+
+void Larder::freeSoundChunk(const std::filesystem::path & _file_path)
+{
+    m_sound_chunks.erase(_file_path.string());
 }

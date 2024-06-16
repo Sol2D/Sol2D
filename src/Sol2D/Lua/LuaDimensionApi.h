@@ -17,7 +17,7 @@
 #pragma once
 
 #include <Sol2D/Dimension.h>
-#include <Sol2D/Lua/LuaForward.h>
+#include <Sol2D/Lua/Aux/LuaForward.h>
 #include <optional>
 
 namespace Sol2D::Lua {
