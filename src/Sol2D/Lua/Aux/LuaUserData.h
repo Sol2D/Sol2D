@@ -18,6 +18,7 @@
 
 #include <lua.hpp>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
+#include <cstring>
 
 namespace Sol2D::Lua::Aux {
 
@@ -26,7 +27,9 @@ struct LuaUserData
 {
     static UserData * pushUserData(lua_State * _lua)
     {
-        return static_cast<UserData *>(lua_newuserdata(_lua, sizeof(UserData)));
+        void * data = lua_newuserdata(_lua, sizeof(UserData));
+        std::memset(data, 0, sizeof(UserData));
+        return static_cast<UserData *>(data);
     }
 
     static MetatablePushResult pushMetatable(lua_State * _lua)
