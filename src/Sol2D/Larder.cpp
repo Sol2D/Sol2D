@@ -73,3 +73,25 @@ void Larder::freeSoundChunk(const std::filesystem::path & _file_path)
 {
     m_sound_chunks.erase(_file_path.string());
 }
+
+SDL::MusicPtr Larder::getMusic(const std::filesystem::path & _file_path)
+{
+    {
+        auto it = m_musics.find(_file_path.string());
+        if(it != m_musics.end())
+            return it->second;
+    }
+    Mix_Music * music = Mix_LoadMUS(_file_path.c_str());
+    if(music)
+    {
+        SDL::MusicPtr ptr = SDL::wrapMusic(music);
+        m_musics[_file_path.string()] = ptr;
+        return ptr;
+    }
+    return nullptr;
+}
+
+void Larder::freeMusic(const std::filesystem::path & _file_path)
+{
+    m_musics.erase(_file_path.string());
+}

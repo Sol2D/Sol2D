@@ -126,6 +126,10 @@ public:
 
     void freeSoundChunk(const std::filesystem::path & _file_path);
 
+    SDL::MusicPtr getMusic(const std::filesystem::path & _file_path);
+
+    void freeMusic(const std::filesystem::path & _file_path);
+
 private:
     SDL_Renderer & mr_renderer;
     Utils::KeyValueStorage<std::string, Sprite> m_sprites;
@@ -134,6 +138,7 @@ private:
     Utils::KeyValueStorage<std::string, BodyPrototype> m_body_prototypes;
     std::unordered_map<std::string, SDL::FontPtr> m_fonts;
     std::unordered_map<std::string, SDL::SoundChunkPtr> m_sound_chunks;
+    std::unordered_map<std::string, SDL::MusicPtr> m_musics;
 };
 
 } // namespace Sol2D

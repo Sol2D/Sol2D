@@ -403,6 +403,13 @@ function __larder:getSoundEffect(file_path) end
 ---@param file_path string
 function __larder:freeSoundEffect(file_path) end
 
+---@param file_path string
+---@return sol.Music | nil
+function __larder:getMusic(file_path) end
+
+---@param file_path string
+function __larder:freeMusic(file_path) end
+
 ---@class sol.BodyPrototype
 local __body_prototype
 
@@ -665,3 +672,13 @@ function __sound_effect:play(channel) end
 ---@param channel integer?
 ---@return boolean
 function __sound_effect:loop(iteration_count, channel) end
+
+---@class sol.Music
+local __music
+
+---@return boolean
+function __music:play() end
+
+---@param iteration_count integer
+---@return boolean
+function __music:loop(iteration_count) end

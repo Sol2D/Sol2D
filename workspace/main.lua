@@ -211,6 +211,15 @@ local function createSkeleton()
     return scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 1 })
 end
 
+(function ()
+    local music = larder:getMusic('sounds/village_in_despair/village_in_despair.flac')
+    if music == nil then
+        print('Unable to load music')
+    else
+        music:loop(-1)
+    end
+end)()
+
 -- local body_id = createSpacesheep()
 local player_body_id = createPlayer()
 local skeleton_body_id = createSkeleton()

@@ -21,6 +21,7 @@
 #include <Sol2D/Lua/LuaSpriteAnimationApi.h>
 #include <Sol2D/Lua/LuaFontApi.h>
 #include <Sol2D/Lua/LuaSoundEffectApi.h>
+#include <Sol2D/Lua/LuaMusicApi.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
@@ -37,6 +38,7 @@ const char gc_message_sprite_animation_key_expected[] = "a sprite animation key 
 const char gc_message_font_file_path_expected[] = "a font file path expected";
 const char gc_message_font_size_expected[] = "a font size expected";
 const char gc_message_sound_effect_file_path_expected[] = "a sound effect file path expected";
+const char gc_message_music_file_path_expected[] = "a music file path expected";
 
 struct Self : LuaUserData<Self, gc_metatable_larder>
 {
@@ -267,6 +269,36 @@ int luaApi_FreeSoundEffect(lua_State * _lua)
     return 0;
 }
 
+// 1 self
+// 2 file path
+int luaApi_GetMusic(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    const char * path = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, path != nullptr, 2, gc_message_music_file_path_expected);
+    SDL::MusicPtr chunk = self->larder->getMusic(
+        self->workspace->toAbsolutePath(std::filesystem::path(path))
+    );
+    if(chunk == nullptr)
+        lua_pushnil(_lua);
+    else
+        pushMusicApi(_lua, chunk);
+    return 1;
+}
+
+// 1 self
+// 2 file path
+int luaApi_FreeMusic(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    const char * path = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, path != nullptr, 2, gc_message_music_file_path_expected);
+    self->larder->freeMusic(
+        self->workspace->toAbsolutePath(std::filesystem::path(path))
+    );
+    return 0;
+}
+
 } // namespace name
 
 void Sol2D::Lua::pushLarderApi(lua_State * _lua,  const Workspace & _workspace, Larder & _larder)
@@ -293,6 +325,8 @@ void Sol2D::Lua::pushLarderApi(lua_State * _lua,  const Workspace & _workspace, 
             { "freeFont", luaApi_FreeFont },
             { "getSoundEffect", luaApi_GetSoundEffect },
             { "freeSoundEffect", luaApi_FreeSoundEffect },
+            { "getMusic", luaApi_GetMusic },
+            { "freeMusic", luaApi_FreeMusic },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);
