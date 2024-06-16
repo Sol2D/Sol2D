@@ -20,7 +20,13 @@ end
 
 local teleport_sound_effect = larder:getSoundEffect('sounds/teleport/teleport.wav')
 if teleport_sound_effect == nil then
-    print('Sound effect is not loaded')
+    print('The teleport sound effect is not loaded')
+    return
+end
+
+local click_sound_effect = larder:getSoundEffect('sounds/click/click.mp3')
+if click_sound_effect == nil then
+    print('The click sound effect is not loaded')
     return
 end
 
@@ -274,6 +280,7 @@ switch_view_button:subscribeOnClick(function()
         followed_body_id = player_body_id
     end
     scene:setFollowedBody(followed_body_id)
+    click_sound_effect:play()
 end)
 
 sol.heartbeat:subscribe(function()
