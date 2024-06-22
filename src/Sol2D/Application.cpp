@@ -127,7 +127,10 @@ bool Application::initialize()
         mr_workspace.getApplicationName().c_str(),
         800,
         600,
-        SDL_WINDOW_RESIZABLE | /*SDL_WINDOW_HIGH_PIXEL_DENSITY | */SDL_WINDOW_VULKAN /*| SDL_WINDOW_FULLSCREEN*/
+        SDL_WINDOW_RESIZABLE
+        // SDL_WINDOW_FULLSCREEN
+        // | SDL_WINDOW_HIGH_PIXEL_DENSITY
+        | SDL_WINDOW_VULKAN
         // TODO: "vulkan" renderer cannot be created with SDL_WINDOW_HIGH_PIXEL_DENSITY
     );
     if(!mp_window)

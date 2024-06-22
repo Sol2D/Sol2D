@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<game directory="games/side_scroller">
+<game directory="games/rpg">
     <engine>
         <graphics fps="120" />
         <logging level="trace" />
     </engine>
     <application name="My Game">
-        <scripts entry="scripts/main.lua" />
-        <resources directory="resources" />
+        <scripts entry="main.lua" />
+        <resources dicrectory="" />
         <logging level="trace" />
     </application>
 </game>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" nextlayerid="8" nextobjectid="14">
+ <tileset firstgid="1" source="freetileset/tiles.tsx"/>
+ <tileset firstgid="19" source="freetileset/objects.tsx"/>
+ <layer id="3" name="ground-2" width="100" height="20">
+  <data encoding="base64" compression="zstd">
+   KLUv/WBAHgUCAJgAAQAAAAIDAAQAAAAFBgAREhESEKDwtnWQgt0dtSpcaWRSih4qXppTtl5X/WtddCuTP8agnpnbgno2Zwt6DAM=
+  </data>
+ </layer>
+ <layer id="1" name="ground-1" width="100" height="20">
+  <data encoding="base64" compression="zstd">
+   KLUv/WBAHoUHAPQCAA0AAAAODwADAAEAAAACAgYABAAAAAUKAAAACwYADAAAAAkNAQEEBQcAAAAIAwZLoIBrdWCCE4nMkR31ySlmSgdH7dCc4eJk03Dp45dCaS3AnvynT4MH/kwrpwQmp5rR+k2qTzrKcIHJUNmS50LmJqfEF56ufHRz08+FvMp4OukkpL6FE/ykkn0Eb5jU0+k4OU7OYCo7xf1x6aMbgj4kqXmXzqRZoEqPb9QJBROgCuvSNGdydXhpl4C6aS/DTY67+8nbo1VMevUgPi5ssir5vH7rW+QLpEacF6iSsxrdIr5APGK5UO1poHI7QcH/bA==
+  </data>
+ </layer>
+ <objectgroup id="6" name="places">
+  <object id="1" type="obstacle" x="0.147727" y="2047.94" width="4987.85" height="511.881"/>
+  <object id="4" type="obstacle" x="5506" y="1791.88" width="1917.64" height="767.879"/>
+  <object id="5" type="obstacle" x="7424" y="1536" width="1281.33" height="639.75"/>
+  <object id="6" type="obstacle" x="8705.1" y="2175.97" width="1023.2" height="384.205"/>
+  <object id="7" type="obstacle" x="11392" y="2175.69" width="1408" height="384.343"/>
+  <object id="8" type="obstacle" x="12288.3" y="1407.83" width="510.409" height="767.652"/>
+  <object id="9" type="obstacle" x="0.102273" y="463.636" width="127.864" height="1584.17"/>
+  <object id="10" type="water" x="4989.33" y="2079.33" width="515.667" height="480"/>
+  <object id="11" type="water" x="9728.58" y="2208.17" width="1661.92" height="351.333"/>
+  <object id="12" name="start-position" x="287" y="2023">
+   <point/>
+  </object>
+  <object id="13" name="finish" x="12414" y="-6" width="382" height="900"/>
+ </objectgroup>
+</map>

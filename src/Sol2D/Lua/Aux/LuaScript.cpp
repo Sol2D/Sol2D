@@ -22,9 +22,12 @@ void Sol2D::Lua::Aux::executeScript(
     const std::filesystem::path & _path)
 {
     std::filesystem::path path = _workspace.getScriptFullPath(_path);
+    _workspace.getMainLogger().info("Executing script \"{0}\"", path.c_str());
     if(luaL_loadfile(_lua, path.c_str()) == LUA_OK)
     {
-        if(lua_pcall(_lua, 0, LUA_MULTRET, 0) != LUA_OK)
+        if(lua_pcall(_lua, 0, LUA_MULTRET, 0) == LUA_OK)
+            _workspace.getMainLogger().info("Script \"{0}\" executed successfully", path.c_str());
+        else
             _workspace.getMainLogger().error(lua_tostring(_lua, -1));
     }
     else
