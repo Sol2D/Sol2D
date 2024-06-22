@@ -42,7 +42,7 @@ int luaApi_LoadFromFile(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     SpriteSheetOptions options;
     luaL_argcheck(_lua,  tryGetSpriteSheetOptions(_lua, 3, options), 3, "sprite sheet options expected");
-    bool result = self->sprite_sheet->loadFromFile(self->workspace->toAbsolutePath(path), options);
+    bool result = self->sprite_sheet->loadFromFile(self->workspace->getResourceFullPath(path), options);
     lua_pushboolean(_lua, result);
     return 1;
 }

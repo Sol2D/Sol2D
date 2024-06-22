@@ -28,10 +28,10 @@ class Workspace final
     S2_DISABLE_COPY_AND_MOVE(Workspace)
 
 private:
-    explicit Workspace(const std::filesystem::path & _path);
+    Workspace();
 
 public:
-    static std::unique_ptr<Workspace> load(const std::filesystem::path & _path);
+    static std::unique_ptr<Workspace> load(const std::filesystem::path & _config_path);
 
     const std::string & getApplicationName() const
     {
@@ -48,9 +48,14 @@ public:
         return m_frame_rate;
     }
 
-    std::filesystem::path toAbsolutePath(const std::filesystem::path & _path) const
+    std::filesystem::path getResourceFullPath(const std::filesystem::path & _resource_path) const
     {
-        return _path.is_absolute() ? _path : m_path / _path;
+        return getFullPath(m_resources_directory, _resource_path);
+    }
+
+    std::filesystem::path getScriptFullPath(const std::filesystem::path & _script_path) const
+    {
+        return getFullPath(m_scripts_directory, _script_path);
     }
 
     spdlog::logger & getMainLogger() const
@@ -63,14 +68,19 @@ public:
         return *m_lua_logger_ptr;
     }
 
-public:
-    static const char * s_default_dirname;
+private:
+    static std::filesystem::path getFullPath(const std::filesystem::path & _dir, const std::filesystem::path & _path)
+    {
+        if(_path.is_absolute() || _dir.empty())
+            return _path;
+        return _dir / _path;
+    }
 
 private:
-    const std::filesystem::path m_path;
-    static const char * s_manifest_filename;
     std::string m_application_name;
     std::filesystem::path m_main_script_path;
+    std::filesystem::path m_scripts_directory;
+    std::filesystem::path m_resources_directory;
     uint16_t m_frame_rate;
     std::shared_ptr<spdlog::logger> m_main_logger_ptr;
     std::shared_ptr<spdlog::logger> m_lua_logger_ptr;

@@ -213,7 +213,7 @@ int luaApi_GetFont(lua_State * _lua)
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_font_file_path_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, gc_message_font_size_expected);
     SDL::FontPtr font = self->larder->getFont(
-        self->workspace->toAbsolutePath(std::filesystem::path(path)),
+        self->workspace->getResourceFullPath(std::filesystem::path(path)),
         static_cast<uint16_t>(lua_tointeger(_lua, 3))
     );
     if(font == nullptr)
@@ -233,7 +233,7 @@ int luaApi_FreeFont(lua_State * _lua)
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_font_file_path_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, gc_message_font_size_expected);
     self->larder->freeFont(
-        self->workspace->toAbsolutePath(std::filesystem::path(path)),
+        self->workspace->getResourceFullPath(std::filesystem::path(path)),
         static_cast<uint16_t>(lua_tointeger(_lua, 3))
     );
     return 0;
@@ -247,7 +247,7 @@ int luaApi_GetSoundEffect(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_sound_effect_file_path_expected);
     SDL::SoundChunkPtr chunk = self->larder->getSoundChunk(
-        self->workspace->toAbsolutePath(std::filesystem::path(path))
+        self->workspace->getResourceFullPath(std::filesystem::path(path))
     );
     if(chunk == nullptr)
         lua_pushnil(_lua);
@@ -264,7 +264,7 @@ int luaApi_FreeSoundEffect(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_sound_effect_file_path_expected);
     self->larder->freeSoundChunk(
-        self->workspace->toAbsolutePath(std::filesystem::path(path))
+        self->workspace->getResourceFullPath(std::filesystem::path(path))
     );
     return 0;
 }
@@ -277,7 +277,7 @@ int luaApi_GetMusic(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_music_file_path_expected);
     SDL::MusicPtr chunk = self->larder->getMusic(
-        self->workspace->toAbsolutePath(std::filesystem::path(path))
+        self->workspace->getResourceFullPath(std::filesystem::path(path))
     );
     if(chunk == nullptr)
         lua_pushnil(_lua);
@@ -294,7 +294,7 @@ int luaApi_FreeMusic(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_music_file_path_expected);
     self->larder->freeMusic(
-        self->workspace->toAbsolutePath(std::filesystem::path(path))
+        self->workspace->getResourceFullPath(std::filesystem::path(path))
     );
     return 0;
 }

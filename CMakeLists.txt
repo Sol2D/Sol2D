@@ -33,20 +33,12 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 set(SOL2D_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src/Sol2D)
-set(SOL2D_WORKSPACE_DIR ${CMAKE_CURRENT_LIST_DIR}/workspace)
 set(THIRD_PATY_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
 
 file(GLOB_RECURSE SOL2D_SRC
     "${SOL2D_SRC_DIR}/*.h"
     "${SOL2D_SRC_DIR}/*.cpp"
 )
-
-file(GLOB_RECURSE SOL2D_WORKSPACE
-    "${SOL2D_WORKSPACE_DIR}/*"
-)
-
-source_group("Engine" ${SOL2D_SRC_DIR})
-source_group("Workspace" ${SOL2D_WORKSPACE_DIR})
 
 add_subdirectory(third_party/SDL)
 add_subdirectory(third_party/SDL_image)
@@ -63,6 +55,8 @@ pkg_check_modules(LUA REQUIRED lua)
 pkg_check_modules(ZSTD REQUIRED libzstd)
 
 add_executable(${PROJECT_NAME} ${SOL2D_SRC})
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
@@ -97,18 +91,45 @@ target_link_libraries(${PROJECT_NAME}
     ${ZSTD_LINK_LIBRARIES}
 )
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
-
-add_custom_target(copy_workspace ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_LIST_DIR}/workspace
-    ${PROJECT_BINARY_DIR}/workspace
-    COMMENT "Copying workspace into binary directory"
+set(SOL2D_USE_GAMES
+    OFF
+    CACHE BOOL "Enables test games"
 )
 
-add_dependencies(${PROJECT_NAME} copy_workspace)
-
-add_custom_target(workspace SOURCES ${SOL2D_WORKSPACE})
+if(SOL2D_USE_GAMES)
+    set(SOL2D_GAMES_DIR_NAME games)
+    set(SOL2D_GAMES_DIR
+        "${CMAKE_CURRENT_LIST_DIR}/${SOL2D_GAMES_DIR_NAME}"
+    )
+    set(SOL2D_GAME_CONFING
+        "${CMAKE_CURRENT_LIST_DIR}/game.xml"
+    )
+    file(GLOB_RECURSE SOL2D_GAMES_SRC
+        "${SOL2D_GAMES_DIR}/*"
+    )
+    list(APPEND SOL2D_GAMES_SRC
+        ${SOL2D_GAME_CONFING}
+    )
+    add_custom_target(copy_games_directories ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        ${SOL2D_GAMES_DIR}
+        "${PROJECT_BINARY_DIR}/${SOL2D_GAMES_DIR_NAME}"
+        COMMENT "Copying the ${SOL2D_GAMES_DIR_NAME}"
+    )
+    add_custom_target(copy_game_config ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${SOL2D_GAME_CONFING}
+        ${PROJECT_BINARY_DIR}
+        COMMENT "Copying the ${SOL2D_GAME_CONFING}"
+    )
+    add_dependencies(${PROJECT_NAME}
+        copy_games_directories
+        copy_game_config
+    )
+    add_custom_target(games SOURCES
+        ${SOL2D_GAMES_SRC}
+    )
+endif(SOL2D_USE_WORKSPACES)
 
 add_custom_target(misc SOURCES
     .gitignore

@@ -23,11 +23,7 @@ using namespace tinyxml2;
 
 namespace fs = std::filesystem;
 
-const char * Workspace::s_default_dirname = "workspace";
-const char * Workspace::s_manifest_filename = "manifest.xml";
-
-Workspace::Workspace(const std::filesystem::path & _path) :
-    m_path(_path),
+Workspace::Workspace() :
     m_frame_rate(60)
 {
     m_main_logger_ptr = spdlog::stdout_logger_mt("engine");
@@ -36,34 +32,72 @@ Workspace::Workspace(const std::filesystem::path & _path) :
     m_main_logger_ptr->set_level(spdlog::level::off);
 }
 
-std::unique_ptr<Workspace> Workspace::load(const std::filesystem::path & _path)
+std::unique_ptr<Workspace> Workspace::load(const std::filesystem::path & _config_path)
 {
-    std::unique_ptr<Workspace> workspace(new Workspace(_path));
-    fs::path manifest_path = workspace->m_path / s_manifest_filename;
     XMLDocument doc;
-    if(doc.LoadFile(manifest_path.c_str()) != XML_SUCCESS)
-    {
+    if(doc.LoadFile(_config_path.c_str()) != XML_SUCCESS)
         return nullptr;
-    }
     const XMLElement * xroot = doc.RootElement();
+    std::unique_ptr<Workspace> workspace(new Workspace());
+    fs::path base_dir = _config_path.parent_path();
+    if(const char * root_dir = xroot->Attribute("directory"))
+    {
+        fs::path root_dir_path(root_dir);
+        if(root_dir_path.is_absolute())
+            base_dir = root_dir_path;
+        else
+            base_dir /= root_dir_path;
+    }
+    workspace->m_scripts_directory = base_dir;
+    workspace->m_resources_directory = base_dir;
     if(const XMLElement * xengine = xroot->FirstChildElement("engine"))
     {
-        if(uint32_t frame_rate = xengine->UnsignedAttribute("frame_rate", 0))
+        if(const XMLElement * xgraphics = xengine->FirstChildElement("graphics"))
         {
-            if(frame_rate > 0 && frame_rate < UINT16_MAX)
-                workspace->m_frame_rate = static_cast<uint16_t>(frame_rate);
+            if(uint32_t frame_rate = xgraphics->UnsignedAttribute("fps", 0))
+            {
+                if(frame_rate > 0 && frame_rate < UINT16_MAX)
+                    workspace->m_frame_rate = static_cast<uint16_t>(frame_rate);
+            }
         }
-        if(const char * log_level = xengine->Attribute("log_level"))
-            workspace->m_main_logger_ptr->set_level(spdlog::level::from_str(log_level));
+        if(const XMLElement * xlogging = xengine->FirstChildElement("logging"))
+        {
+            if(const char * log_level = xlogging->Attribute("level"))
+                workspace->m_main_logger_ptr->set_level(spdlog::level::from_str(log_level));
+        }
     }
     if(const XMLElement * xapp = xroot->FirstChildElement("application"))
     {
         if(const char * app_name = xapp->Attribute("name"))
             workspace->m_application_name = app_name;
-        if(const char * log_level = xapp->Attribute("log_level"))
-            workspace->m_lua_logger_ptr->set_level(spdlog::level::from_str(log_level));
-        if(const char * script = xapp->Attribute("script"))
-            workspace->m_main_script_path = script;
+        if(const XMLElement * xscripts = xapp->FirstChildElement("scripts"))
+        {
+            if(const char * entry = xscripts->Attribute("entry"))
+            {
+                fs::path entry_path(entry);
+                if(entry_path.is_absolute())
+                    workspace->m_main_script_path = entry_path;
+                else
+                    workspace->m_main_script_path = base_dir / entry_path;
+                workspace->m_scripts_directory = workspace->m_main_script_path.parent_path();
+            }
+        }
+        if(const XMLElement * xresources = xapp->FirstChildElement("resources"))
+        {
+            if(const char * directory = xresources->Attribute("directory"))
+            {
+                fs::path directory_path(directory);
+                if(directory_path.is_absolute())
+                    workspace->m_resources_directory = directory_path;
+                else
+                    workspace->m_resources_directory /= directory_path;
+            }
+        }
+        if(const XMLElement * xlogging = xapp->FirstChildElement("logging"))
+        {
+            if(const char * log_level = xlogging->Attribute("level"))
+                workspace->m_lua_logger_ptr->set_level(spdlog::level::from_str(log_level));
+        }
     }
     return workspace;
 }

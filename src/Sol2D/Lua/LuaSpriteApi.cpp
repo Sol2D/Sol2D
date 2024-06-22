@@ -42,7 +42,7 @@ int luaApi_LoadFromFile(lua_State * _lua)
     luaL_argcheck(_lua, path != nullptr, 2, "path expected");
     SpriteOptions options;
     tryGetSpriteOptions(_lua, 3, options);
-    bool result = self->sprite->loadFromFile(self->workspace->toAbsolutePath(path), options);
+    bool result = self->sprite->loadFromFile(self->workspace->getResourceFullPath(path), options);
     lua_pushboolean(_lua, result);
     return 1;
 }

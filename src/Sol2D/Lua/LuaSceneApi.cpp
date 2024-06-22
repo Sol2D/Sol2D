@@ -110,7 +110,7 @@ int luaApi_LoadTileMap(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, "a file path expected");
-    bool result = self->scene->loadTileMap(self->workspace->toAbsolutePath(path));
+    bool result = self->scene->loadTileMap(self->workspace->getResourceFullPath(path));
     lua_pushboolean(_lua, result);
     return 1;
 }
