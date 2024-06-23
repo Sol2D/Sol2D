@@ -14,9 +14,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/SDL/SDL.h>
-#include <vector>
 #include <cmath>
+#include <cstring>
+#include <vector>
+#include <algorithm>
+#include <Sol2D/SDL/SDL.h>
 
 void Sol2D::SDL::sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, uint32_t _radius) // TODO: float radius
 {
@@ -77,4 +79,67 @@ bool operator == (const SDL_Color & _color1, const SDL_Color & _color2)
            _color1.g == _color2.g &&
            _color1.b == _color2.b &&
            _color1.a == _color2.a;
+}
+
+
+void Sol2D::SDL::sdlDetectContentRect(SDL_Surface & _surface, SDL_Rect & _rect)
+{
+    std::vector<bool> rows(_surface.h);
+    std::vector<bool> columns(_surface.w);
+
+    const uint8_t * surface_pixels = static_cast<const uint8_t *>(_surface.pixels);
+    const Uint32 reference_pixel = SDL_MapRGBA(_surface.format, 0, 0, 0, 0);
+
+    for(int y = 0; y < _surface.h; ++y)
+    {
+        for(int x = 0; x < _surface.w; ++x)
+        {
+            const Uint32 * pixel = reinterpret_cast<const Uint32 *>(
+                &surface_pixels[(x + y * _surface.w) * _surface.format->bytes_per_pixel]
+                );
+            bool not_empty = std::memcmp(&reference_pixel, pixel, _surface.format->bytes_per_pixel) != 0;
+            rows[y] = rows[y] || not_empty;
+            columns[x] = columns[x] || not_empty;
+        }
+    }
+
+    _rect.x = 0;
+    _rect.y = 0;
+    _rect.w = _surface.w;
+    _rect.h = _surface.h;
+
+    {
+        auto it = std::find(columns.begin(), columns.end(), true);
+        if(it != columns.end())
+        {
+            _rect.x = it - columns.begin();
+            if(_rect.x == _rect.w - 1) // The image is empty
+            {
+                _rect.x = 0;
+                return;
+            }
+            _rect.w -= _rect.x;
+        }
+    }
+
+    {
+        auto it = std::find(columns.rbegin(), columns.rend(), true);
+        if(it != columns.rend())
+            _rect.w -= it - columns.rbegin();
+    }
+
+    {
+        auto it = std::find(rows.begin(), rows.end(), true);
+        if(it != rows.end())
+        {
+            _rect.y = it - rows.begin();
+            _rect.h -= _rect.y;
+        }
+    }
+
+    {
+        auto it = std::find(rows.rbegin(), rows.rend(), true);
+        if(it != rows.rend())
+            _rect.h -= it - rows.rbegin();
+    }
 }

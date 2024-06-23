@@ -37,12 +37,32 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
             SDL_MapRGBA(surface->format, color.r, color.g, color.b, color.a)
         );
     }
-    m_source_rect = _options.rect.has_value() ? _options.rect.value() : SDL_FRect {
-         .x = .0f,
-         .y = .0f,
-         .w = static_cast<float>(surface->w),
-         .h = static_cast<float>(surface->h)
-    };
+    if(_options.autodetect_rect)
+    {
+        SDL_Rect content_rect;
+        sdlDetectContentRect(*surface, content_rect);
+        if(content_rect.w != surface->w || content_rect.h != surface->h)
+        {
+            m_source_rect.x = static_cast<float>(content_rect.x);
+            m_source_rect.y = static_cast<float>(content_rect.y);
+            m_source_rect.w = static_cast<float>(content_rect.w);
+            m_source_rect.h = static_cast<float>(content_rect.h);
+        }
+    }
+    else if(_options.rect.has_value())
+    {
+        m_source_rect = _options.rect.value();
+    }
+    else
+    {
+        m_source_rect = SDL_FRect
+        {
+            .x = .0f,
+            .y = .0f,
+            .w = static_cast<float>(surface->w),
+            .h = static_cast<float>(surface->h)
+        };
+    }
     m_texture_ptr = wrapSdlTexturePtr(SDL_CreateTextureFromSurface(mp_renderer, surface));
     SDL_DestroySurface(surface);
     return true;

@@ -30,6 +30,8 @@ inline TexturePtr wrapSdlTexturePtr(SDL_Texture * _texture)
 
 void sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, uint32_t _radius);
 
+void sdlDetectContentRect(SDL_Surface & _surface, SDL_Rect & _rect);
+
 } // namespace Sol2D::SDL
 
 bool operator == (const SDL_Color & _color1, const SDL_Color & _color2);

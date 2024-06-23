@@ -26,6 +26,12 @@ namespace Sol2D {
 
 struct SpriteOptions
 {
+    SpriteOptions() :
+        autodetect_rect(false)
+    {
+    }
+
+    bool autodetect_rect;
     std::optional<SDL_FRect> rect;
     std::optional<SDL_Color> color_to_alpha;
 };
