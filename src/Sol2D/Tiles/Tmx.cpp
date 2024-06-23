@@ -146,6 +146,7 @@ public:
 private:
     void makeTiles(TexturePtr _texture, TileSet & _set, uint32_t _first_gid, uint32_t _tile_width,
                    uint32_t _tile_height, uint32_t _spacing, uint32_t _margin);
+    void makeTile(const XMLElement & _xml_tile, TileSet & _set, uint32_t _first_gid);
 
 public:
     static const char * sc_root_tag_name;
@@ -942,7 +943,12 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
     }
     else
     {
-        // TODO: load tiles
+        for(const XMLElement * xml_tile = _xml.FirstChildElement("tile");
+             xml_tile;
+             xml_tile = xml_tile->NextSiblingElement(xml_tile->Name()))
+        {
+            makeTile(*xml_tile, set, _first_gid);
+        }
     }
 
     // TODO: <tileoffset>
@@ -973,6 +979,40 @@ void TileSetXmlLoader::makeTiles(TexturePtr _texture,
             mr_tile_heap.createTile(gid++, _set, _texture, x, y, _tile_width, _tile_height);
         }
     }
+}
+
+void TileSetXmlLoader::makeTile(const XMLElement & _xml_tile, TileSet & _set, uint32_t _first_gid)
+{
+    uint32_t gid = readRequiredUintAttribute(_xml_tile, "id") + _first_gid;
+    if(const XMLElement * xml_image = _xml_tile.FirstChildElement("image"))
+    {
+        TexturePtr texture = parseImage(*xml_image);
+        uint32_t x = xml_image->UnsignedAttribute("x");
+        uint32_t y = xml_image->UnsignedAttribute("y");
+        uint32_t width = xml_image->UnsignedAttribute("width");
+        uint32_t height = xml_image->UnsignedAttribute("height");
+        if(!width || !height)
+        {
+            SDL_QueryTexture(texture.get(),
+                             nullptr,
+                             nullptr,
+                             reinterpret_cast<int *>(&width),
+                             reinterpret_cast<int *>(&height));
+        }
+        mr_tile_heap.createTile(gid, _set, texture, x, y, width, height);
+    }
+
+    // TODO: type: The class of the tile. Is inherited by tile objects.
+    //       (since 1.0, defaults to “”, was saved as class in 1.9)
+    // TODO: terrain: Defines the terrain type of each corner of the tile, given as comma-separated indexes in the
+    //       terrain types array in the order top-left, top-right, bottom-left, bottom-right.
+    //       Leaving out a value means that corner has no terrain. (deprecated since 1.5 in favour of <wangtile>)
+    // TODO: probability: A percentage indicating the probability that this tile is chosen when it competes with
+    //       others while editing with the terrain tool. (defaults to 0)
+
+    // TODO: <properties>
+    // TODO: <objectgroup>
+    // TODO: <animation>
 }
 
 Tmx Sol2D::Tiles::loadTmx(SDL_Renderer & _renderer, const Workspace & _workspace, const std::filesystem::path & _path)
