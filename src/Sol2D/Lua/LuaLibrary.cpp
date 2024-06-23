@@ -29,7 +29,9 @@
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
 #include <Sol2D/Lua/Aux/LuaScript.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 #include <functional>
+#include <sstream>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -47,6 +49,32 @@ void addSublibrary(lua_State * _lua, const char * _sublib_name, std::function<vo
     lua_settable(_lua, library_table_idx);
 }
 
+bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
+{
+    if(_path.empty())
+    {
+        return true;
+    }
+    static const char * path_key = "path";
+    bool result = false;
+    if(lua_getglobal(_lua, "package") == LUA_TTABLE)
+    {
+        LuaTable table(_lua, -1);
+        std::string search_paths;
+        if(table.tryGetString(path_key, search_paths))
+        {
+            std::stringstream search_paths_stream(search_paths);
+            search_paths_stream << search_paths <<
+                LUA_PATH_SEP << (_path / LUA_PATH_MARK ".lua").string() <<
+                LUA_PATH_SEP << (_path / LUA_PATH_MARK / "init.lua").string();
+            table.setStringValue(path_key, search_paths_stream.str().c_str());
+            result = true;
+        }
+    }
+    lua_pop(_lua, 1);
+    return result;
+}
+
 } // namespace name
 
 LuaLibrary::LuaLibrary(const Workspace & _workspace, World & _world) :
@@ -54,6 +82,10 @@ LuaLibrary::LuaLibrary(const Workspace & _workspace, World & _world) :
     mr_workspace(_workspace)
 {
     luaL_openlibs(mp_lua);
+    if(!addPackagePath(mp_lua, _workspace.getScriptsRootPath()))
+    {
+        _workspace.getMainLogger().warn("Unable to add Lua package paths");
+    }
     lua_newuserdata(mp_lua, 1);
     if(pushMetatable(mp_lua, gc_metatable_lib) == MetatablePushResult::Created)
     {

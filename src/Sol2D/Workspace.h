@@ -43,6 +43,11 @@ public:
         return m_main_script_path;
     }
 
+    const std::filesystem::path & getScriptsRootPath() const
+    {
+        return m_scripts_directory;
+    }
+
     uint16_t getFrameRate() const
     {
         return m_frame_rate;

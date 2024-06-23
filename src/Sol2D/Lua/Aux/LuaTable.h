@@ -37,6 +37,7 @@ public:
     bool tryGetNumber(const char * _key, lua_Number * _value) const;
     bool tryGetInteger(const char * _key, lua_Integer * _value) const;
     bool tryGetBoolean(const char * _key, bool * _value) const;
+    bool tryGetString(const char * _key, std::string & _value) const;
     bool tryGetValue(const char * _key);
 
     void setValueFromTop(const char * _key);

@@ -51,6 +51,17 @@ bool LuaTable::tryGetBoolean(const char * _key, bool * _value) const
     return result;
 }
 
+bool LuaTable::tryGetString(const char * _key, std::string & _value) const
+{
+    lua_pushstring(mp_lua, _key);
+    lua_gettable(mp_lua, m_idx);
+    bool result = lua_isstring(mp_lua, -1);
+    if(result)
+        _value = lua_tostring(mp_lua, -1);
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
 bool LuaTable::tryGetValue(const char * _key)
 {
     lua_pushstring(mp_lua, _key);
