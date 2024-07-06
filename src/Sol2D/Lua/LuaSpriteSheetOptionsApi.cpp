@@ -66,7 +66,7 @@ bool Sol2D::Lua::tryGetSpriteSheetOptions(lua_State * _lua, int _idx, SpriteShee
     lua_pushstring(_lua, gc_key_color_to_alpha);
     if(lua_gettable(_lua, -2) == LUA_TTABLE)
     {
-        SDL_Color color;
+        Color color;
         if(tryGetColor(_lua, -1, color))
             _options.color_to_alpha = color;
     }

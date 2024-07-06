@@ -57,14 +57,14 @@ void Sol2D::Lua::pushTileMapObject(lua_State * _lua, const TileMapObject & _obje
     table.setValueFromTop("position");
     if(const TileMapPolyX * poly = dynamic_cast<const TileMapPolyX *>(&_object))
     {
-         const std::vector<SDL_FPoint> & points = poly->getPoints();
+         const std::vector<Point> & points = poly->getPoints();
          if(!points.empty())
          {
              lua_newtable(_lua);
              size_t count = points.size();
              for(size_t i = 0; i < count; ++i)
              {
-                 const SDL_FPoint & point = points[i];
+                 const Point & point = points[i];
                  pushPoint(_lua, point.x, point.y);
                  lua_rawseti(_lua, -2, i + 1);
              }

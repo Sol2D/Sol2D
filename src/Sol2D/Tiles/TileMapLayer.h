@@ -20,6 +20,7 @@
 #include <Sol2D/Tiles/ObjectHeap.h>
 #include <Sol2D/Def.h>
 #include <Sol2D/SDL/SDL.h>
+#include <Sol2D/Color.h>
 #include <unordered_map>
 #include <string>
 #include <cstdint>
@@ -233,9 +234,9 @@ public:
     float getParallaxX() const { return m_parallax_x; }
     void setParallaxY(float _parallax) { m_parallax_y = _parallax; }
     float getParallaxY() const { return m_parallax_y; }
-    void setTintColor(const SDL_Color & _color) { m_tint_color = _color; }
+    void setTintColor(const Color & _color) { m_tint_color = _color; }
     void removeTintColor() { m_tint_color.reset(); }
-    const std::optional<SDL_Color> & getTintColor() const { return m_tint_color; }
+    const std::optional<Color> & getTintColor() const { return m_tint_color; }
 
 private:
     uint32_t m_id;
@@ -248,7 +249,7 @@ private:
     int32_t m_offset_y;
     float m_parallax_x; // TODO: To render parallax https://doc.mapeditor.org/en/stable/manual/layers/#parallax-factor
     float m_parallax_y;
-    std::optional<SDL_Color> m_tint_color; // TODO: To render tint color. https://doc.mapeditor.org/en/stable/manual/layers/#tint-color
+    std::optional<Color> m_tint_color; // TODO: To render tint color. https://doc.mapeditor.org/en/stable/manual/layers/#tint-color
 };
 
 

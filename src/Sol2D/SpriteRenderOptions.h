@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <Sol2D/Rect.h>
 #include <SDL3/SDL.h>
 #include <optional>
 
@@ -32,8 +33,7 @@ struct SpriteRenderOptions
 
     double angle_rad;
     SDL_FlipMode flip;
-    std::optional<SDL_FPoint> flip_center;
-    std::optional<SDL_FPoint> size;
+    std::optional<Point> flip_center;
 };
 
 } // namespace Sol2D

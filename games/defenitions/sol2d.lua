@@ -20,7 +20,7 @@ self = nil
 ---@class BodyContext
 ---@field bodyId integer
 ---@field scene sol.Scene
----@field arg? any
+---@field arg any?
 
 ---@class Point
 ---@field x number
@@ -45,6 +45,7 @@ self = nil
 ---@class SpriteOptions 
 ---@field colorToAlpha Color?
 ---@field rect Rectangle?
+---@field autodetectRect boolean? default false
 
 ---@class SpriteSheetOptions
 ---@field spriteWidth integer
@@ -59,9 +60,12 @@ self = nil
 
 ---@class ShapeGraphicOptions 
 ---@field position Point?
----@field size Size?
 ---@field isFlippedHorizontally boolean?
 ---@field isFlippedVertically boolean?
+
+---@class SpriteAnimationOptions
+---@field duration integer? # milliseconds
+---@field position? Point
 
 ---@class BodyOptions
 ---@field type integer?
@@ -119,14 +123,14 @@ function __world:deleteFragment(fragment_id) end
 function __world:bindFragment(fragment_id, name) end
 
 ---@class Fragment
----@field top? Dimension
----@field right? Dimension
----@field left? Dimension
----@field bottom? Dimension
----@field width? Dimension
----@field height? Dimension
----@field zIndex? integer default: 0
----@field isVisible? boolean default: true
+---@field top Dimension?
+---@field right Dimension?
+---@field left Dimension?
+---@field bottom Dimension?
+---@field width Dimension?
+---@field height Dimension?
+---@field zIndex integer? default: 0
+---@field isVisible boolean? default: true
 
 ---@class DimensionTable
 ---@field unit integer
@@ -483,6 +487,24 @@ local __sprite
 ---@return boolean
 function __sprite:loadFromFile(path, options) end
 
+---@return Rectangle
+function __sprite:getSourceRect() end
+
+---@return Size
+function __sprite:getDestinationSize() end
+
+---@param size Size
+function __sprite:setDestinationSize(size) end
+
+function __sprite:scale() end
+
+---@param scale_factor number
+function __sprite:scale(scale_factor) end
+
+---@param scale_factor_x number
+---@param scale_factor_y number
+function __sprite:scale(scale_factor_x, scale_factor_y) end
+
 ---@class sol.SpriteSheet
 local __sprite_sheet
 
@@ -494,22 +516,22 @@ function __sprite_sheet:loadFromFile(path, options) end
 ---@class sol.SpriteAnimation
 local __sprite_animation
 
----@param during integer
 ---@param sprite sol.Sprite
+---@param options? SpriteAnimationOptions
 ---@return boolean
-function __sprite_animation:addFrameFromSprite(during, sprite) end
+function __sprite_animation:addFrameFromSprite(sprite, options) end
 
----@param during integer
 ---@param sprite_sheet sol.SpriteSheet
 ---@param index integer
+---@param options? SpriteAnimationOptions
 ---@return boolean
-function __sprite_animation:addFrameFromSpriteSheet(during, sprite_sheet, index) end
+function __sprite_animation:addFrameFromSpriteSheet(sprite_sheet, index, options) end
 
----@param during integer
 ---@param sprite_sheet sol.SpriteSheet
 ---@param indices integer[]
+---@param options? SpriteAnimationOptions
 ---@return boolean
-function __sprite_animation:addFrames(during, sprite_sheet, indices) end
+function __sprite_animation:addFrames(sprite_sheet, indices, options) end
 
 ---@return Point[]
 function __body_polygon_shape_prototype:getPoints() end

@@ -164,7 +164,7 @@ class GraphicRenderingVisitor
 
 public:
     GraphicRenderingVisitor(
-        const SDL_FPoint & _point,
+        const Point & _point,
         std::chrono::milliseconds _time_passed,
         const SpriteRenderOptions & _options
     ) :
@@ -174,18 +174,18 @@ public:
     {
     }
 
-    void operator ()(Sprite & _sprite)
+    void operator () (Sprite & _sprite)
     {
         _sprite.render(mr_point, mr_options);
     }
 
-    void operator ()(SpriteAnimation & _animation)
+    void operator () (SpriteAnimation & _animation)
     {
         _animation.render(mr_point, m_time_passed, mr_options);
     }
 
 private:
-    const SDL_FPoint & mr_point;
+    const Point & mr_point;
     std::chrono::milliseconds m_time_passed;
     const SpriteRenderOptions & mr_options;
 };
@@ -263,7 +263,7 @@ Scene::Scene(const Workspace & _workspace, SDL_Renderer & _renderer) :
     mr_workspace(_workspace),
     mr_renderer(_renderer),
     m_world_offset{.0f, .0f},
-    mp_b2_world(new b2World({ .0f, .0f })), // TODO: from parameters
+    mp_b2_world(new b2World({ .0f, 10000.0f })), // TODO: from parameters
     m_scale_factor(20.0f), // TODO: from parameters
     mp_followed_body(nullptr),
     mp_contact_listener(new Private::SceneContactListener)
@@ -289,7 +289,7 @@ void Scene::deinitialize()
     mp_followed_body = nullptr;
 }
 
-uint64_t Scene::createBody(const SDL_FPoint & _position, const BodyPrototype & _prototype)
+uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _prototype)
 {
     Body * body = new Body;
     b2BodyDef b2_body_def;
@@ -317,7 +317,7 @@ uint64_t Scene::createBody(const SDL_FPoint & _position, const BodyPrototype & _
                 dynamic_cast<const BodyPolygonShapePrototype *>(&__shape_proto);
             if(!polygon_proto)
                 break;
-            const std::vector<SDL_FPoint> & points = polygon_proto->getPoints();
+            const std::vector<Point> & points = polygon_proto->getPoints();
             if(points.size() < 3 || points.size() > b2_maxPolygonVertices)
                 break;
             b2PolygonShape b2_shape;
@@ -349,7 +349,7 @@ uint64_t Scene::createBody(const SDL_FPoint & _position, const BodyPrototype & _
             const float radius = circle_proto->getRadius() / m_scale_factor;
             if(radius <= .0f)
                 break;
-            SDL_FPoint position = circle_proto->getCenter();
+            Point position = circle_proto->getCenter();
             position.x /= m_scale_factor;
             position.y /= m_scale_factor;
             b2CircleShape b2_shape;
@@ -407,7 +407,7 @@ void Scene::createBodiesFromMapObjects(
         case TileMapObjectType::Polygon:
         {
             const TileMapPolygon * polygon = static_cast<const TileMapPolygon *>(&__map_object);
-            const std::vector<SDL_FPoint> & points = polygon->getPoints();
+            const std::vector<Point> & points = polygon->getPoints();
             if(points.size() < 3 || points.size() > b2_maxPolygonVertices)
                 break;
             b2PolygonShape b2_shape;
@@ -567,7 +567,7 @@ void Scene::render(const RenderState & _state)
     executeDefers();
     mp_b2_world->Step(_state.time_passed.count() / 1000.0f, 8, 3); // TODO: stable rate (1.0f / 60.0f), all from user settings
     syncWorldWithFollowedBody();
-    const SDL_Color & bg_color = m_tile_map_ptr->getBackgroundColor();
+    const Color & bg_color = m_tile_map_ptr->getBackgroundColor();
     SDL_SetRenderDrawColor(&mr_renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
     SDL_RenderClear(&mr_renderer);
 
@@ -629,7 +629,7 @@ void Scene::syncWorldWithFollowedBody()
 void Scene::drawBody(b2Body & _body, std::chrono::milliseconds _time_passed)
 {
     SpriteRenderOptions options; // TODO: to FixtureUserData? How to rotate multiple shapes?
-    SDL_FPoint body_position;
+    Point body_position;
     {
         b2Vec2 pos = _body.GetPosition();
         body_position = toAbsoluteCoords(pos.x * m_scale_factor, pos.y * m_scale_factor);
@@ -640,14 +640,8 @@ void Scene::drawBody(b2Body & _body, std::chrono::milliseconds _time_passed)
         BodyShapeGraphic * graphic = shape->getCurrentGraphics();
         if(graphic)
         {
-            options.size = graphic->options.size;
             options.flip = graphic->options.getFlip();
-            SDL_FPoint point
-            {
-                .x = body_position.x + graphic->options.position.x,
-                .y = body_position.y + graphic->options.position.y,
-            };
-            GraphicRenderingVisitor rendering_visitor(point, _time_passed, options);
+            GraphicRenderingVisitor rendering_visitor(body_position + graphic->options.position, _time_passed, options);
             std::visit(rendering_visitor, graphic->graphic);
         }
     }
@@ -714,12 +708,12 @@ void Scene::drawObjectLayer(const TileMapObjectLayer & _layer)
 
 void Scene::drawPolyXObject(const TileMapPolyX & _poly, bool _close)
 {
-    const std::vector<SDL_FPoint> & poly_points = _poly.getPoints();
+    const std::vector<Point> & poly_points = _poly.getPoints();
     size_t poly_points_count = poly_points.size();
     if(poly_points_count < 2) return;
     size_t total_points_count = _close ? poly_points_count + 1 : poly_points_count;
-    SDL_FPoint base_point = toAbsoluteCoords(_poly.getX(), _poly.getY());
-    std::vector<SDL_FPoint> points(total_points_count);
+    Point base_point = toAbsoluteCoords(_poly.getX(), _poly.getY());
+    std::vector<Point> points(total_points_count);
     for(size_t i = 0; i < poly_points_count; ++i)
     {
         points[i].x = base_point.x + poly_points[i].x;
@@ -730,18 +724,18 @@ void Scene::drawPolyXObject(const TileMapPolyX & _poly, bool _close)
         points[poly_points_count].x = points[0].x;
         points[poly_points_count].y = points[0].y;
     }
-    SDL_RenderLines(&mr_renderer, points.data(), total_points_count);
+    SDL_RenderLines(&mr_renderer, points.data()->toSdlPtr(), total_points_count);
 }
 
 void Scene::drawCircle(const TileMapCircle & _circle)
 {
-    SDL_FPoint position = toAbsoluteCoords(_circle.getX(), _circle.getY());
+    Point position = toAbsoluteCoords(_circle.getX(), _circle.getY());
     sdlRenderCircle(&mr_renderer, position, _circle.getRadius());
 }
 
 void Scene::drawTileLayer(const TileMapTileLayer & _layer)
 {
-    SDL_FRect camera;
+    Rect camera;
     camera.x = m_world_offset.x;
     camera.y = m_world_offset.y;
     {
@@ -759,7 +753,8 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
     const float start_y = first_row * m_tile_map_ptr->getTileHeight() - camera.y;
 
     SDL_FRect src_rect;
-    SDL_FRect dest_rect {
+    SDL_FRect dest_rect =
+    {
         .x = .0f,
         .y = .0f,
         .w = static_cast<float>(m_tile_map_ptr->getTileWidth()),
@@ -800,7 +795,7 @@ void Scene::drawBox2D()
     for(b2Body * body = mp_b2_world->GetBodyList(); body; body = body->GetNext())
     {
         const b2Vec2 & body_pos = body->GetPosition();
-        const SDL_FPoint body_abs_pos = toAbsoluteCoords(body_pos.x * m_scale_factor, body_pos.y * m_scale_factor);
+        const Point body_abs_pos = toAbsoluteCoords(body_pos.x * m_scale_factor, body_pos.y * m_scale_factor);
         SDL_SetRenderDrawColor(&mr_renderer, 20, 255, 255, 100);
         SDL_RenderLine(&mr_renderer, body_abs_pos.x, body_abs_pos.y - 8, body_abs_pos.x, body_abs_pos.y + 8);
         SDL_RenderLine(&mr_renderer, body_abs_pos.x - 8, body_abs_pos.y, body_abs_pos.x + 8, body_abs_pos.y);
@@ -821,14 +816,8 @@ void Scene::drawBox2D()
                     rotator.reset(new VectorRotator(angle));
                 for(int32 i = 1; i < polygon->m_count; ++i)
                 {
-                    SDL_FPoint a {
-                        .x = polygon->m_vertices[i - 1].x,
-                        .y = polygon->m_vertices[i - 1].y
-                    };
-                    SDL_FPoint b {
-                        .x = polygon->m_vertices[i].x,
-                        .y = polygon->m_vertices[i].y
-                    };
+                    Point a = makePoint(polygon->m_vertices[i - 1].x, polygon->m_vertices[i - 1].y);
+                    Point b = makePoint(polygon->m_vertices[i].x, polygon->m_vertices[i].y);
                     if(rotator)
                     {
                         a = rotator->rotate(a);
@@ -838,14 +827,10 @@ void Scene::drawBox2D()
                     b = toAbsoluteCoords((b.x + body_pos.x) * m_scale_factor, (b.y + body_pos.y) * m_scale_factor);
                     SDL_RenderLine(&mr_renderer, a.x, a.y, b.x, b.y);
                 }
-                SDL_FPoint a {
-                    .x = polygon->m_vertices[0].x,
-                    .y = polygon->m_vertices[0].y
-                };
-                SDL_FPoint b {
-                    .x = polygon->m_vertices[polygon->m_count - 1].x,
-                    .y = polygon->m_vertices[polygon->m_count - 1].y
-                };
+                Point a =  makePoint(polygon->m_vertices[0].x, polygon->m_vertices[0].y);
+                Point b = makePoint(
+                    polygon->m_vertices[polygon->m_count - 1].x,
+                    polygon->m_vertices[polygon->m_count - 1].y);
                 if(rotator)
                 {
                     a = rotator->rotate(a);
@@ -859,7 +844,7 @@ void Scene::drawBox2D()
             case b2Shape::e_circle:
             {
                 b2CircleShape * circle = dynamic_cast<b2CircleShape *>(shape);
-                SDL_FPoint center = toAbsoluteCoords(
+                Point center = toAbsoluteCoords(
                     body_pos.x * m_scale_factor,
                     body_pos.y * m_scale_factor
                 );
@@ -873,15 +858,15 @@ void Scene::drawBox2D()
     }
 }
 
-SDL_FPoint Scene::toAbsoluteCoords(float _world_x, float _world_y) const
+Point Scene::toAbsoluteCoords(float _world_x, float _world_y) const
 {
-    SDL_FPoint result;
+    Point result;
     result.x = _world_x - m_world_offset.x;
     result.y = _world_y - m_world_offset.y;
     return result;
 }
 
-void Scene::applyForce(uint64_t _body_id, const SDL_FPoint & _force)
+void Scene::applyForce(uint64_t _body_id, const Point & _force)
 {
     if(mp_b2_world->IsLocked())
         m_defers.push_front([=, this]() { applyForce(_body_id, _force); });
@@ -889,7 +874,7 @@ void Scene::applyForce(uint64_t _body_id, const SDL_FPoint & _force)
         body->ApplyForceToCenter(b2Vec2(_force.x / m_scale_factor, _force.y / m_scale_factor), true); // TODO: what is wake?
 }
 
-void Scene::setBodyPosition(uint64_t _body_id, const SDL_FPoint & _position)
+void Scene::setBodyPosition(uint64_t _body_id, const Point & _position)
 {
     if(mp_b2_world->IsLocked())
         m_defers.push_front([=, this]() { setBodyPosition(_body_id, _position); });
@@ -897,14 +882,14 @@ void Scene::setBodyPosition(uint64_t _body_id, const SDL_FPoint & _position)
         body->SetTransform(b2Vec2(_position.x / m_scale_factor, _position.y / m_scale_factor), body->GetAngle());
 }
 
-std::optional<SDL_FPoint> Scene::getBodyPosition(uint64_t _body_id) const
+std::optional<Point> Scene::getBodyPosition(uint64_t _body_id) const
 {
     if(b2Body * body = findBody(_body_id))
     {
         b2Vec2 pos = body->GetPosition();
-        return SDL_FPoint { .x = pos.x * m_scale_factor, .y = pos.y * m_scale_factor };
+        return makePoint(pos.x * m_scale_factor, pos.y * m_scale_factor);
     }
-    return std::optional<SDL_FPoint>();
+    return std::optional<Point>();
 }
 
 void Scene::addContactObserver(ContactObserver & _observer)
@@ -917,29 +902,24 @@ void Scene::removeContactObserver(ContactObserver & _observer)
     mp_contact_listener->removeObserver(_observer);
 }
 
-std::optional<std::vector<SDL_FPoint>> Scene::findPath(
+std::optional<std::vector<Point>> Scene::findPath(
     uint64_t _body_id,
-    const SDL_FPoint & _destination,
+    const Point & _destination,
     bool _allow_diagonal_steps,
     bool _avoid_sensors) const
 {
     const b2Body * body = findBody(_body_id);
     if(!body)
-        return std::optional<std::vector<SDL_FPoint>>();
+        return std::optional<std::vector<Point>>();
     b2Vec2 dest(_destination.x / m_scale_factor, _destination.y / m_scale_factor);
     AStarOptions options;
     options.allow_diagonal_steps = _allow_diagonal_steps;
     options.avoid_sensors = _avoid_sensors;
     auto b2_result = aStarFindPath(*mp_b2_world, *body, dest, options);
     if(!b2_result.has_value())
-        return std::optional<std::vector<SDL_FPoint>>();
-    std::vector<SDL_FPoint> result(b2_result.value().size());
+        return std::optional<std::vector<Point>>();
+    std::vector<Point> result(b2_result.value().size());
     for(size_t i = 0; i < b2_result.value().size(); ++i)
-    {
-        result[i] = SDL_FPoint {
-            .x = b2_result.value()[i].x * m_scale_factor,
-            .y = b2_result.value()[i].y * m_scale_factor
-        };
-    }
+        result[i] = makePoint(b2_result.value()[i].x * m_scale_factor, b2_result.value()[i].y * m_scale_factor);
     return result;
 }

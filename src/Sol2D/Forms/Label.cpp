@@ -154,7 +154,7 @@ void Label::render(const RenderState & _state)
     if(dest_rect.y < draw_area_y)
         dest_rect.y = draw_area_y;
 
-    SDL_Color bg_color = background_color[m_state];
+    Color bg_color = background_color[m_state];
     if (bg_color.a != 255)
     {
         SDL_SetRenderDrawColor(&mr_renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);

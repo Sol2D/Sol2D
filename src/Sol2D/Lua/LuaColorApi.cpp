@@ -30,7 +30,7 @@ static constexpr char gc_key_a[] = "a";
 
 } // namespace name
 
-bool Sol2D::Lua::tryGetColor(lua_State * _lua, int _idx, SDL_Color & _color)
+bool Sol2D::Lua::tryGetColor(lua_State * _lua, int _idx, Color & _color)
 {
     if(!lua_istable(_lua, _idx))
     {

@@ -30,9 +30,9 @@ class BodyPrototype final
 public:
     explicit BodyPrototype(BodyType _type);
     BodyType getType() const;
-    BodyCircleShapePrototype & createCircleShape(const std::string & _key, SDL_FPoint _position, float _radius);
-    BodyPolygonShapePrototype & createPolygonShape(const std::string & _key, const SDL_FRect & _rect);
-    BodyPolygonShapePrototype & createPolygonShape(const std::string & _key, const std::vector<SDL_FPoint> & _points);
+    BodyCircleShapePrototype & createCircleShape(const std::string & _key, Point _position, float _radius);
+    BodyPolygonShapePrototype & createPolygonShape(const std::string & _key, const Rect & _rect);
+    BodyPolygonShapePrototype & createPolygonShape(const std::string & _key, const std::vector<Point> & _points);
     void forEachShape(std::function<void (const std::string &, const BodyShapePrototype &)> _callback) const;
 
 private:
@@ -52,23 +52,22 @@ inline BodyType BodyPrototype::getType() const
 
 inline BodyCircleShapePrototype & BodyPrototype::createCircleShape(
     const std::string & _key,
-    SDL_FPoint _position, float _radius)
+    Point _position, float _radius)
 {
     BodyCircleShapePrototype * shape = new BodyCircleShapePrototype(_position, _radius);
     m_shapes.addOrReplaceItem(_key, shape);
     return *shape;
 }
 
-inline BodyPolygonShapePrototype & BodyPrototype::createPolygonShape(const std::string & _key, const SDL_FRect & _rect)
+inline BodyPolygonShapePrototype & BodyPrototype::createPolygonShape(const std::string & _key, const Rect & _rect)
 {
     BodyPolygonShapePrototype * shape = new BodyPolygonShapePrototype(_rect);
     m_shapes.addOrReplaceItem(_key, shape);
     return *shape;
 }
 
-inline BodyPolygonShapePrototype & BodyPrototype::createPolygonShape(
-    const std::string & _key,
-    const std::vector<SDL_FPoint> & _points)
+inline BodyPolygonShapePrototype & BodyPrototype::createPolygonShape(const std::string & _key,
+                                                                    const std::vector<Point> & _points)
 {
     BodyPolygonShapePrototype * shape = new BodyPolygonShapePrototype(_points);
     m_shapes.addOrReplaceItem(_key, shape);

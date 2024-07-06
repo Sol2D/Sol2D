@@ -16,7 +16,7 @@
 
 #include <Sol2D/Utils/Math.h>
 
-void Sol2D::Utils::rotateVectors(std::vector<SDL_FPoint> & _vectors, double _angle_rad)
+void Sol2D::Utils::rotateVectors(std::vector<Point> & _vectors, double _angle_rad)
 {
     VectorRotator rotator(_angle_rad);
     for(size_t i = 0; i < _vectors.size(); ++i)

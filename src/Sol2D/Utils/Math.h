@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <SDL3/SDL_rect.h>
+#include <Sol2D/Rect.h>
 #include <vector>
 #include <cmath>
 
@@ -31,9 +31,9 @@ public:
     {
     }
 
-    SDL_FPoint rotate(const SDL_FPoint & _vector)
+    Point rotate(const Point & _vector)
     {
-        return SDL_FPoint {
+        return Point {
             .x = static_cast<float>(m_cosine * _vector.x - m_sine * _vector.y),
             .y  = static_cast<float>(m_sine * _vector.x + m_cosine * _vector.y)
         };
@@ -54,6 +54,6 @@ inline double radiansToDegrees(double _radians)
     return _radians == 0.0 ? 0.0 : (_radians * 180.0) / std::numbers::pi;
 }
 
-void rotateVectors(std::vector<SDL_FPoint> & _vectors, double _angle_rad);
+void rotateVectors(std::vector<Point> & _vectors, double _angle_rad);
 
 } // namespace Sol2D::Utils

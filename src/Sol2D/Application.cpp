@@ -217,15 +217,15 @@ inline void Application::onMouseButtonDown(const SDL_MouseButtonEvent & _event)
     {
     case SDL_BUTTON_LEFT:
         m_render_state.mouse_state.lb_click.state = MouseClickState::Started;
-        m_render_state.mouse_state.lb_click.start = SDL_FPoint { .x = _event.x, .y = _event.y };
+        m_render_state.mouse_state.lb_click.start = makePoint(_event.x, _event.y);
         break;
     case SDL_BUTTON_RIGHT:
         m_render_state.mouse_state.rb_click.state = MouseClickState::Started;
-        m_render_state.mouse_state.rb_click.start = SDL_FPoint { .x = _event.x, .y = _event.y };
+        m_render_state.mouse_state.rb_click.start = makePoint(_event.x, _event.y);
         break;
     case SDL_BUTTON_MIDDLE:
         m_render_state.mouse_state.mb_click.state = MouseClickState::Started;
-        m_render_state.mouse_state.mb_click.start = SDL_FPoint { .x = _event.x, .y = _event.y };
+        m_render_state.mouse_state.mb_click.start = makePoint(_event.x, _event.y);
         break;
     }
 }
@@ -236,15 +236,15 @@ inline void Application::onMouseButtonUp(const SDL_MouseButtonEvent & _event)
     {
     case SDL_BUTTON_LEFT:
         m_render_state.mouse_state.lb_click.state = MouseClickState::Finished;
-        m_render_state.mouse_state.lb_click.finish = SDL_FPoint { .x = _event.x, .y = _event.y };
+        m_render_state.mouse_state.lb_click.finish = makePoint(_event.x, _event.y);
         break;
     case SDL_BUTTON_RIGHT:
         m_render_state.mouse_state.rb_click.state = MouseClickState::Finished;
-        m_render_state.mouse_state.rb_click.finish = SDL_FPoint { .x = _event.x, .y = _event.y };
+        m_render_state.mouse_state.rb_click.finish = makePoint(_event.x, _event.y);
         break;
     case SDL_BUTTON_MIDDLE:
         m_render_state.mouse_state.mb_click.state = MouseClickState::Finished;
-        m_render_state.mouse_state.mb_click.finish = SDL_FPoint { .x = _event.x, .y = _event.y };
+        m_render_state.mouse_state.mb_click.finish = makePoint(_event.x, _event.y);
         break;
     }
 }

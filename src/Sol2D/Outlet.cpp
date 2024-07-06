@@ -104,5 +104,5 @@ void Outlet::render(const RenderState & _state)
     SDL_SetRenderTarget(&mr_renderer, m_texture_ptr.get());
     mp_canvas->render(_state);
     SDL_SetRenderTarget(&mr_renderer, nullptr);
-    SDL_RenderTexture(&mr_renderer, m_texture_ptr.get(), nullptr, &m_rect);
+    SDL_RenderTexture(&mr_renderer, m_texture_ptr.get(), nullptr, m_rect.toSdlPtr());
 }

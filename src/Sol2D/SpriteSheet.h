@@ -17,6 +17,8 @@
 #pragma once
 
 #include <Sol2D/SDL/SDL.h>
+#include <Sol2D/Rect.h>
+#include <Sol2D/Color.h>
 #include <Sol2D/Def.h>
 #include <vector>
 #include <optional>
@@ -34,7 +36,7 @@ struct SpriteSheetOptions
     uint32_t margin_left;
     uint32_t horizontal_spacing;
     uint32_t vertical_spacing;
-    std::optional<SDL_Color> color_to_alpha;
+    std::optional<Color> color_to_alpha;
 };
 
 class SpriteSheet final
@@ -47,13 +49,13 @@ public:
     bool loadFromFile(const std::filesystem::path & _path, const SpriteSheetOptions & _options);
     bool isValid() const;
     size_t getSpriteCount() const;
-    const std::vector<SDL_FRect> & getRects() const;
+    const std::vector<Rect> & getRects() const;
     SDL::TexturePtr getTexture() const;
 
 private:
     SDL_Renderer * mp_renderer;
     SDL::TexturePtr m_texture_ptr;
-    std::vector<SDL_FRect> m_rects;
+    std::vector<Rect> m_rects;
 };
 
 inline bool SpriteSheet::isValid() const
@@ -66,7 +68,7 @@ inline size_t SpriteSheet::getSpriteCount() const
     return m_rects.size();
 }
 
-inline const std::vector<SDL_FRect> & SpriteSheet::getRects() const
+inline const std::vector<Rect> & SpriteSheet::getRects() const
 {
     return m_rects;
 }

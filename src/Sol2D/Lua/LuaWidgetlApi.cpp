@@ -189,7 +189,7 @@ template<typename SelfT>
 int luaApi_SetForegroundColor(lua_State * _lua)
 {
     SelfT * self = SelfT::getUserData(_lua, 1);
-    SDL_Color color;
+    Color color;
     luaL_argcheck(_lua, tryGetColor(_lua, 2, color), 2, gc_message_color_required);
     self->widget->foreground_color.setValue(getWidgetState(_lua, 3), color);
     return 0;
@@ -202,7 +202,7 @@ template<typename SelfT>
 int luaApi_SetBackgroundColor(lua_State * _lua)
 {
     SelfT * self = SelfT::getUserData(_lua, 1);
-    SDL_Color color;
+    Color color;
     luaL_argcheck(_lua, tryGetColor(_lua, 2, color), 2, gc_message_color_required);
     self->widget->background_color.setValue(getWidgetState(_lua, 3), color);
     return 0;
@@ -215,7 +215,7 @@ template<typename SelfT>
 int luaApi_SetBorderColor(lua_State * _lua)
 {
     SelfT * self = SelfT::getUserData(_lua, 1);
-    SDL_Color color;
+    Color color;
     luaL_argcheck(_lua, tryGetColor(_lua, 2, color), 2, gc_message_color_required);
     self->widget->border_color.setValue(getWidgetState(_lua, 3), color);
     return 0;

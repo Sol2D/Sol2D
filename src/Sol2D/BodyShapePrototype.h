@@ -73,13 +73,13 @@ private:
 class BodyPolygonShapePrototype : public BodyShapePrototype
 {
 public:
-    explicit BodyPolygonShapePrototype(const std::vector<SDL_FPoint> & _points) :
+    explicit BodyPolygonShapePrototype(const std::vector<Point> & _points) :
         BodyShapePrototype(BodyShapeType::Polygon),
         m_points(_points)
     {
     }
 
-    explicit BodyPolygonShapePrototype(const SDL_FRect & _rect) :
+    explicit BodyPolygonShapePrototype(const Rect & _rect) :
         BodyShapePrototype(BodyShapeType::Polygon),
         m_points(4)
     {
@@ -89,27 +89,27 @@ public:
         m_points[2].y = m_points[3].y = _rect.y + _rect.h;
     }
 
-    const std::vector<SDL_FPoint> & getPoints() const
+    const std::vector<Point> & getPoints() const
     {
         return m_points;
     }
 
 private:
-    std::vector<SDL_FPoint> m_points;
+    std::vector<Point> m_points;
 };
 
 class BodyCircleShapePrototype : public BodyShapePrototype
 {
 
 public:
-    BodyCircleShapePrototype(SDL_FPoint _center, float _radius) :
+    BodyCircleShapePrototype(Point _center, float _radius) :
         BodyShapePrototype(BodyShapeType::Circle),
         m_center(_center),
         m_radius(_radius)
     {
     }
 
-    SDL_FPoint getCenter() const
+    Point getCenter() const
     {
         return m_center;
     }
@@ -120,7 +120,7 @@ public:
     }
 
 private:
-    SDL_FPoint m_center;
+    Point m_center;
     float m_radius;
 };
 

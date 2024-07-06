@@ -72,27 +72,14 @@ bool tryReadShapeGraphicOptions(lua_State * _lua, int _idx, BodyShapeGraphicOpti
     if(!lua_istable(_lua, _idx))
         return false;
 
-    lua_pushstring(_lua, "position");
-    if(lua_gettable(_lua, _idx) == LUA_TTABLE)
-    {
-        SDL_FPoint point;
-        if(tryGetPoint(_lua, -1, point))
-            _options.position = point;
-    }
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, "size");
-    if(lua_gettable(_lua, _idx) == LUA_TTABLE)
-    {
-        SDL_FPoint size;
-        if(tryGetSize(_lua, -1, size))
-            _options.size = size;
-    }
-    lua_pop(_lua, 1);
-
     LuaTable table(_lua, _idx);
     table.tryGetBoolean("isFlippedHorizontally", &_options.is_flipped_horizontally);
     table.tryGetBoolean("isFlippedVertically", &_options.is_flipped_vertically);
+    if(table.tryGetValue("position"))
+    {
+        tryGetPoint(_lua, -1, _options.position);
+        lua_pop(_lua, 1);
+    }
 
     return true;
 }

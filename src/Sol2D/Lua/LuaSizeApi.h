@@ -17,11 +17,17 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <SDL3/SDL_rect.h>
+#include <Sol2D/Rect.h>
 
 namespace Sol2D::Lua {
 
-bool tryGetSize(lua_State * _lua, int _idx, SDL_FPoint & _size);
+bool tryGetSize(lua_State * _lua, int _idx, Size & _size);
+
 void pushSize(lua_State * _lua, float _w, float _h);
+
+inline void pushSize(lua_State * _lua, const Size & _size)
+{
+    pushSize(_lua, _size.w, _size.h);
+}
 
 } // namespace Sol2D::Lua

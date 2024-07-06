@@ -1,10 +1,11 @@
-local function createLevel()
-    local main_scene_name = 'main'
-    local scene = sol.world:createScene(main_scene_name)
+---@param name string
+---@return { scene: sol.Scene, name: string }
+local function createLevel(name)
+    local scene = sol.world:createScene(name)
     scene:loadTileMap('tilemaps/level-01.tmx')
     return {
         scene = scene,
-        name = main_scene_name
+        name = name
     }
 end
 

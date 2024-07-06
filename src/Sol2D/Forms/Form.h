@@ -31,17 +31,17 @@ public:
     explicit Form(SDL_Renderer & _renderer);
     ~Form() override;
     void render(const RenderState & _state) override;
-    void setBackgroundColor(const SDL_Color & _color);
+    void setBackgroundColor(const Color & _color);
     Label & createLabel(const std::string & _text);
     Button & createButton(const std::string & _text);
 
 private:
     SDL_Renderer & mr_renderer;
-    SDL_Color m_bg_color;
+    Color m_bg_color;
     std::vector<Widget *> m_widgets;
 };
 
-inline void Form::setBackgroundColor(const SDL_Color & _color)
+inline void Form::setBackgroundColor(const Color & _color)
 {
     m_bg_color = _color;
 }

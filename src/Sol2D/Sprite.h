@@ -19,6 +19,7 @@
 #include <Sol2D/SpriteRenderOptions.h>
 #include <Sol2D/Def.h>
 #include <Sol2D/SDL/SDL.h>
+#include <Sol2D/Color.h>
 #include <filesystem>
 #include <optional>
 
@@ -32,8 +33,8 @@ struct SpriteOptions
     }
 
     bool autodetect_rect;
-    std::optional<SDL_FRect> rect;
-    std::optional<SDL_Color> color_to_alpha;
+    std::optional<Rect> rect;
+    std::optional<Color> color_to_alpha;
 };
 
 class Sprite final
@@ -45,18 +46,24 @@ public:
     bool loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options = SpriteOptions());
     bool isValid() const;
     SDL::TexturePtr getTexture() const;
-    const SDL_FRect & getRect() const;
-    void render(const SDL_FPoint & _point, SpriteRenderOptions _options = SpriteRenderOptions());
+    const Rect & getSourceRect() const;
+    const Size & getDestinationSize() const;
+    void setDesinationSize(const Size & _size);
+    void scale(float _scale_factor);
+    void scale(float _scale_factor_x, float _scale_factor_y);
+    void render(const Point & _point, SpriteRenderOptions _options = SpriteRenderOptions());
 
 private:
     SDL_Renderer * mp_renderer;
     SDL::TexturePtr m_texture_ptr;
-    SDL_FRect m_source_rect;
+    Rect m_source_rect;
+    Size m_desination_size;
 };
 
 inline Sprite::Sprite(SDL_Renderer & _renderer) :
     mp_renderer(&_renderer),
-    m_source_rect({ .0f, .0f, .0f, .0f })
+    m_source_rect({ .0f, .0f, .0f, .0f }),
+    m_desination_size({ .0f, .0f })
 {
 }
 
@@ -70,9 +77,37 @@ inline SDL::TexturePtr Sprite::getTexture() const
     return m_texture_ptr;
 }
 
-inline const SDL_FRect & Sprite::getRect() const
+inline const Rect & Sprite::getSourceRect() const
 {
     return m_source_rect;
+}
+
+inline const Size & Sprite::getDestinationSize() const
+{
+    return m_desination_size;
+}
+
+inline void Sprite::setDesinationSize(const Size & _size)
+{
+    m_desination_size = _size;
+}
+
+inline void Sprite::scale(float _scale_factor)
+{
+    if(_scale_factor != .0f)
+    {
+        m_desination_size.w = m_source_rect.w * _scale_factor;
+        m_desination_size.h = m_source_rect.h * _scale_factor;
+    }
+}
+
+inline void Sprite::scale(float _scale_factor_x, float _scale_factor_y)
+{
+    if(_scale_factor_x != .0 && _scale_factor_y != .0f)
+    {
+        m_desination_size.w = m_source_rect.w * _scale_factor_x;
+        m_desination_size.h = m_source_rect.h * _scale_factor_y;
+    }
 }
 
 } // namespace Sol2D

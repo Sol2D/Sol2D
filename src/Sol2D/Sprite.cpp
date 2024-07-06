@@ -30,7 +30,7 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
         return false;
     if(_options.color_to_alpha.has_value())
     {
-        SDL_Color color = _options.color_to_alpha.value();
+        Color color = _options.color_to_alpha.value();
         SDL_SetSurfaceColorKey(
             surface,
             SDL_TRUE,
@@ -55,43 +55,36 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     }
     else
     {
-        m_source_rect = SDL_FRect
-        {
-            .x = .0f,
-            .y = .0f,
-            .w = static_cast<float>(surface->w),
-            .h = static_cast<float>(surface->h)
-        };
+        m_source_rect.x = .0f;
+        m_source_rect.y = .0f;
+        m_source_rect.w = static_cast<float>(surface->w);
+        m_source_rect.h = static_cast<float>(surface->h);
     }
+    m_desination_size.w = m_source_rect.w;
+    m_desination_size.h = m_source_rect.h;
     m_texture_ptr = wrapSdlTexturePtr(SDL_CreateTextureFromSurface(mp_renderer, surface));
     SDL_DestroySurface(surface);
     return true;
 }
 
-void Sprite::render(const SDL_FPoint & _point, SpriteRenderOptions _options /*= SpriteRenderOptions()*/)
+void Sprite::render(const Point & _point, SpriteRenderOptions _options /*= SpriteRenderOptions()*/)
 {
     if(!isValid())
         return;
-    SDL_FRect dest_rect;
-    dest_rect.x = _point.x;
-    dest_rect.y = _point.y;
-    if(_options.size.has_value())
+    SDL_FRect dest_rect =
     {
-        dest_rect.w = _options.size->x;
-        dest_rect.h = _options.size->y;
-    }
-    else
-    {
-        dest_rect.w = m_source_rect.w;
-        dest_rect.h = m_source_rect.h;
-    }
+        .x = _point.x,
+        .y = _point.y,
+        .w = m_desination_size.w,
+        .h = m_desination_size.h
+    };
     SDL_RenderTextureRotated(
         mp_renderer,
         m_texture_ptr.get(),
-        &m_source_rect,
+        m_source_rect.toSdlPtr(),
         &dest_rect,
         radiansToDegrees(_options.angle_rad),
-        _options.flip_center.has_value() ? &_options.flip_center.value() : nullptr,
+        _options.flip_center.has_value() ? _options.flip_center->toSdlPtr() : nullptr,
         _options.flip
     );
 }

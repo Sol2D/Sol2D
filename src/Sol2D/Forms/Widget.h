@@ -19,6 +19,7 @@
 #include <Sol2D/Forms/WidgetProperty.h>
 #include <Sol2D/Forms/WidgetPadding.h>
 #include <Sol2D/Canvas.h>
+#include <Sol2D/Color.h>
 #include <Sol2D/SDL/TTF.h>
 #include <Sol2D/SDL/SDL.h>
 
@@ -44,10 +45,10 @@ public:
 
 public:
     WidgetProperty<SDL::FontPtr> font;
-    WidgetProperty<SDL_Color> foreground_color;
-    WidgetProperty<SDL_Color> background_color;
+    WidgetProperty<Color> foreground_color;
+    WidgetProperty<Color> background_color;
     WidgetProperty<float> border_width;
-    WidgetProperty<SDL_Color> border_color;
+    WidgetProperty<Color> border_color;
     WidgetProperty<WidgetPadding> padding;
 
 protected:
@@ -66,9 +67,9 @@ protected:
     Dimension<float> m_width;
     Dimension<float> m_height;
 
-    static constexpr SDL_Color sc_default_foreground_color{255, 255, 255, 255};
-    static constexpr SDL_Color sc_default_background_color{0, 0, 0, 0};
-    static constexpr SDL_Color sc_default_border_color = sc_default_foreground_color;
+    static constexpr Color sc_default_foreground_color{255, 255, 255, 255};
+    static constexpr Color sc_default_background_color{0, 0, 0, 0};
+    static constexpr Color sc_default_border_color = sc_default_foreground_color;
 };
 
 inline Widget::Widget(const Canvas & _parent, SDL_Renderer & _renderer):

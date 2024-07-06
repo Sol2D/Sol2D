@@ -37,7 +37,7 @@ public:
 private:
     Fragment m_fragment;
     SDL_Renderer & mr_renderer;
-    SDL_FRect m_rect;
+    Rect m_rect;
     Canvas * mp_canvas;
     SDL::TexturePtr m_texture_ptr;
 };

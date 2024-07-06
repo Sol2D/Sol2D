@@ -21,11 +21,31 @@ using namespace Sol2D;
 using namespace Sol2D::SDL;
 using namespace Sol2D::Utils;
 
+namespace {
+
+inline std::chrono::milliseconds getDuration(std::optional<std::chrono::milliseconds> _opt_duration)
+{
+    if(!_opt_duration.has_value())
+        return std::chrono::milliseconds::zero();
+    return _opt_duration.value() < std::chrono::milliseconds::zero()
+        ? std::chrono::milliseconds::zero()
+        : _opt_duration.value();
+}
+
+inline Point getPosition(const std::optional<Point> & _point)
+{
+    return _point.value_or(makePoint(.0f, .0f));
+}
+
+} // namespace
+
 struct SpriteAnimation::Frame
 {
     TexturePtr texture;
-    SDL_FRect rect;
+    Rect src_rect;
+    Size dest_size;
     std::chrono::milliseconds duration;
+    Point position;
 };
 
 SpriteAnimation::SpriteAnimation(SDL_Renderer & _renderer) :
@@ -98,39 +118,48 @@ void SpriteAnimation::copy(const SpriteAnimation & _from, SpriteAnimation & _to)
         _to.m_frames.push_back(new Frame(*frame));
 }
 
-bool SpriteAnimation::addFrame(std::chrono::milliseconds _duration, const Sprite & _sprite)
+bool SpriteAnimation::addFrame(const Sprite & _sprite, const SpriteAnimationOptions & _options)
 {
     if(!_sprite.isValid())
         return false;
-    m_frames.push_back(new Frame {
+    Frame * frame = new Frame
+    {
         .texture = _sprite.getTexture(),
-        .rect = _sprite.getRect(),
-        .duration = _duration
-    });
-    m_total_duration += _duration;
+        .src_rect = _sprite.getSourceRect(),
+        .dest_size = _sprite.getDestinationSize(),
+        .duration = getDuration(_options.duration),
+        .position = getPosition(_options.position)
+    };
+    m_frames.push_back(frame);
+    m_total_duration += frame->duration;
     return true;
 }
 
 bool SpriteAnimation::addFrame(
-    std::chrono::milliseconds _duration,
     const SpriteSheet & _sprite_sheet,
-    size_t _sprite_index)
+    size_t _sprite_index,
+    const SpriteAnimationOptions & _options)
 {
     if(!_sprite_sheet.isValid() || _sprite_sheet.getSpriteCount() <= _sprite_index)
         return false;
-    m_frames.push_back(new Frame {
+    const Rect & rect = _sprite_sheet.getRects().at(_sprite_index);
+    Frame * frame = new Frame
+    {
         .texture = _sprite_sheet.getTexture(),
-        .rect = _sprite_sheet.getRects().at(_sprite_index),
-        .duration = _duration
-    });
-    m_total_duration += _duration;
+        .src_rect = rect,
+        .dest_size = rect.getSize(),
+        .duration = getDuration(_options.duration),
+        .position = getPosition(_options.position)
+    };
+    m_frames.push_back(frame);
+    m_total_duration += frame->duration;
     return true;
 }
 
 bool SpriteAnimation::addFrames(
-    std::chrono::milliseconds _duration,
     const SpriteSheet & _sprite_sheet,
-    std::vector<size_t> _sprite_indices)
+    std::vector<size_t> _sprite_indices,
+    const SpriteAnimationOptions & _options)
 {
     if(!_sprite_sheet.isValid())
         return false;
@@ -145,18 +174,26 @@ bool SpriteAnimation::addFrames(
     m_frames.reserve(m_frames.size() + count);
     for(size_t index : _sprite_indices)
     {
-        m_frames.push_back(new Frame {
+        const Rect & rect = _sprite_sheet.getRects().at(index);
+        Frame * frame = new Frame
+        {
             .texture = _sprite_sheet.getTexture(),
-            .rect = _sprite_sheet.getRects().at(index),
-            .duration = _duration
-        });
-        m_total_duration += _duration;
+            .src_rect = rect,
+            .dest_size = {
+                .w = rect.w,
+                .h = rect.h
+            },
+            .duration = getDuration(_options.duration),
+            .position = getPosition(_options.position)
+        };
+        m_frames.push_back(frame);
+        m_total_duration += frame->duration;
     }
     return true;
 }
 
 void SpriteAnimation::render(
-    const SDL_FPoint & _point,
+    const Point & _point,
     std::chrono::milliseconds _time_passed,
     SpriteRenderOptions _options /*= SpriteRenderOptions()*/)
 {
@@ -186,19 +223,20 @@ void SpriteAnimation::render(
             }
         }
     }
-    SDL_FRect dest_rect {
-        .x = _point.x,
-        .y = _point.y,
-        .w = frame->rect.w,
-        .h = frame->rect.h
+    SDL_FRect dest_rect
+    {
+        .x = _point.x - frame->position.x,
+        .y = _point.y - frame->position.y,
+        .w = frame->dest_size.w,
+        .h = frame->dest_size.h
     };
     SDL_RenderTextureRotated(
         mp_renderer,
         frame->texture.get(),
-        &frame->rect,
+        frame->src_rect.toSdlPtr(),
         &dest_rect,
         radiansToDegrees(_options.angle_rad),
-        _options.flip_center.has_value() ? &_options.flip_center.value() : nullptr,
+        _options.flip_center.has_value() ? _options.flip_center->toSdlPtr() : nullptr,
         _options.flip
     );
 }

@@ -24,6 +24,12 @@
 
 namespace Sol2D {
 
+struct SpriteAnimationOptions
+{
+    std::optional<std::chrono::milliseconds> duration;
+    std::optional<Point> position;
+};
+
 class SpriteAnimation final
 {
     struct Frame;
@@ -36,13 +42,13 @@ public:
     SpriteAnimation & operator = (const SpriteAnimation & _animation);
     SpriteAnimation & operator = (SpriteAnimation && _animation);
     void clear();
-    bool addFrame(std::chrono::milliseconds _duration, const Sprite & _sprite);
-    bool addFrame(std::chrono::milliseconds _duration, const SpriteSheet & _sprite_sheet, size_t _sprite_index);
-    bool addFrames(std::chrono::milliseconds _duration,
+    bool addFrame(const Sprite & _sprite, const SpriteAnimationOptions & _options);
+    bool addFrame(const SpriteSheet & _sprite_sheet, size_t _sprite_index, const SpriteAnimationOptions & _options);
+    bool addFrames(
         const SpriteSheet & _sprite_sheet,
-        std::vector<size_t> _sprite_indices);
-    void render(
-        const SDL_FPoint & _point,
+        std::vector<size_t> _sprite_indices,
+        const SpriteAnimationOptions & _options);
+    void render(const Point & _point,
         std::chrono::milliseconds _time_passed,
         SpriteRenderOptions _options = SpriteRenderOptions());
 

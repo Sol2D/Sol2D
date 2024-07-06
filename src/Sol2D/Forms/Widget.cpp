@@ -30,7 +30,7 @@ void Widget::renderBorder()
     {
         return;
     }
-    SDL_Color border_color = this->border_color[m_state];
+    Color border_color = this->border_color[m_state];
     SDL_SetRenderDrawColor(&mr_renderer, border_color.r, border_color.g, border_color.b, border_color.a);
 
     const float x0 = m_x.getPixels(mr_parent.getWidth());

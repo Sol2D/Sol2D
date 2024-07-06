@@ -43,7 +43,7 @@ class Scene final : public Canvas
 public:
     Scene(const Workspace & _workspace, SDL_Renderer & _renderer);
     ~Scene() override;
-    uint64_t createBody(const SDL_FPoint & _position, const BodyPrototype & _prototype);
+    uint64_t createBody(const Point & _position, const BodyPrototype & _prototype);
     void createBodiesFromMapObjects(
         const std::string & _class,
         const BodyOptions & _body_options,
@@ -66,14 +66,13 @@ public:
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(std::string _name) const;
     void render(const RenderState & _state) override;
-    void applyForce(uint64_t _body_id, const SDL_FPoint & _force);
-    void setBodyPosition(uint64_t _body_id, const SDL_FPoint & _position);
-    std::optional<SDL_FPoint> getBodyPosition(uint64_t _body_id) const;
+    void applyForce(uint64_t _body_id, const Point & _force);
+    void setBodyPosition(uint64_t _body_id, const Point & _position);
+    std::optional<Point> getBodyPosition(uint64_t _body_id) const;
     void addContactObserver(ContactObserver & _observer);
     void removeContactObserver(ContactObserver & _observer);
-    std::optional<std::vector<SDL_FPoint>> findPath(
-        uint64_t _body_id,
-        const SDL_FPoint & _destination,
+    std::optional<std::vector<Point> > findPath(uint64_t _body_id,
+        const Point & _destination,
         bool _allow_diagonal_steps,
         bool _avoid_sensors) const;
 
@@ -94,12 +93,12 @@ private:
     void drawTileLayer(const Tiles::TileMapTileLayer & _layer);
     void drawImageLayer(const Tiles::TileMapImageLayer & _layer);
     void drawBox2D();
-    SDL_FPoint toAbsoluteCoords(float _world_x, float _world_y) const;
+    Point toAbsoluteCoords(float _world_x, float _world_y) const;
 
 private:
     const Workspace & mr_workspace;
     SDL_Renderer & mr_renderer;
-    SDL_FPoint m_world_offset;
+    Point m_world_offset;
     b2World * mp_b2_world;
     float m_scale_factor;
     std::unordered_map<uint64_t, b2Body *> m_bodies;

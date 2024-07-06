@@ -17,12 +17,13 @@
 #pragma once
 
 #include <Sol2D/Utils/Math.h>
+#include <Sol2D/Rect.h>
+#include <Sol2D/Color.h>
 #include <Sol2D/Def.h>
 #include <string>
 #include <cstdint>
 #include <optional>
 #include <vector>
-#include <SDL3/SDL.h>
 
 namespace Sol2D::Tiles {
 
@@ -154,13 +155,13 @@ protected:
     }
 
 public:
-    const std::vector<SDL_FPoint> & getPoints() const { return m_points; }
-    std::vector<SDL_FPoint> & getPoints() { return m_points; }
-    void addPoint(const SDL_FPoint & _point) { m_points.push_back(_point); }
+    const std::vector<Point> & getPoints() const { return m_points; }
+    std::vector<Point> & getPoints() { return m_points; }
+    void addPoint(const Point & _point) { m_points.push_back(_point); }
     void rotate(float _angle_rad) { Utils::rotateVectors(m_points, _angle_rad); }
 
 private:
-    std::vector<SDL_FPoint> m_points;
+    std::vector<Point> m_points;
 };
 
 
@@ -228,8 +229,8 @@ public:
     void setFontSize(uint16_t _size) { m_font_size = _size; }
     bool isWordWraEnabled() const { return m_is_word_wrap_enabled; }
     void ebableWordWrap(bool _enabled) { m_is_word_wrap_enabled = _enabled; }
-    const SDL_Color & getColor() const { return m_color; }
-    void setColor(const SDL_Color & _color) { m_color = _color; }
+    const Color & getColor() const { return m_color; }
+    void setColor(const Color & _color) { m_color = _color; }
     bool isBold() const { return m_is_bold; }
     void setBold(bool _bold) { m_is_bold = _bold; }
     bool isItalic() const { return m_is_italic; }
@@ -249,7 +250,7 @@ private:
     std::string m_font_family;
     uint16_t m_font_size;
     bool m_is_word_wrap_enabled;
-    SDL_Color m_color;
+    Color m_color;
     bool m_is_bold;
     bool m_is_italic;
     bool m_is_underlined;

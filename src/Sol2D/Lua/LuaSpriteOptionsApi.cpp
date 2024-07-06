@@ -25,6 +25,7 @@ namespace {
 
 constexpr char gc_key_rect[] = "rect";
 constexpr char gc_key_color_to_alpha[] = "colorToAlpha";
+constexpr char gc_key_autodetect_rect[] = "autodetectRect";
 
 } // namespace name
 
@@ -38,7 +39,7 @@ bool Sol2D::Lua::tryGetSpriteOptions(lua_State * _lua, int _idx, SpriteOptions &
     lua_pushstring(_lua, gc_key_rect);
     if(lua_gettable(_lua, -2) == LUA_TTABLE)
     {
-        SDL_FRect rect;
+        Rect rect;
         if(tryGetRect(_lua, -1, rect))
             _sprite_options.rect = rect;
     }
@@ -47,9 +48,16 @@ bool Sol2D::Lua::tryGetSpriteOptions(lua_State * _lua, int _idx, SpriteOptions &
     lua_pushstring(_lua, gc_key_color_to_alpha);
     if(lua_gettable(_lua, -2) == LUA_TTABLE)
     {
-        SDL_Color color;
+        Color color;
         if(tryGetColor(_lua, -1, color))
             _sprite_options.color_to_alpha = color;
+    }
+    lua_pop(_lua, 1);
+
+    lua_pushstring(_lua, gc_key_autodetect_rect);
+    if(lua_gettable(_lua, -2) == LUA_TBOOLEAN)
+    {
+        _sprite_options.autodetect_rect = lua_toboolean(_lua, -1);
     }
     lua_pop(_lua, 1);
 

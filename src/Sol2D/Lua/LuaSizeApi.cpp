@@ -27,7 +27,7 @@ static constexpr char gc_key_h[] = "h";
 
 } // namespace name
 
-bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, SDL_FPoint & _size)
+bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, Size & _size)
 {
     if(!lua_istable(_lua, _idx))
     {
@@ -39,8 +39,8 @@ bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, SDL_FPoint & _size)
         table.tryGetNumber(gc_key_w, &w) &&
         table.tryGetNumber(gc_key_h, &h))
     {
-        _size.x = static_cast<float>(w);
-        _size.y = static_cast<float>(h);
+        _size.w = static_cast<float>(w);
+        _size.h = static_cast<float>(h);
         return true;
     }
     return false;

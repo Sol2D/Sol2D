@@ -17,6 +17,8 @@
 #include <Sol2D/Lua/LuaSpriteAnimationApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
+#include <Sol2D/Lua/LuaPointApi.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
@@ -27,7 +29,6 @@ using namespace Sol2D::Lua::Aux;
 namespace {
 
 const char gc_metatable_sprite_animation[] = "sol.SpriteAnimation";
-const char gc_message_duration_expected[] = "duration expected";
 const char gc_message_sprite_sheet_expected[] = "sprite sheet expected";
 
 struct Self : LuaUserData<Self, gc_metatable_sprite_animation>
@@ -35,52 +36,71 @@ struct Self : LuaUserData<Self, gc_metatable_sprite_animation>
     SpriteAnimation * animation;
 };
 
+void readSpriteAnimationOptions(lua_State * _lua, int _idx, SpriteAnimationOptions & _options)
+{
+    if(!lua_istable(_lua, _idx))
+        return;
+
+    LuaTable table(_lua, _idx);
+
+    {
+        lua_Integer duration;
+        if(table.tryGetInteger("duration", &duration))
+            _options.duration = std::chrono::milliseconds(duration);
+    }
+
+    if(table.tryGetValue("position"))
+    {
+        Point position;
+        if(tryGetPoint(_lua, -1, position))
+            _options.position = position;
+    }
+}
+
 // 1 self
-// 2 duration
-// 3 sprite
+// 2 sprite
+// 3 options (optional)
 int luaApi_addFrameFromSprite(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_duration_expected);
-    uint32_t duration = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     Sprite * sprite;
-    luaL_argcheck(_lua, tryGetSprite(_lua, 3, &sprite), 3, "sprite expected");
-    bool result = self->animation->addFrame(std::chrono::milliseconds(duration), *sprite);
+    luaL_argcheck(_lua, tryGetSprite(_lua, 2, &sprite), 2, "sprite expected");
+    SpriteAnimationOptions options;
+    readSpriteAnimationOptions(_lua, 3, options);
+    bool result = self->animation->addFrame(*sprite, options);
     lua_pushboolean(_lua, result);
     return 1;
 }
 
 // 1 self
-// 2 duration
-// 3 sprite sheet
-// 4 sprite index
+// 2 sprite sheet
+// 3 sprite index
+// 4 options (optional)
 int luaApi_addFrameFromSpriteSheet(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_duration_expected);
-    uint32_t duration = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     SpriteSheet * sprite_sheet;
-    luaL_argcheck(_lua, tryGetSpriteSheet(_lua, 3, &sprite_sheet), 3, gc_message_sprite_sheet_expected);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 4), 4, "sprite index expected");
+    luaL_argcheck(_lua, tryGetSpriteSheet(_lua, 2, &sprite_sheet), 2, gc_message_sprite_sheet_expected);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, "sprite index expected");
     size_t index = static_cast<size_t>(lua_tointeger(_lua, 4));
-    bool result = self->animation->addFrame(std::chrono::milliseconds(duration), *sprite_sheet, index);
+    SpriteAnimationOptions options;
+    readSpriteAnimationOptions(_lua, 4, options);
+    bool result = self->animation->addFrame(*sprite_sheet, index, options);
     lua_pushboolean(_lua, result);
     return 1;
 }
 
 // 1 self
-// 2 duration
-// 3 sprite sheet
-// 4 sprite indices
+// 2 sprite sheet
+// 3 sprite indices
+// 4 options (optional)
 int luaApi_addFrames(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_duration_expected);
-    uint32_t duration = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     SpriteSheet * sprite_sheet;
-    luaL_argcheck(_lua, tryGetSpriteSheet(_lua, 3, &sprite_sheet), 3, gc_message_sprite_sheet_expected);
-    luaL_argcheck(_lua, lua_istable(_lua, 4), 4, "sprite indices array expected");
-    size_t index_count = lua_rawlen(_lua, 4);
+    luaL_argcheck(_lua, tryGetSpriteSheet(_lua, 2, &sprite_sheet), 2, gc_message_sprite_sheet_expected);
+    luaL_argcheck(_lua, lua_istable(_lua, 3), 3, "sprite indices array expected");
+    size_t index_count = lua_rawlen(_lua, 3);
     if(index_count == 0)
     {
         lua_pushboolean(_lua, false);
@@ -89,13 +109,15 @@ int luaApi_addFrames(lua_State * _lua)
     std::vector<size_t> indices(index_count);
     for(size_t i = 1; i <= index_count; ++i)
     {
-        lua_rawgeti(_lua, 4, i);
+        lua_rawgeti(_lua, 3, i);
         if(!lua_isinteger(_lua, -1))
             luaL_error(_lua, "the item %d of the indices array is not an integer", i);
         indices[i - 1] = static_cast<size_t>(lua_tointeger(_lua, -1));
         lua_pop(_lua, 1);
     }
-    bool result = self->animation->addFrames(std::chrono::milliseconds(duration), *sprite_sheet, indices);
+    SpriteAnimationOptions options;
+    readSpriteAnimationOptions(_lua, 4, options);
+    bool result = self->animation->addFrames(*sprite_sheet, indices, options);
     lua_pushboolean(_lua, result);
     return 1;
 }

@@ -36,7 +36,7 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
         return false;
     if(_options.color_to_alpha.has_value())
     {
-        SDL_Color color = _options.color_to_alpha.value();
+        Color color = _options.color_to_alpha.value();
         SDL_SetSurfaceColorKey(
             surface,
             SDL_TRUE,
@@ -45,12 +45,11 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
     }
     m_texture_ptr = wrapSdlTexturePtr(SDL_CreateTextureFromSurface(mp_renderer, surface));
     SDL_DestroySurface(surface);
-    SDL_FRect rect = {
-        .x = .0f,
-        .y = .0f,
-        .w = static_cast<float>(_options.sprite_width),
-        .h = static_cast<float>(_options.sprite_height)
-    };
+    Rect rect = makeRect(
+        .0f,
+        .0f,
+        static_cast<float>(_options.sprite_width),
+        static_cast<float>(_options.sprite_height));
     for(uint16_t row = 0; row < _options.row_count; ++row)
     {
         rect.y = _options.margin_top + row * _options.sprite_height + row * _options.vertical_spacing;

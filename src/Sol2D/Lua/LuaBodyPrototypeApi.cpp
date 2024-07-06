@@ -51,7 +51,7 @@ int luaApi_CreateCircleShape(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_shape_key_expected);
-    SDL_FPoint position;
+    Point position;
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, position), 3, "the circle center position expected");
     luaL_argcheck(_lua, lua_isnumber(_lua, 4), 4, "the circle radius expected");
     float radius = static_cast<float>(lua_tonumber(_lua, 4));
@@ -67,8 +67,8 @@ int luaApi_CreatePolygonShape(lua_State * _lua) // TODO: split up: createBoxShap
     Self * self = Self::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_shape_key_expected);
-    SDL_FRect rect;
-    SDL_FPoint point;
+    Rect rect;
+    Point point;
     BodyShapePrototype * shape_prototype = nullptr;
     if(tryGetRect(_lua, 3, rect))
     {
@@ -79,7 +79,7 @@ int luaApi_CreatePolygonShape(lua_State * _lua) // TODO: split up: createBoxShap
         int points_count = lua_gettop(_lua) - 1;
         if(points_count < 3)
             luaL_error(_lua, "a polygon requires at least 3 points, %d provided", points_count);
-        std::vector<SDL_FPoint> points(points_count);
+        std::vector<Point> points(points_count);
         points[0] = point;
         for(int i = 1; i < points_count; ++i)
         {

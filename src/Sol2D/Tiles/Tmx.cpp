@@ -79,7 +79,7 @@ protected:
     std::string formatFileReadErrorMessage() const;
     std::string formatFileReadErrorMessage(const fs::path & _path) const;
     std::string formatXmlRootElemetErrorMessage(const char * _expected) const;
-    bool tryParseColor(const char * _value, SDL_Color & _color) const;
+    bool tryParseColor(const char * _value, Color & _color) const;
     TexturePtr parseImage(const XMLElement & _xml);
 
 protected:
@@ -299,7 +299,7 @@ std::string XmlLoader::formatXmlRootElemetErrorMessage(const char * _expected) c
     return ss.str();
 }
 
-bool XmlLoader::tryParseColor(const char * _value, SDL_Color & _color) const
+bool XmlLoader::tryParseColor(const char * _value, Color & _color) const
 {
     if(_value == nullptr)
         return false;
@@ -370,7 +370,7 @@ TexturePtr XmlLoader::parseImage(const XMLElement & _xml)
     }
     if(const char * trans = _xml.Attribute("trans"))
     {
-        SDL_Color color;
+        Color color;
         if(tryParseColor(trans, color))
         {
             SDL_SetSurfaceColorKey(
@@ -446,7 +446,7 @@ void TileMapXmlLoader::loadFromXml(const XMLDocument & _xml)
             mr_map.setStaggerIndex(TileMap::StaggerIndex::Odd);
     }
     {
-        SDL_Color color;
+        Color color;
         if(tryParseColor(xmap->Attribute("backgroundcolor"), color))
             mr_map.setBackgroundColor(color);
     }
@@ -556,7 +556,7 @@ void TileMapXmlLoader::readLayer(const XMLElement & _xml, TileMapLayer & _layer)
         _layer.setOffsetX(offset_x);
     if(int32_t offset_y = _xml.IntAttribute("offsety", 0))
         _layer.setOffsetY(offset_y);
-    SDL_Color tint_color;
+    Color tint_color;
     if(tryParseColor(_xml.Attribute("tintcolor"), tint_color))
         _layer.setTintColor(tint_color);
 }
@@ -798,11 +798,10 @@ void TileMapXmlLoader::loadPoints(const XMLElement & _xml, TileMapPolyX & _poly)
     {
         del_pos = point_str.find(',', 0); // TODO: remove "find", use the 2nd arg of "strtol" (see loadTileLayerDataCsv)
         if(del_pos != std::string::npos)
-        {            
-            SDL_FPoint point;
-            point.x = std::strtof(point_str.c_str(), nullptr);
-            point.y = std::strtof(&point_str.c_str()[del_pos + 1], nullptr);
-            _poly.addPoint(point);
+        {
+            _poly.addPoint(makePoint(
+                std::strtof(point_str.c_str(), nullptr),
+                std::strtof(&point_str.c_str()[del_pos + 1], nullptr)));
         }
     }
 }
@@ -815,7 +814,7 @@ void TileMapXmlLoader::loadText(const XMLElement & _xml, TileMapText & _text)
         _text.setFontSize(static_cast<uint16_t>(font_size));
     if(const char * color_str = _xml.Attribute("color"))
     {
-        SDL_Color color;
+        Color color;
         if(tryParseColor(color_str, color))
             _text.setColor(color);
     }

@@ -38,7 +38,7 @@ public:
 
 private:
     void handleState(const RenderState & _state);
-    bool isPointIn(const SDL_FPoint & _point, const SDL_FRect & _rect) const;
+    bool isPointIn(const Point & _point, const Rect & _rect) const;
 
 private:
     Utils::Observable<ButtonClickObserver> m_click_observable;

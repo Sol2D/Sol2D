@@ -152,7 +152,7 @@ int luaApi_CreateBody(lua_State * _lua)
 {
     bool has_script_argument = lua_gettop(_lua) >= 4;
     Self * self = Self::getUserData(_lua, 1);
-    SDL_FPoint position = { .0f, .0f };
+    Point position = { .0f, .0f };
     if(!lua_isnil(_lua, 2))
         luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "body position expected");
     LuaBodyPrototype & lua_proto = getBodyPrototype(_lua, 3);
@@ -206,7 +206,7 @@ int luaApi_ApplyForce(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    SDL_FPoint force;
+    Point force;
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, force), 3, "a force vector expected");
     self->scene->applyForce(body_id, force);
     return 0;
@@ -220,7 +220,7 @@ int luaApi_SetBodyPosition(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    SDL_FPoint position;
+    Point position;
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, position), 3, "a position expected");
     self->scene->setBodyPosition(body_id, position);
     return 0;
@@ -233,7 +233,7 @@ int luaApi_GetBodyPosition(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    std::optional<SDL_FPoint> position = self->scene->getBodyPosition(body_id);
+    std::optional<Point> position = self->scene->getBodyPosition(body_id);
     if(position.has_value())
         pushPoint(_lua, position.value().x, position.value().y);
     else
@@ -373,7 +373,7 @@ int luaApi_FindPath(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    SDL_FPoint destination;
+    Point destination;
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, destination), 3, "a destination point expected");
     auto result = self->scene->findPath(body_id, destination, false, false);
     if(result.has_value())

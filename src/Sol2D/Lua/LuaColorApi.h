@@ -17,10 +17,10 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <SDL3/SDL_pixels.h>
+#include <Sol2D/Color.h>
 
 namespace Sol2D::Lua {
 
-bool tryGetColor(lua_State * _lua, int _idx, SDL_Color & _color);
+bool tryGetColor(lua_State * _lua, int _idx, Color & _color);
 
 } // namespace Sol2D::Lua

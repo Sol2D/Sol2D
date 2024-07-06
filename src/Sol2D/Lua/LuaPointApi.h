@@ -17,11 +17,11 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <SDL3/SDL_rect.h>
+#include <Sol2D/Rect.h>
 
 namespace Sol2D::Lua {
 
-bool tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point);
+bool tryGetPoint(lua_State * _lua, int _idx, Point & _point);
 void pushPoint(lua_State * _lua, float _x, float _y);
 
 } // namespace Sol2D::Lua

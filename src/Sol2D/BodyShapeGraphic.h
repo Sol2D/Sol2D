@@ -18,7 +18,6 @@
 
 #include <Sol2D/SpriteAnimation.h>
 #include <SDL3/SDL_rect.h>
-#include <optional>
 #include <variant>
 
 namespace Sol2D {
@@ -32,8 +31,7 @@ struct BodyShapeGraphicOptions
     {
     }
 
-    SDL_FPoint position;
-    std::optional<SDL_FPoint> size;
+    Point position;
     bool is_flipped_horizontally;
     bool is_flipped_vertically;
 
