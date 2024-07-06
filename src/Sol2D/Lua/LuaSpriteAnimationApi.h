@@ -18,10 +18,11 @@
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
 #include <Sol2D/SpriteAnimation.h>
+#include <memory>
 
 namespace Sol2D::Lua {
 
-void pushSpriteAnimationApi(lua_State * _lua, SpriteAnimation & _animation);
-bool tryGetSpriteAnimation(lua_State * _lua, int _idx, SpriteAnimation ** _animation);
+void pushSpriteAnimationApi(lua_State * _lua, std::shared_ptr<SpriteAnimation> _animation);
+std::shared_ptr<SpriteAnimation> tryGetSpriteAnimation(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

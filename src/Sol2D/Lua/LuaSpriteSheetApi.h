@@ -19,10 +19,11 @@
 #include "Sol2D/Workspace.h"
 #include <Sol2D/SpriteSheet.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
+#include <memory>
 
 namespace Sol2D::Lua {
 
-void pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspace, SpriteSheet & _sprite_sheet);
-bool tryGetSpriteSheet(lua_State * _lua, int _idx, SpriteSheet ** _spire_sheet);
+void pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<SpriteSheet> _sprite_sheet);
+std::shared_ptr<SpriteSheet> tryGetSpriteSheet(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

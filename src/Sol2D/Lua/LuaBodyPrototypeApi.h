@@ -19,22 +19,18 @@
 #include <Sol2D/BodyPrototype.h>
 #include <Sol2D/Workspace.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
+#include <memory>
 
 namespace Sol2D::Lua {
 
 struct LuaBodyPrototype
 {
-    LuaBodyPrototype(BodyPrototype & _proto) :
-        proto(_proto)
-    {
-    }
-
-    BodyPrototype & proto;
+    std::shared_ptr<BodyPrototype> proto;
     std::optional<std::filesystem::path> script_path;
 };
 
-void pushBodyPrototypeApi(lua_State * _lua, BodyPrototype & _body_prototype);
+void pushBodyPrototypeApi(lua_State * _lua, std::shared_ptr<BodyPrototype> _body_prototype);
 
-LuaBodyPrototype & getBodyPrototype(lua_State * _lua, int _idx);
+std::optional<LuaBodyPrototype> tryGetBodyPrototype(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

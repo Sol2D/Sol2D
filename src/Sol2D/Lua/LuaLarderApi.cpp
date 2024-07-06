@@ -56,7 +56,7 @@ int luaApi_CreateBodyPrototype(lua_State * _lua)
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_body_prototype_key_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, "a body type expected");
     std::optional<BodyType> body_type = castToBodyType(lua_tointeger(_lua, 3));
-    BodyPrototype & proto = self->larder->createBodyPrototype(
+    std::shared_ptr<BodyPrototype> proto = self->larder->createBodyPrototype(
         key,
         body_type.has_value() ? body_type.value() : BodyType::Static);
     pushBodyPrototypeApi(_lua, proto);
@@ -70,9 +70,9 @@ int luaApi_GetBodyPrototype(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_body_prototype_key_expected);
-    BodyPrototype * proto = self->larder->getBodyPrototype(key);
+    std::shared_ptr<BodyPrototype> proto = self->larder->getBodyPrototype(key);
     if(proto)
-        pushBodyPrototypeApi(_lua, *proto);
+        pushBodyPrototypeApi(_lua, proto);
     else
         lua_pushnil(_lua);
     return 1;
@@ -134,7 +134,7 @@ int luaApi_CreateSpriteSheet(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_sheet_key_expected);
-    SpriteSheet & sprite_sheet = self->larder->createSpriteSheet(key);
+    std::shared_ptr<SpriteSheet> sprite_sheet = self->larder->createSpriteSheet(key);
     pushSpriteSheetApi(_lua, *self->workspace, sprite_sheet);
     return 1;
 }
@@ -146,9 +146,9 @@ int luaApi_GetSpriteSheet(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_sheet_key_expected);
-    SpriteSheet * sprite_sheet = self->larder->getSpriteSheet(key);
+    std::shared_ptr<SpriteSheet> sprite_sheet = self->larder->getSpriteSheet(key);
     if(sprite_sheet)
-        pushSpriteSheetApi(_lua, *self->workspace, *sprite_sheet);
+        pushSpriteSheetApi(_lua, *self->workspace, sprite_sheet);
     else
         lua_pushnil(_lua);
     return 1;
@@ -172,7 +172,7 @@ int luaApi_CreateSpriteAnimation(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_animation_key_expected);
-    SpriteAnimation & sprite_animation = self->larder->createSpriteAnimation(key);
+    std::shared_ptr<SpriteAnimation> sprite_animation = self->larder->createSpriteAnimation(key);
     pushSpriteAnimationApi(_lua, sprite_animation);
     return 1;
 }
@@ -184,9 +184,9 @@ int luaApi_GetSpriteAnimation(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_animation_key_expected);
-    SpriteAnimation * sprite_animation = self->larder->getSpriteAnimation(key);
+    std::shared_ptr<SpriteAnimation> sprite_animation = self->larder->getSpriteAnimation(key);
     if(sprite_animation)
-        pushSpriteAnimationApi(_lua, *sprite_animation);
+        pushSpriteAnimationApi(_lua, sprite_animation);
     else
         lua_pushnil(_lua);
     return 1;

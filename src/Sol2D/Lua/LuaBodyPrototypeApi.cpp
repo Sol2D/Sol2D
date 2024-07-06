@@ -29,15 +29,30 @@ namespace {
 
 const char gc_message_shape_key_expected[] = "a shape key expected";
 
-struct Self : LuaBodyPrototype, LuaUserData<Self, LuaTypeName::body_prototype>
+struct Self : LuaUserData<Self, LuaTypeName::body_prototype>
 {
+    Self(std::shared_ptr<BodyPrototype> & _proto) :
+        proto(_proto)
+    {
+    }
+
+    std::weak_ptr<BodyPrototype> proto;
+    std::optional<std::filesystem::path> script_path;
+
+    std::shared_ptr<BodyPrototype> getBodyPrototype(lua_State * _lua) const
+    {
+        std::shared_ptr<BodyPrototype> ptr = proto.lock();
+        if(!ptr)
+            luaL_error(_lua, "the body prototype is destroyed");
+        return ptr;
+    }
 };
 
 // 1 self
 int luaApi_GetType(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    BodyType type = self->proto.getType();
+    BodyType type = self->getBodyPrototype(_lua)->getType();
     lua_pushinteger(_lua, static_cast<lua_Integer>(type));
     return 1;
 }
@@ -55,7 +70,7 @@ int luaApi_CreateCircleShape(lua_State * _lua)
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, position), 3, "the circle center position expected");
     luaL_argcheck(_lua, lua_isnumber(_lua, 4), 4, "the circle radius expected");
     float radius = static_cast<float>(lua_tonumber(_lua, 4));
-    pushBodyShapePrototypeApi(_lua, self->proto.createCircleShape(key, position, radius));
+    pushBodyShapePrototypeApi(_lua, self->getBodyPrototype(_lua)->createCircleShape(key, position, radius));
     return 1;
 }
 
@@ -72,7 +87,7 @@ int luaApi_CreatePolygonShape(lua_State * _lua) // TODO: split up: createBoxShap
     BodyShapePrototype * shape_prototype = nullptr;
     if(tryGetRect(_lua, 3, rect))
     {
-        shape_prototype = &self->proto.createPolygonShape(key, rect);
+        shape_prototype = &self->getBodyPrototype(_lua)->createPolygonShape(key, rect);
     }
     else if(tryGetPoint(_lua, 3, point))
     {
@@ -87,7 +102,7 @@ int luaApi_CreatePolygonShape(lua_State * _lua) // TODO: split up: createBoxShap
             luaL_argcheck(_lua, tryGetPoint(_lua, idx, point), idx, "a point expected");
             points[i] = point;
         }
-        shape_prototype = &self->proto.createPolygonShape(key, points);
+        shape_prototype = &self->getBodyPrototype(_lua)->createPolygonShape(key, points);
     }
     else
     {
@@ -110,7 +125,7 @@ int luaApi_AttachScript(lua_State * _lua)
 
 } // namespace name
 
-void Sol2D::Lua::pushBodyPrototypeApi(lua_State * _lua, BodyPrototype & _body_prototype)
+void Sol2D::Lua::pushBodyPrototypeApi(lua_State * _lua, std::shared_ptr<BodyPrototype> _body_prototype)
 {
     Self * self = Self::pushUserData(_lua);
     new(self) Self(_body_prototype);
@@ -128,8 +143,18 @@ void Sol2D::Lua::pushBodyPrototypeApi(lua_State * _lua, BodyPrototype & _body_pr
     lua_setmetatable(_lua, -2);
 }
 
-LuaBodyPrototype & Sol2D::Lua::getBodyPrototype(lua_State * _lua, int _idx)
+std::optional<LuaBodyPrototype> Sol2D::Lua::tryGetBodyPrototype(lua_State * _lua, int _idx)
 {
     Self * self = Self::getUserData(_lua, _idx);
-    return *self;
+    if(self)
+    {
+        LuaBodyPrototype result;
+        result.proto = self->proto.lock();
+        if(result.proto)
+        {
+            result.script_path = self->script_path;
+            return result;
+        }
+    }
+    return std::optional<LuaBodyPrototype>();
 }

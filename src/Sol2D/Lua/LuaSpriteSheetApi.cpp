@@ -28,7 +28,15 @@ namespace {
 struct Self : LuaUserData<Self, LuaTypeName::sprite_sheet>
 {
     const Workspace * workspace;
-    SpriteSheet * sprite_sheet;
+    std::weak_ptr<SpriteSheet> sprite_sheet;
+
+    std::shared_ptr<SpriteSheet> getSpriteSheet(lua_State * _lua) const
+    {
+        std::shared_ptr<SpriteSheet> ptr = sprite_sheet.lock();
+        if(!ptr)
+            luaL_error(_lua, "the sprite sheet is destroyed");
+        return ptr;
+    }
 };
 
 // 1 self
@@ -41,18 +49,18 @@ int luaApi_LoadFromFile(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     SpriteSheetOptions options;
     luaL_argcheck(_lua,  tryGetSpriteSheetOptions(_lua, 3, options), 3, "sprite sheet options expected");
-    bool result = self->sprite_sheet->loadFromFile(self->workspace->getResourceFullPath(path), options);
+    bool result = self->getSpriteSheet(_lua)->loadFromFile(self->workspace->getResourceFullPath(path), options);
     lua_pushboolean(_lua, result);
     return 1;
 }
 
 } // namespace name
 
-void Sol2D::Lua::pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspace, SpriteSheet & _sprite_sheet)
+void Sol2D::Lua::pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<SpriteSheet> _sprite_sheet)
 {
     Self * self = Self::pushUserData(_lua);
     self->workspace = &_workspace;
-    self->sprite_sheet = &_sprite_sheet;
+    new(&self->sprite_sheet) std::weak_ptr<SpriteSheet>(_sprite_sheet);
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
@@ -64,13 +72,8 @@ void Sol2D::Lua::pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspa
     lua_setmetatable(_lua, -2);
 }
 
-bool Sol2D::Lua::tryGetSpriteSheet(lua_State * _lua, int _idx, SpriteSheet ** _spire_sheet)
+std::shared_ptr<SpriteSheet> Sol2D::Lua::tryGetSpriteSheet(lua_State * _lua, int _idx)
 {
     Self * self = Self::getUserData(_lua, _idx);
-    if(self)
-    {
-        *_spire_sheet = self->sprite_sheet;
-        return true;
-    }
-    return false;
+    return self ? self->sprite_sheet.lock() : nullptr;
 }

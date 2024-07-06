@@ -134,8 +134,8 @@ int luaApi_AddSpriteAnimation(lua_State * _lua)
     BodyShapePrototype * prototype = getBodyShapePrototype(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, "a sprite animation key expected");
-    SpriteAnimation * sprite_animation = nullptr;
-    luaL_argcheck(_lua, tryGetSpriteAnimation(_lua, 3, &sprite_animation), 3, "a sprite expected");
+    std::shared_ptr<SpriteAnimation> sprite_animation = tryGetSpriteAnimation(_lua, 3);
+    luaL_argcheck(_lua, sprite_animation, 3, "a sprite animation expected");
     BodyShapeGraphicOptions options;
     tryReadShapeGraphicOptions(_lua, 4, options);
     prototype->addGraphic(key, *sprite_animation, options);

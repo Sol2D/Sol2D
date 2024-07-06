@@ -46,6 +46,60 @@ std::shared_ptr<Sprite> Larder::getSprite(const std::string & _key) const
     return it == m_sprites.cend() ? nullptr : it->second;
 }
 
+std::shared_ptr<SpriteSheet> Larder::createSpriteSheet(const std::string & _key)
+{
+    std::shared_ptr<SpriteSheet> sprite_sheet(new SpriteSheet(mr_renderer));
+    m_sprite_sheets[_key] = sprite_sheet;
+    return sprite_sheet;
+}
+
+bool Larder::deleteSpriteSheet(const std::string & _key)
+{
+    return m_sprite_sheets.erase(_key) > 0;
+}
+
+std::shared_ptr<SpriteSheet> Larder::getSpriteSheet(const std::string & _key) const
+{
+    auto it = m_sprite_sheets.find(_key);
+    return it == m_sprite_sheets.cend() ? nullptr : it->second;
+}
+
+std::shared_ptr<SpriteAnimation> Larder::createSpriteAnimation(const std::string & _key)
+{
+    std::shared_ptr<SpriteAnimation> animation(new SpriteAnimation(mr_renderer));
+    m_animations[_key] = animation;
+    return animation;
+}
+
+bool Larder::deleteSpriteAnimation(const std::string & _key)
+{
+    return m_animations.erase(_key) > 0;
+}
+
+std::shared_ptr<SpriteAnimation> Larder::getSpriteAnimation(const std::string & _key) const
+{
+    auto it = m_animations.find(_key);
+    return it == m_animations.cend() ? nullptr : it->second;
+}
+
+std::shared_ptr<BodyPrototype> Larder::createBodyPrototype(const std::string & _key, BodyType _body_type)
+{
+    std::shared_ptr<BodyPrototype> proto(new BodyPrototype(_body_type));
+    m_body_prototypes[_key] = proto;
+    return proto;
+}
+
+bool Larder::deleteBodyPrototype(const std::string & _key)
+{
+    return m_body_prototypes.erase(_key) > 0;
+}
+
+std::shared_ptr<BodyPrototype> Larder::getBodyPrototype(const std::string & _key) const
+{
+    auto it = m_body_prototypes.find(_key);
+    return it == m_body_prototypes.cend() ? nullptr : it->second;
+}
+
 FontPtr Larder::getFont(const std::filesystem::path & _file_path, uint16_t _size)
 {
     const std::string key = makeFontKey(_file_path, _size);

@@ -155,11 +155,13 @@ int luaApi_CreateBody(lua_State * _lua)
     Point position = { .0f, .0f };
     if(!lua_isnil(_lua, 2))
         luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "body position expected");
-    LuaBodyPrototype & lua_proto = getBodyPrototype(_lua, 3);
-    uint64_t body_id = self->scene->createBody(position, lua_proto.proto);
+    std::optional<LuaBodyPrototype> lua_proto = tryGetBodyPrototype(_lua, 3);
+    if(!lua_proto.has_value())
+        luaL_argerror(_lua, 3, "invalid body brototype");
+    uint64_t body_id = self->scene->createBody(position, *lua_proto->proto);
     lua_pushinteger(_lua, body_id);
 
-    if(lua_proto.script_path.has_value())
+    if(lua_proto->script_path.has_value())
     {
         LuaTable table = LuaTable::pushNew(_lua);
         table.setIntegerValue("bodyId", body_id);
@@ -169,7 +171,7 @@ int luaApi_CreateBody(lua_State * _lua)
             lua_pushvalue(_lua, 4);
             table.setValueFromTop("arg");
         }
-        executeScriptWithContext(_lua, *self->workspace, lua_proto.script_path.value());
+        executeScriptWithContext(_lua, *self->workspace, lua_proto->script_path.value());
     }
 
     return 1;

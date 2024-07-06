@@ -33,7 +33,15 @@ const char gc_message_sprite_sheet_expected[] = "sprite sheet expected";
 
 struct Self : LuaUserData<Self, LuaTypeName::sprite_animation>
 {
-    SpriteAnimation * animation;
+    std::weak_ptr<SpriteAnimation> animation;
+
+    std::shared_ptr<SpriteAnimation> getAnimation(lua_State * _lua) const
+    {
+        std::shared_ptr<SpriteAnimation> ptr = animation.lock();
+        if(!ptr)
+            luaL_error(_lua, "the sprite animation is destroyed");
+        return ptr;
+    }
 };
 
 void readSpriteAnimationOptions(lua_State * _lua, int _idx, SpriteAnimationOptions & _options)
@@ -67,7 +75,7 @@ int luaApi_addFrameFromSprite(lua_State * _lua)
     luaL_argcheck(_lua, sprite, 2, "sprite expected");
     SpriteAnimationOptions options;
     readSpriteAnimationOptions(_lua, 3, options);
-    bool result = self->animation->addFrame(*sprite, options);
+    bool result = self->getAnimation(_lua)->addFrame(*sprite, options);
     lua_pushboolean(_lua, result);
     return 1;
 }
@@ -79,13 +87,13 @@ int luaApi_addFrameFromSprite(lua_State * _lua)
 int luaApi_addFrameFromSpriteSheet(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    SpriteSheet * sprite_sheet;
-    luaL_argcheck(_lua, tryGetSpriteSheet(_lua, 2, &sprite_sheet), 2, gc_message_sprite_sheet_expected);
+    std::shared_ptr<SpriteSheet> sprite_sheet = tryGetSpriteSheet(_lua, 2);
+    luaL_argcheck(_lua, sprite_sheet, 2, gc_message_sprite_sheet_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, "sprite index expected");
     size_t index = static_cast<size_t>(lua_tointeger(_lua, 4));
     SpriteAnimationOptions options;
     readSpriteAnimationOptions(_lua, 4, options);
-    bool result = self->animation->addFrame(*sprite_sheet, index, options);
+    bool result = self->getAnimation(_lua)->addFrame(*sprite_sheet, index, options);
     lua_pushboolean(_lua, result);
     return 1;
 }
@@ -97,8 +105,8 @@ int luaApi_addFrameFromSpriteSheet(lua_State * _lua)
 int luaApi_addFrames(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    SpriteSheet * sprite_sheet;
-    luaL_argcheck(_lua, tryGetSpriteSheet(_lua, 2, &sprite_sheet), 2, gc_message_sprite_sheet_expected);
+    std::shared_ptr<SpriteSheet> sprite_sheet = tryGetSpriteSheet(_lua, 2);
+    luaL_argcheck(_lua, sprite_sheet, 2, gc_message_sprite_sheet_expected);
     luaL_argcheck(_lua, lua_istable(_lua, 3), 3, "sprite indices array expected");
     size_t index_count = lua_rawlen(_lua, 3);
     if(index_count == 0)
@@ -117,17 +125,17 @@ int luaApi_addFrames(lua_State * _lua)
     }
     SpriteAnimationOptions options;
     readSpriteAnimationOptions(_lua, 4, options);
-    bool result = self->animation->addFrames(*sprite_sheet, indices, options);
+    bool result = self->getAnimation(_lua)->addFrames(*sprite_sheet, indices, options);
     lua_pushboolean(_lua, result);
     return 1;
 }
 
 } // namespace name
 
-void Sol2D::Lua::pushSpriteAnimationApi(lua_State * _lua, SpriteAnimation & _animation)
+void Sol2D::Lua::pushSpriteAnimationApi(lua_State * _lua, std::shared_ptr<SpriteAnimation> _animation)
 {
     Self * self = Self::pushUserData(_lua);
-    self->animation = &_animation;
+    new(&self->animation) std::weak_ptr<SpriteAnimation>(_animation);
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
@@ -141,13 +149,8 @@ void Sol2D::Lua::pushSpriteAnimationApi(lua_State * _lua, SpriteAnimation & _ani
     lua_setmetatable(_lua, -2);
 }
 
-bool Sol2D::Lua::tryGetSpriteAnimation(lua_State * _lua, int _idx, SpriteAnimation ** _animation)
+std::shared_ptr<SpriteAnimation> Sol2D::Lua::tryGetSpriteAnimation(lua_State * _lua, int _idx)
 {
     Self * self = Self::getUserData(_lua, _idx);
-    if(self)
-    {
-        *_animation = self->animation;
-        return true;
-    }
-    return false;
+    return self ? self->animation.lock() : nullptr;
 }

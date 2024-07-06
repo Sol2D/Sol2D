@@ -42,84 +42,33 @@ public:
     bool deleteSprite(const std::string & _key);
     std::shared_ptr<Sprite> getSprite(const std::string & _key) const;
 
-    SpriteSheet & createSpriteSheet(const std::string & _key)
-    {
-        return m_sprite_sheets.addOrReplaceItem(_key, new SpriteSheet(mr_renderer));
-    }
+    std::shared_ptr<SpriteSheet> createSpriteSheet(const std::string & _key);
+    bool deleteSpriteSheet(const std::string & _key);
+    std::shared_ptr<SpriteSheet> getSpriteSheet(const std::string & _key) const;
 
-    bool deleteSpriteSheet(const std::string & _key)
-    {
-        return m_sprite_sheets.deleteItem(_key);
-    }
+    std::shared_ptr<SpriteAnimation> createSpriteAnimation(const std::string & _key);
+    bool deleteSpriteAnimation(const std::string & _key);
+    std::shared_ptr<SpriteAnimation> getSpriteAnimation(const std::string & _key) const;
 
-    SpriteSheet * getSpriteSheet(const std::string & _key)
-    {
-        return m_sprite_sheets.getItem(_key);
-    }
-
-    const SpriteSheet * getSpriteSheet(const std::string & _key) const
-    {
-        return m_sprite_sheets.getItem(_key);
-    }
-
-    SpriteAnimation & createSpriteAnimation(const std::string & _key)
-    {
-        return m_animations.addOrReplaceItem(_key, new SpriteAnimation(mr_renderer));
-    }
-
-    bool deleteSpriteAnimation(const std::string & _key)
-    {
-        return m_animations.deleteItem(_key);
-    }
-
-    SpriteAnimation * getSpriteAnimation(const std::string & _key)
-    {
-        return m_animations.getItem(_key);
-    }
-
-    const SpriteAnimation * getSpriteAnimation(const std::string & _key) const
-    {
-        return m_animations.getItem(_key);
-    }
-
-    BodyPrototype & createBodyPrototype(const std::string & _key, BodyType _body_type)
-    {
-        return m_body_prototypes.addOrReplaceItem(_key, new BodyPrototype(_body_type));
-    }
-
-    bool deleteBodyPrototype(const std::string & _key)
-    {
-        return m_body_prototypes.deleteItem(_key);
-    }
-
-    BodyPrototype * getBodyPrototype(const std::string & _key)
-    {
-        return m_body_prototypes.getItem(_key);
-    }
-
-    const BodyPrototype * getBodyPrototype(const std::string & _key) const
-    {
-        return m_body_prototypes.getItem(_key);
-    }
+    std::shared_ptr<BodyPrototype> createBodyPrototype(const std::string & _key, BodyType _body_type);
+    bool deleteBodyPrototype(const std::string & _key);
+    std::shared_ptr<BodyPrototype> getBodyPrototype(const std::string & _key) const;
 
     SDL::FontPtr getFont(const std::filesystem::path & _file_path, uint16_t _size);
-
     void freeFont(const std::filesystem::path & _file_path, uint16_t _size);
 
     SDL::SoundChunkPtr getSoundChunk(const std::filesystem::path & _file_path);
-
     void freeSoundChunk(const std::filesystem::path & _file_path);
 
     SDL::MusicPtr getMusic(const std::filesystem::path & _file_path);
-
     void freeMusic(const std::filesystem::path & _file_path);
 
 private:
     SDL_Renderer & mr_renderer;
     std::unordered_map<std::string, std::shared_ptr<Sprite>> m_sprites;
-    Utils::KeyValueStorage<std::string, SpriteSheet> m_sprite_sheets;
-    Utils::KeyValueStorage<std::string, SpriteAnimation> m_animations;
-    Utils::KeyValueStorage<std::string, BodyPrototype> m_body_prototypes;
+    std::unordered_map<std::string, std::shared_ptr<SpriteSheet>> m_sprite_sheets;
+    std::unordered_map<std::string, std::shared_ptr<SpriteAnimation>> m_animations;
+    std::unordered_map<std::string, std::shared_ptr<BodyPrototype>> m_body_prototypes;
     std::unordered_map<std::string, SDL::FontPtr> m_fonts;
     std::unordered_map<std::string, SDL::SoundChunkPtr> m_sound_chunks;
     std::unordered_map<std::string, SDL::MusicPtr> m_musics;
