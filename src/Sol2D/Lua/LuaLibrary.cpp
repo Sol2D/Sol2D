@@ -27,6 +27,8 @@
 #include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/LuaWidgetlApi.h>
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
+#include <Sol2D/Lua/LuaSpriteApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaScript.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
@@ -38,8 +40,6 @@ using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
 
 namespace {
-
-const char * gc_metatable_lib = "sol.Library";
 
 void addSublibrary(lua_State * _lua, const char * _sublib_name, std::function<void()> _push_sublib)
 {
@@ -87,11 +87,12 @@ LuaLibrary::LuaLibrary(const Workspace & _workspace, World & _world) :
         _workspace.getMainLogger().warn("Unable to add Lua package paths");
     }
     lua_newuserdata(mp_lua, 1);
-    if(pushMetatable(mp_lua, gc_metatable_lib) == MetatablePushResult::Created)
+    if(pushMetatable(mp_lua, LuaTypeName::lib) == MetatablePushResult::Created)
     {
         addSublibrary(mp_lua, "world", [this, &_world]() { pushWorldApi(mp_lua, mr_workspace, _world); });
         addSublibrary(mp_lua, "heartbeat", [this]() { pushHeartbeatApi(mp_lua); });
         addSublibrary(mp_lua, "keyboard", [this]() { pushKeyboardApiOntoStack(mp_lua); });
+        addSublibrary(mp_lua, "Scancode", [this]() { pushScancodeEnum(mp_lua); });
         addSublibrary(mp_lua, "Scancode", [this]() { pushScancodeEnum(mp_lua); });
         addSublibrary(mp_lua, "BodyType", [this]() { pushBodyTypeEnum(mp_lua); });
         addSublibrary(mp_lua, "BodyShapeType", [this]() { pushBodyShapeTypeEnum(mp_lua); });

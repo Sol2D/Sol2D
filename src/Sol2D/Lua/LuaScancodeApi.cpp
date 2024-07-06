@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaScancodeApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <SDL3/SDL_scancode.h>
@@ -22,16 +23,10 @@
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
 
-namespace {
-
-const char * gc_metatable_scancode = "sol.Scancode";
-
-} // namespace name
-
 void Sol2D::Lua::pushScancodeEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, gc_metatable_scancode) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::scancode) == MetatablePushResult::Created)
     {
         LuaTable table(_lua);
         table.setIntegerValue("RIGHT_ARROW", SDL_SCANCODE_RIGHT);

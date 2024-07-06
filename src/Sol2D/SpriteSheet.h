@@ -16,10 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/SDL/SDL.h>
-#include <Sol2D/Rect.h>
-#include <Sol2D/Color.h>
-#include <Sol2D/Def.h>
+#include <Sol2D/Sprite.h>
 #include <vector>
 #include <optional>
 #include <filesystem>
@@ -49,8 +46,9 @@ public:
     bool loadFromFile(const std::filesystem::path & _path, const SpriteSheetOptions & _options);
     bool isValid() const;
     size_t getSpriteCount() const;
-    const std::vector<Rect> & getRects() const;
-    SDL::TexturePtr getTexture() const;
+    Sprite toSprite(size_t _idx);
+    const std::vector<Rect> & getRects() const; // TODO: delete
+    SDL::TexturePtr getTexture() const; // TODO: delete
 
 private:
     SDL_Renderer * mp_renderer;
@@ -66,6 +64,11 @@ inline bool SpriteSheet::isValid() const
 inline size_t SpriteSheet::getSpriteCount() const
 {
     return m_rects.size();
+}
+
+inline Sprite SpriteSheet::toSprite(size_t _idx)
+{
+    return _idx >= m_rects.size() ? Sprite(*mp_renderer) : Sprite(*mp_renderer, m_texture_ptr, m_rects[_idx]);
 }
 
 inline const std::vector<Rect> & SpriteSheet::getRects() const

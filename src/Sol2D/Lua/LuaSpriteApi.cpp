@@ -18,6 +18,7 @@
 #include <Sol2D/Lua/LuaSpriteOptionsApi.h>
 #include <Sol2D/Lua/LuaRectApi.h>
 #include <Sol2D/Lua/LuaSizeApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
@@ -26,12 +27,18 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_sprite[] = "sol.Sprite";
-
-struct Self : LuaUserData<Self, gc_metatable_sprite>
+struct Self : LuaUserData<Self, LuaTypeName::sprite>
 {
-    Sprite * sprite;
+    std::weak_ptr<Sprite> sprite;
     const Workspace * workspace;
+
+    std::shared_ptr<Sprite> getSprite(lua_State * _lua) const
+    {
+        std::shared_ptr<Sprite> ptr = sprite.lock();
+        if(!ptr)
+            luaL_error(_lua, "the sprite is destroyed");
+        return ptr;
+    }
 };
 
 // 1 self
@@ -44,8 +51,16 @@ int luaApi_LoadFromFile(lua_State * _lua)
     luaL_argcheck(_lua, path != nullptr, 2, "path expected");
     SpriteOptions options;
     tryGetSpriteOptions(_lua, 3, options);
-    bool result = self->sprite->loadFromFile(self->workspace->getResourceFullPath(path), options);
+    bool result = self->getSprite(_lua)->loadFromFile(self->workspace->getResourceFullPath(path), options);
     lua_pushboolean(_lua, result);
+    return 1;
+}
+
+// 1 self
+int luaApi_IsValid(lua_State * _lua)
+{
+    Self * self = Self::getUserData(_lua, 1);
+    lua_pushboolean(_lua, self->getSprite(_lua)->isValid());
     return 1;
 }
 
@@ -53,7 +68,7 @@ int luaApi_LoadFromFile(lua_State * _lua)
 int luaApi_GetSourceRect(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    pushRect(_lua, self->sprite->getSourceRect());
+    pushRect(_lua, self->getSprite(_lua)->getSourceRect());
     return 1;
 }
 
@@ -61,7 +76,7 @@ int luaApi_GetSourceRect(lua_State * _lua)
 int luaApi_GetDestinationSize(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    const Size & size = self->sprite->getDestinationSize();
+    const Size & size = self->getSprite(_lua)->getDestinationSize();
     pushSize(_lua, size);
     return 1;
 }
@@ -73,7 +88,7 @@ int luaApi_SetDestinationSize(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     Size size;
     luaL_argcheck(_lua, tryGetSize(_lua, 2, size), 2, "size required");
-    self->sprite->setDesinationSize(size);
+    self->getSprite(_lua)->setDesinationSize(size);
     return 0;
 }
 
@@ -87,28 +102,29 @@ int luaApi_Scale(lua_State * _lua)
     {
         float scale_factor = static_cast<float>(lua_tonumber(_lua, 2));
         if(lua_isnumber(_lua, 3))
-            self->sprite->scale(scale_factor, static_cast<float>(lua_tonumber(_lua, 3)));
+            self->getSprite(_lua)->scale(scale_factor, static_cast<float>(lua_tonumber(_lua, 3)));
         else
-            self->sprite->scale(scale_factor);
+            self->getSprite(_lua)->scale(scale_factor);
     }
     else
     {
-        self->sprite->scale(1.0f);
+        self->getSprite(_lua)->scale(1.0f);
     }
     return 0;
 }
 
 } // namespace name
 
-void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, Sprite & _sprite)
+void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Sprite> _sprite)
 {
     Self * self = Self::pushUserData(_lua);
-    self->sprite = &_sprite;
     self->workspace = &_workspace;
+    new(&self->sprite) std::weak_ptr<Sprite>(_sprite);
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
             { "loadFromFile", luaApi_LoadFromFile },
+            { "isValid", luaApi_IsValid },
             { "getSourceRect", luaApi_GetSourceRect },
             { "getDestinationSize", luaApi_GetDestinationSize },
             { "setDestinationSize", luaApi_SetDestinationSize },
@@ -120,13 +136,8 @@ void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, S
     lua_setmetatable(_lua, -2);
 }
 
-bool Sol2D::Lua::tryGetSprite(lua_State * _lua, int _idx, Sprite ** _spire)
+std::shared_ptr<Sprite> Sol2D::Lua::tryGetSprite(lua_State * _lua, int _idx)
 {
     Self * self = Self::getUserData(_lua, _idx);
-    if(self)
-    {
-        *_spire = self->sprite;
-        return true;
-    }
-    return false;
+    return self ? self->sprite.lock() : nullptr;
 }

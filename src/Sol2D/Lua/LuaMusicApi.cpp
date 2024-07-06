@@ -15,16 +15,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaMusicApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
+using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
 using namespace Sol2D::SDL;
 
 namespace {
 
-const char gc_metatable_music[] = "sol.Music";
-
-struct Self : LuaUserData<Self, gc_metatable_music>
+struct Self : LuaUserData<Self, LuaTypeName::music>
 {
     MusicPtr music;
 };

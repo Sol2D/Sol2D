@@ -43,6 +43,7 @@ public:
     S2_DEFAULT_COPY_AND_MOVE(Sprite)
 
     explicit Sprite(SDL_Renderer & _renderer);
+    Sprite(SDL_Renderer & _renderer, SDL::TexturePtr _texture, const Rect & _rect);
     bool loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options = SpriteOptions());
     bool isValid() const;
     SDL::TexturePtr getTexture() const;
@@ -64,6 +65,14 @@ inline Sprite::Sprite(SDL_Renderer & _renderer) :
     mp_renderer(&_renderer),
     m_source_rect({ .0f, .0f, .0f, .0f }),
     m_desination_size({ .0f, .0f })
+{
+}
+
+inline Sprite::Sprite(SDL_Renderer & _renderer, SDL::TexturePtr _texture, const Rect & _rect) :
+    mp_renderer(&_renderer),
+    m_texture_ptr(_texture),
+    m_source_rect(_rect),
+    m_desination_size(_rect.getSize())
 {
 }
 

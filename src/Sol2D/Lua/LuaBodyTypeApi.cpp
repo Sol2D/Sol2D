@@ -18,21 +18,17 @@
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
 
-namespace {
-
-const char * gc_metatable_body_type = "sol.BodyType";
-
-} // namespace name
 
 void Sol2D::Lua::pushBodyTypeEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, gc_metatable_body_type) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::body_type) == MetatablePushResult::Created)
     {
         LuaTable table(_lua);
         table.setIntegerValue("DYNAMIC", static_cast<lua_Integer>(BodyType::Dynamic));

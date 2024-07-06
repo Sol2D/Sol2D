@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaHeartbeatApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
@@ -23,11 +24,10 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_heartbeat[] = "sol.Heartbeat";
 char __gc_registry_key_heartbeat_anchor = '\0';
 constexpr void * gc_registry_key_heartbeat = static_cast<void *>(&__gc_registry_key_heartbeat_anchor);
 
-struct Self : LuaUserData<Self, gc_metatable_heartbeat> { };
+struct Self : LuaUserData<Self, LuaTypeName::heartbeat> { };
 
 // 1 self
 // 2 callback

@@ -19,6 +19,7 @@
 #include <Sol2D/Lua/LuaFormApi.h>
 #include <Sol2D/Lua/LuaLarderApi.h>
 #include <Sol2D/Lua/LuaFragmentApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
@@ -27,12 +28,11 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_world[] = "sol.World";
 const char gc_message_larder_key_expected[] = "a larder key expected";
 const char gc_message_fragment_id_expected[] = "a fragment ID expected";
 const char gc_message_scene_name_expected[] = "a scene name expected";
 
-struct Self : LuaUserData<Self, gc_metatable_world>
+struct Self : LuaUserData<Self, LuaTypeName::world>
 {
     World * world;
     const Workspace * workspace;

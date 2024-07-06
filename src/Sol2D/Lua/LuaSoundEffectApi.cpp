@@ -15,17 +15,17 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaSoundEffectApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
 using namespace Sol2D::SDL;
+using namespace Lua;
 using namespace Lua::Aux;
 
 namespace {
 
-const char gc_metatable_sound_effect[] = "sol.SoundEffect";
-
-struct Self : LuaUserData<Self, gc_metatable_sound_effect>
+struct Self : LuaUserData<Self, LuaTypeName::sound_effect>
 {
     SoundChunkPtr chunk;
 };

@@ -28,6 +28,24 @@ inline std::string makeFontKey(const std::filesystem::path & _file_path, uint16_
 
 } // namespace name
 
+std::shared_ptr<Sprite> Larder::createSprite(const std::string & _key)
+{
+    std::shared_ptr<Sprite> sprite(new Sprite(mr_renderer));
+    m_sprites[_key] = sprite;
+    return sprite;
+}
+
+bool Larder::deleteSprite(const std::string & _key)
+{
+    return m_sprites.erase(_key) > 0;
+}
+
+std::shared_ptr<Sprite> Larder::getSprite(const std::string & _key) const
+{
+    auto it = m_sprites.find(_key);
+    return it == m_sprites.cend() ? nullptr : it->second;
+}
+
 FontPtr Larder::getFont(const std::filesystem::path & _file_path, uint16_t _size)
 {
     const std::string key = makeFontKey(_file_path, _size);

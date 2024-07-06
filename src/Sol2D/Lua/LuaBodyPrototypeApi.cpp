@@ -18,6 +18,7 @@
 #include <Sol2D/Lua/LuaBodyShapePrototypeApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaRectApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
@@ -26,10 +27,9 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_body_prototype[] = "sol.BodyPrototype";
 const char gc_message_shape_key_expected[] = "a shape key expected";
 
-struct Self : LuaBodyPrototype, LuaUserData<Self, gc_metatable_body_prototype>
+struct Self : LuaBodyPrototype, LuaUserData<Self, LuaTypeName::body_prototype>
 {
 };
 

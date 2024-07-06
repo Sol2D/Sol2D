@@ -15,23 +15,17 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D::Forms;
 using namespace Sol2D::Lua::Aux;
 
-namespace {
-
-const char gc_metatable_vertical_text_alignment[] = "sol.HorizontalTextAlignment";
-const char gc_metatable_horizontal_text_alignment[] = "sol.VerticalTextAlignment";
-
-} // namespace
-
 void Sol2D::Lua::pushVerticalTextAlignmentEmum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, gc_metatable_vertical_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::vertical_text_alignment) == MetatablePushResult::Created)
     {
         LuaTable table(_lua);
         table.setIntegerValue("NONE", static_cast<lua_Integer>(VerticalTextAlignment::None));
@@ -45,7 +39,7 @@ void Sol2D::Lua::pushVerticalTextAlignmentEmum(lua_State * _lua)
 void Sol2D::Lua::pushHorizontalTextAlignmentEmum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, gc_metatable_horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
     {
         LuaTable table(_lua);
         table.setIntegerValue("NONE", static_cast<lua_Integer>(HorizontalTextAlignment::None));

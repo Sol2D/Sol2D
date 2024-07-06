@@ -15,22 +15,17 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/BodyShapeType.h>
 
 using namespace Sol2D::Lua::Aux;
 
-namespace {
-
-const char gc_metatable_body_shape_type[] = "sol.BodyShapeType";
-
-} // namespace
-
 void Sol2D::Lua::pushBodyShapeTypeEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, gc_metatable_body_shape_type) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::body_shape_type) == MetatablePushResult::Created)
     {
         LuaTable table(_lua);
         table.setIntegerValue("CIRCLE", static_cast<lua_Integer>(BodyShapeType::Circle));

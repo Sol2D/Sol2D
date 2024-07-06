@@ -21,6 +21,7 @@
 #include <Sol2D/Lua/LuaBodyShapeOptionsApi.h>
 #include <Sol2D/Lua/LuaContactApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 #include <Sol2D/Lua/Aux/LuaWeakRegistryStorage.h>
@@ -33,13 +34,12 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_scene[] = "sol.Scene";
 const char gc_message_body_id_expected[] = "a body ID expected";
 const char gc_message_shape_key_expected[] = "a shape key expected";
 const char gc_message_graphic_key_expected[] = "a graphic key expected";
 const char gc_message_subscription_id_expected[] = "a subscriptin ID expected";
 
-struct Self : LuaUserData<Self, gc_metatable_scene>
+struct Self : LuaUserData<Self, LuaTypeName::scene>
 {
     Scene * scene;
     const Workspace * workspace;

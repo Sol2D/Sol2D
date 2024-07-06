@@ -36,13 +36,13 @@ self = nil
 ---@field w number
 ---@field h number
 
----@class Color 
+---@class Color
 ---@field r integer
 ---@field g integer
 ---@field b integer
 ---@field a integer?
 
----@class SpriteOptions 
+---@class SpriteOptions
 ---@field colorToAlpha Color?
 ---@field rect Rectangle?
 ---@field autodetectRect boolean? default false
@@ -58,7 +58,7 @@ self = nil
 ---@field verticalSpacing integer?
 ---@field colorToAlpha Color?
 
----@class ShapeGraphicOptions 
+---@class ShapeGraphicOptions
 ---@field position Point?
 ---@field isFlippedHorizontally boolean?
 ---@field isFlippedVertically boolean?
@@ -486,6 +486,9 @@ local __sprite
 ---@param options SpriteOptions?
 ---@return boolean
 function __sprite:loadFromFile(path, options) end
+
+---@return boolean
+function __sprite:isValid() end
 
 ---@return Rectangle
 function __sprite:getSourceRect() end

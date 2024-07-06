@@ -18,6 +18,7 @@
 #include <Sol2D/Lua/LuaColorApi.h>
 #include <Sol2D/Lua/LuaFontApi.h>
 #include <Sol2D/Lua/LuaWidgetlApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
@@ -28,9 +29,7 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_form[] = "sol.Form";
-
-struct Self : LuaUserData<Self, gc_metatable_form>
+struct Self : LuaUserData<Self, LuaTypeName::form>
 {
     Form * form;
     const Workspace * workspace;

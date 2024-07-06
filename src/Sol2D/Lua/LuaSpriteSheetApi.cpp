@@ -16,6 +16,7 @@
 
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetOptionsApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
@@ -24,9 +25,7 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_sprite_sheet[] = "sol.SpriteSheet";
-
-struct Self : LuaUserData<Self, gc_metatable_sprite_sheet>
+struct Self : LuaUserData<Self, LuaTypeName::sprite_sheet>
 {
     const Workspace * workspace;
     SpriteSheet * sprite_sheet;

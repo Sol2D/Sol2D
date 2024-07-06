@@ -20,6 +20,7 @@
 #include <Sol2D/Lua/LuaColorApi.h>
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
 #include <Sol2D/Lua/LuaWidgetPaddingApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaWeakRegistryStorage.h>
@@ -31,10 +32,6 @@ using namespace Sol2D::Lua::Aux;
 using namespace Sol2D::Forms;
 
 namespace {
-
-const char gc_metatable_widget_state[] = "sol.WidgetState";
-const char gc_metatable_label[] = "sol.Label";
-const char gc_metatable_button[] = "sol.Button";
 
 const char gc_message_color_required[] = "color required";
 const char gc_message_alignment_required[] = "alignment required";
@@ -75,11 +72,11 @@ struct Self : LuaUserData<SelfT, metatable>
     WidgetT * widget;
 };
 
-struct LabelSelf : Self<LabelSelf, Label, gc_metatable_label>
+struct LabelSelf : Self<LabelSelf, Label, LuaTypeName::label>
 {
 };
 
-struct ButtonSelf : Self<ButtonSelf, Button, gc_metatable_button>
+struct ButtonSelf : Self<ButtonSelf, Button, LuaTypeName::button>
 {
     const Workspace * workspace;
     LuaButtonClickObserver * click_observer;
@@ -354,7 +351,7 @@ constexpr std::array<luaL_Reg, 1> gc_null_funcs =
 void Sol2D::Lua::pushWidgetStateEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, gc_metatable_widget_state) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::widget_state) == MetatablePushResult::Created)
     {
         LuaTable table(_lua);
         table.setIntegerValue("DEFAULT", static_cast<lua_Integer>(WidgetState::Default));

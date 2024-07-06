@@ -22,6 +22,7 @@
 #include <Sol2D/Lua/LuaFontApi.h>
 #include <Sol2D/Lua/LuaSoundEffectApi.h>
 #include <Sol2D/Lua/LuaMusicApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
@@ -30,7 +31,6 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_larder[] = "sol.Larder";
 const char gc_message_body_prototype_key_expected[] = "a body prototype key expected";
 const char gc_message_sprite_key_expected[] = "a sprite key expected";
 const char gc_message_sprite_sheet_key_expected[] = "a sprite sheet key expected";
@@ -40,7 +40,7 @@ const char gc_message_font_size_expected[] = "a font size expected";
 const char gc_message_sound_effect_file_path_expected[] = "a sound effect file path expected";
 const char gc_message_music_file_path_expected[] = "a music file path expected";
 
-struct Self : LuaUserData<Self, gc_metatable_larder>
+struct Self : LuaUserData<Self, LuaTypeName::larder>
 {
     Larder * larder;
     const Workspace * workspace;
@@ -96,7 +96,7 @@ int luaApi_CreateSprite(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_key_expected);
-    Sprite & sprite = self->larder->createSprite(key);
+    std::shared_ptr<Sprite> sprite = self->larder->createSprite(key);
     pushSpriteApi(_lua, *self->workspace, sprite);
     return 1;
 }
@@ -108,9 +108,9 @@ int luaApi_GetSprite(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_key_expected);
-    Sprite * sprite = self->larder->getSprite(key);
+    std::shared_ptr<Sprite> sprite = self->larder->getSprite(key);
     if(sprite)
-        pushSpriteApi(_lua, *self->workspace, *sprite);
+        pushSpriteApi(_lua, *self->workspace, sprite);
     else
         lua_pushnil(_lua);
     return 1;

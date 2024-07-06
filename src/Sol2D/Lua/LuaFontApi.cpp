@@ -17,6 +17,7 @@
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/LuaFontApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -25,9 +26,7 @@ using namespace Sol2D::SDL;
 
 namespace {
 
-const char gc_metatable_font[] = "sol.Font";
-
-struct Self : LuaUserData<Self, gc_metatable_font>
+struct Self : LuaUserData<Self, LuaTypeName::font>
 {
     FontPtr font;
 };

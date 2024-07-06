@@ -38,25 +38,9 @@ public:
     {
     }
 
-    Sprite & createSprite(const std::string & _key)
-    {
-        return m_sprites.addOrReplaceItem(_key, new Sprite(mr_renderer));
-    }
-
-    bool deleteSprite(const std::string & _key)
-    {
-        return m_sprites.deleteItem(_key);
-    }
-
-    Sprite * getSprite(const std::string & _key)
-    {
-        return m_sprites.getItem(_key);
-    }
-
-    const Sprite * getSprite(const std::string & _key) const
-    {
-        return m_sprites.getItem(_key);
-    }
+    std::shared_ptr<Sprite> createSprite(const std::string & _key);
+    bool deleteSprite(const std::string & _key);
+    std::shared_ptr<Sprite> getSprite(const std::string & _key) const;
 
     SpriteSheet & createSpriteSheet(const std::string & _key)
     {
@@ -132,7 +116,7 @@ public:
 
 private:
     SDL_Renderer & mr_renderer;
-    Utils::KeyValueStorage<std::string, Sprite> m_sprites;
+    std::unordered_map<std::string, std::shared_ptr<Sprite>> m_sprites;
     Utils::KeyValueStorage<std::string, SpriteSheet> m_sprite_sheets;
     Utils::KeyValueStorage<std::string, SpriteAnimation> m_animations;
     Utils::KeyValueStorage<std::string, BodyPrototype> m_body_prototypes;

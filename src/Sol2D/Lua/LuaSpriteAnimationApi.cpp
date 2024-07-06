@@ -18,6 +18,7 @@
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
@@ -28,10 +29,9 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_sprite_animation[] = "sol.SpriteAnimation";
 const char gc_message_sprite_sheet_expected[] = "sprite sheet expected";
 
-struct Self : LuaUserData<Self, gc_metatable_sprite_animation>
+struct Self : LuaUserData<Self, LuaTypeName::sprite_animation>
 {
     SpriteAnimation * animation;
 };
@@ -63,8 +63,8 @@ void readSpriteAnimationOptions(lua_State * _lua, int _idx, SpriteAnimationOptio
 int luaApi_addFrameFromSprite(lua_State * _lua)
 {
     Self * self = Self::getUserData(_lua, 1);
-    Sprite * sprite;
-    luaL_argcheck(_lua, tryGetSprite(_lua, 2, &sprite), 2, "sprite expected");
+    std::shared_ptr<Sprite> sprite = tryGetSprite(_lua, 2);
+    luaL_argcheck(_lua, sprite, 2, "sprite expected");
     SpriteAnimationOptions options;
     readSpriteAnimationOptions(_lua, 3, options);
     bool result = self->animation->addFrame(*sprite, options);

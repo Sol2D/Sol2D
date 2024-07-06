@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaKeyboardApi.h>
+#include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <SDL3/SDL_keyboard.h>
 
@@ -23,9 +24,7 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_keyboard[] = "sol.Keyboard";
-
-struct Self : LuaUserData<Self, gc_metatable_keyboard>
+struct Self : LuaUserData<Self, LuaTypeName::keyboard>
 {
     int kb_state_length;
     const Uint8 * kb_state;

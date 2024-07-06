@@ -22,6 +22,7 @@
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/LuaStrings.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -29,30 +30,27 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_metatable_body_circle_shape_prototype[] = "sol.BodyCircleShapePrototype";
-const char gc_metatable_body_polygon_shape_prototype[] = "sol.BodyPolygonShapePrototype";
-
-struct BodyPolygonShapePrototypeSelf : LuaUserData<BodyPolygonShapePrototypeSelf, gc_metatable_body_polygon_shape_prototype>
+struct BodyPolygonShapePrototypeSelf : LuaUserData<BodyPolygonShapePrototypeSelf, LuaTypeName::body_polygon_shape_prototype>
 {
     BodyPolygonShapePrototype * shape_prototype;
 };
 
-struct BodyCircleShapePrototypeSelf : LuaUserData<BodyCircleShapePrototypeSelf, gc_metatable_body_circle_shape_prototype>
+struct BodyCircleShapePrototypeSelf : LuaUserData<BodyCircleShapePrototypeSelf, LuaTypeName::body_circle_shape_prototype>
 {
     BodyCircleShapePrototype * shape_prototype;
 };
 
 BodyShapePrototype * getBodyShapePrototype(lua_State * _lua, int _idx)
 {
-    void * user_data = luaL_testudata(_lua, _idx, gc_metatable_body_polygon_shape_prototype);
+    void * user_data = luaL_testudata(_lua, _idx, LuaTypeName::body_polygon_shape_prototype);
     if(user_data == nullptr)
     {
-        user_data = luaL_testudata(_lua, _idx, gc_metatable_body_circle_shape_prototype);
+        user_data = luaL_testudata(_lua, _idx, LuaTypeName::body_circle_shape_prototype);
         if(user_data == nullptr)
         {
             std::stringstream ss;
-            ss << gc_metatable_body_polygon_shape_prototype << " or "
-               << gc_metatable_body_circle_shape_prototype << "expected";
+            ss << LuaTypeName::body_polygon_shape_prototype << " or "
+               << LuaTypeName::body_circle_shape_prototype << "expected";
             luaL_argerror(_lua, _idx, ss.str().c_str());
         }
         else
@@ -119,8 +117,8 @@ int luaApi_AddSprite(lua_State * _lua)
     BodyShapePrototype * prototype = getBodyShapePrototype(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, "a sprite key expected");
-    Sprite * sprite = nullptr;
-    luaL_argcheck(_lua, tryGetSprite(_lua, 3, &sprite), 3, "a sprite expected");
+    std::shared_ptr<Sprite> sprite = tryGetSprite(_lua, 3);
+    luaL_argcheck(_lua, sprite, 3, "a sprite expected");
     BodyShapeGraphicOptions options;
     tryReadShapeGraphicOptions(_lua, 4, options);
     prototype->addGraphic(key, *sprite, options);
