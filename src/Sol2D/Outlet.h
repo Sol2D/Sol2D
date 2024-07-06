@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include <Sol2D/SDL/SDL.h>
 #include <Sol2D/Fragment.h>
 #include <Sol2D/Canvas.h>
+#include <SDL3/SDL.h>
 
 namespace Sol2D {
 
@@ -39,7 +39,7 @@ private:
     SDL_Renderer & mr_renderer;
     Rect m_rect;
     Canvas * mp_canvas;
-    SDL::TexturePtr m_texture_ptr;
+    std::shared_ptr<SDL_Texture> m_texture_ptr;
 };
 
 inline const Fragment & Outlet::getFragment() const

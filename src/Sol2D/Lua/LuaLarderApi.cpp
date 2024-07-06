@@ -212,7 +212,7 @@ int luaApi_GetFont(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_font_file_path_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, gc_message_font_size_expected);
-    SDL::FontPtr font = self->larder->getFont(
+    std::shared_ptr<TTF_Font> font = self->larder->getFont(
         self->workspace->getResourceFullPath(std::filesystem::path(path)),
         static_cast<uint16_t>(lua_tointeger(_lua, 3))
     );
@@ -246,7 +246,7 @@ int luaApi_GetSoundEffect(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_sound_effect_file_path_expected);
-    SDL::SoundChunkPtr chunk = self->larder->getSoundChunk(
+    std::shared_ptr<Mix_Chunk> chunk = self->larder->getSoundChunk(
         self->workspace->getResourceFullPath(std::filesystem::path(path))
     );
     if(chunk == nullptr)
@@ -276,7 +276,7 @@ int luaApi_GetMusic(lua_State * _lua)
     Self * self = Self::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_music_file_path_expected);
-    SDL::MusicPtr chunk = self->larder->getMusic(
+    std::shared_ptr<Mix_Music> chunk = self->larder->getMusic(
         self->workspace->getResourceFullPath(std::filesystem::path(path))
     );
     if(chunk == nullptr)

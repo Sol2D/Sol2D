@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/SpriteSheet.h>
+#include <Sol2D/SDL/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
 using namespace Sol2D;
@@ -43,7 +44,7 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
             SDL_MapRGBA(surface->format, color.r, color.g, color.b, color.a)
             );
     }
-    m_texture_ptr = wrapSdlTexturePtr(SDL_CreateTextureFromSurface(mp_renderer, surface));
+    m_texture_ptr = wrapTexture(SDL_CreateTextureFromSurface(mp_renderer, surface));
     SDL_DestroySurface(surface);
     Rect rect = makeRect(
         .0f,

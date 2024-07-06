@@ -27,8 +27,11 @@ namespace {
 
 struct Self : LuaUserData<Self, LuaTypeName::sprite_sheet>
 {
-    const Workspace * workspace;
-    std::weak_ptr<SpriteSheet> sprite_sheet;
+    Self(const Workspace & _workplace, std::shared_ptr<SpriteSheet> & _sprite_sheet) :
+        workspace(_workplace),
+        sprite_sheet(_sprite_sheet)
+    {
+    }
 
     std::shared_ptr<SpriteSheet> getSpriteSheet(lua_State * _lua) const
     {
@@ -37,6 +40,9 @@ struct Self : LuaUserData<Self, LuaTypeName::sprite_sheet>
             luaL_error(_lua, "the sprite sheet is destroyed");
         return ptr;
     }
+
+    const Workspace & workspace;
+    std::weak_ptr<SpriteSheet> sprite_sheet;
 };
 
 // 1 self
@@ -49,7 +55,7 @@ int luaApi_LoadFromFile(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     SpriteSheetOptions options;
     luaL_argcheck(_lua,  tryGetSpriteSheetOptions(_lua, 3, options), 3, "sprite sheet options expected");
-    bool result = self->getSpriteSheet(_lua)->loadFromFile(self->workspace->getResourceFullPath(path), options);
+    bool result = self->getSpriteSheet(_lua)->loadFromFile(self->workspace.getResourceFullPath(path), options);
     lua_pushboolean(_lua, result);
     return 1;
 }
@@ -58,9 +64,7 @@ int luaApi_LoadFromFile(lua_State * _lua)
 
 void Sol2D::Lua::pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<SpriteSheet> _sprite_sheet)
 {
-    Self * self = Self::pushUserData(_lua);
-    self->workspace = &_workspace;
-    new(&self->sprite_sheet) std::weak_ptr<SpriteSheet>(_sprite_sheet);
+    Self::pushUserData(_lua, std::ref(_workspace), _sprite_sheet);
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {

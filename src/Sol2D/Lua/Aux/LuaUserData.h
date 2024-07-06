@@ -19,17 +19,19 @@
 #include <lua.hpp>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <cstring>
+#include <new>
 
 namespace Sol2D::Lua::Aux {
 
 template<typename UserData, const char metatable[]>
 struct LuaUserData
 {
-    static UserData * pushUserData(lua_State * _lua)
+    template<typename ...CtorArgs>
+    static UserData * pushUserData(lua_State * _lua, CtorArgs ... _ctor_args)
     {
         void * data = lua_newuserdata(_lua, sizeof(UserData));
         std::memset(data, 0, sizeof(UserData));
-        return static_cast<UserData *>(data);
+        return new(data) UserData(_ctor_args...);
     }
 
     static MetatablePushResult pushMetatable(lua_State * _lua)

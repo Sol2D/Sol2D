@@ -16,12 +16,13 @@
 
 #pragma once
 
-#include <Sol2D/SDL/TTF.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
+#include <SDL3_ttf/SDL_ttf.h>
+#include <memory>
 
 namespace Sol2D::Lua {
 
-void pushFontApi(lua_State * _lua, SDL::FontPtr _font);
-SDL::FontPtr tryGetFont(lua_State * _lua, int _idx);
+void pushFontApi(lua_State * _lua, std::shared_ptr<TTF_Font> _font);
+std::shared_ptr<TTF_Font> tryGetFont(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

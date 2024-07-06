@@ -19,6 +19,7 @@
 #include <Sol2D/Utils/Zstd.h>
 #include <Sol2D/Utils/Base64.h>
 #include <Sol2D/Utils/String.h>
+#include <Sol2D/SDL/SDL.h>
 #include <Sol2D/Def.h>
 #include <SDL3_image/SDL_image.h>
 #include <tinyxml2.h>
@@ -80,7 +81,7 @@ protected:
     std::string formatFileReadErrorMessage(const fs::path & _path) const;
     std::string formatXmlRootElemetErrorMessage(const char * _expected) const;
     bool tryParseColor(const char * _value, Color & _color) const;
-    TexturePtr parseImage(const XMLElement & _xml);
+    std::shared_ptr<SDL_Texture> parseImage(const XMLElement & _xml);
 
 protected:
     SDL_Renderer & mr_renderer;
@@ -144,7 +145,7 @@ public:
     void loadFromXml(const XMLElement & _xml, uint32_t _first_gid);
 
 private:
-    void makeTiles(TexturePtr _texture, TileSet & _set, uint32_t _first_gid, uint32_t _tile_width,
+    void makeTiles(std::shared_ptr<SDL_Texture> _texture, TileSet & _set, uint32_t _first_gid, uint32_t _tile_width,
                    uint32_t _tile_height, uint32_t _spacing, uint32_t _margin);
     void makeTile(const XMLElement & _xml_tile, TileSet & _set, uint32_t _first_gid);
 
@@ -351,7 +352,7 @@ bool XmlLoader::tryParseColor(const char * _value, Color & _color) const
     return true;
 }
 
-TexturePtr XmlLoader::parseImage(const XMLElement & _xml)
+std::shared_ptr<SDL_Texture> XmlLoader::parseImage(const XMLElement & _xml)
 {
     SDL_Surface * surface = nullptr;
     if(const char * source = _xml.Attribute("source"))
@@ -382,7 +383,7 @@ TexturePtr XmlLoader::parseImage(const XMLElement & _xml)
     }
     SDL_Texture * texture = SDL_CreateTextureFromSurface(&mr_renderer, surface);
     SDL_DestroySurface(surface);
-    return wrapSdlTexturePtr(texture);
+    return wrapTexture(texture);
 }
 
 inline TileMapXmlLoader::TileMapXmlLoader(SDL_Renderer & _renderer,
@@ -937,7 +938,7 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
 
     if(const XMLElement * xml_image = _xml.FirstChildElement("image"))
     {
-        TexturePtr texture = parseImage(*xml_image);
+        std::shared_ptr<SDL_Texture> texture = parseImage(*xml_image);
         makeTiles(texture, set, _first_gid, tile_width, tile_height, spacing, margin);
     }
     else
@@ -958,7 +959,7 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
     // TODO: <transformations>
 }
 
-void TileSetXmlLoader::makeTiles(TexturePtr _texture,
+void TileSetXmlLoader::makeTiles(std::shared_ptr<SDL_Texture> _texture,
                                  TileSet & _set,
                                  uint32_t _first_gid,
                                  uint32_t _tile_width,
@@ -985,7 +986,7 @@ void TileSetXmlLoader::makeTile(const XMLElement & _xml_tile, TileSet & _set, ui
     uint32_t gid = readRequiredUintAttribute(_xml_tile, "id") + _first_gid;
     if(const XMLElement * xml_image = _xml_tile.FirstChildElement("image"))
     {
-        TexturePtr texture = parseImage(*xml_image);
+        std::shared_ptr<SDL_Texture> texture = parseImage(*xml_image);
         uint32_t x = xml_image->UnsignedAttribute("x");
         uint32_t y = xml_image->UnsignedAttribute("y");
         uint32_t width = xml_image->UnsignedAttribute("width");

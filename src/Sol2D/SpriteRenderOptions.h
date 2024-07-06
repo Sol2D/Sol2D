@@ -17,7 +17,7 @@
 #pragma once
 
 #include <Sol2D/Rect.h>
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_surface.h>
 #include <optional>
 
 namespace Sol2D {

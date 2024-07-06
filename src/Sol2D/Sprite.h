@@ -18,8 +18,8 @@
 
 #include <Sol2D/SpriteRenderOptions.h>
 #include <Sol2D/Def.h>
-#include <Sol2D/SDL/SDL.h>
 #include <Sol2D/Color.h>
+#include <SDL3/SDL.h>
 #include <filesystem>
 #include <optional>
 
@@ -43,10 +43,10 @@ public:
     S2_DEFAULT_COPY_AND_MOVE(Sprite)
 
     explicit Sprite(SDL_Renderer & _renderer);
-    Sprite(SDL_Renderer & _renderer, SDL::TexturePtr _texture, const Rect & _rect);
+    Sprite(SDL_Renderer & _renderer, std::shared_ptr<SDL_Texture> _texture, const Rect & _rect);
     bool loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options = SpriteOptions());
     bool isValid() const;
-    SDL::TexturePtr getTexture() const;
+    std::shared_ptr<SDL_Texture> getTexture() const;
     const Rect & getSourceRect() const;
     const Size & getDestinationSize() const;
     void setDesinationSize(const Size & _size);
@@ -56,7 +56,7 @@ public:
 
 private:
     SDL_Renderer * mp_renderer;
-    SDL::TexturePtr m_texture_ptr;
+    std::shared_ptr<SDL_Texture> m_texture_ptr;
     Rect m_source_rect;
     Size m_desination_size;
 };
@@ -68,7 +68,7 @@ inline Sprite::Sprite(SDL_Renderer & _renderer) :
 {
 }
 
-inline Sprite::Sprite(SDL_Renderer & _renderer, SDL::TexturePtr _texture, const Rect & _rect) :
+inline Sprite::Sprite(SDL_Renderer & _renderer, std::shared_ptr<SDL_Texture> _texture, const Rect & _rect) :
     mp_renderer(&_renderer),
     m_texture_ptr(_texture),
     m_source_rect(_rect),
@@ -81,7 +81,7 @@ inline bool Sprite::isValid() const
     return m_texture_ptr != nullptr;
 }
 
-inline SDL::TexturePtr Sprite::getTexture() const
+inline std::shared_ptr<SDL_Texture> Sprite::getTexture() const
 {
     return m_texture_ptr;
 }

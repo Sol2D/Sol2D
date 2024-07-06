@@ -19,7 +19,6 @@
 #include <Sol2D/Forms/Widget.h>
 #include <Sol2D/Forms/TextAlignment.h>
 #include <Sol2D/SDL/SDL.h>
-#include <Sol2D/SDL/TTF.h>
 #include <string>
 
 namespace Sol2D::Forms {

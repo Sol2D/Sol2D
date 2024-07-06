@@ -18,13 +18,9 @@
 
 #include <Sol2D/SpriteAnimation.h>
 #include <Sol2D/BodyPrototype.h>
-#include <Sol2D/Utils/KeyValueStorage.h>
 #include <Sol2D/Workspace.h>
-#include <Sol2D/SDL/TTF.h>
-#include <Sol2D/SDL/Mixer.h>
-#include <SDL3/SDL_render.h>
-#include <string>
-#include <filesystem>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 namespace Sol2D {
 
@@ -54,13 +50,13 @@ public:
     bool deleteBodyPrototype(const std::string & _key);
     std::shared_ptr<BodyPrototype> getBodyPrototype(const std::string & _key) const;
 
-    SDL::FontPtr getFont(const std::filesystem::path & _file_path, uint16_t _size);
+    std::shared_ptr<TTF_Font> getFont(const std::filesystem::path & _file_path, uint16_t _size);
     void freeFont(const std::filesystem::path & _file_path, uint16_t _size);
 
-    SDL::SoundChunkPtr getSoundChunk(const std::filesystem::path & _file_path);
+    std::shared_ptr<Mix_Chunk> getSoundChunk(const std::filesystem::path & _file_path);
     void freeSoundChunk(const std::filesystem::path & _file_path);
 
-    SDL::MusicPtr getMusic(const std::filesystem::path & _file_path);
+    std::shared_ptr<Mix_Music> getMusic(const std::filesystem::path & _file_path);
     void freeMusic(const std::filesystem::path & _file_path);
 
 private:
@@ -69,9 +65,9 @@ private:
     std::unordered_map<std::string, std::shared_ptr<SpriteSheet>> m_sprite_sheets;
     std::unordered_map<std::string, std::shared_ptr<SpriteAnimation>> m_animations;
     std::unordered_map<std::string, std::shared_ptr<BodyPrototype>> m_body_prototypes;
-    std::unordered_map<std::string, SDL::FontPtr> m_fonts;
-    std::unordered_map<std::string, SDL::SoundChunkPtr> m_sound_chunks;
-    std::unordered_map<std::string, SDL::MusicPtr> m_musics;
+    std::unordered_map<std::string, std::shared_ptr<TTF_Font>> m_fonts;
+    std::unordered_map<std::string, std::shared_ptr<Mix_Chunk>> m_sound_chunks;
+    std::unordered_map<std::string, std::shared_ptr<Mix_Music>> m_musics;
 };
 
 } // namespace Sol2D

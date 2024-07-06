@@ -19,7 +19,6 @@
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
-using namespace Sol2D::SDL;
 using namespace Lua;
 using namespace Lua::Aux;
 
@@ -27,7 +26,7 @@ namespace {
 
 struct Self : LuaUserData<Self, LuaTypeName::sound_effect>
 {
-    SoundChunkPtr chunk;
+    std::shared_ptr<Mix_Chunk> chunk;
 };
 
 // 1 self
@@ -73,7 +72,7 @@ int luaApi_Loop(lua_State * _lua)
 
 } // namespace
 
-void Sol2D::Lua::pushSoundEffectApi(lua_State * _lua, SoundChunkPtr _chunk)
+void Sol2D::Lua::pushSoundEffectApi(lua_State * _lua, std::shared_ptr<Mix_Chunk> _chunk)
 {
     Self * self = Self::pushUserData(_lua);
     self->chunk = _chunk;

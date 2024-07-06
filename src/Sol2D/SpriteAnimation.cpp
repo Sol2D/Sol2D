@@ -18,7 +18,6 @@
 #include <Sol2D/Utils/Math.h>
 
 using namespace Sol2D;
-using namespace Sol2D::SDL;
 using namespace Sol2D::Utils;
 
 namespace {
@@ -41,7 +40,7 @@ inline Point getPosition(const std::optional<Point> & _point)
 
 struct SpriteAnimation::Frame
 {
-    TexturePtr texture;
+    std::shared_ptr<SDL_Texture> texture;
     Rect src_rect;
     Size dest_size;
     std::chrono::milliseconds duration;

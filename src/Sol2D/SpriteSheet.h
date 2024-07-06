@@ -48,11 +48,11 @@ public:
     size_t getSpriteCount() const;
     Sprite toSprite(size_t _idx);
     const std::vector<Rect> & getRects() const; // TODO: delete
-    SDL::TexturePtr getTexture() const; // TODO: delete
+    std::shared_ptr<SDL_Texture> getTexture() const; // TODO: delete
 
 private:
     SDL_Renderer * mp_renderer;
-    SDL::TexturePtr m_texture_ptr;
+    std::shared_ptr<SDL_Texture> m_texture_ptr;
     std::vector<Rect> m_rects;
 };
 
@@ -76,7 +76,7 @@ inline const std::vector<Rect> & SpriteSheet::getRects() const
     return m_rects;
 }
 
-inline SDL::TexturePtr SpriteSheet::getTexture() const
+inline std::shared_ptr<SDL_Texture> SpriteSheet::getTexture() const
 {
     return m_texture_ptr;
 }

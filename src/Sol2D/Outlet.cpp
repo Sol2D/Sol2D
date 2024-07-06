@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Outlet.h>
+#include <Sol2D/SDL/SDL.h>
 
 using namespace Sol2D;
 using namespace Sol2D::SDL;
@@ -78,7 +79,7 @@ void Outlet::resize()
             m_rect.w,
             m_rect.h
         );
-        m_texture_ptr = wrapSdlTexturePtr(texture);
+        m_texture_ptr = wrapTexture(texture);
     }
     mp_canvas->reconfigure(m_rect);
 }

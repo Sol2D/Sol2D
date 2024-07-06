@@ -16,11 +16,12 @@
 
 #pragma once
 
-#include <Sol2D/SDL/Mixer.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <memory>
 
 namespace Sol2D::Lua {
 
-void pushMusicApi(lua_State * _lua, SDL::MusicPtr _music);
+void pushMusicApi(lua_State * _lua, std::shared_ptr<Mix_Music> _music);
 
 } // namespace Sol2D::Lua

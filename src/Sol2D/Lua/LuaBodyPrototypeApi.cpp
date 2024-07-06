@@ -36,9 +36,6 @@ struct Self : LuaUserData<Self, LuaTypeName::body_prototype>
     {
     }
 
-    std::weak_ptr<BodyPrototype> proto;
-    std::optional<std::filesystem::path> script_path;
-
     std::shared_ptr<BodyPrototype> getBodyPrototype(lua_State * _lua) const
     {
         std::shared_ptr<BodyPrototype> ptr = proto.lock();
@@ -46,6 +43,9 @@ struct Self : LuaUserData<Self, LuaTypeName::body_prototype>
             luaL_error(_lua, "the body prototype is destroyed");
         return ptr;
     }
+
+    std::weak_ptr<BodyPrototype> proto;
+    std::optional<std::filesystem::path> script_path;
 };
 
 // 1 self
@@ -127,8 +127,7 @@ int luaApi_AttachScript(lua_State * _lua)
 
 void Sol2D::Lua::pushBodyPrototypeApi(lua_State * _lua, std::shared_ptr<BodyPrototype> _body_prototype)
 {
-    Self * self = Self::pushUserData(_lua);
-    new(self) Self(_body_prototype);
+    Self::pushUserData(_lua, _body_prototype);
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {

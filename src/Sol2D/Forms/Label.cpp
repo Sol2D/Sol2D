@@ -78,7 +78,7 @@ bool Label::setState(WidgetState _state)
 
 void Label::render(const RenderState & _state)
 {
-    FontPtr font = this->font[m_state];
+    std::shared_ptr<TTF_Font> font = this->font[m_state];
     if(!font)
         return;
     if(mp_texture == nullptr)

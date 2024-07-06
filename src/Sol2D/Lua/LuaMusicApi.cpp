@@ -20,13 +20,12 @@
 
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
-using namespace Sol2D::SDL;
 
 namespace {
 
 struct Self : LuaUserData<Self, LuaTypeName::music>
 {
-    MusicPtr music;
+    std::shared_ptr<Mix_Music> music;
 };
 
 // 1 self
@@ -59,7 +58,7 @@ int luaApi_Loop(lua_State * _lua)
 
 } // namespace
 
-void Sol2D::Lua::pushMusicApi(lua_State * _lua, MusicPtr _music)
+void Sol2D::Lua::pushMusicApi(lua_State * _lua, std::shared_ptr<Mix_Music> _music)
 {
     Self * self = Self::pushUserData(_lua);
     self->music = _music;

@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <SDL3_image/SDL_image.h>
 #include <Sol2D/Sprite.h>
+#include <Sol2D/SDL/SDL.h>
 #include <Sol2D/Utils/Math.h>
+#include <SDL3_image/SDL_image.h>
 
 using namespace Sol2D;
 using namespace Sol2D::SDL;
@@ -62,7 +63,7 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     }
     m_desination_size.w = m_source_rect.w;
     m_desination_size.h = m_source_rect.h;
-    m_texture_ptr = wrapSdlTexturePtr(SDL_CreateTextureFromSurface(mp_renderer, surface));
+    m_texture_ptr = wrapTexture(SDL_CreateTextureFromSurface(mp_renderer, surface));
     SDL_DestroySurface(surface);
     return true;
 }

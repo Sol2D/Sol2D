@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Larder.h>
+#include <Sol2D/SDL/TTF.h>
+#include <Sol2D/SDL/Mixer.h>
 
 using namespace Sol2D;
 using namespace Sol2D::SDL;
@@ -100,7 +102,7 @@ std::shared_ptr<BodyPrototype> Larder::getBodyPrototype(const std::string & _key
     return it == m_body_prototypes.cend() ? nullptr : it->second;
 }
 
-FontPtr Larder::getFont(const std::filesystem::path & _file_path, uint16_t _size)
+std::shared_ptr<TTF_Font> Larder::getFont(const std::filesystem::path & _file_path, uint16_t _size)
 {
     const std::string key = makeFontKey(_file_path, _size);
     {
@@ -111,7 +113,7 @@ FontPtr Larder::getFont(const std::filesystem::path & _file_path, uint16_t _size
     TTF_Font * font = TTF_OpenFont(_file_path.c_str(), _size);
     if(font)
     {
-        FontPtr ptr = wrapTtfFont(font);
+        std::shared_ptr<TTF_Font> ptr = wrapFont(font);
         m_fonts[key] = ptr;
         return ptr;
     }
@@ -124,7 +126,7 @@ void Larder::freeFont(const std::filesystem::path & _file_path, uint16_t _size)
     m_fonts.erase(key);
 }
 
-SDL::SoundChunkPtr Larder::getSoundChunk(const std::filesystem::path & _file_path)
+std::shared_ptr<Mix_Chunk> Larder::getSoundChunk(const std::filesystem::path & _file_path)
 {
     {
         auto it = m_sound_chunks.find(_file_path.string());
@@ -134,7 +136,7 @@ SDL::SoundChunkPtr Larder::getSoundChunk(const std::filesystem::path & _file_pat
     Mix_Chunk * chunk = Mix_LoadWAV(_file_path.c_str());
     if(chunk)
     {
-        SDL::SoundChunkPtr ptr = SDL::wrapSoundChunk(chunk);
+        std::shared_ptr<Mix_Chunk> ptr = SDL::wrapSoundChunk(chunk);
         m_sound_chunks[_file_path.string()] = ptr;
         return ptr;
     }
@@ -146,7 +148,7 @@ void Larder::freeSoundChunk(const std::filesystem::path & _file_path)
     m_sound_chunks.erase(_file_path.string());
 }
 
-SDL::MusicPtr Larder::getMusic(const std::filesystem::path & _file_path)
+std::shared_ptr<Mix_Music> Larder::getMusic(const std::filesystem::path & _file_path)
 {
     {
         auto it = m_musics.find(_file_path.string());
@@ -156,7 +158,7 @@ SDL::MusicPtr Larder::getMusic(const std::filesystem::path & _file_path)
     Mix_Music * music = Mix_LoadMUS(_file_path.c_str());
     if(music)
     {
-        SDL::MusicPtr ptr = SDL::wrapMusic(music);
+        std::shared_ptr<Mix_Music> ptr = SDL::wrapMusic(music);
         m_musics[_file_path.string()] = ptr;
         return ptr;
     }

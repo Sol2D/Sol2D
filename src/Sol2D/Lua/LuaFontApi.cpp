@@ -22,34 +22,28 @@
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
-using namespace Sol2D::SDL;
 
 namespace {
 
 struct Self : LuaUserData<Self, LuaTypeName::font>
 {
-    FontPtr font;
-};
+    Self(std::shared_ptr<TTF_Font> & _font) :
+        font(_font)
+    {
+    }
 
-// 1 self
-int luaApi_GC(lua_State * _lua)
-{
-    Self * self = Self::getUserData(_lua, 1);
-    self->font.reset();
-    return 0;
-}
+    std::weak_ptr<TTF_Font> font;
+};
 
 } // namespace name
 
-void Sol2D::Lua::pushFontApi(lua_State * _lua, SDL::FontPtr _font)
+void Sol2D::Lua::pushFontApi(lua_State * _lua, std::shared_ptr<TTF_Font> _font)
 {
-    Self * self = Self::pushUserData(_lua);
-    self->font = _font;
+    Self::pushUserData(_lua, _font);
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] =
         {
-            { "__gc", luaApi_GC },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);
@@ -57,8 +51,8 @@ void Sol2D::Lua::pushFontApi(lua_State * _lua, SDL::FontPtr _font)
     lua_setmetatable(_lua, -2);
 }
 
-FontPtr Sol2D::Lua::tryGetFont(lua_State * _lua, int _idx)
+std::shared_ptr<TTF_Font> Sol2D::Lua::tryGetFont(lua_State * _lua, int _idx)
 {
     Self * self = Self::getUserData(_lua, _idx);
-    return self ? self->font : nullptr;
+    return self ? self->font.lock() : nullptr;
 }

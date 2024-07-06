@@ -19,7 +19,6 @@
 #include <Sol2D/Tiles/TileHeap.h>
 #include <Sol2D/Tiles/ObjectHeap.h>
 #include <Sol2D/Def.h>
-#include <Sol2D/SDL/SDL.h>
 #include <Sol2D/Color.h>
 #include <unordered_map>
 #include <string>
@@ -261,11 +260,11 @@ public:
     {
     }
 
-    void setImage(SDL::TexturePtr _image) { m_image = _image; }
-    const SDL::TexturePtr getImage() const { return m_image; }
+    void setImage(std::shared_ptr<SDL_Texture> _image) { m_image = _image; }
+    const std::shared_ptr<SDL_Texture> getImage() const { return m_image; }
 
 private:
-    SDL::TexturePtr m_image;
+    std::shared_ptr<SDL_Texture> m_image;
 };
 
 

@@ -173,7 +173,7 @@ template<typename SelfT>
 int luaApi_SetFont(lua_State * _lua)
 {
     SelfT * self = SelfT::getUserData(_lua, 1);
-    SDL::FontPtr font = tryGetFont(_lua, 2);
+    std::shared_ptr<TTF_Font> font = tryGetFont(_lua, 2);
     luaL_argcheck(_lua, font != nullptr, 2, "font required");
     self->widget->font = font;
     return 0;

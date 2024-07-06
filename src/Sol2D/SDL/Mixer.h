@@ -21,15 +21,12 @@
 
 namespace Sol2D::SDL {
 
-using SoundChunkPtr = std::shared_ptr<Mix_Chunk>;
-using MusicPtr = std::shared_ptr<Mix_Music>;
-
-inline SoundChunkPtr wrapSoundChunk(Mix_Chunk * _chunk)
+inline std::shared_ptr<Mix_Chunk> wrapSoundChunk(Mix_Chunk * _chunk)
 {
     return std::shared_ptr<Mix_Chunk>(_chunk, Mix_FreeChunk);
 }
 
-inline MusicPtr wrapMusic(Mix_Music * _music)
+inline std::shared_ptr<Mix_Music> wrapMusic(Mix_Music * _music)
 {
     return std::shared_ptr<Mix_Music>(_music, Mix_FreeMusic);
 }

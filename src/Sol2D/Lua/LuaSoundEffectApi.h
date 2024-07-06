@@ -17,10 +17,11 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/SDL/Mixer.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#include <memory>
 
 namespace Sol2D::Lua {
 
-void pushSoundEffectApi(lua_State * _lua, SDL::SoundChunkPtr _chunk);
+void pushSoundEffectApi(lua_State * _lua, std::shared_ptr<Mix_Chunk> _chunk);
 
 } // namespace Sol2D::Lua

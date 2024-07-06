@@ -20,8 +20,8 @@
 #include <Sol2D/Forms/WidgetPadding.h>
 #include <Sol2D/Canvas.h>
 #include <Sol2D/Color.h>
-#include <Sol2D/SDL/TTF.h>
 #include <Sol2D/SDL/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 namespace Sol2D::Forms {
 
@@ -44,7 +44,7 @@ public:
     WidgetState getState() const;
 
 public:
-    WidgetProperty<SDL::FontPtr> font;
+    WidgetProperty<std::shared_ptr<TTF_Font>> font;
     WidgetProperty<Color> foreground_color;
     WidgetProperty<Color> background_color;
     WidgetProperty<float> border_width;

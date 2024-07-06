@@ -17,7 +17,6 @@
 #pragma once
 
 #include <Sol2D/Forms/Widget.h>
-#include <Sol2D/SDL/TTF.h>
 
 namespace Sol2D::Forms {
 

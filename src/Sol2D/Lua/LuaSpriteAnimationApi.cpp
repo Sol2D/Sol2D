@@ -33,7 +33,10 @@ const char gc_message_sprite_sheet_expected[] = "sprite sheet expected";
 
 struct Self : LuaUserData<Self, LuaTypeName::sprite_animation>
 {
-    std::weak_ptr<SpriteAnimation> animation;
+    Self(std::shared_ptr<SpriteAnimation> & _animation) :
+        animation(_animation)
+    {
+    }
 
     std::shared_ptr<SpriteAnimation> getAnimation(lua_State * _lua) const
     {
@@ -42,6 +45,8 @@ struct Self : LuaUserData<Self, LuaTypeName::sprite_animation>
             luaL_error(_lua, "the sprite animation is destroyed");
         return ptr;
     }
+
+    std::weak_ptr<SpriteAnimation> animation;
 };
 
 void readSpriteAnimationOptions(lua_State * _lua, int _idx, SpriteAnimationOptions & _options)
@@ -134,8 +139,7 @@ int luaApi_addFrames(lua_State * _lua)
 
 void Sol2D::Lua::pushSpriteAnimationApi(lua_State * _lua, std::shared_ptr<SpriteAnimation> _animation)
 {
-    Self * self = Self::pushUserData(_lua);
-    new(&self->animation) std::weak_ptr<SpriteAnimation>(_animation);
+    Self::pushUserData(_lua, _animation);
     if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {

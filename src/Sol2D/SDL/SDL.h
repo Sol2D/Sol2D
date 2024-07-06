@@ -21,9 +21,7 @@
 
 namespace Sol2D::SDL {
 
-using TexturePtr = std::shared_ptr<SDL_Texture>;
-
-inline TexturePtr wrapSdlTexturePtr(SDL_Texture * _texture)
+inline std::shared_ptr<SDL_Texture> wrapTexture(SDL_Texture * _texture)
 {
     return std::shared_ptr<SDL_Texture>(_texture, SDL_DestroyTexture);
 }
