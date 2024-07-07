@@ -25,7 +25,7 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-struct Self : LuaUserData<Self, LuaTypeName::sprite_sheet>
+struct Self : LuaSelfBase
 {
     Self(const Workspace & _workplace, std::shared_ptr<SpriteSheet> & _sprite_sheet) :
         workspace(_workplace),
@@ -45,12 +45,14 @@ struct Self : LuaUserData<Self, LuaTypeName::sprite_sheet>
     std::weak_ptr<SpriteSheet> sprite_sheet;
 };
 
+using UserData = LuaUserData<Self, LuaTypeName::sprite_sheet>;
+
 // 1 self
 // 2 path
 // 3 options
 int luaApi_LoadFromFile(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, "path expected");
     const char * path = lua_tostring(_lua, 2);
     SpriteSheetOptions options;
@@ -64,10 +66,11 @@ int luaApi_LoadFromFile(lua_State * _lua)
 
 void Sol2D::Lua::pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<SpriteSheet> _sprite_sheet)
 {
-    Self::pushUserData(_lua, std::ref(_workspace), _sprite_sheet);
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    UserData::pushUserData(_lua, std::ref(_workspace), _sprite_sheet);
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
+            { "__gc", UserData::luaGC },
             { "loadFromFile", luaApi_LoadFromFile },
             { nullptr, nullptr }
         };
@@ -78,6 +81,6 @@ void Sol2D::Lua::pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspa
 
 std::shared_ptr<SpriteSheet> Sol2D::Lua::tryGetSpriteSheet(lua_State * _lua, int _idx)
 {
-    Self * self = Self::getUserData(_lua, _idx);
+    Self * self = UserData::getUserData(_lua, _idx);
     return self ? self->sprite_sheet.lock() : nullptr;
 }

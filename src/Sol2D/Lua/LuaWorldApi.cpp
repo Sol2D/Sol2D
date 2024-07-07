@@ -32,17 +32,19 @@ const char gc_message_larder_key_expected[] = "a larder key expected";
 const char gc_message_fragment_id_expected[] = "a fragment ID expected";
 const char gc_message_scene_name_expected[] = "a scene name expected";
 
-struct Self : LuaUserData<Self, LuaTypeName::world>
+struct Self : LuaSelfBase
 {
     World * world;
     const Workspace * workspace;
 };
 
+using UserData = LuaUserData<Self, LuaTypeName::world>;
+
 // 1 self
 // 2 name
 int luaApi_CreateScene(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, name != nullptr, 2, "the scene name expected");
     pushSceneApi(_lua, *self->workspace, self->world->createScene(name));
@@ -53,7 +55,7 @@ int luaApi_CreateScene(lua_State * _lua)
 // 2 name
 int luaApi_CreateForm(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, name != nullptr, 2, "the scene name expected");
     pushFormApi(_lua, *self->workspace, self->world->createForm(name));
@@ -64,7 +66,7 @@ int luaApi_CreateForm(lua_State * _lua)
 // 2 key
 int luaApi_CreateLarder(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_larder_key_expected);
     Larder & larder = self->world->createLarder(key);
@@ -76,7 +78,7 @@ int luaApi_CreateLarder(lua_State * _lua)
 // 2 key
 int luaApi_GetLarder(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_larder_key_expected);
     Larder * larder = self->world->getLarder(key);
@@ -91,7 +93,7 @@ int luaApi_GetLarder(lua_State * _lua)
 // 2 key
 int luaApi_DeleteLarder(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_larder_key_expected);
     lua_pushboolean(_lua, self->world->deleteLarder(key));
@@ -102,7 +104,7 @@ int luaApi_DeleteLarder(lua_State * _lua)
 // 2 fragment
 int luaApi_CreateFragment(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     Fragment fragment;
     luaL_argcheck(_lua, tryGetFragment(_lua, 2, fragment), 2, "");
     lua_pushinteger(_lua, self->world->createFragment(fragment));
@@ -114,7 +116,7 @@ int luaApi_CreateFragment(lua_State * _lua)
 // 3 fragment
 int luaApi_UpdateFragment(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
     FragmentID fragment_id = static_cast<FragmentID>(lua_tointeger(_lua, 2));
     Fragment fragment;
@@ -127,7 +129,7 @@ int luaApi_UpdateFragment(lua_State * _lua)
 // 2 fragment ID
 int luaApi_GetFragment(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
     FragmentID fragment_id = static_cast<FragmentID>(lua_tointeger(_lua, 2));
     const Fragment * fragment = self->world->getFragment(fragment_id);
@@ -142,7 +144,7 @@ int luaApi_GetFragment(lua_State * _lua)
 // 2 fragment ID
 int luaApi_DeleteFragment(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
     FragmentID fragment_id = static_cast<FragmentID>(lua_tointeger(_lua, 2));
     lua_pushboolean(_lua, self->world->deleteFragment(fragment_id));
@@ -154,7 +156,7 @@ int luaApi_DeleteFragment(lua_State * _lua)
 // 3 scene key
 int luaApi_BindFragment(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
     FragmentID fragment_id = static_cast<FragmentID>(lua_tointeger(_lua, 2));
     luaL_argcheck(_lua, lua_isstring(_lua, 3), 3, gc_message_scene_name_expected);
@@ -167,12 +169,13 @@ int luaApi_BindFragment(lua_State * _lua)
 
 void Sol2D::Lua::pushWorldApi(lua_State * _lua, const Workspace & _workspace, World & _world)
 {
-    Self * self = Self::pushUserData(_lua);
+    Self * self = UserData::pushUserData(_lua);
     self->world = &_world;
     self->workspace = &_workspace;
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
+            { "__gc", UserData::luaGC },
             { "createScene", luaApi_CreateScene },
             // TODO: getScene
             // TODO: deleteScene

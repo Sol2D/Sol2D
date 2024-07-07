@@ -24,24 +24,23 @@ using namespace Lua::Aux;
 
 namespace {
 
-struct Self : LuaUserData<Self, LuaTypeName::sound_effect>
+struct Self : LuaSelfBase
 {
+    ~Self()
+    {
+        chunk.reset();
+    }
+
     std::shared_ptr<Mix_Chunk> chunk;
 };
 
-// 1 self
-int luaApi_GC(lua_State * _lua)
-{
-    Self * self = Self::getUserData(_lua, 1);
-    self->chunk.reset();
-    return 0;
-}
+using UserData = LuaUserData<Self, LuaTypeName::sound_effect>;
 
 // 1 self
 // 2 channel (optional)
 int luaApi_Play(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     bool result = false;
     if(self->chunk)
     {
@@ -57,7 +56,7 @@ int luaApi_Play(lua_State * _lua)
 // 3 channel (optional)
 int luaApi_Loop(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "iteration count required");
     int iteration_count = lua_tointeger(_lua, 2);
     bool result = false;
@@ -74,13 +73,13 @@ int luaApi_Loop(lua_State * _lua)
 
 void Sol2D::Lua::pushSoundEffectApi(lua_State * _lua, std::shared_ptr<Mix_Chunk> _chunk)
 {
-    Self * self = Self::pushUserData(_lua);
+    Self * self = UserData::pushUserData(_lua);
     self->chunk = _chunk;
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] =
         {
-            { "__gc", luaApi_GC },
+            { "__gc", UserData::luaGC },
             { "play", luaApi_Play },
             { "loop", luaApi_Loop },
             { nullptr, nullptr }

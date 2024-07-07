@@ -20,18 +20,53 @@
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <cstring>
 #include <new>
+#include <concepts>
 
 namespace Sol2D::Lua::Aux {
 
-template<typename UserData, const char metatable[]>
-struct LuaUserData
+struct LuaSelfBase;
+
+namespace __Private {
+
+struct LuaUserDataBase
+{
+private:
+    LuaUserDataBase() {} // Static struct must not be instantiated
+
+protected:
+    static void beforeDestroyLuaSelf(lua_State * _lua, LuaSelfBase & _lua_self);
+};
+
+} // namespace __Private
+
+struct LuaSelfBase
+{
+    friend struct __Private::LuaUserDataBase;
+
+public:
+    virtual ~LuaSelfBase() { }
+
+protected:
+    virtual void beforeDestruction(lua_State * /*_lua*/) { }
+};
+
+inline void __Private::LuaUserDataBase::beforeDestroyLuaSelf(lua_State * _lua, LuaSelfBase & _lua_self)
+{
+    _lua_self.beforeDestruction(_lua);
+}
+
+template<typename T>
+concept LuaSelfConcept = std::derived_from<T, LuaSelfBase>;
+
+template<LuaSelfConcept LuaSelf, const char metatable[]>
+struct LuaUserData : __Private::LuaUserDataBase
 {
     template<typename ...CtorArgs>
-    static UserData * pushUserData(lua_State * _lua, CtorArgs ... _ctor_args)
+    static LuaSelf * pushUserData(lua_State * _lua, CtorArgs ... _ctor_args)
     {
-        void * data = lua_newuserdata(_lua, sizeof(UserData));
-        std::memset(data, 0, sizeof(UserData));
-        return new(data) UserData(_ctor_args...);
+        void * data = lua_newuserdata(_lua, sizeof(LuaSelf));
+        std::memset(data, 0, sizeof(LuaSelf));
+        return new(data) LuaSelf(_ctor_args...);
     }
 
     static MetatablePushResult pushMetatable(lua_State * _lua)
@@ -39,9 +74,17 @@ struct LuaUserData
         return Sol2D::Lua::Aux::pushMetatable(_lua, metatable);
     }
 
-    static UserData * getUserData(lua_State * _lua, int _idx)
+    static LuaSelf * getUserData(lua_State * _lua, int _idx)
     {
-        return static_cast<UserData *>(luaL_checkudata(_lua, _idx, metatable));
+        return static_cast<LuaSelf *>(luaL_checkudata(_lua, _idx, metatable));
+    }
+
+    static int luaGC(lua_State * _lua)
+    {
+        LuaSelf * udata = getUserData(_lua, 1);
+        beforeDestroyLuaSelf(_lua, *udata);
+        udata->~LuaSelf();
+        return 0;
     }
 };
 

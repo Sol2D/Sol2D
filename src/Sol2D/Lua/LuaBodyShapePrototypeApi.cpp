@@ -30,15 +30,20 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-struct BodyPolygonShapePrototypeSelf : LuaUserData<BodyPolygonShapePrototypeSelf, LuaTypeName::body_polygon_shape_prototype>
+struct BodyPolygonShapePrototypeSelf : LuaSelfBase
 {
     BodyPolygonShapePrototype * shape_prototype;
 };
 
-struct BodyCircleShapePrototypeSelf : LuaUserData<BodyCircleShapePrototypeSelf, LuaTypeName::body_circle_shape_prototype>
+using BodyPolygonShapePrototypeUserData = LuaUserData<BodyPolygonShapePrototypeSelf, LuaTypeName::body_polygon_shape_prototype>;
+
+struct BodyCircleShapePrototypeSelf : LuaSelfBase
 {
     BodyCircleShapePrototype * shape_prototype;
 };
+
+using BodyCircleShapePrototypeUserData = LuaUserData<BodyCircleShapePrototypeSelf, LuaTypeName::body_circle_shape_prototype>;
+
 
 BodyShapePrototype * getBodyShapePrototype(lua_State * _lua, int _idx)
 {
@@ -156,7 +161,7 @@ int luaApi_RemoveGraphic(lua_State * _lua)
 // 1 self (LuaBodyPolygonShapePrototypeApi)
 int luaApi_GetPoints(lua_State * _lua)
 {
-    BodyPolygonShapePrototypeSelf * self = BodyPolygonShapePrototypeSelf::getUserData(_lua, 1);
+    BodyPolygonShapePrototypeSelf * self = BodyPolygonShapePrototypeUserData::getUserData(_lua, 1);
     const auto & points = self->shape_prototype->getPoints();
     lua_newtable(_lua);
     for(size_t i = 0; i < points.size(); ++i)
@@ -170,7 +175,7 @@ int luaApi_GetPoints(lua_State * _lua)
 // 1 self (LuaBodyCircleShapePrototypeApi)
 int luaApi_GetRadius(lua_State * _lua)
 {
-    BodyCircleShapePrototypeSelf * self = BodyCircleShapePrototypeSelf::getUserData(_lua, 1);
+    BodyCircleShapePrototypeSelf * self = BodyCircleShapePrototypeUserData::getUserData(_lua, 1);
     lua_pushnumber(_lua, self->shape_prototype->getRadius());
     return 1;
 }
@@ -185,20 +190,22 @@ void Sol2D::Lua::pushBodyShapePrototypeApi(lua_State * _lua, BodyShapePrototype 
     {
     case BodyShapeType::Polygon:
     {
-        BodyPolygonShapePrototypeSelf * self = BodyPolygonShapePrototypeSelf::pushUserData(_lua);
+        BodyPolygonShapePrototypeSelf * self = BodyPolygonShapePrototypeUserData::pushUserData(_lua);
         self->shape_prototype = dynamic_cast<BodyPolygonShapePrototype *>(&_body_shape_prototype);
-        metatable_push_result = BodyPolygonShapePrototypeSelf::pushMetatable(_lua);
+        metatable_push_result = BodyPolygonShapePrototypeUserData::pushMetatable(_lua);
         funcs = {
+            { "__gc", BodyPolygonShapePrototypeUserData::luaGC },
             { "getPoints", luaApi_GetPoints }
         };
         break;
     }
     case BodyShapeType::Circle:
     {
-        BodyCircleShapePrototypeSelf * self = BodyCircleShapePrototypeSelf::pushUserData(_lua);
+        BodyCircleShapePrototypeSelf * self = BodyCircleShapePrototypeUserData::pushUserData(_lua);
         self->shape_prototype = dynamic_cast<BodyCircleShapePrototype *>(&_body_shape_prototype);
-        metatable_push_result = BodyCircleShapePrototypeSelf::pushMetatable(_lua);
+        metatable_push_result = BodyCircleShapePrototypeUserData::pushMetatable(_lua);
         funcs = {
+            { "__gc", BodyCircleShapePrototypeUserData::luaGC },
             { "getRadius", luaApi_GetRadius }
         };
         break;

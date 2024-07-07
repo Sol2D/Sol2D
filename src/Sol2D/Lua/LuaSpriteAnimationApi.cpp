@@ -31,7 +31,7 @@ namespace {
 
 const char gc_message_sprite_sheet_expected[] = "sprite sheet expected";
 
-struct Self : LuaUserData<Self, LuaTypeName::sprite_animation>
+struct Self : LuaSelfBase
 {
     Self(std::shared_ptr<SpriteAnimation> & _animation) :
         animation(_animation)
@@ -48,6 +48,8 @@ struct Self : LuaUserData<Self, LuaTypeName::sprite_animation>
 
     std::weak_ptr<SpriteAnimation> animation;
 };
+
+using UserData = LuaUserData<Self, LuaTypeName::sprite_animation>;
 
 void readSpriteAnimationOptions(lua_State * _lua, int _idx, SpriteAnimationOptions & _options)
 {
@@ -75,7 +77,7 @@ void readSpriteAnimationOptions(lua_State * _lua, int _idx, SpriteAnimationOptio
 // 3 options (optional)
 int luaApi_addFrameFromSprite(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     std::shared_ptr<Sprite> sprite = tryGetSprite(_lua, 2);
     luaL_argcheck(_lua, sprite, 2, "sprite expected");
     SpriteAnimationOptions options;
@@ -91,7 +93,7 @@ int luaApi_addFrameFromSprite(lua_State * _lua)
 // 4 options (optional)
 int luaApi_addFrameFromSpriteSheet(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     std::shared_ptr<SpriteSheet> sprite_sheet = tryGetSpriteSheet(_lua, 2);
     luaL_argcheck(_lua, sprite_sheet, 2, gc_message_sprite_sheet_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, "sprite index expected");
@@ -109,7 +111,7 @@ int luaApi_addFrameFromSpriteSheet(lua_State * _lua)
 // 4 options (optional)
 int luaApi_addFrames(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     std::shared_ptr<SpriteSheet> sprite_sheet = tryGetSpriteSheet(_lua, 2);
     luaL_argcheck(_lua, sprite_sheet, 2, gc_message_sprite_sheet_expected);
     luaL_argcheck(_lua, lua_istable(_lua, 3), 3, "sprite indices array expected");
@@ -139,10 +141,11 @@ int luaApi_addFrames(lua_State * _lua)
 
 void Sol2D::Lua::pushSpriteAnimationApi(lua_State * _lua, std::shared_ptr<SpriteAnimation> _animation)
 {
-    Self::pushUserData(_lua, _animation);
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    UserData::pushUserData(_lua, _animation);
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
+            { "__gc", UserData::luaGC },
             { "addFrameFromSprite", luaApi_addFrameFromSprite },
             { "addFrameFromSpriteSheet", luaApi_addFrameFromSpriteSheet },
             { "addFrames", luaApi_addFrames },
@@ -155,6 +158,6 @@ void Sol2D::Lua::pushSpriteAnimationApi(lua_State * _lua, std::shared_ptr<Sprite
 
 std::shared_ptr<SpriteAnimation> Sol2D::Lua::tryGetSpriteAnimation(lua_State * _lua, int _idx)
 {
-    Self * self = Self::getUserData(_lua, _idx);
+    Self * self = UserData::getUserData(_lua, _idx);
     return self ? self->animation.lock() : nullptr;
 }

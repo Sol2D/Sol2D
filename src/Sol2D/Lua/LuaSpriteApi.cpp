@@ -27,7 +27,7 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-struct Self : LuaUserData<Self, LuaTypeName::sprite>
+struct Self : LuaSelfBase
 {
     Self(const Workspace & _workspace, std::shared_ptr<Sprite> & _sprite) :
         workspace(_workspace),
@@ -47,12 +47,14 @@ struct Self : LuaUserData<Self, LuaTypeName::sprite>
     std::weak_ptr<Sprite> sprite;
 };
 
+using UserData = LuaUserData<Self, LuaTypeName::sprite>;
+
 // 1 self
 // 2 path
 // 3 options (optional)
 int luaApi_LoadFromFile(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, "path expected");
     SpriteOptions options;
@@ -65,7 +67,7 @@ int luaApi_LoadFromFile(lua_State * _lua)
 // 1 self
 int luaApi_IsValid(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     lua_pushboolean(_lua, self->getSprite(_lua)->isValid());
     return 1;
 }
@@ -73,7 +75,7 @@ int luaApi_IsValid(lua_State * _lua)
 // 1 self
 int luaApi_GetSourceRect(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     pushRect(_lua, self->getSprite(_lua)->getSourceRect());
     return 1;
 }
@@ -81,7 +83,7 @@ int luaApi_GetSourceRect(lua_State * _lua)
 // 1 self
 int luaApi_GetDestinationSize(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const Size & size = self->getSprite(_lua)->getDestinationSize();
     pushSize(_lua, size);
     return 1;
@@ -91,7 +93,7 @@ int luaApi_GetDestinationSize(lua_State * _lua)
 // 2 size
 int luaApi_SetDestinationSize(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     Size size;
     luaL_argcheck(_lua, tryGetSize(_lua, 2, size), 2, "size required");
     self->getSprite(_lua)->setDesinationSize(size);
@@ -103,7 +105,7 @@ int luaApi_SetDestinationSize(lua_State * _lua)
 // 3 scale factor Y (optional)
 int luaApi_Scale(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     if(lua_isnumber(_lua, 2))
     {
         float scale_factor = static_cast<float>(lua_tonumber(_lua, 2));
@@ -123,10 +125,11 @@ int luaApi_Scale(lua_State * _lua)
 
 void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Sprite> _sprite)
 {
-    Self::pushUserData(_lua, std::ref(_workspace), _sprite);
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    UserData::pushUserData(_lua, std::ref(_workspace), _sprite);
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
+            { "__gc", UserData::luaGC },
             { "loadFromFile", luaApi_LoadFromFile },
             { "isValid", luaApi_IsValid },
             { "getSourceRect", luaApi_GetSourceRect },
@@ -142,6 +145,6 @@ void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, s
 
 std::shared_ptr<Sprite> Sol2D::Lua::tryGetSprite(lua_State * _lua, int _idx)
 {
-    Self * self = Self::getUserData(_lua, _idx);
+    Self * self = UserData::getUserData(_lua, _idx);
     return self ? self->sprite.lock() : nullptr;
 }

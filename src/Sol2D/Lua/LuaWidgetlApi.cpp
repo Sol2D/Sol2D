@@ -66,22 +66,35 @@ void LuaButtonClickObserver::onClick()
     storage.callSet(mr_worksapce, m_callback_set_id, 0);
 }
 
-template<typename SelfT, typename WidgetT, const char metatable[]>
-struct Self : LuaUserData<SelfT, metatable>
+template<typename WidgetT>
+struct Self : LuaSelfBase
 {
     WidgetT * widget;
 };
 
-struct LabelSelf : Self<LabelSelf, Label, LuaTypeName::label>
+struct LabelSelf : Self<Label>
 {
 };
 
-struct ButtonSelf : Self<ButtonSelf, Button, LuaTypeName::button>
-{
+using LabelUserData = LuaUserData<LabelSelf, LuaTypeName::label>;
+
+struct ButtonSelf : Self<Button>
+{   
     const Workspace * workspace;
     LuaButtonClickObserver * click_observer;
     uint32_t callback_set_id_click;
+
+protected:
+    void beforeDestruction(lua_State * _lua) override
+    {
+        LuaCallbackStorage storage(_lua);
+        storage.destroyCallbackSet(callback_set_id_click);
+        widget->removeObserver(*click_observer);
+        delete click_observer;
+    }
 };
+
+using ButtonUserData = LuaUserData<ButtonSelf, LuaTypeName::button>;
 
 template<typename T, size_t left_len, size_t right_len>
 constexpr std::array<T, left_len + right_len> operator + (std::array<T, left_len> _left, std::array<T, right_len> _right)
@@ -108,10 +121,10 @@ WidgetState getWidgetState(lua_State * _lua, int _idx)
 
 // 1 self
 // 2 dimension
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetX(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     std::optional<Dimension<float>> dimension = tryGetDimension<float>(_lua, 2);
     luaL_argcheck(_lua, dimension.has_value(), 2, "the X value required");
     self->widget->setX(dimension.value());
@@ -120,10 +133,10 @@ int luaApi_SetX(lua_State * _lua)
 
 // 1 self
 // 2 dimension
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetY(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     std::optional<Dimension<float>> dimension = tryGetDimension<float>(_lua, 2);
     luaL_argcheck(_lua, dimension.has_value(), 2, "the Y value required");
     self->widget->setY(dimension.value());
@@ -132,10 +145,10 @@ int luaApi_SetY(lua_State * _lua)
 
 // 1 self
 // 2 dimension
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetWidth(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     std::optional<Dimension<float>> dimension = tryGetDimension<float>(_lua, 2);
     luaL_argcheck(_lua, dimension.has_value(), 2, "the width value required");
     self->widget->setWidth(dimension.value());
@@ -144,10 +157,10 @@ int luaApi_SetWidth(lua_State * _lua)
 
 // 1 self
 // 2 dimension
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetHeight(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     std::optional<Dimension<float>> dimension = tryGetDimension<float>(_lua, 2);
     luaL_argcheck(_lua, dimension.has_value(), 2, "the height value required");
     self->widget->setHeight(dimension.value());
@@ -156,10 +169,10 @@ int luaApi_SetHeight(lua_State * _lua)
 
 // 1 self
 // 2 text
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetText(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     const char * text = nullptr;
     if(lua_gettop(_lua) >= 2 && lua_isstring(_lua, 2))
         text = lua_tostring(_lua, 2);
@@ -169,10 +182,10 @@ int luaApi_SetText(lua_State * _lua)
 
 // 1 self
 // 2 font
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetFont(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     std::shared_ptr<TTF_Font> font = tryGetFont(_lua, 2);
     luaL_argcheck(_lua, font != nullptr, 2, "font required");
     self->widget->font = font;
@@ -182,10 +195,10 @@ int luaApi_SetFont(lua_State * _lua)
 // 1 self
 // 2 color
 // 3 widget state?
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetForegroundColor(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     Color color;
     luaL_argcheck(_lua, tryGetColor(_lua, 2, color), 2, gc_message_color_required);
     self->widget->foreground_color.setValue(getWidgetState(_lua, 3), color);
@@ -195,10 +208,10 @@ int luaApi_SetForegroundColor(lua_State * _lua)
 // 1 self
 // 2 color
 // 3 widget state?
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetBackgroundColor(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     Color color;
     luaL_argcheck(_lua, tryGetColor(_lua, 2, color), 2, gc_message_color_required);
     self->widget->background_color.setValue(getWidgetState(_lua, 3), color);
@@ -208,10 +221,10 @@ int luaApi_SetBackgroundColor(lua_State * _lua)
 // 1 self
 // 2 color
 // 3 widget state?
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetBorderColor(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     Color color;
     luaL_argcheck(_lua, tryGetColor(_lua, 2, color), 2, gc_message_color_required);
     self->widget->border_color.setValue(getWidgetState(_lua, 3), color);
@@ -221,10 +234,10 @@ int luaApi_SetBorderColor(lua_State * _lua)
 // 1 self
 // 2 width
 // 3 widget state?
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetBorderWidth(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isnumber(_lua, 2), 2, "width required");
     self->widget->border_width.setValue(getWidgetState(_lua, 3), static_cast<float>(lua_tonumber(_lua, 2)));
     return 0;
@@ -233,10 +246,10 @@ int luaApi_SetBorderWidth(lua_State * _lua)
 // 1 self
 // 2 alignment
 // 3 widget state?
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetVerticalTextAlignment(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     VerticalTextAlignment alignment;
     luaL_argcheck(_lua, tryGetVerticalTextAlignment(_lua, 2, &alignment), 2, gc_message_alignment_required);
     self->widget->vertical_text_alignment.setValue(getWidgetState(_lua, 3), alignment);
@@ -246,10 +259,10 @@ int luaApi_SetVerticalTextAlignment(lua_State * _lua)
 // 1 self
 // 2 alignment
 // 3 widget state?
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetHorizontalTextAlignment(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     HorizontalTextAlignment alignment;
     luaL_argcheck(_lua, tryGetHorizontalTextAlignment(_lua, 2, &alignment), 2, gc_message_alignment_required);
     self->widget->horizontal_text_alignment.setValue(getWidgetState(_lua, 3), alignment);
@@ -259,10 +272,10 @@ int luaApi_SetHorizontalTextAlignment(lua_State * _lua)
 // 1 self
 // 2 padding
 // 3 widget state?
-template<typename SelfT>
+template<typename UserDataT>
 int luaApi_SetPadding(lua_State * _lua)
 {
-    SelfT * self = SelfT::getUserData(_lua, 1);
+    auto * self = UserDataT::getUserData(_lua, 1);
     WidgetPadding padding;
     luaL_argcheck(_lua, tryGetWidgetPadding(_lua, 2, padding), 2, "padding required");
     self->widget->padding.setValue(getWidgetState(_lua, 3), padding);
@@ -270,21 +283,10 @@ int luaApi_SetPadding(lua_State * _lua)
 }
 
 // 1 self
-int luaApi_ButtonGC(lua_State * _lua)
-{
-    ButtonSelf * self = ButtonSelf::getUserData(_lua, 1);
-    LuaCallbackStorage storage(_lua);
-    storage.destroyCallbackSet(self->callback_set_id_click);
-    self->widget->removeObserver(*self->click_observer);
-    delete self->click_observer;
-    return 0;
-}
-
-// 1 self
 // 2 callback
 int luaApi_ButtonSubscribeOnClick(lua_State * _lua)
 {
-    ButtonSelf * self = ButtonSelf::getUserData(_lua, 1);
+    ButtonSelf * self = ButtonUserData::getUserData(_lua, 1);
     LuaCallbackStorage storage(_lua);
     uint32_t id = storage.addCallback(self->callback_set_id_click, 2);
     lua_pushinteger(_lua, static_cast<lua_Integer>(id));
@@ -295,7 +297,7 @@ int luaApi_ButtonSubscribeOnClick(lua_State * _lua)
 // 2 subscription ID
 int luaApi_ButtonUnsubscribeOnClick(lua_State * _lua)
 {
-    ButtonSelf * self = ButtonSelf::getUserData(_lua, 1);
+    ButtonSelf * self = ButtonUserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_required);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     LuaCallbackStorage storage(_lua);
@@ -303,37 +305,37 @@ int luaApi_ButtonUnsubscribeOnClick(lua_State * _lua)
     return 0;
 }
 
-template<typename SelfT>
-constexpr std::array<luaL_Reg, 9> gc_widget_funcs =
+template<typename UserDataT>
+constexpr std::array<luaL_Reg, 10> gc_widget_funcs =
 {
     {
-        { "setX", luaApi_SetX<SelfT> },
-        { "setY", luaApi_SetY<SelfT> },
-        { "setWidth", luaApi_SetWidth<SelfT> },
-        { "setHeight", luaApi_SetHeight<SelfT> },
-        { "setBackgroundColor", luaApi_SetBackgroundColor<SelfT> },
-        { "setForegroundColor", luaApi_SetForegroundColor<SelfT> },
-        { "setBorderColor", luaApi_SetBorderColor<SelfT> },
-        { "setBorderWidth", luaApi_SetBorderWidth<SelfT> },
-        { "setPadding", luaApi_SetPadding<SelfT> }
+        { "__gc", UserDataT::luaGC },
+        { "setX", luaApi_SetX<UserDataT> },
+        { "setY", luaApi_SetY<UserDataT> },
+        { "setWidth", luaApi_SetWidth<UserDataT> },
+        { "setHeight", luaApi_SetHeight<UserDataT> },
+        { "setBackgroundColor", luaApi_SetBackgroundColor<UserDataT> },
+        { "setForegroundColor", luaApi_SetForegroundColor<UserDataT> },
+        { "setBorderColor", luaApi_SetBorderColor<UserDataT> },
+        { "setBorderWidth", luaApi_SetBorderWidth<UserDataT> },
+        { "setPadding", luaApi_SetPadding<UserDataT> }
     }
 };
 
-template<typename SelfT>
+template<typename UserDataT>
 constexpr std::array<luaL_Reg, 4> gc_label_funcs =
 {
     {
-        { "setFont", luaApi_SetFont<SelfT> },
-        { "setText", luaApi_SetText<SelfT> },
-        { "setVerticalTextAlignment", luaApi_SetVerticalTextAlignment<SelfT> },
-        { "setHorizontalTextAlignment", luaApi_SetHorizontalTextAlignment<SelfT> }
+        { "setFont", luaApi_SetFont<UserDataT> },
+        { "setText", luaApi_SetText<UserDataT> },
+        { "setVerticalTextAlignment", luaApi_SetVerticalTextAlignment<UserDataT> },
+        { "setHorizontalTextAlignment", luaApi_SetHorizontalTextAlignment<UserDataT> }
     }
 };
 
-constexpr std::array<luaL_Reg, 3> gc_button_funcs =
+constexpr std::array<luaL_Reg, 2> gc_button_funcs =
 {
     {
-        { "__gc", luaApi_ButtonGC },
         { "subscribeOnClick", luaApi_ButtonSubscribeOnClick },
         { "unsubscribeOnClick", luaApi_ButtonUnsubscribeOnClick }
     }
@@ -367,13 +369,13 @@ void Sol2D::Lua::pushLabelApi(lua_State * _lua, Label & _label)
     if(weak_registry.tryGet(&_label, LUA_TUSERDATA))
         return;
 
-    LabelSelf * self = LabelSelf::pushUserData(_lua);
+    LabelSelf * self = LabelUserData::pushUserData(_lua);
     self->widget = &_label;
-    if(LabelSelf::pushMetatable(_lua) == MetatablePushResult::Created)
+    if(LabelUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         auto funcs =
-            gc_widget_funcs<LabelSelf> +
-            gc_label_funcs<LabelSelf> +
+            gc_widget_funcs<LabelUserData> +
+            gc_label_funcs<LabelUserData> +
             gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
@@ -388,17 +390,17 @@ void Sol2D::Lua::pushButtonApi(lua_State * _lua, Forms::Button & _button, const 
     if(weak_registry.tryGet(&_button, LUA_TUSERDATA))
         return;
 
-    ButtonSelf * self = ButtonSelf::pushUserData(_lua);
+    ButtonSelf * self = ButtonUserData::pushUserData(_lua);
     self->workspace = &_workspace;
     self->widget = &_button;
     self->callback_set_id_click = LuaCallbackStorage::generateUniqueSetId();
     self->click_observer = new LuaButtonClickObserver(_lua, _workspace, self->callback_set_id_click);
     _button.addObserver(*self->click_observer);
-    if(ButtonSelf::pushMetatable(_lua) == MetatablePushResult::Created)
+    if(ButtonUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         auto funcs =
-            gc_widget_funcs<ButtonSelf> +
-            gc_label_funcs<ButtonSelf> +
+            gc_widget_funcs<ButtonUserData> +
+            gc_label_funcs<ButtonUserData> +
             gc_button_funcs +
             gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);

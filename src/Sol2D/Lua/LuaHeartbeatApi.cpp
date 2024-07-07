@@ -27,13 +27,13 @@ namespace {
 char __gc_registry_key_heartbeat_anchor = '\0';
 constexpr void * gc_registry_key_heartbeat = static_cast<void *>(&__gc_registry_key_heartbeat_anchor);
 
-struct Self : LuaUserData<Self, LuaTypeName::heartbeat> { };
+using UserData = LuaUserData<LuaSelfBase, LuaTypeName::heartbeat>;
 
 // 1 self
 // 2 callback
 int luaApi_Subscribe(lua_State * _lua)
 {
-    Self::getUserData(_lua, 1);
+    UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isfunction(_lua, 2), lua_absindex(_lua, 1), "callback function is required");
     pushTableFromRegistry(_lua, gc_registry_key_heartbeat);
     lua_Unsigned callbacks_count = lua_rawlen(_lua, 3);
@@ -47,10 +47,11 @@ int luaApi_Subscribe(lua_State * _lua)
 
 void Sol2D::Lua::pushHeartbeatApi(lua_State * _lua)
 {
-    Self::pushUserData(_lua);
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    UserData::pushUserData(_lua);
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
+            { "__gc", UserData::luaGC },
             { "subscribe", luaApi_Subscribe }, // TODO: how to unsubscribe when the body is dead? The only on callback must exist?
             { nullptr, nullptr }
         };

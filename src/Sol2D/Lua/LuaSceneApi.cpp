@@ -39,14 +39,26 @@ const char gc_message_shape_key_expected[] = "a shape key expected";
 const char gc_message_graphic_key_expected[] = "a graphic key expected";
 const char gc_message_subscription_id_expected[] = "a subscriptin ID expected";
 
-struct Self : LuaUserData<Self, LuaTypeName::scene>
-{
+struct Self : LuaSelfBase
+{       
     Scene * scene;
     const Workspace * workspace;
     ContactObserver * contact_observer;
     uint32_t callback_set_id_begin_contact;
     uint32_t callback_set_id_end_contact;
+
+protected:
+    void beforeDestruction(lua_State * _lua) override
+    {
+        LuaCallbackStorage storage(_lua);
+        storage.destroyCallbackSet(callback_set_id_begin_contact);
+        storage.destroyCallbackSet(callback_set_id_end_contact);
+        scene->removeContactObserver(*contact_observer);
+        delete contact_observer;
+    }
 };
+
+using UserData = LuaUserData<Self, LuaTypeName::scene>;
 
 class LuaContactObserver : public ContactObserver
 {
@@ -92,22 +104,10 @@ void LuaContactObserver::endContact(Contact & _contact)
 }
 
 // 1 self
-int luaApi_GC(lua_State * _lua)
-{
-    Self * self = Self::getUserData(_lua, 1);
-    LuaCallbackStorage storage(_lua);
-    storage.destroyCallbackSet(self->callback_set_id_begin_contact);
-    storage.destroyCallbackSet(self->callback_set_id_end_contact);
-    self->scene->removeContactObserver(*self->contact_observer);
-    delete self->contact_observer;
-    return 0;
-}
-
-// 1 self
 // 2 file path
 int luaApi_LoadTileMap(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, "a file path expected");
     bool result = self->scene->loadTileMap(self->workspace->getResourceFullPath(path));
@@ -119,7 +119,7 @@ int luaApi_LoadTileMap(lua_State * _lua)
 // 2 object id
 int luaApi_GetTileMapObjectById(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "object id expected");
     const Tiles::TileMapObject * object = self->scene->getTileMapObjectById(static_cast<uint32_t>(lua_tointeger(_lua, 2)));
     if(object)
@@ -133,7 +133,7 @@ int luaApi_GetTileMapObjectById(lua_State * _lua)
 // 2 object name
 int luaApi_GetTileMapObjectByName(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, name, 2, "object name expected");
     const Tiles::TileMapObject * object = self->scene->getTileMapObjectByName(name);
@@ -151,7 +151,7 @@ int luaApi_GetTileMapObjectByName(lua_State * _lua)
 int luaApi_CreateBody(lua_State * _lua)
 {
     bool has_script_argument = lua_gettop(_lua) >= 4;
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     Point position = { .0f, .0f };
     if(!lua_isnil(_lua, 2))
         luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "body position expected");
@@ -183,7 +183,7 @@ int luaApi_CreateBody(lua_State * _lua)
 // 4 shape options (optional)
 int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * class_name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, class_name != nullptr, 2, "a class name expected");
 
@@ -205,7 +205,7 @@ int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
 // 3 force vector (point)
 int luaApi_ApplyForce(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     Point force;
@@ -219,7 +219,7 @@ int luaApi_ApplyForce(lua_State * _lua)
 // 3 position
 int luaApi_SetBodyPosition(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     Point position;
@@ -232,7 +232,7 @@ int luaApi_SetBodyPosition(lua_State * _lua)
 // 2 body id
 int luaApi_GetBodyPosition(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     std::optional<Point> position = self->scene->getBodyPosition(body_id);
@@ -247,7 +247,7 @@ int luaApi_GetBodyPosition(lua_State * _lua)
 // 2 body id
 int luaApi_SetFollowedBody(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     lua_pushboolean(_lua, self->scene->setFollowedBody(body_id));
@@ -257,7 +257,7 @@ int luaApi_SetFollowedBody(lua_State * _lua)
 // 1 self
 int luaApi_ResetFollowedBody(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     self->scene->resetFollowedBody();
     return 0;
 }
@@ -267,7 +267,7 @@ int luaApi_ResetFollowedBody(lua_State * _lua)
 // 3 layer
 int luaApi_SetBodyLayer(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     const char * layer = lua_tostring(_lua, 3);
@@ -282,7 +282,7 @@ int luaApi_SetBodyLayer(lua_State * _lua)
 // 4 graphic key
 int luaApi_SetBodyShapeCurrentGraphic(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     const char * shape_id = lua_tostring(_lua, 3);
@@ -301,7 +301,7 @@ int luaApi_SetBodyShapeCurrentGraphic(lua_State * _lua)
 // 6 flip vertically
 int luaApi_FlipBodyShapeGraphic(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     const char * shape_id = lua_tostring(_lua, 3);
@@ -324,7 +324,7 @@ int luaApi_FlipBodyShapeGraphic(lua_State * _lua)
 // 2 callback
 int luaApi_SubscribeToBeginContact(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     LuaCallbackStorage storage(_lua);
     uint32_t id = storage.addCallback(self->callback_set_id_begin_contact, 2);
     lua_pushinteger(_lua, static_cast<lua_Integer>(id));
@@ -335,7 +335,7 @@ int luaApi_SubscribeToBeginContact(lua_State * _lua)
 // 2 subscription ID
 int luaApi_UnsubscribeFromBeginContact(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     LuaCallbackStorage storage(_lua);
@@ -347,7 +347,7 @@ int luaApi_UnsubscribeFromBeginContact(lua_State * _lua)
 // 2 callback
 int luaApi_SubscribeToEndContact(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     LuaCallbackStorage storage(_lua);
     uint32_t id = storage.addCallback(self->callback_set_id_end_contact, 2);
     lua_pushinteger(_lua, static_cast<lua_Integer>(id));
@@ -358,7 +358,7 @@ int luaApi_SubscribeToEndContact(lua_State * _lua)
 // 2 subscription ID
 int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     LuaCallbackStorage storage(_lua);
@@ -372,7 +372,7 @@ int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
 // TODO: options
 int luaApi_FindPath(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     Point destination;
@@ -402,7 +402,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, Sc
     if(weak_registry.tryGet(&_scene, LUA_TUSERDATA))
         return;
 
-    Self * self = Self::pushUserData(_lua);
+    Self * self = UserData::pushUserData(_lua);
     self->scene = &_scene;
     self->workspace = &_workspace;
     self->callback_set_id_begin_contact = LuaCallbackStorage::generateUniqueSetId();
@@ -413,10 +413,10 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, Sc
         self->callback_set_id_begin_contact,
         self->callback_set_id_end_contact);
     self->scene->addContactObserver(*self->contact_observer);
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
-            { "__gc", luaApi_GC, },
+            { "__gc", UserData::luaGC },
             { "loadTileMap", luaApi_LoadTileMap },
             { "getTileMapObjectById", luaApi_GetTileMapObjectById },
             { "getTileMapObjectByName", luaApi_GetTileMapObjectByName },

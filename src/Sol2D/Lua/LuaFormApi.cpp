@@ -29,17 +29,19 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-struct Self : LuaUserData<Self, LuaTypeName::form>
+struct Self : LuaSelfBase
 {
     Form * form;
     const Workspace * workspace;
 };
 
+using UserData = LuaUserData<Self, LuaTypeName::form>;
+
 // 1 self
 // 2 text
 int luaApi_CreateLabel(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * text = lua_tostring(_lua, 2);
     Label & label = self->form->createLabel(text ? std::string(text) : std::string());
     pushLabelApi(_lua, label);
@@ -50,7 +52,7 @@ int luaApi_CreateLabel(lua_State * _lua)
 // 2 text
 int luaApi_CreateButton(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     const char * text = lua_tostring(_lua, 2);
     Button & button = self->form->createButton(text ? std::string(text) : std::string());
     pushButtonApi(_lua, button, *self->workspace);
@@ -61,12 +63,13 @@ int luaApi_CreateButton(lua_State * _lua)
 
 void Sol2D::Lua::pushFormApi(lua_State * _lua, const Workspace & _workspace, Form & _form)
 {
-    Self * self = Self::pushUserData(_lua);
+    Self * self = UserData::pushUserData(_lua);
     self->form = &_form;
     self->workspace = &_workspace;
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
+            { "__gc", UserData::luaGC },
             { "createLabel", luaApi_CreateLabel },
             { "createButton", luaApi_CreateButton },
             { nullptr, nullptr }

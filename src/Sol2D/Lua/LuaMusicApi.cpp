@@ -23,23 +23,22 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-struct Self : LuaUserData<Self, LuaTypeName::music>
+struct Self : LuaSelfBase
 {
+    ~Self() override
+    {
+        music.reset();
+    }
+
     std::shared_ptr<Mix_Music> music;
 };
 
-// 1 self
-int luaApi_GC(lua_State * _lua)
-{
-    Self * self = Self::getUserData(_lua, 1);
-    self->music.reset();
-    return 0;
-}
+using UserData = LuaUserData<Self, LuaTypeName::music>;
 
 // 1 self
 int luaApi_Play(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     bool result = self->music && Mix_PlayMusic(self->music.get(), 0) == 0;
     lua_pushboolean(_lua, result);
     return 1;
@@ -49,7 +48,7 @@ int luaApi_Play(lua_State * _lua)
 // 2 iteration count
 int luaApi_Loop(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "iteration count required");
     bool result = self->music && Mix_PlayMusic(self->music.get(), lua_tointeger(_lua, 2)) == 0;
     lua_pushboolean(_lua, result);
@@ -60,13 +59,13 @@ int luaApi_Loop(lua_State * _lua)
 
 void Sol2D::Lua::pushMusicApi(lua_State * _lua, std::shared_ptr<Mix_Music> _music)
 {
-    Self * self = Self::pushUserData(_lua);
+    Self * self = UserData::pushUserData(_lua);
     self->music = _music;
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] =
             {
-                { "__gc", luaApi_GC },
+                { "__gc", UserData::luaGC },
                 { "play", luaApi_Play },
                 { "loop", luaApi_Loop },
                 { nullptr, nullptr }

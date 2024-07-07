@@ -24,11 +24,13 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-struct Self : LuaUserData<Self, LuaTypeName::keyboard>
+struct Self : LuaSelfBase
 {
     int kb_state_length;
     const Uint8 * kb_state;
 };
+
+using UserData = LuaUserData<Self, LuaTypeName::keyboard>;
 
 // 1 self
 // 2 scancode
@@ -36,7 +38,7 @@ struct Self : LuaUserData<Self, LuaTypeName::keyboard>
 // n scancode
 int luaApi_GetState(lua_State * _lua)
 {
-    Self * self = Self::getUserData(_lua, 1);
+    Self * self = UserData::getUserData(_lua, 1);
     int top = lua_gettop(_lua);
     for(int idx = 2; idx <= top; ++idx)
     {
@@ -51,11 +53,12 @@ int luaApi_GetState(lua_State * _lua)
 
 void Sol2D::Lua::pushKeyboardApiOntoStack(lua_State * _lua)
 {
-    Self * self = Self::pushUserData(_lua);
+    Self * self = UserData::pushUserData(_lua);
     self->kb_state = SDL_GetKeyboardState(&self->kb_state_length);
-    if(Self::pushMetatable(_lua) == MetatablePushResult::Created)
+    if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
+            { "__gc", UserData::luaGC },
             { "getState", luaApi_GetState },
             { nullptr, nullptr }
         };
