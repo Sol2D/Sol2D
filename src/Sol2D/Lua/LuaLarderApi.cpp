@@ -42,8 +42,22 @@ const char gc_message_music_file_path_expected[] = "a music file path expected";
 
 struct Self : LuaSelfBase
 {
-    Larder * larder;
-    const Workspace * workspace;
+    Self(const Workspace & _workspace, std::shared_ptr<Larder> & _larder) :
+        workspace(_workspace),
+        larder(_larder)
+    {
+    }
+
+    std::shared_ptr<Larder> getLarder(lua_State * _lua) const
+    {
+        std::shared_ptr<Larder> ptr = larder.lock();
+        if(!ptr)
+            luaL_error(_lua, "the larder is destroyed");
+        return ptr;
+    }
+
+    const Workspace & workspace;
+    std::weak_ptr<Larder> larder;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::larder>;
@@ -58,7 +72,7 @@ int luaApi_CreateBodyPrototype(lua_State * _lua)
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_body_prototype_key_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, "a body type expected");
     std::optional<BodyType> body_type = castToBodyType(lua_tointeger(_lua, 3));
-    std::shared_ptr<BodyPrototype> proto = self->larder->createBodyPrototype(
+    std::shared_ptr<BodyPrototype> proto = self->getLarder(_lua)->createBodyPrototype(
         key,
         body_type.has_value() ? body_type.value() : BodyType::Static);
     pushBodyPrototypeApi(_lua, proto);
@@ -72,7 +86,7 @@ int luaApi_GetBodyPrototype(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_body_prototype_key_expected);
-    std::shared_ptr<BodyPrototype> proto = self->larder->getBodyPrototype(key);
+    std::shared_ptr<BodyPrototype> proto = self->getLarder(_lua)->getBodyPrototype(key);
     if(proto)
         pushBodyPrototypeApi(_lua, proto);
     else
@@ -87,7 +101,7 @@ int luaApi_DeleteBodyPrototype(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_body_prototype_key_expected);
-    lua_pushboolean(_lua, self->larder->deleteBodyPrototype(key));
+    lua_pushboolean(_lua, self->getLarder(_lua)->deleteBodyPrototype(key));
     return 1;
 }
 
@@ -98,8 +112,8 @@ int luaApi_CreateSprite(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_key_expected);
-    std::shared_ptr<Sprite> sprite = self->larder->createSprite(key);
-    pushSpriteApi(_lua, *self->workspace, sprite);
+    std::shared_ptr<Sprite> sprite = self->getLarder(_lua)->createSprite(key);
+    pushSpriteApi(_lua, self->workspace, sprite);
     return 1;
 }
 
@@ -110,9 +124,9 @@ int luaApi_GetSprite(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_key_expected);
-    std::shared_ptr<Sprite> sprite = self->larder->getSprite(key);
+    std::shared_ptr<Sprite> sprite = self->getLarder(_lua)->getSprite(key);
     if(sprite)
-        pushSpriteApi(_lua, *self->workspace, sprite);
+        pushSpriteApi(_lua, self->workspace, sprite);
     else
         lua_pushnil(_lua);
     return 1;
@@ -125,7 +139,7 @@ int luaApi_DeleteSprite(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_key_expected);
-    lua_pushboolean(_lua, self->larder->deleteSprite(key));
+    lua_pushboolean(_lua, self->getLarder(_lua)->deleteSprite(key));
     return 1;
 }
 
@@ -136,8 +150,8 @@ int luaApi_CreateSpriteSheet(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_sheet_key_expected);
-    std::shared_ptr<SpriteSheet> sprite_sheet = self->larder->createSpriteSheet(key);
-    pushSpriteSheetApi(_lua, *self->workspace, sprite_sheet);
+    std::shared_ptr<SpriteSheet> sprite_sheet = self->getLarder(_lua)->createSpriteSheet(key);
+    pushSpriteSheetApi(_lua, self->workspace, sprite_sheet);
     return 1;
 }
 
@@ -148,9 +162,9 @@ int luaApi_GetSpriteSheet(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_sheet_key_expected);
-    std::shared_ptr<SpriteSheet> sprite_sheet = self->larder->getSpriteSheet(key);
+    std::shared_ptr<SpriteSheet> sprite_sheet = self->getLarder(_lua)->getSpriteSheet(key);
     if(sprite_sheet)
-        pushSpriteSheetApi(_lua, *self->workspace, sprite_sheet);
+        pushSpriteSheetApi(_lua, self->workspace, sprite_sheet);
     else
         lua_pushnil(_lua);
     return 1;
@@ -163,7 +177,7 @@ int luaApi_DeleteSpriteSheet(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_sheet_key_expected);
-    lua_pushboolean(_lua, self->larder->deleteSpriteSheet(key));
+    lua_pushboolean(_lua, self->getLarder(_lua)->deleteSpriteSheet(key));
     return 1;
 }
 
@@ -174,7 +188,7 @@ int luaApi_CreateSpriteAnimation(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_animation_key_expected);
-    std::shared_ptr<SpriteAnimation> sprite_animation = self->larder->createSpriteAnimation(key);
+    std::shared_ptr<SpriteAnimation> sprite_animation = self->getLarder(_lua)->createSpriteAnimation(key);
     pushSpriteAnimationApi(_lua, sprite_animation);
     return 1;
 }
@@ -186,7 +200,7 @@ int luaApi_GetSpriteAnimation(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_animation_key_expected);
-    std::shared_ptr<SpriteAnimation> sprite_animation = self->larder->getSpriteAnimation(key);
+    std::shared_ptr<SpriteAnimation> sprite_animation = self->getLarder(_lua)->getSpriteAnimation(key);
     if(sprite_animation)
         pushSpriteAnimationApi(_lua, sprite_animation);
     else
@@ -201,7 +215,7 @@ int luaApi_DeleteSpriteAnimation(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_sprite_animation_key_expected);
-    lua_pushboolean(_lua, self->larder->deleteSpriteAnimation(key));
+    lua_pushboolean(_lua, self->getLarder(_lua)->deleteSpriteAnimation(key));
     return 1;
 }
 
@@ -214,8 +228,8 @@ int luaApi_GetFont(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_font_file_path_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, gc_message_font_size_expected);
-    std::shared_ptr<TTF_Font> font = self->larder->getFont(
-        self->workspace->getResourceFullPath(std::filesystem::path(path)),
+    std::shared_ptr<TTF_Font> font = self->getLarder(_lua)->getFont(
+        self->workspace.getResourceFullPath(std::filesystem::path(path)),
         static_cast<uint16_t>(lua_tointeger(_lua, 3))
     );
     if(font == nullptr)
@@ -234,8 +248,8 @@ int luaApi_FreeFont(lua_State * _lua)
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_font_file_path_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, gc_message_font_size_expected);
-    self->larder->freeFont(
-        self->workspace->getResourceFullPath(std::filesystem::path(path)),
+    self->getLarder(_lua)->freeFont(
+        self->workspace.getResourceFullPath(std::filesystem::path(path)),
         static_cast<uint16_t>(lua_tointeger(_lua, 3))
     );
     return 0;
@@ -248,8 +262,8 @@ int luaApi_GetSoundEffect(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_sound_effect_file_path_expected);
-    std::shared_ptr<Mix_Chunk> chunk = self->larder->getSoundChunk(
-        self->workspace->getResourceFullPath(std::filesystem::path(path))
+    std::shared_ptr<Mix_Chunk> chunk = self->getLarder(_lua)->getSoundChunk(
+        self->workspace.getResourceFullPath(std::filesystem::path(path))
     );
     if(chunk == nullptr)
         lua_pushnil(_lua);
@@ -265,8 +279,8 @@ int luaApi_FreeSoundEffect(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_sound_effect_file_path_expected);
-    self->larder->freeSoundChunk(
-        self->workspace->getResourceFullPath(std::filesystem::path(path))
+    self->getLarder(_lua)->freeSoundChunk(
+        self->workspace.getResourceFullPath(std::filesystem::path(path))
     );
     return 0;
 }
@@ -278,8 +292,8 @@ int luaApi_GetMusic(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_music_file_path_expected);
-    std::shared_ptr<Mix_Music> chunk = self->larder->getMusic(
-        self->workspace->getResourceFullPath(std::filesystem::path(path))
+    std::shared_ptr<Mix_Music> chunk = self->getLarder(_lua)->getMusic(
+        self->workspace.getResourceFullPath(std::filesystem::path(path))
     );
     if(chunk == nullptr)
         lua_pushnil(_lua);
@@ -295,19 +309,17 @@ int luaApi_FreeMusic(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, gc_message_music_file_path_expected);
-    self->larder->freeMusic(
-        self->workspace->getResourceFullPath(std::filesystem::path(path))
+    self->getLarder(_lua)->freeMusic(
+        self->workspace.getResourceFullPath(std::filesystem::path(path))
     );
     return 0;
 }
 
 } // namespace name
 
-void Sol2D::Lua::pushLarderApi(lua_State * _lua,  const Workspace & _workspace, Larder & _larder)
+void Sol2D::Lua::pushLarderApi(lua_State * _lua,  const Workspace & _workspace, std::shared_ptr<Larder> _larder)
 {
-    Self * self = UserData::pushUserData(_lua);
-    self->larder = &_larder;
-    self->workspace = &_workspace;
+    UserData::pushUserData(_lua, std::ref(_workspace), std::ref(_larder));
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {

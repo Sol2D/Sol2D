@@ -50,25 +50,6 @@ struct Self : LuaSelfBase
 
 using UserData = LuaUserData<Self, LuaTypeName::body_prototype>;
 
-// struct Self : LuaUserData<Self, LuaTypeName::body_prototype>
-// {
-//     Self(std::shared_ptr<BodyPrototype> & _proto) :
-//         proto(_proto)
-//     {
-//     }
-
-//     std::shared_ptr<BodyPrototype> getBodyPrototype(lua_State * _lua) const
-//     {
-//         std::shared_ptr<BodyPrototype> ptr = proto.lock();
-//         if(!ptr)
-//             luaL_error(_lua, "the body prototype is destroyed");
-//         return ptr;
-//     }
-
-//     std::weak_ptr<BodyPrototype> proto;
-//     std::optional<std::filesystem::path> script_path;
-// };
-
 // 1 self
 int luaApi_GetType(lua_State * _lua)
 {

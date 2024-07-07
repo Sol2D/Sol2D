@@ -39,27 +39,6 @@ const char gc_message_shape_key_expected[] = "a shape key expected";
 const char gc_message_graphic_key_expected[] = "a graphic key expected";
 const char gc_message_subscription_id_expected[] = "a subscriptin ID expected";
 
-struct Self : LuaSelfBase
-{       
-    Scene * scene;
-    const Workspace * workspace;
-    ContactObserver * contact_observer;
-    uint32_t callback_set_id_begin_contact;
-    uint32_t callback_set_id_end_contact;
-
-protected:
-    void beforeDestruction(lua_State * _lua) override
-    {
-        LuaCallbackStorage storage(_lua);
-        storage.destroyCallbackSet(callback_set_id_begin_contact);
-        storage.destroyCallbackSet(callback_set_id_end_contact);
-        scene->removeContactObserver(*contact_observer);
-        delete contact_observer;
-    }
-};
-
-using UserData = LuaUserData<Self, LuaTypeName::scene>;
-
 class LuaContactObserver : public ContactObserver
 {
 public:
@@ -77,6 +56,50 @@ private:
     uint32_t m_callback_set_id_begin_contact;
     uint32_t m_callback_set_id_end_contact;
 };
+
+struct Self : LuaSelfBase
+{
+public:
+    Self(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Scene> & _scene) :
+        workspace(_workspace),
+        scene(_scene),
+        callback_set_id_begin_contact(LuaCallbackStorage::generateUniqueSetId()),
+        callback_set_id_end_contact(LuaCallbackStorage::generateUniqueSetId()),
+        mp_contact_observer(new LuaContactObserver(_lua, _workspace, callback_set_id_begin_contact, callback_set_id_end_contact))
+    {
+        _scene->addContactObserver(*mp_contact_observer);
+    }
+
+    std::shared_ptr<Scene> getScene(lua_State * _lua) const
+    {
+        std::shared_ptr<Scene> ptr = scene.lock();
+        if(!ptr)
+            luaL_error(_lua, "the scene is destroyed");
+        return ptr;
+    }
+
+protected:
+    void beforeDestruction(lua_State * _lua) override
+    {
+        LuaCallbackStorage storage(_lua);
+        storage.destroyCallbackSet(callback_set_id_begin_contact);
+        storage.destroyCallbackSet(callback_set_id_end_contact);
+        if(std::shared_ptr<Scene> ptr = scene.lock())
+            ptr->removeContactObserver(*mp_contact_observer);
+        delete mp_contact_observer;
+    }
+
+public:
+    const Workspace & workspace;
+    std::weak_ptr<Scene> scene;
+    const uint32_t callback_set_id_begin_contact;
+    const uint32_t callback_set_id_end_contact;
+
+private:
+    ContactObserver * mp_contact_observer;
+};
+
+using UserData = LuaUserData<Self, LuaTypeName::scene>;
 
 LuaContactObserver::LuaContactObserver(
     lua_State * _lua,
@@ -110,7 +133,7 @@ int luaApi_LoadTileMap(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * path = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, path != nullptr, 2, "a file path expected");
-    bool result = self->scene->loadTileMap(self->workspace->getResourceFullPath(path));
+    bool result = self->getScene(_lua)->loadTileMap(self->workspace.getResourceFullPath(path));
     lua_pushboolean(_lua, result);
     return 1;
 }
@@ -121,7 +144,7 @@ int luaApi_GetTileMapObjectById(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "object id expected");
-    const Tiles::TileMapObject * object = self->scene->getTileMapObjectById(static_cast<uint32_t>(lua_tointeger(_lua, 2)));
+    const Tiles::TileMapObject * object = self->getScene(_lua)->getTileMapObjectById(static_cast<uint32_t>(lua_tointeger(_lua, 2)));
     if(object)
         pushTileMapObject(_lua, *object);
     else
@@ -136,7 +159,7 @@ int luaApi_GetTileMapObjectByName(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, name, 2, "object name expected");
-    const Tiles::TileMapObject * object = self->scene->getTileMapObjectByName(name);
+    const Tiles::TileMapObject * object = self->getScene(_lua)->getTileMapObjectByName(name);
     if(object)
         pushTileMapObject(_lua, *object);
     else
@@ -158,7 +181,7 @@ int luaApi_CreateBody(lua_State * _lua)
     std::optional<LuaBodyPrototype> lua_proto = tryGetBodyPrototype(_lua, 3);
     if(!lua_proto.has_value())
         luaL_argerror(_lua, 3, "invalid body brototype");
-    uint64_t body_id = self->scene->createBody(position, *lua_proto->proto);
+    uint64_t body_id = self->getScene(_lua)->createBody(position, *lua_proto->proto);
     lua_pushinteger(_lua, body_id);
 
     if(lua_proto->script_path.has_value())
@@ -171,7 +194,7 @@ int luaApi_CreateBody(lua_State * _lua)
             lua_pushvalue(_lua, 4);
             table.setValueFromTop("arg");
         }
-        executeScriptWithContext(_lua, *self->workspace, lua_proto->script_path.value());
+        executeScriptWithContext(_lua, self->workspace, lua_proto->script_path.value());
     }
 
     return 1;
@@ -196,7 +219,7 @@ int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
         if(arg_count >= 4)
             tryGetBodyShapeOptions(_lua, 4, body_shape_options);
     }
-    self->scene->createBodiesFromMapObjects(class_name, body_options, body_shape_options);
+    self->getScene(_lua)->createBodiesFromMapObjects(class_name, body_options, body_shape_options);
     return 0;
 }
 
@@ -210,7 +233,7 @@ int luaApi_ApplyForce(lua_State * _lua)
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     Point force;
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, force), 3, "a force vector expected");
-    self->scene->applyForce(body_id, force);
+    self->getScene(_lua)->applyForce(body_id, force);
     return 0;
 }
 
@@ -224,7 +247,7 @@ int luaApi_SetBodyPosition(lua_State * _lua)
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     Point position;
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, position), 3, "a position expected");
-    self->scene->setBodyPosition(body_id, position);
+    self->getScene(_lua)->setBodyPosition(body_id, position);
     return 0;
 }
 
@@ -235,7 +258,7 @@ int luaApi_GetBodyPosition(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    std::optional<Point> position = self->scene->getBodyPosition(body_id);
+    std::optional<Point> position = self->getScene(_lua)->getBodyPosition(body_id);
     if(position.has_value())
         pushPoint(_lua, position.value().x, position.value().y);
     else
@@ -250,7 +273,7 @@ int luaApi_SetFollowedBody(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    lua_pushboolean(_lua, self->scene->setFollowedBody(body_id));
+    lua_pushboolean(_lua, self->getScene(_lua)->setFollowedBody(body_id));
     return 1;
 }
 
@@ -258,7 +281,7 @@ int luaApi_SetFollowedBody(lua_State * _lua)
 int luaApi_ResetFollowedBody(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    self->scene->resetFollowedBody();
+    self->getScene(_lua)->resetFollowedBody();
     return 0;
 }
 
@@ -272,7 +295,7 @@ int luaApi_SetBodyLayer(lua_State * _lua)
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     const char * layer = lua_tostring(_lua, 3);
     luaL_argcheck(_lua, layer != nullptr, 3, "a layer name expected");
-    lua_pushboolean(_lua, self->scene->setBodyLayer(body_id, layer));
+    lua_pushboolean(_lua, self->getScene(_lua)->setBodyLayer(body_id, layer));
     return 1;
 }
 
@@ -289,7 +312,7 @@ int luaApi_SetBodyShapeCurrentGraphic(lua_State * _lua)
     luaL_argcheck(_lua, shape_id != nullptr, 3, gc_message_shape_key_expected);
     const char * graphic_id = lua_tostring(_lua, 4);
     luaL_argcheck(_lua, graphic_id != nullptr, 4, gc_message_graphic_key_expected);
-    lua_pushboolean(_lua, self->scene->setBodyShapeCurrentGraphic(body_id, shape_id, graphic_id));
+    lua_pushboolean(_lua, self->getScene(_lua)->setBodyShapeCurrentGraphic(body_id, shape_id, graphic_id));
     return 1;
 }
 
@@ -310,7 +333,7 @@ int luaApi_FlipBodyShapeGraphic(lua_State * _lua)
     luaL_argcheck(_lua, graphic_id != nullptr, 4, gc_message_graphic_key_expected);
     luaL_argexpected(_lua, lua_isboolean(_lua, 5), 5, "boolean");
     luaL_argexpected(_lua, lua_isboolean(_lua, 6), 6, "boolean");
-    bool result = self->scene->flipBodyShapeGraphic(
+    bool result = self->getScene(_lua)->flipBodyShapeGraphic(
         body_id,
         shape_id,
         graphic_id,
@@ -377,7 +400,7 @@ int luaApi_FindPath(lua_State * _lua)
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     Point destination;
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, destination), 3, "a destination point expected");
-    auto result = self->scene->findPath(body_id, destination, false, false);
+    auto result = self->getScene(_lua)->findPath(body_id, destination, false, false);
     if(result.has_value())
     {
         lua_newtable(_lua);
@@ -396,23 +419,13 @@ int luaApi_FindPath(lua_State * _lua)
 
 } // namespace
 
-void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, Scene & _scene)
+void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Scene> _scene)
 {
     LuaWeakRegistryStorage weak_registry(_lua);
     if(weak_registry.tryGet(&_scene, LUA_TUSERDATA))
         return;
 
-    Self * self = UserData::pushUserData(_lua);
-    self->scene = &_scene;
-    self->workspace = &_workspace;
-    self->callback_set_id_begin_contact = LuaCallbackStorage::generateUniqueSetId();
-    self->callback_set_id_end_contact = LuaCallbackStorage::generateUniqueSetId();
-    self->contact_observer = new LuaContactObserver(
-        _lua,
-        _workspace,
-        self->callback_set_id_begin_contact,
-        self->callback_set_id_end_contact);
-    self->scene->addContactObserver(*self->contact_observer);
+    UserData::pushUserData(_lua, _lua, std::ref(_workspace), std::ref(_scene));
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {

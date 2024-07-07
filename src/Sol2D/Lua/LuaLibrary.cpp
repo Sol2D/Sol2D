@@ -25,7 +25,7 @@
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaFragmentApi.h>
 #include <Sol2D/Lua/LuaDimensionApi.h>
-#include <Sol2D/Lua/LuaWidgetlApi.h>
+#include <Sol2D/Lua/LuaWidgetApi.h>
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaStrings.h>

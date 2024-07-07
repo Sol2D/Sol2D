@@ -26,12 +26,20 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    ~Self()
+    Self(std::shared_ptr<Mix_Chunk> & _chunk) :
+        chunk(_chunk)
     {
-        chunk.reset();
     }
 
-    std::shared_ptr<Mix_Chunk> chunk;
+    std::shared_ptr<Mix_Chunk> getChunk(lua_State * _lua) const
+    {
+        std::shared_ptr<Mix_Chunk> ptr = chunk.lock();
+        if(!ptr)
+            luaL_error(_lua, "the chunk is destroyed");
+        return ptr;
+    }
+
+    std::weak_ptr<Mix_Chunk> chunk;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::sound_effect>;
@@ -41,12 +49,8 @@ using UserData = LuaUserData<Self, LuaTypeName::sound_effect>;
 int luaApi_Play(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    bool result = false;
-    if(self->chunk)
-    {
-        int channel = lua_isinteger(_lua, 2) ? lua_tointeger(_lua, 2) : -1;
-        result = Mix_PlayChannel(channel, self->chunk.get(), 0) >= 0;
-    }
+    int channel = lua_isinteger(_lua, 2) ? lua_tointeger(_lua, 2) : -1;
+    bool result = Mix_PlayChannel(channel, self->getChunk(_lua).get(), 0) >= 0;
     lua_pushboolean(_lua, result);
     return 1;
 }
@@ -59,12 +63,8 @@ int luaApi_Loop(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "iteration count required");
     int iteration_count = lua_tointeger(_lua, 2);
-    bool result = false;
-    if(self->chunk)
-    {
-        int channel = lua_isinteger(_lua, 3) ? lua_tointeger(_lua, 3) : -1;
-        result = Mix_PlayChannel(channel, self->chunk.get(), iteration_count) >= 0;
-    }
+    int channel = lua_isinteger(_lua, 3) ? lua_tointeger(_lua, 3) : -1;
+    bool result = Mix_PlayChannel(channel, self->getChunk(_lua).get(), iteration_count) >= 0;
     lua_pushboolean(_lua, result);
     return 1;
 }
@@ -73,8 +73,7 @@ int luaApi_Loop(lua_State * _lua)
 
 void Sol2D::Lua::pushSoundEffectApi(lua_State * _lua, std::shared_ptr<Mix_Chunk> _chunk)
 {
-    Self * self = UserData::pushUserData(_lua);
-    self->chunk = _chunk;
+    UserData::pushUserData(_lua, std::ref(_chunk));
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] =

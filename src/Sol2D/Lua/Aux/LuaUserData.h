@@ -81,9 +81,9 @@ struct LuaUserData : __Private::LuaUserDataBase
 
     static int luaGC(lua_State * _lua)
     {
-        LuaSelf * udata = getUserData(_lua, 1);
-        beforeDestroyLuaSelf(_lua, *udata);
-        udata->~LuaSelf();
+        LuaSelf * self = getUserData(_lua, 1);
+        beforeDestroyLuaSelf(_lua, *self);
+        self->~LuaSelf();
         return 0;
     }
 };

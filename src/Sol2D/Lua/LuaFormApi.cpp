@@ -17,7 +17,7 @@
 #include <Sol2D/Lua/LuaFormApi.h>
 #include <Sol2D/Lua/LuaColorApi.h>
 #include <Sol2D/Lua/LuaFontApi.h>
-#include <Sol2D/Lua/LuaWidgetlApi.h>
+#include <Sol2D/Lua/LuaWidgetApi.h>
 #include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
@@ -31,8 +31,22 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    Form * form;
-    const Workspace * workspace;
+    Self(const Workspace & _workspace, std::shared_ptr<Form> & _form) :
+        workspace(_workspace),
+        form(_form)
+    {
+    }
+
+    std::shared_ptr<Form> getForm(lua_State * _lua)
+    {
+        std::shared_ptr<Form> ptr = form.lock();
+        if(!ptr)
+            luaL_error(_lua, "the form is destroyed");
+        return ptr;
+    }
+
+    const Workspace & workspace;
+    std::weak_ptr<Form> form;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::form>;
@@ -43,7 +57,7 @@ int luaApi_CreateLabel(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * text = lua_tostring(_lua, 2);
-    Label & label = self->form->createLabel(text ? std::string(text) : std::string());
+    Label & label = self->getForm(_lua)->createLabel(text ? std::string(text) : std::string());
     pushLabelApi(_lua, label);
     return 1;
 }
@@ -54,18 +68,16 @@ int luaApi_CreateButton(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * text = lua_tostring(_lua, 2);
-    Button & button = self->form->createButton(text ? std::string(text) : std::string());
-    pushButtonApi(_lua, button, *self->workspace);
+    Button & button = self->getForm(_lua)->createButton(text ? std::string(text) : std::string());
+    pushButtonApi(_lua, button, self->workspace);
     return 1;
 }
 
 } // namespace
 
-void Sol2D::Lua::pushFormApi(lua_State * _lua, const Workspace & _workspace, Form & _form)
+void Sol2D::Lua::pushFormApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Form> _form)
 {
-    Self * self = UserData::pushUserData(_lua);
-    self->form = &_form;
-    self->workspace = &_workspace;
+    UserData::pushUserData(_lua, std::ref(_workspace), std::ref(_form));
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {

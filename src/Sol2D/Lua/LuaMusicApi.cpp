@@ -25,12 +25,20 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    ~Self() override
+    Self(std::shared_ptr<Mix_Music> & _music) :
+        music(_music)
     {
-        music.reset();
     }
 
-    std::shared_ptr<Mix_Music> music;
+    std::shared_ptr<Mix_Music> getMusic(lua_State * _lua) const
+    {
+        std::shared_ptr<Mix_Music> ptr = music.lock();
+        if(!ptr)
+            luaL_error(_lua, "the music is destroyed");
+        return ptr;
+    }
+
+    std::weak_ptr<Mix_Music> music;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::music>;
@@ -39,7 +47,7 @@ using UserData = LuaUserData<Self, LuaTypeName::music>;
 int luaApi_Play(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    bool result = self->music && Mix_PlayMusic(self->music.get(), 0) == 0;
+    bool result = Mix_PlayMusic(self->getMusic(_lua).get(), 0) == 0;
     lua_pushboolean(_lua, result);
     return 1;
 }
@@ -50,7 +58,7 @@ int luaApi_Loop(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "iteration count required");
-    bool result = self->music && Mix_PlayMusic(self->music.get(), lua_tointeger(_lua, 2)) == 0;
+    bool result = Mix_PlayMusic(self->getMusic(_lua).get(), lua_tointeger(_lua, 2)) == 0;
     lua_pushboolean(_lua, result);
     return 1;
 }
@@ -59,17 +67,16 @@ int luaApi_Loop(lua_State * _lua)
 
 void Sol2D::Lua::pushMusicApi(lua_State * _lua, std::shared_ptr<Mix_Music> _music)
 {
-    Self * self = UserData::pushUserData(_lua);
-    self->music = _music;
+    UserData::pushUserData(_lua, std::ref(_music));
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] =
-            {
-                { "__gc", UserData::luaGC },
-                { "play", luaApi_Play },
-                { "loop", luaApi_Loop },
-                { nullptr, nullptr }
-            };
+        {
+            { "__gc", UserData::luaGC },
+            { "play", luaApi_Play },
+            { "loop", luaApi_Loop },
+            { nullptr, nullptr }
+        };
         luaL_setfuncs(_lua, funcs, 0);
     }
     lua_setmetatable(_lua, -2);

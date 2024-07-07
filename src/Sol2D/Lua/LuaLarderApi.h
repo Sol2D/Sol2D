@@ -22,6 +22,6 @@
 
 namespace Sol2D::Lua {
 
-void pushLarderApi(lua_State * _lua, const Workspace & _workspace, Larder & _larder);
+void pushLarderApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Larder> _larder);
 
 } // namespace Sol2D::Lua

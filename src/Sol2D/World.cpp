@@ -19,6 +19,7 @@
 
 using namespace Sol2D;
 using namespace Sol2D::Forms;
+using namespace Sol2D::Utils;
 
 World::World(SDL_Renderer & _renderer, const Workspace & _workspace) :
     mr_renderer(_renderer),
@@ -27,60 +28,90 @@ World::World(SDL_Renderer & _renderer, const Workspace & _workspace) :
 {
 }
 
-Scene & World::createScene(const std::string & _name)
+std::shared_ptr<Scene> World::createScene(const std::string & _name)
 {
     Scene * scene = new Scene(mr_workspace, mr_renderer);
-    Renderable * renderable = new Renderable(scene);
-    m_renderables.addOrReplaceItem(_name, renderable);
-    return *scene;
+    Renderable renderable
+    {
+        .kind = RenderableKind::Scene,
+        .canvas = std::shared_ptr<Canvas>(scene)
+    };
+    m_renderables[_name] = renderable;
+    return std::static_pointer_cast<Scene>(renderable.canvas);
 }
 
-Scene * World::getScene(const std::string & _name)
+std::shared_ptr<Scene> World::getScene(const std::string & _name) const
 {
-    Renderable * renderable = m_renderables.getItem(_name);
-    return renderable ? renderable->tryGetScene() : nullptr;
+    auto it = m_renderables.find(_name);
+    if(it == m_renderables.cend() || it->second.kind != RenderableKind::Scene)
+        return nullptr;
+    return std::static_pointer_cast<Scene>(it->second.canvas);
 }
 
-Form & World::createForm(const std::string & _name)
+std::shared_ptr<Form> World::createForm(const std::string & _name)
 {
     Form * form = new Form(mr_renderer);
-    Renderable * renderable = new Renderable(form);
-    m_renderables.addOrReplaceItem(_name, renderable);
-    return *form;
+    Renderable renderable
+    {
+        .kind = RenderableKind::Form,
+        .canvas = std::shared_ptr<Canvas>(form)
+    };
+    m_renderables[_name] = renderable;
+    return std::static_pointer_cast<Form>(renderable.canvas);
 }
 
-Form * World::getFrom(const std::string & _name)
+std::shared_ptr<Form> World::getFrom(const std::string & _name) const
 {
-    Renderable * renderable = m_renderables.getItem(_name);
-    return renderable ? renderable->tryGetForm() : nullptr;
+    auto it = m_renderables.find(_name);
+    if(it == m_renderables.cend() || it->second.kind != RenderableKind::Form)
+        return nullptr;
+    return std::static_pointer_cast<Form>(it->second.canvas);
+}
+
+std::shared_ptr<Larder> World::createLarder(const std::string & _key)
+{
+    std::shared_ptr<Larder> larder = std::make_shared<Larder>(mr_renderer);
+    m_larders[_key] = larder;
+    return larder;
+}
+
+std::shared_ptr<Larder> World::getLarder(const std::string _key) const
+{
+    auto it = m_larders.find(_key);
+    return it == m_larders.end() ? nullptr : it->second;
+}
+
+bool World::deleteLarder(const std::string & _key)
+{
+    return m_larders.erase(_key) > 0;
 }
 
 FragmentID World::createFragment(const Fragment & _fragment)
 {
     FragmentID id = m_next_fragment_id++;
     Outlet * outlet = new Outlet(_fragment, mr_renderer);
-    m_outlets.addOrReplaceItem(id, outlet);
+    m_outlets[id] = std::unique_ptr<Outlet>(outlet);
     emplaceOrderedOutlet(outlet);
     return id;
 }
 
 const Fragment * World::getFragment(FragmentID _id) const
 {
-    const Outlet * outlet = m_outlets.getItem(_id);
-    return outlet ? &outlet->getFragment() : nullptr;
+    auto it = m_outlets.find(_id);
+    return it == m_outlets.cend() ? nullptr : &it->second->getFragment();
 }
 
 bool World::updateFragment(FragmentID _id, const Fragment & _fragment)
 {
-    Outlet * outlet = m_outlets.getItem(_id);
-    if(!outlet)
+    auto it = m_outlets.find(_id);
+    if(it == m_outlets.end() )
         return false;
-    bool need_to_reorder = _fragment.z_index != outlet->getFragment().z_index;
-    outlet->reconfigure(_fragment);
+    bool need_to_reorder = _fragment.z_index != it->second->getFragment().z_index;
+    it->second->reconfigure(_fragment);
     if(need_to_reorder)
     {
-        eraseOrderedOutlet(outlet);
-        emplaceOrderedOutlet(outlet);
+        eraseOrderedOutlet(it->second.get());
+        emplaceOrderedOutlet(it->second.get());
     }
     return true;
 }
@@ -104,20 +135,24 @@ void World::eraseOrderedOutlet(Outlet * _outlet)
 
 bool World::deleteFragment(FragmentID _id)
 {
-    Outlet * outlet = m_outlets.getItem(_id);
-    if(!outlet) return false;
-    eraseOrderedOutlet(outlet);
-    m_outlets.deleteItem(_id);
+    auto it = m_outlets.find(_id);
+    if(it == m_outlets.end() )
+        return false;
+    eraseOrderedOutlet(it->second.get());
+    m_outlets.erase(_id);
     return true;
 }
 
 bool World::bindFragment(FragmentID _fragment_id, const std::string & _name)
 {
-    Outlet * outlet = m_outlets.getItem(_fragment_id);
-    if(!outlet) return false;
-    Renderable * renderable = m_renderables.getItem(_name);
-    if(!renderable) return false;
-    outlet->bind(*renderable->getCanvas());
+    auto outlet_it = m_outlets.find(_fragment_id);
+    if(outlet_it == m_outlets.end() )
+        return false;
+    auto renderables_it = m_renderables.find(_name);
+    if(renderables_it == m_renderables.end())
+        return false;
+
+    outlet_it->second->bind(*renderables_it->second.canvas.get());
     return true;
 }
 

@@ -22,6 +22,6 @@
 
 namespace Sol2D::Lua {
 
-void pushFormApi(lua_State * _lua, const Workspace & _workspace, Forms::Form & _form);
+void pushFormApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Forms::Form> _form);
 
 } // namespace Sol2D::Lua
