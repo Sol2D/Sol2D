@@ -16,25 +16,17 @@
 
 #pragma once
 
-#include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Workspace.h>
-#include <Sol2D/Window.h>
 #include <Sol2D/Store.h>
+#include <Sol2D/Workspace.h>
+#include <Sol2D/Lua/Aux/LuaForward.h>
+#include <SDL3/SDL_render.h>
 
 namespace Sol2D::Lua {
 
-class LuaLibrary final
-{
-public:
-    S2_DISABLE_COPY_AND_MOVE(LuaLibrary)
-    LuaLibrary(const Workspace & _workspace, StoreManager & _store_manager, Window & _window, SDL_Renderer & _renderer);
-    ~LuaLibrary();
-    void executeMainScript();
-    void step(const RenderState & _state);
-
-private:
-    lua_State * mp_lua;
-    const Workspace & mr_workspace;
-};
+void pushStoreManagerApi(
+    lua_State * _lua,
+    const Workspace & _workspace,
+    SDL_Renderer & _renderer,
+    StoreManager & _store_manager);
 
 } // namespace Sol2D::Lua

@@ -79,6 +79,11 @@ struct LuaUserData : __Private::LuaUserDataBase
         return static_cast<LuaSelf *>(luaL_checkudata(_lua, _idx, metatable));
     }
 
+    static LuaSelf * tryGetUserData(lua_State * _lua, int _idx)
+    {
+        return static_cast<LuaSelf *>(luaL_testudata(_lua, _idx, metatable));
+    }
+
     static int luaGC(lua_State * _lua)
     {
         LuaSelf * self = getUserData(_lua, 1);

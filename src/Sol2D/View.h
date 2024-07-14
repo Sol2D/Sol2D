@@ -16,35 +16,41 @@
 
 #pragma once
 
-#include <Sol2D/Fragment.h>
-#include <Sol2D/Canvas.h>
-#include <SDL3/SDL.h>
+#include <Sol2D/RenderState.h>
+#include <Sol2D/Outlet.h>
+#include <unordered_map>
+#include <list>
 
 namespace Sol2D {
 
-class Outlet final
+class View final
 {
-    S2_DISABLE_COPY_AND_MOVE(Outlet)
+    S2_DISABLE_COPY_AND_MOVE(View)
 
 public:
-    Outlet(const Fragment & _fragmet, SDL_Renderer & _renderer);
+    View(SDL_Renderer & _renderer);
+    uint16_t createFragment(const Fragment & _fragment);
+    const Fragment * getFragment(uint16_t _id) const;
+    bool updateFragment(uint16_t _id, const Fragment & _fragment);
+    bool deleteFragment(uint16_t _id);
+    bool bindFragment(uint16_t _fragment_id, std::shared_ptr<Canvas> _canvas);
     void resize();
-    void bind(std::shared_ptr<Canvas> _canvas);
-    void reconfigure(const Fragment & _fragment);
     void render(const RenderState & _state);
-    const Fragment & getFragment() const;
 
 private:
-    Fragment m_fragment;
+    void emplaceOrderedOutlet(Outlet * _outlet);
+    void eraseOrderedOutlet(Outlet * _outlet);
+
+private:
     SDL_Renderer & mr_renderer;
-    Rect m_rect;
-    std::shared_ptr<Canvas> m_canvas;
-    std::shared_ptr<SDL_Texture> m_texture;
+    std::unordered_map<uint16_t, std::unique_ptr<Outlet>> m_outlets;
+    uint16_t m_next_fragment_id;
+    std::list<Outlet *> m_ordered_outlets;
 };
 
-inline const Fragment & Outlet::getFragment() const
+inline View::View(SDL_Renderer & _renderer) :
+    mr_renderer(_renderer)
 {
-    return m_fragment;
 }
 
 } // namespace Sol2D

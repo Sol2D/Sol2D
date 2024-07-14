@@ -1,11 +1,11 @@
----@param name string
----@return { scene: sol.Scene, name: string }
-local function createLevel(name)
-    local scene = sol.world:createScene(name)
+---@return { scene: sol.Scene, store: sol.Store }
+local function createLevel()
+    local store = sol.stores:createStore('level-01')
+    local scene = store:createObject('sol.Scene', 'main')
     scene:loadTileMap('tilemaps/level-01.tmx')
     return {
         scene = scene,
-        name = name
+        store = store
     }
 end
 

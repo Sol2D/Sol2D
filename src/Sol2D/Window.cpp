@@ -14,27 +14,14 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#pragma once
-
-#include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Workspace.h>
 #include <Sol2D/Window.h>
-#include <Sol2D/Store.h>
 
-namespace Sol2D::Lua {
+using namespace Sol2D;
 
-class LuaLibrary final
+void Window::render(const RenderState & _state)
 {
-public:
-    S2_DISABLE_COPY_AND_MOVE(LuaLibrary)
-    LuaLibrary(const Workspace & _workspace, StoreManager & _store_manager, Window & _window, SDL_Renderer & _renderer);
-    ~LuaLibrary();
-    void executeMainScript();
-    void step(const RenderState & _state);
-
-private:
-    lua_State * mp_lua;
-    const Workspace & mr_workspace;
-};
-
-} // namespace Sol2D::Lua
+    SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 0); // TODO: from Lua
+    SDL_RenderClear(&mr_renderer);
+    if(m_view) m_view->render(_state);
+    SDL_RenderPresent(&mr_renderer);
+}

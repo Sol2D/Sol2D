@@ -17,7 +17,9 @@
 #include <Sol2D/Lua/LuaStrings.h>
 
 const char Sol2D::Lua::LuaTypeName::lib[]                          = "sol.Library";
-const char Sol2D::Lua::LuaTypeName::world[]                        = "sol.World";
+const char Sol2D::Lua::LuaTypeName::store_manager[]                = "sol.StoreManager";
+const char Sol2D::Lua::LuaTypeName::window[]                       = "sol.Window";
+const char Sol2D::Lua::LuaTypeName::view[]                         = "sol.View";
 const char Sol2D::Lua::LuaTypeName::scene[]                        = "sol.Scene";
 const char Sol2D::Lua::LuaTypeName::tile_map_object_type[]         = "sol.TileMapObjectType";
 const char Sol2D::Lua::LuaTypeName::keyboard[]                     = "sol.Keyboard";

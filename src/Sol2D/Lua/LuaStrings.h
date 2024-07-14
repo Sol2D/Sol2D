@@ -22,7 +22,9 @@ namespace Sol2D::Lua {
 struct LuaTypeName
 {
     static const char lib[];
-    static const char world[];
+    static const char store_manager[];
+    static const char window[];
+    static const char view[];
     static const char scene[];
     static const char tile_map_object_type[];
     static const char keyboard[];

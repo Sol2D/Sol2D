@@ -16,25 +16,13 @@
 
 #pragma once
 
+#include <Sol2D/View.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Workspace.h>
-#include <Sol2D/Window.h>
-#include <Sol2D/Store.h>
 
 namespace Sol2D::Lua {
 
-class LuaLibrary final
-{
-public:
-    S2_DISABLE_COPY_AND_MOVE(LuaLibrary)
-    LuaLibrary(const Workspace & _workspace, StoreManager & _store_manager, Window & _window, SDL_Renderer & _renderer);
-    ~LuaLibrary();
-    void executeMainScript();
-    void step(const RenderState & _state);
+std::shared_ptr<View> tryGetView(lua_State * _lua, int _idx);
 
-private:
-    lua_State * mp_lua;
-    const Workspace & mr_workspace;
-};
+void pushViewApi(lua_State * _lua, std::shared_ptr<View> _view);
 
 } // namespace Sol2D::Lua

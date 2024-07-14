@@ -90,3 +90,10 @@ void Sol2D::Lua::pushFormApi(lua_State * _lua, const Workspace & _workspace, std
     }
     lua_setmetatable(_lua, -2);
 }
+
+std::shared_ptr<Forms::Form> Sol2D::Lua::tryGetForm(lua_State * _lua, int _idx)
+{
+    if(Self * self = UserData::tryGetUserData(_lua, _idx))
+        return self->getForm(_lua);
+    return nullptr;
+}

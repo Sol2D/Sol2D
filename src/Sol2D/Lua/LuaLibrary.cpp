@@ -15,7 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaLibrary.h>
-#include <Sol2D/Lua/LuaWorldApi.h>
+#include <Sol2D/Lua/LuaWindowApi.h>
+#include <Sol2D/Lua/LuaStoreManagerApi.h>
 #include <Sol2D/Lua/LuaHeartbeatApi.h>
 #include <Sol2D/Lua/LuaScancodeApi.h>
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
@@ -77,7 +78,12 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
 
 } // namespace name
 
-LuaLibrary::LuaLibrary(const Workspace & _workspace, World & _world) :
+LuaLibrary::LuaLibrary(
+    const Workspace & _workspace,
+    StoreManager & _store_manager,
+    Window & _window,
+    SDL_Renderer & _renderer
+) :
     mp_lua(luaL_newstate()),
     mr_workspace(_workspace)
 {
@@ -89,9 +95,12 @@ LuaLibrary::LuaLibrary(const Workspace & _workspace, World & _world) :
     lua_newuserdata(mp_lua, 1);
     if(pushMetatable(mp_lua, LuaTypeName::lib) == MetatablePushResult::Created)
     {
-        addSublibrary(mp_lua, "world", [this, &_world]() { pushWorldApi(mp_lua, _world); });
+        addSublibrary(mp_lua, "window", [this, &_window]() { pushWindowApi(mp_lua, _window); });
         addSublibrary(mp_lua, "heartbeat", [this]() { pushHeartbeatApi(mp_lua); });
         addSublibrary(mp_lua, "keyboard", [this]() { pushKeyboardApiOntoStack(mp_lua); });
+        addSublibrary(mp_lua, "stores", [this, &_store_manager, &_workspace, &_renderer] {
+            pushStoreManagerApi(mp_lua, _workspace, _renderer, _store_manager);
+        });
         addSublibrary(mp_lua, "Scancode", [this]() { pushScancodeEnum(mp_lua); });
         addSublibrary(mp_lua, "Scancode", [this]() { pushScancodeEnum(mp_lua); });
         addSublibrary(mp_lua, "BodyType", [this]() { pushBodyTypeEnum(mp_lua); });

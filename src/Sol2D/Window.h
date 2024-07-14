@@ -16,11 +16,46 @@
 
 #pragma once
 
-#include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/World.h>
+#include <Sol2D/View.h>
+#include <SDL3/SDL_render.h>
+#include <memory>
 
-namespace Sol2D::Lua {
+namespace Sol2D {
 
-void pushWorldApi(lua_State * _lua, World & _world);
+class Window final
+{
+    S2_DISABLE_COPY_AND_MOVE(Window)
 
-} // namespace Sol2D::Lua
+public:
+    explicit Window(SDL_Renderer & _renderer);
+    void render(const RenderState & _state);
+    void setView(std::shared_ptr<View> _view);
+    std::shared_ptr<View> getView() const;
+    void resize();
+
+private:
+    SDL_Renderer & mr_renderer;
+    std::shared_ptr<View> m_view;
+};
+
+inline Window:: Window(SDL_Renderer & _renderer) :
+    mr_renderer(_renderer)
+{
+}
+
+inline void Window::setView(std::shared_ptr<View> _view)
+{
+    m_view = _view;
+}
+
+inline std::shared_ptr<View> Window::getView() const
+{
+    return m_view;
+}
+
+inline void Window::resize()
+{
+    if(m_view) m_view->resize();
+}
+
+} // namespace Sol2D

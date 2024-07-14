@@ -4,9 +4,10 @@
 ---@field Scancode sol.Scancode
 ---@field BodyType sol.BodyType
 ---@field BodyShapeType sol.BodyShapeType
----@field world sol.World
 ---@field heartbeat sol.Heartbeat
 ---@field keyboard sol.Keyboard
+---@field stores sol.StoreManager
+---@field window sol.Window
 ---@field TileMapObjectType sol.TileMapObjectType
 ---@field DimensionUnit sol.DimensionUnit
 ---@field WidgetState sol.WidgetState
@@ -77,47 +78,6 @@ self = nil
 ---@field isSensor boolean?
 ---@field density number?
 
----@class sol.World
-local __world
-
----@param name string
----@return sol.Scene
-function __world:createScene(name) end
-
----@param name string
----@return sol.Form
-function __world:createForm(name) end
-
----@param key string
----@return sol.Store
-function __world:createStore(key) end
-
----@param key string
----@return boolean
-function __world:deleteStore(key) end
-
----@param fragment Fragment
----@return integer
-function __world:createFragment(fragment) end
-
----@param fragment_id integer
----@param fragment Fragment
----@return boolean
-function __world:updateFragment(fragment_id, fragment) end
-
----@param fragment_id integer
----@return Fragment?
-function __world:getFragment(fragment_id) end
-
----@param fragment_id integer
----@return boolean
-function __world:deleteFragment(fragment_id) end
-
----@param fragment_id integer
----@param name string A name of the scene or form
----@return boolean
-function __world:bindFragment(fragment_id, name) end
-
 ---@class Fragment
 ---@field top Dimension?
 ---@field right Dimension?
@@ -137,6 +97,55 @@ function __world:bindFragment(fragment_id, name) end
 ---@class sol.DimensionUnit
 ---@field PIXEL integer
 ---@field PERCENT integer
+
+---@class sol.StoreManager
+local __store_manager
+
+---@param key string
+---@return sol.Store
+function __store_manager:createStore(key) end
+
+---@param key string
+---@return sol.Store?
+function __store_manager:getStore(key) end
+
+---@param key string
+---@return boolean
+function __store_manager:deleteStore(key) end
+
+---@class sol.Window
+local __window
+
+---@param view sol.View?
+function __window:setView(view) end
+
+---@return sol.View?
+function __window:getView() end
+
+---@class sol.View
+local __view
+
+---@param fragment Fragment
+---@return integer
+function __view:createFragment(fragment) end
+
+---@param fragment_id integer
+---@param fragment Fragment
+---@return boolean
+function __view:updateFragment(fragment_id, fragment) end
+
+---@param fragment_id integer
+---@return Fragment?
+function __view:getFragment(fragment_id) end
+
+---@param fragment_id integer
+---@return boolean
+function __view:deleteFragment(fragment_id) end
+
+---@param fragment_id integer
+---@param target? sol.Scene | sol.Form
+---@return boolean
+function __view:bindFragment(fragment_id, target) end
 
 ---@class sol.Scene
 local __scene
@@ -337,6 +346,21 @@ function __button:unsubscribeOnClick(subscription_id) end
 ---@class sol.Store
 local __store
 
+---@param type 'sol.View'
+---@param key string
+---@return sol.View
+function __store:createObject(type, key) end
+
+---@param type 'sol.Scene'
+---@param key string
+---@return sol.Scene
+function __store:createObject(type, key) end
+
+---@param type 'sol.Form'
+---@param key string
+---@return sol.Form
+function __store:createObject(type, key) end
+
 ---@param type 'sol.Sprite'
 ---@param key string
 ---@return sol.Sprite
@@ -413,7 +437,17 @@ function __store:getObject(type, key, file_path) end
 ---@return sol.Font | nil
 function __store:getObject(type, key, file_path, font_size) end
 
----@param type 'sol.Sprite' | 'sol.SpriteSheet' | 'sol.SpriteAnimation' | 'sol.BodyPrototype' | 'sol.SoundEffect' | 'sol.Music' | 'sol.Font'
+---@param type
+---| 'sol.View'
+---| 'sol.Scene'
+---| 'sol.Form'
+---| 'sol.Sprite'
+---| 'sol.SpriteSheet'
+---| 'sol.SpriteAnimation'
+---| 'sol.BodyPrototype'
+---| 'sol.SoundEffect'
+---| 'sol.Music'
+---| 'sol.Font'
 ---@param key string
 ---@return boolean
 function __store:freeObject(type, key) end

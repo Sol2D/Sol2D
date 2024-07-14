@@ -24,4 +24,6 @@ namespace Sol2D::Lua {
 
 void pushSceneApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Scene> _scene);
 
+std::shared_ptr<Scene> tryGetScene(lua_State * _lua, int _idx);
+
 } // namespace Sol2D::Lua

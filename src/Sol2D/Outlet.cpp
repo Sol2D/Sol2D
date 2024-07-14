@@ -23,14 +23,13 @@ using namespace Sol2D::SDL;
 Outlet::Outlet(const Fragment & _fragmet, SDL_Renderer & _renderer) :
     m_fragment(_fragmet),
     mr_renderer(_renderer),
-    m_rect{.0f, .0f, .0f, .0f},
-    mp_canvas(nullptr)
+    m_rect{.0f, .0f, .0f, .0f}
 {
 }
 
 void Outlet::resize()
 {
-    if(!mp_canvas || !m_fragment.is_visible)
+    if(!m_canvas || !m_fragment.is_visible)
         return;
 
     int viewport_w, viewport_h;
@@ -68,7 +67,7 @@ void Outlet::resize()
 
     if(m_rect.h < 1.0f || m_rect.w < 1.0f)
     {
-        m_texture_ptr = nullptr;
+        m_texture = nullptr;
     }
     else
     {
@@ -79,31 +78,31 @@ void Outlet::resize()
             m_rect.w,
             m_rect.h
         );
-        m_texture_ptr = wrapTexture(texture);
+        m_texture = wrapTexture(texture);
     }
-    mp_canvas->reconfigure(m_rect);
+    m_canvas->reconfigure(m_rect);
 }
 
-void Outlet::bind(Canvas & _canvas)
+void Outlet::bind(std::shared_ptr<Canvas> _canvas)
 {
-    mp_canvas = &_canvas;
+    m_canvas = _canvas;
     resize();
 }
 
 void Outlet::reconfigure(const Fragment & _fragment)
 {
     if(!_fragment.is_visible && m_fragment.is_visible)
-        m_texture_ptr.reset();
+        m_texture.reset();
     m_fragment = _fragment;
     resize();
 }
 
 void Outlet::render(const RenderState & _state)
 {
-    if(!mp_canvas || !m_texture_ptr)
+    if(!m_canvas || !m_texture)
         return;
-    SDL_SetRenderTarget(&mr_renderer, m_texture_ptr.get());
-    mp_canvas->render(_state);
+    SDL_SetRenderTarget(&mr_renderer, m_texture.get());
+    m_canvas->render(_state);
     SDL_SetRenderTarget(&mr_renderer, nullptr);
-    SDL_RenderTexture(&mr_renderer, m_texture_ptr.get(), nullptr, m_rect.toSdlPtr());
+    SDL_RenderTexture(&mr_renderer, m_texture.get(), nullptr, m_rect.toSdlPtr());
 }

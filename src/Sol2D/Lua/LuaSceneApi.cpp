@@ -456,3 +456,10 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
 
     weak_registry.save(&_scene, -1);
 }
+
+std::shared_ptr<Scene> Sol2D::Lua::tryGetScene(lua_State * _lua, int _idx)
+{
+    if(Self * self = UserData::tryGetUserData(_lua, _idx))
+        return self->getScene(_lua);
+    return nullptr;
+}

@@ -50,11 +50,12 @@ private:
     void onMouseButtonUp(const SDL_MouseButtonEvent & _event);
 
 private:
-    SDL_Window * mp_window;
-    SDL_Renderer * mp_renderer;
+    SDL_Window * mp_sdl_window;
+    SDL_Renderer * mp_sdl_renderer;
     const Workspace & mr_workspace;
     RenderState m_render_state;
-    World * mp_world;
+    Window * mp_window;
+    StoreManager * mp_store_manager;
     LuaLibrary * mp_lua;
 };
 
@@ -67,23 +68,25 @@ SDL_AssertState SDLCALL sdlAssertionHandler (const SDL_AssertData * _data, void 
 
 
 Application::Application(const Workspace & _workspace) :
-    mp_window(nullptr),
-    mp_renderer(nullptr),
+    mp_sdl_window(nullptr),
+    mp_sdl_renderer(nullptr),
     mr_workspace(_workspace),
     m_render_state{},
-    mp_world(nullptr),
+    mp_window(nullptr),
+    mp_store_manager(nullptr),
     mp_lua(nullptr)
 {
 }
 
 Application::~Application()
 {
-    if(mp_renderer)
-        SDL_DestroyRenderer(mp_renderer);
-    if(mp_window)
-        SDL_DestroyWindow(mp_window);
+    if(mp_sdl_renderer)
+        SDL_DestroyRenderer(mp_sdl_renderer);
+    if(mp_sdl_window)
+        SDL_DestroyWindow(mp_sdl_window);
     delete mp_lua;
-    delete mp_world;
+    delete mp_window;
+    delete mp_store_manager;
     IMG_Quit();
     TTF_Quit();
     Mix_Quit();
@@ -123,7 +126,7 @@ bool Application::initialize()
     }
     SDL_SetAssertionHandler(sdlAssertionHandler, nullptr);
     // TODO: SDL_WINDOW_VULKAN from manifest
-    mp_window = SDL_CreateWindow(
+    mp_sdl_window = SDL_CreateWindow(
         mr_workspace.getApplicationName().c_str(),
         800,
         600,
@@ -133,19 +136,20 @@ bool Application::initialize()
         | SDL_WINDOW_VULKAN
         // TODO: "vulkan" renderer cannot be created with SDL_WINDOW_HIGH_PIXEL_DENSITY
     );
-    if(!mp_window)
+    if(!mp_sdl_window)
     {
         mr_workspace.getMainLogger().critical("Unable to create window. {}", SDL_GetError());
         return false;
     }
-    mp_renderer = SDL_CreateRenderer(mp_window, nullptr); // TODO: select driver
-    if(!mp_renderer)
+    mp_sdl_renderer = SDL_CreateRenderer(mp_sdl_window, nullptr); // TODO: select driver
+    if(!mp_sdl_renderer)
     {
         mr_workspace.getMainLogger().critical("Unable to create renderer. {}", SDL_GetError());
         return false;
     }
-    mp_world = new World(*mp_renderer, mr_workspace);
-    mp_lua = new LuaLibrary(mr_workspace, *mp_world);
+    mp_window = new Window(*mp_sdl_renderer);
+    mp_store_manager = new StoreManager();
+    mp_lua = new LuaLibrary(mr_workspace, *mp_store_manager, *mp_window, *mp_sdl_renderer);
     mp_lua->executeMainScript();
     return true;
 }
@@ -208,7 +212,7 @@ bool Application::handleEvent(const SDL_Event & _event)
 
 inline void Application::onWindowResized(const SDL_WindowEvent & /*_event*/)
 {
-    mp_world->resize();
+    mp_window->resize();
 }
 
 inline void Application::onMouseButtonDown(const SDL_MouseButtonEvent & _event)
@@ -252,8 +256,8 @@ inline void Application::onMouseButtonUp(const SDL_MouseButtonEvent & _event)
 void Application::render()
 {
     int width, height;
-    SDL_GetCurrentRenderOutputSize(mp_renderer, &width, &height);
-    mp_world->render(m_render_state);
+    SDL_GetCurrentRenderOutputSize(mp_sdl_renderer, &width, &height);
+    mp_window->render(m_render_state);
     mp_lua->step(m_render_state);
 }
 

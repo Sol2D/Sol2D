@@ -1,16 +1,17 @@
-local main_scene_name = 'main'
-local scene = sol.world:createScene(main_scene_name)
-local store = sol.world:createStore('main')
+local store = sol.stores:createStore('main')
+local view = store:createObject('sol.View', 'main')
+local scene = store:createObject('sol.Scene', 'level-01')
+
 scene:loadTileMap('tiled/tmx/level-01.tmx')
 -- scene:loadTileMap('tiled/tmx/level-03.tmx')
 -- scene:loadTileMap('tiled/tmx/test2.tmx')
 scene:createBodiesFromMapObjects('Obstacle')
 scene:createBodiesFromMapObjects('Sensor', nil, { isSensor = true })
 
-local main_fragment_id = sol.world:createFragment({
+local main_fragment_id = view:createFragment({
     top = { unit = sol.DimensionUnit.PIXEL, value = 50 }
 })
-sol.world:bindFragment(main_fragment_id, main_scene_name)
+view:bindFragment(main_fragment_id, scene)
 
 local font_roboto = store:createObject('sol.Font', 'roboto-18', 'fonts/Roboto/Roboto-Bold.ttf', 18)
 if font_roboto == nil then
@@ -40,8 +41,7 @@ local score = {
     end
 }
 
-local score_form_name = 'score'
-local form = sol.world:createForm(score_form_name)
+local form = store:createObject('sol.Form', 'score')
 
 local function createScoreLabel()
     local label = form:createLabel(score:formatMessage())
@@ -95,10 +95,12 @@ end
 
 local switch_view_button = createSwitchViewButton()
 
-local score_fragment_id = sol.world:createFragment({
+local score_fragment_id = view:createFragment({
     height = { unit = sol.DimensionUnit.PIXEL, value = 50 }
 })
-sol.world:bindFragment(score_fragment_id, score_form_name)
+view:bindFragment(score_fragment_id, form)
+
+sol.window:setView(view)
 
 local function createSpacesheep()
     local body_proto = store:createObject('sol.BodyPrototype', 'spaceship', sol.BodyType.DYNAMIC)
@@ -218,7 +220,7 @@ local function createSkeleton()
 end
 
 (function ()
-    local music = store:createObject('sol.Music', 'village-in-despair', 'sounds/village_in_despair/village_in_despair.flac')
+    local music = store:createObject('sol.Music', 'village-сin-despair', 'sounds/village_in_despair/village_in_despair.flac')
     if music == nil then
         print('Unable to load music')
     else
