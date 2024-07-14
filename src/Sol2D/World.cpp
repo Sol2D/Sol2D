@@ -68,22 +68,22 @@ std::shared_ptr<Form> World::getFrom(const std::string & _name) const
     return std::static_pointer_cast<Form>(it->second.canvas);
 }
 
-std::shared_ptr<Larder> World::createLarder(const std::string & _key)
+std::shared_ptr<Store> World::createStore(const std::string & _key)
 {
-    std::shared_ptr<Larder> larder = std::make_shared<Larder>(mr_renderer);
-    m_larders[_key] = larder;
-    return larder;
+    std::shared_ptr<Store> store = std::make_shared<Store>();
+    m_stores[_key] = store;
+    return store;
 }
 
-std::shared_ptr<Larder> World::getLarder(const std::string _key) const
+std::shared_ptr<Store> World::getStore(const std::string _key) const
 {
-    auto it = m_larders.find(_key);
-    return it == m_larders.end() ? nullptr : it->second;
+    auto it = m_stores.find(_key);
+    return it == m_stores.end() ? nullptr : it->second;
 }
 
-bool World::deleteLarder(const std::string & _key)
+bool World::deleteStore(const std::string & _key)
 {
-    return m_larders.erase(_key) > 0;
+    return m_stores.erase(_key) > 0;
 }
 
 FragmentID World::createFragment(const Fragment & _fragment)

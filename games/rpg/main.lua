@@ -1,6 +1,6 @@
 local main_scene_name = 'main'
 local scene = sol.world:createScene(main_scene_name)
-local larder = sol.world:createLarder('main')
+local store = sol.world:createStore('main')
 scene:loadTileMap('tiled/tmx/level-01.tmx')
 -- scene:loadTileMap('tiled/tmx/level-03.tmx')
 -- scene:loadTileMap('tiled/tmx/test2.tmx')
@@ -12,19 +12,19 @@ local main_fragment_id = sol.world:createFragment({
 })
 sol.world:bindFragment(main_fragment_id, main_scene_name)
 
-local font_roboto = larder:getFont('fonts/Roboto/Roboto-Bold.ttf', 18)
+local font_roboto = store:createObject('sol.Font', 'roboto-18', 'fonts/Roboto/Roboto-Bold.ttf', 18)
 if font_roboto == nil then
     print('Font is not loaded')
     return
 end
 
-local teleport_sound_effect = larder:getSoundEffect('sounds/teleport/teleport.wav')
+local teleport_sound_effect = store:createObject('sol.SoundEffect', 'teleport', 'sounds/teleport/teleport.wav')
 if teleport_sound_effect == nil then
     print('The teleport sound effect is not loaded')
     return
 end
 
-local click_sound_effect = larder:getSoundEffect('sounds/click/click.mp3')
+local click_sound_effect = store:createObject('sol.SoundEffect', 'click', 'sounds/click/click.mp3')
 if click_sound_effect == nil then
     print('The click sound effect is not loaded')
     return
@@ -101,7 +101,7 @@ local score_fragment_id = sol.world:createFragment({
 sol.world:bindFragment(score_fragment_id, score_form_name)
 
 local function createSpacesheep()
-    local body_proto = larder:createBodyPrototype('spaceship', sol.BodyType.DYNAMIC)
+    local body_proto = store:createObject('sol.BodyPrototype', 'spaceship', sol.BodyType.DYNAMIC)
     local spaceship_rect = { x = 48, y = 48, w = 72, h = 96 }
     local rect_proto = body_proto:createPolygonShape('main', spaceship_rect)
     body_proto:createPolygonShape('polygon',
@@ -110,7 +110,7 @@ local function createSpacesheep()
         { x = 35, y = 15 }
     )
     body_proto:createCircleShape('circle', { x = 15, y = 15 }, 10)
-    local spacehip_sprite = larder:createSprite('spaceship')
+    local spacehip_sprite = store:createObject('sol.Sprite', 'spaceship')
     if spacehip_sprite:loadFromFile('assets/spaceship/spaceship.png') then
         print('Sprite loaded')
         rect_proto:addSprite('spaceship', spacehip_sprite, {
@@ -133,12 +133,12 @@ local function getStartPosition()
 end
 
 local function createPlayer()
-    local body_proto = larder:createBodyPrototype('player', sol.BodyType.DYNAMIC)
+    local body_proto = store:createObject('sol.BodyPrototype', 'player', sol.BodyType.DYNAMIC)
     body_proto:attachScript('player.lua')
     local size = { w = 32, h = 36 }
     local position = { x = -(size.w / 2), y = -(size.h / 2) }
     local shape_proto = body_proto:createPolygonShape('main', { x = position.x, y = position.y, w = size.w, h = size.h })
-    local sprite_sheet = larder:createSpriteSheet('player')
+    local sprite_sheet = store:createObject('sol.SpriteSheet', 'player')
     if sprite_sheet:loadFromFile('assets/player/george.png', {
             spriteWidth = size.w,
             spriteHeight = size.h,
@@ -155,16 +155,16 @@ local function createPlayer()
         return
     end
     local frame_duration = 200
-    local animation_idle = larder:createSpriteAnimation('player_idle') -- TODO: Load a sprite form a sheet, animation is overhead
-    animation_idle:addFrameFromSpriteSheet(0, sprite_sheet, 0)
-    local animation_right = larder:createSpriteAnimation('player_right')
-    animation_right:addFrames(frame_duration, sprite_sheet, { 3, 7, 11, 15 })
-    local animation_left = larder:createSpriteAnimation('player_left')
-    animation_left:addFrames(frame_duration, sprite_sheet, { 1, 5, 9, 13 })
-    local animation_up = larder:createSpriteAnimation('player_up')
-    animation_up:addFrames(frame_duration, sprite_sheet, { 2, 6, 10, 14 })
-    local animation_down = larder:createSpriteAnimation('player_down')
-    animation_down:addFrames(frame_duration, sprite_sheet, { 0, 4, 8, 12 })
+    local animation_idle = store:createObject('sol.SpriteAnimation', 'player_idle') -- TODO: Load a sprite form a sheet, animation is overhead
+    animation_idle:addFrameFromSpriteSheet(sprite_sheet, 0)
+    local animation_right = store:createObject('sol.SpriteAnimation', 'player_right')
+    animation_right:addFrames(sprite_sheet, { 3, 7, 11, 15 }, { frame_duration = frame_duration })
+    local animation_left = store:createObject('sol.SpriteAnimation', 'player_left')
+    animation_left:addFrames(sprite_sheet, { 1, 5, 9, 13 }, { frame_duration = frame_duration })
+    local animation_up = store:createObject('sol.SpriteAnimation', 'player_up')
+    animation_up:addFrames(sprite_sheet, { 2, 6, 10, 14 }, { frame_duration = frame_duration })
+    local animation_down = store:createObject('sol.SpriteAnimation', 'player_down')
+    animation_down:addFrames(sprite_sheet, { 0, 4, 8, 12 }, { frame_duration = frame_duration })
     shape_proto:addSpriteAnimation('idle', animation_idle, { position = position })
     shape_proto:addSpriteAnimation('right', animation_right, { position = position })
     shape_proto:addSpriteAnimation('left', animation_left, { position = position })
@@ -174,12 +174,12 @@ local function createPlayer()
 end
 
 local function createSkeleton()
-    local body_proto = larder:createBodyPrototype('skeleton', sol.BodyType.DYNAMIC)
+    local body_proto = store:createObject('sol.BodyPrototype', 'skeleton', sol.BodyType.DYNAMIC)
     body_proto:attachScript('skeleton.lua')
     local size = { w = 34, h = 50 }
     local position = { x = -(size.w / 2), y = -(size.h / 2) }
     local shape_proto = body_proto:createPolygonShape('main', { x = position.x, y = position.y, w = size.w, h = size.h })
-    local sprite_sheet = larder:createSpriteSheet('skeleton-walkcycle')
+    local sprite_sheet = store:createObject('sol.SpriteSheet', 'skeleton-walkcycle')
     if sprite_sheet:loadFromFile('assets/skeleton/walkcycle.png', {
             spriteWidth = size.w,
             spriteHeight = size.h,
@@ -196,16 +196,16 @@ local function createSkeleton()
         return
     end
     local frame_duration = 80;
-    local animation_idle = larder:createSpriteAnimation('skeleton_idle')
-    animation_idle:addFrameFromSpriteSheet(0, sprite_sheet, 18)
-    local animation_up = larder:createSpriteAnimation('skeleton_up')
-    animation_up:addFrames(frame_duration, sprite_sheet, { 1, 2, 3, 4, 5, 6, 7, 8 })
-    local animation_left = larder:createSpriteAnimation('skeleton_left')
-    animation_left:addFrames(frame_duration, sprite_sheet, { 10, 11, 12, 13, 14, 15, 16, 17 })
-    local animation_down = larder:createSpriteAnimation('skeleton_down')
-    animation_down:addFrames(frame_duration, sprite_sheet, { 19, 20, 21, 22, 23, 24, 25, 26 })
-    local animation_right = larder:createSpriteAnimation('skeleton_right')
-    animation_right:addFrames(frame_duration, sprite_sheet, { 28, 29, 30, 31, 32, 33, 34, 35 })
+    local animation_idle = store:createObject('sol.SpriteAnimation', 'skeleton_idle')
+    animation_idle:addFrameFromSpriteSheet(sprite_sheet, 18)
+    local animation_up = store:createObject('sol.SpriteAnimation', 'skeleton_up')
+    animation_up:addFrames(sprite_sheet, { 1, 2, 3, 4, 5, 6, 7, 8 }, { frame_duration = frame_duration })
+    local animation_left = store:createObject('sol.SpriteAnimation', 'skeleton_left')
+    animation_left:addFrames(sprite_sheet, { 10, 11, 12, 13, 14, 15, 16, 17 }, { frame_duration = frame_duration })
+    local animation_down = store:createObject('sol.SpriteAnimation','skeleton_down')
+    animation_down:addFrames(sprite_sheet, { 19, 20, 21, 22, 23, 24, 25, 26 }, { frame_duration = frame_duration })
+    local animation_right = store:createObject('sol.SpriteAnimation','skeleton_right')
+    animation_right:addFrames(sprite_sheet, { 28, 29, 30, 31, 32, 33, 34, 35 }, { frame_duration = frame_duration })
     shape_proto:addSpriteAnimation('idle', animation_idle, { position = position })
     shape_proto:addSpriteAnimation('right', animation_right, { position = position })
     shape_proto:addSpriteAnimation('left', animation_left, { position = position })
@@ -218,7 +218,7 @@ local function createSkeleton()
 end
 
 (function ()
-    local music = larder:getMusic('sounds/village_in_despair/village_in_despair.flac')
+    local music = store:createObject('sol.Music', 'village-in-despair', 'sounds/village_in_despair/village_in_despair.flac')
     if music == nil then
         print('Unable to load music')
     else

@@ -67,7 +67,7 @@ int luaApi_Loop(lua_State * _lua)
 
 void Sol2D::Lua::pushMusicApi(lua_State * _lua, std::shared_ptr<Mix_Music> _music)
 {
-    UserData::pushUserData(_lua, std::ref(_music));
+    UserData::pushUserData(_lua, _music);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] =

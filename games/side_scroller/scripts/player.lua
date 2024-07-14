@@ -18,19 +18,19 @@ function Player.getMetadata()
     return setmetatable({}, proto_metatable)
 end
 
----@param larder sol.Larder
+---@param store sol.Store
 ---@param shape sol.BodyShapePrototype
 ---@param scale_factor number
-local function createIdleAnimation(larder, shape, scale_factor)
+local function createIdleAnimation(store, shape, scale_factor)
     local sprite_loading_options = {
         rect = { x = 58, y = 42, w = 434, h = 615 }
     }
     local sprite_animation_options = {
         duration = 80
     }
-    local animation = larder:createSpriteAnimation('player_idle')
+    local animation = store:createObject('sol.SpriteAnimation', 'player_idle')
     for i = 1, 10, 1 do
-        local sprite = larder:createSprite('player-idle-' .. i)
+        local sprite = store:createObject('sol.Sprite', 'player-idle-' .. i)
         if not sprite:loadFromFile('sprites/knight/idle (' .. i .. ').png', sprite_loading_options) then
             print('Cannot load player-idle-' .. i)
         end
@@ -51,10 +51,10 @@ local function createIdleAnimation(larder, shape, scale_factor)
     })
 end
 
----@param larder sol.Larder
+---@param store sol.Store
 ---@param shape sol.BodyShapePrototype
 ---@param scale_factor number
-local function createWalkAnimations(larder, shape, scale_factor)
+local function createWalkAnimations(store, shape, scale_factor)
     local sprite_loading_options = {
         rect = { x = 55, y = 31, w = 444, h = 662 }
     }
@@ -65,9 +65,9 @@ local function createWalkAnimations(larder, shape, scale_factor)
             y = -34 * scale_factor
         }
     }
-    local animation = larder:createSpriteAnimation('player_walk')
+    local animation = store:createObject('sol.SpriteAnimation', 'player_walk')
     for i = 1, 10, 1 do
-        local sprite = larder:createSprite('player-walk-' .. i)
+        local sprite = store:createObject('sol.Sprite', 'player-walk-' .. i)
         if not sprite:loadFromFile('sprites/knight/walk (' .. i .. ').png', sprite_loading_options) then
             print('Cannot load player-walk-' .. i) -- TODO: logger
         end
@@ -88,11 +88,11 @@ local function createWalkAnimations(larder, shape, scale_factor)
     })
 end
 
----@param larder sol.Larder larder where the prototype will be created
-function Player.createPrototype(larder)
+---@param store sol.Store store where the prototype will be created
+function Player.createPrototype(store)
     local SCALE_FACTOR = 0.25
     local data = setmetatable({}, proto_metatable)
-    data.proto = larder:createBodyPrototype(data.key, sol.BodyType.DYNAMIC)
+    data.proto = store:createObject('sol.BodyPrototype', data.key, sol.BodyType.DYNAMIC)
     data.proto:attachScript('player-script.lua')
     local hit_box = {
         w = 240 * SCALE_FACTOR,
@@ -101,8 +101,8 @@ function Player.createPrototype(larder)
     hit_box.x = -(hit_box.w / 2)
     hit_box.y = -hit_box.h
     local shape = data.proto:createPolygonShape(data.shapes.main, hit_box)
-    createIdleAnimation(larder, shape, SCALE_FACTOR)
-    createWalkAnimations(larder, shape, SCALE_FACTOR)
+    createIdleAnimation(store, shape, SCALE_FACTOR)
+    createWalkAnimations(store, shape, SCALE_FACTOR)
     return data
 end
 

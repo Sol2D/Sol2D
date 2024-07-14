@@ -66,7 +66,7 @@ int luaApi_LoadFromFile(lua_State * _lua)
 
 void Sol2D::Lua::pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<SpriteSheet> _sprite_sheet)
 {
-    UserData::pushUserData(_lua, std::ref(_workspace), _sprite_sheet);
+    UserData::pushUserData(_lua, _workspace, _sprite_sheet);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {

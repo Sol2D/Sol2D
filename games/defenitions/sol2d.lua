@@ -89,16 +89,12 @@ function __world:createScene(name) end
 function __world:createForm(name) end
 
 ---@param key string
----@return sol.Larder
-function __world:createLarder(key) end
-
----@param key string
----@return sol.Larder | nil
-function __world:getLarder(key) end
+---@return sol.Store
+function __world:createStore(key) end
 
 ---@param key string
 ---@return boolean
-function __world:deleteLarder(key) end
+function __world:deleteStore(key) end
 
 ---@param fragment Fragment
 ---@return integer
@@ -338,81 +334,89 @@ function __button:unsubscribeOnClick(subscription_id) end
 ---@field shapeKey string
 ---@field tileMapObjectId integer?
 
----@class sol.Larder
-local __larder;
+---@class sol.Store
+local __store
 
----@param key string
----@param body_type integer
----@see sol.BodyType
----@return sol.BodyPrototype
-function __larder:createBodyPrototype(key, body_type) end
-
----@param key string
----@return sol.BodyPrototype | nil
-function __larder:getBodyPrototype(key) end
-
----@param key string
----@return boolean
-function __larder:deleteBodyPrototype(key) end
-
+---@param type 'sol.Sprite'
 ---@param key string
 ---@return sol.Sprite
-function __larder:createSprite(key) end
+function __store:createObject(type, key) end
 
----@param key string
----@return sol.Sprite | nil
-function __larder:getSprite(key) end
-
----@param key string
----@return boolean
-function __larder:deleteSprite(key) end
-
+---@param type 'sol.SpriteSheet'
 ---@param key string
 ---@return sol.SpriteSheet
-function __larder:createSpriteSheet(key) end
+function __store:createObject(type, key) end
 
----@param key string
----@return sol.SpriteSheet | nil
-function __larder:getSpriteSheet(key) end
-
----@param key string
----@return boolean
-function __larder:deleteSpriteSheet(key) end
-
+---@param type 'sol.SpriteAnimation'
 ---@param key string
 ---@return sol.SpriteAnimation
-function __larder:createSpriteAnimation(key) end
+function __store:createObject(type, key) end
 
+---@param type 'sol.BodyPrototype'
 ---@param key string
----@return sol.SpriteAnimation | nil
-function __larder:getSpriteAnimation(key) end
+---@param body_type integer
+---@return sol.BodyPrototype
+---@see sol.BodyType
+function __store:createObject(type, key, body_type) end
 
+---@param type 'sol.SoundEffect'
 ---@param key string
----@return boolean
-function __larder:deleteSpriteAnimation(key) end
-
----@param file_path string
----@param size integer
----@return sol.Font | nil
-function __larder:getFont(file_path, size) end
-
----@param file_path string
----@param size integer
-function __larder:freeFont(file_path, size) end
-
 ---@param file_path string
 ---@return sol.SoundEffect | nil
-function __larder:getSoundEffect(file_path) end
+function __store:createObject(type, key, file_path) end
 
----@param file_path string
-function __larder:freeSoundEffect(file_path) end
-
+---@param type 'sol.Music'
+---@param key string
 ---@param file_path string
 ---@return sol.Music | nil
-function __larder:getMusic(file_path) end
+function __store:createObject(type, key, file_path) end
 
+---@param type 'sol.Font'
+---@param key string
 ---@param file_path string
-function __larder:freeMusic(file_path) end
+---@param font_size integer
+---@return sol.Font | nil
+function __store:createObject(type, key, file_path, font_size) end
+
+---@param type 'sol.Sprite'
+---@param key string
+---@return sol.Sprite | nil
+function __store:getObject(type, key) end
+
+---@param type 'sol.SpriteSheet'
+---@param key string
+---@return sol.SpriteSheet | nil
+function __store:getObject(type, key) end
+
+---@param type 'sol.SpriteAnimation'
+---@param key string
+---@return sol.SpriteAnimation | nil
+function __store:getObject(type, key) end
+
+---@param type 'sol.BodyPrototype'
+---@param key string
+---@see sol.BodyType | nil
+function __store:getObject(type, key, body_type) end
+
+---@param type 'sol.SoundEffect'
+---@param key string
+---@return sol.SoundEffect | nil
+function __store:getObject(type, key, file_path) end
+
+---@param type 'sol.Music'
+---@param key string
+---@return sol.Music | nil
+function __store:getObject(type, key, file_path) end
+
+---@param type 'sol.Font'
+---@param key string
+---@return sol.Font | nil
+function __store:getObject(type, key, file_path, font_size) end
+
+---@param type 'sol.Sprite' | 'sol.SpriteSheet' | 'sol.SpriteAnimation' | 'sol.BodyPrototype' | 'sol.SoundEffect' | 'sol.Music' | 'sol.Font'
+---@param key string
+---@return boolean
+function __store:freeObject(type, key) end
 
 ---@class sol.BodyPrototype
 local __body_prototype

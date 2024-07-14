@@ -28,7 +28,7 @@ struct LuaTypeName
     static const char keyboard[];
     static const char scancode[];
     static const char heartbeat[];
-    static const char larder[];
+    static const char store[];
     static const char dimension_unit_type[];
     static const char sprite[];
     static const char sprite_sheet[];

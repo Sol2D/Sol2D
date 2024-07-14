@@ -425,7 +425,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
     if(weak_registry.tryGet(&_scene, LUA_TUSERDATA))
         return;
 
-    UserData::pushUserData(_lua, _lua, std::ref(_workspace), std::ref(_scene));
+    UserData::pushUserData(_lua, _lua, _workspace, _scene);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {

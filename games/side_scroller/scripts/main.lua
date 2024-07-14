@@ -17,8 +17,8 @@ end
     level_01.scene:createBodiesFromMapObjects('obstacle')
     main_fragment:bind(level_01.name)
 
-    local main_larder = sol.world:createLarder('main')
-    local player_proto = Player.createPrototype(main_larder)  -- player_common_moudle.createPrototype(main_larder)
+    local main_store = sol.world:createStore('main')
+    local player_proto = Player.createPrototype(main_store)
     local player_id = level_01.scene:createBody({ x = 410, y = 200 }, player_proto.proto)
     level_01.scene:setBodyShapeCurrentGraphic(
         player_id,

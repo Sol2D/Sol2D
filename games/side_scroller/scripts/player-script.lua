@@ -28,7 +28,7 @@ function state:set(direction, action)
                 graphic = metadata.graphics.idle_left
             else
                 graphic = metadata.graphics.idle_right
-            end            
+            end
         elseif action == Action.WALK then
             if direction == Direction.LEFT then
                 graphic = metadata.graphics.walk_left

@@ -16,12 +16,16 @@
 
 #pragma once
 
+#include <Sol2D/Store.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
 #include <Sol2D/Workspace.h>
-#include <Sol2D/Larder.h>
 
 namespace Sol2D::Lua {
 
-void pushLarderApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Larder> _larder);
+void pushStoreApi(
+    lua_State * _lua,
+    const Workspace & _workspace,
+    SDL_Renderer & _renderer,
+    std::shared_ptr<Store> _store);
 
 } // namespace Sol2D::Lua

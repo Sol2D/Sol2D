@@ -20,7 +20,7 @@
 #include <Sol2D/BodyPrototype.h>
 #include <Sol2D/Scene.h>
 #include <Sol2D/Forms/Form.h>
-#include <Sol2D/Larder.h>
+#include <Sol2D/Store.h>
 #include <Sol2D/Outlet.h>
 #include <list>
 
@@ -46,13 +46,16 @@ class World final
 
 public:
     World(SDL_Renderer & _renderer, const Workspace & _workspace);
+    SDL_Renderer & getRenderer() const;
+    const Workspace & getWorkspace() const;
     std::shared_ptr<Scene> createScene(const std::string & _name);
     std::shared_ptr<Scene> getScene(const std::string & _name) const;
     std::shared_ptr<Forms::Form> createForm(const std::string & _name);
     std::shared_ptr<Forms::Form> getFrom(const std::string & _name) const;
-    std::shared_ptr<Larder> createLarder(const std::string & _key);
-    std::shared_ptr<Larder> getLarder(const std::string _key) const;
     bool deleteLarder(const std::string & _key);
+    std::shared_ptr<Store> createStore(const std::string & _key);
+    std::shared_ptr<Store> getStore(const std::string _key) const;
+    bool deleteStore(const std::string & _key);
     FragmentID createFragment(const Fragment & _fragment);
     const Fragment * getFragment(FragmentID _id) const;
     bool updateFragment(FragmentID _id, const Fragment & _fragment);
@@ -69,11 +72,21 @@ private:
 private:
     SDL_Renderer & mr_renderer;
     const Workspace & mr_workspace;
-    std::unordered_map<std::string, std::shared_ptr<Larder>> m_larders;
+    std::unordered_map<std::string, std::shared_ptr<Store>> m_stores;
     std::unordered_map<std::string, Renderable> m_renderables;
     std::unordered_map<FragmentID, std::unique_ptr<Outlet>> m_outlets;
     FragmentID m_next_fragment_id;
     std::list<Outlet *> m_ordered_outlets;
 };
+
+inline SDL_Renderer & World::getRenderer() const
+{
+    return mr_renderer;
+}
+
+inline const Workspace & World::getWorkspace() const
+{
+    return mr_workspace;
+}
 
 } // namespace Sol2D

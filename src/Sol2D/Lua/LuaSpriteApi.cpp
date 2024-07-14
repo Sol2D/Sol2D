@@ -125,7 +125,7 @@ int luaApi_Scale(lua_State * _lua)
 
 void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Sprite> _sprite)
 {
-    UserData::pushUserData(_lua, std::ref(_workspace), _sprite);
+    UserData::pushUserData(_lua, _workspace, _sprite);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {

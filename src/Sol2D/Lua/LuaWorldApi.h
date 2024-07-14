@@ -17,11 +17,10 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Workspace.h>
 #include <Sol2D/World.h>
 
 namespace Sol2D::Lua {
 
-void pushWorldApi(lua_State * _lua, const Workspace & _workspace, World & _world);
+void pushWorldApi(lua_State * _lua, World & _world);
 
 } // namespace Sol2D::Lua

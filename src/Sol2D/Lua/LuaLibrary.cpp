@@ -89,7 +89,7 @@ LuaLibrary::LuaLibrary(const Workspace & _workspace, World & _world) :
     lua_newuserdata(mp_lua, 1);
     if(pushMetatable(mp_lua, LuaTypeName::lib) == MetatablePushResult::Created)
     {
-        addSublibrary(mp_lua, "world", [this, &_world]() { pushWorldApi(mp_lua, mr_workspace, _world); });
+        addSublibrary(mp_lua, "world", [this, &_world]() { pushWorldApi(mp_lua, _world); });
         addSublibrary(mp_lua, "heartbeat", [this]() { pushHeartbeatApi(mp_lua); });
         addSublibrary(mp_lua, "keyboard", [this]() { pushKeyboardApiOntoStack(mp_lua); });
         addSublibrary(mp_lua, "Scancode", [this]() { pushScancodeEnum(mp_lua); });

@@ -17,7 +17,7 @@
 #include <Sol2D/Lua/LuaWorldApi.h>
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/LuaFormApi.h>
-#include <Sol2D/Lua/LuaLarderApi.h>
+#include <Sol2D/Lua/LuaStoreApi.h>
 #include <Sol2D/Lua/LuaFragmentApi.h>
 #include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
@@ -28,19 +28,27 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_message_larder_key_expected[] = "a larder key expected";
+const char gc_message_store_key_expected[] = "a store key expected";
 const char gc_message_fragment_id_expected[] = "a fragment ID expected";
 const char gc_message_scene_name_expected[] = "a scene name expected";
 
 struct Self : LuaSelfBase
 {
-    Self(const Workspace & _workspace, World & _world) :
-        workspace(_workspace),
+    explicit Self(World & _world) :
         world(_world)
     {
     }
 
-    const Workspace & workspace;
+    const Workspace & getWorkspace() const
+    {
+        return world.getWorkspace();
+    }
+
+    SDL_Renderer & getRenderer() const
+    {
+        return world.getRenderer();
+    }
+
     World & world;
 };
 
@@ -53,7 +61,7 @@ int luaApi_CreateScene(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, name != nullptr, 2, "the scene name expected");
-    pushSceneApi(_lua, self->workspace, self->world.createScene(name));
+    pushSceneApi(_lua, self->getWorkspace(), self->world.createScene(name));
     return 1;
 }
 
@@ -64,44 +72,30 @@ int luaApi_CreateForm(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, name != nullptr, 2, "the scene name expected");
-    pushFormApi(_lua, self->workspace, self->world.createForm(name));
+    pushFormApi(_lua, self->getWorkspace(), self->world.createForm(name));
     return 1;
 }
 
 // 1 self
 // 2 key
-int luaApi_CreateLarder(lua_State * _lua)
+int luaApi_CreateStore(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, key != nullptr, 2, gc_message_larder_key_expected);
-    pushLarderApi(_lua, self->workspace, self->world.createLarder(key));
+    luaL_argcheck(_lua, key != nullptr, 2, gc_message_store_key_expected);
+    std::shared_ptr<Store> store = self->world.createStore(key);
+    pushStoreApi(_lua, self->getWorkspace(), self->getRenderer(), store);
     return 1;
 }
 
 // 1 self
 // 2 key
-int luaApi_GetLarder(lua_State * _lua)
+int luaApi_DeleteStore(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, key != nullptr, 2, gc_message_larder_key_expected);
-    std::shared_ptr<Larder> larder = self->world.getLarder(key);
-    if(larder)
-        pushLarderApi(_lua, self->workspace, larder);
-    else
-        lua_pushnil(_lua);
-    return 1;
-}
-
-// 1 self
-// 2 key
-int luaApi_DeleteLarder(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    const char * key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, key != nullptr, 2, gc_message_larder_key_expected);
-    lua_pushboolean(_lua, self->world.deleteLarder(key));
+    luaL_argcheck(_lua, key != nullptr, 2, gc_message_store_key_expected);
+    lua_pushboolean(_lua, self->world.deleteStore(key));
     return 1;
 }
 
@@ -172,9 +166,9 @@ int luaApi_BindFragment(lua_State * _lua)
 
 } // namespace
 
-void Sol2D::Lua::pushWorldApi(lua_State * _lua, const Workspace & _workspace, World & _world)
+void Sol2D::Lua::pushWorldApi(lua_State * _lua, World & _world)
 {
-    UserData::pushUserData(_lua, std::ref(_workspace), std::ref(_world));
+    UserData::pushUserData(_lua, _world);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
@@ -185,9 +179,8 @@ void Sol2D::Lua::pushWorldApi(lua_State * _lua, const Workspace & _workspace, Wo
             { "createForm", luaApi_CreateForm },
             // TODO: getForm
             // TODO: deleteForm
-            { "createLarder", luaApi_CreateLarder },
-            { "getLarder", luaApi_GetLarder },
-            { "deleteLarder", luaApi_DeleteLarder },
+            { "createStore", luaApi_CreateStore },
+            { "deleteStore", luaApi_DeleteStore },
             { "createFragment", luaApi_CreateFragment },
             { "updateFragment", luaApi_UpdateFragment },
             { "getFragment", luaApi_GetFragment },

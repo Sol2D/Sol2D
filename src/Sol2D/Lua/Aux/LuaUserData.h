@@ -62,7 +62,7 @@ template<LuaSelfConcept LuaSelf, const char metatable[]>
 struct LuaUserData : __Private::LuaUserDataBase
 {
     template<typename ...CtorArgs>
-    static LuaSelf * pushUserData(lua_State * _lua, CtorArgs ... _ctor_args)
+    static LuaSelf * pushUserData(lua_State * _lua, CtorArgs && ... _ctor_args)
     {
         void * data = lua_newuserdata(_lua, sizeof(LuaSelf));
         std::memset(data, 0, sizeof(LuaSelf));

@@ -77,7 +77,7 @@ int luaApi_CreateButton(lua_State * _lua)
 
 void Sol2D::Lua::pushFormApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Form> _form)
 {
-    UserData::pushUserData(_lua, std::ref(_workspace), std::ref(_form));
+    UserData::pushUserData(_lua, _workspace, _form);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
