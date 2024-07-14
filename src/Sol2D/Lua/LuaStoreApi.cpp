@@ -51,40 +51,9 @@ struct Self : LuaSelfBase
     const Workspace & workspace;
     SDL_Renderer & renderer;
     std::weak_ptr<Store> store;
-    // static const std::unordered_map<std::string, ObjectApi> object_apis;
 };
 
-// const std::unordered_map<std::string, ObjectApi> Self::object_apis
-// {
-//     {
-//         LuaTypeName::sprite,
-//         { createSprite, getSprite, freeObject<Sprite> }
-//     },
-//     {
-//         LuaTypeName::sprite_sheet,
-//         { createSpriteSheet, getSpriteSheet, freeObject<SpriteSheet> }
-//     },
-//     {
-//         LuaTypeName::sprite_animation,
-//         { createSpriteAnimation, getSpriteAnimation, freeObject<SpriteAnimation> }
-//     },
-//     {
-//         LuaTypeName::body_prototype,
-//         { createBodyPrototype, getBodyPrototype, freeObject<BodyPrototype> }
-//     },
-//     {
-//         LuaTypeName::font,
-//         { createFont, getFont, freeObject<TTF_Font> }
-//     },
-//     {
-//         LuaTypeName::sound_effect,
-//         { createSoundEffect, getSoundEffect, freeObject<Mix_Chunk> }
-//     },
-//     {
-//         LuaTypeName::music,
-//         { createMusic, getMusic, freeObject<Mix_Music> }
-//     }
-// };
+using UserData = LuaUserData<Self, LuaTypeName::store>;
 
 int createSprite(lua_State * _lua, const Self & _self, const std::string & _key);
 int createSpriteSheet(lua_State * _lua, const Self & _self, const std::string & _key);
@@ -113,47 +82,64 @@ public:
     int (* free)(lua_State * _lua, const Self & _self, const std::string & _key);
 };
 
-using UserData = LuaUserData<Self, LuaTypeName::store>;
-
 struct ObjectDescription
 {
     explicit ObjectDescription(lua_State * _lua);
 
-    ObjectApi api;
+    const ObjectApi * api;
     const Self * self;
     const char * key;
+};
+
+// Ignore: non-POD static (unordered_map) [clazy-non-pod-global-static]
+const std::unordered_map<std::string, ObjectApi> gc_object_apis
+{
+    {
+        LuaTypeName::sprite,
+        { createSprite, getSprite, freeObject<Sprite> }
+    },
+    {
+        LuaTypeName::sprite_sheet,
+        { createSpriteSheet, getSpriteSheet, freeObject<SpriteSheet> }
+    },
+    {
+        LuaTypeName::sprite_animation,
+        { createSpriteAnimation, getSpriteAnimation, freeObject<SpriteAnimation> }
+    },
+    {
+        LuaTypeName::body_prototype,
+        { createBodyPrototype, getBodyPrototype, freeObject<BodyPrototype> }
+    },
+    {
+        LuaTypeName::font,
+        { createFont, getFont, freeObject<TTF_Font> }
+    },
+    {
+        LuaTypeName::sound_effect,
+        { createSoundEffect, getSoundEffect, freeObject<Mix_Chunk> }
+    },
+    {
+        LuaTypeName::music,
+        { createMusic, getMusic, freeObject<Mix_Music> }
+    }
 };
 
 // 1 self
 // 2 object type
 // 3 key
 ObjectDescription::ObjectDescription(lua_State * _lua) :
-    api{},
+    api(nullptr),
     self(nullptr),
     key(nullptr)
 {
     self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, "an object type expected");
     const char * object_type = lua_tostring(_lua, 2);
-    if(std::strcmp(LuaTypeName::sprite, object_type) == 0)
-        api = { createSprite, getSprite, freeObject<Sprite> };
-    else if(std::strcmp(LuaTypeName::sprite_sheet, object_type) == 0)
-        api = { createSpriteSheet, getSpriteSheet, freeObject<SpriteSheet> };
-    else if(std::strcmp(LuaTypeName::sprite_animation, object_type) == 0)
-        api = { createSpriteAnimation, getSpriteAnimation, freeObject<SpriteAnimation> };
-    else if(std::strcmp(LuaTypeName::body_prototype, object_type) == 0)
-        api = { createBodyPrototype, getBodyPrototype, freeObject<BodyPrototype> };
-    else if(std::strcmp(LuaTypeName::font, object_type) == 0)
-        api = { createFont, getFont, freeObject<TTF_Font> };
-    else if(std::strcmp(LuaTypeName::sound_effect, object_type) == 0)
-        api = { createSoundEffect, getSoundEffect, freeObject<Mix_Chunk> };
-    else if(std::strcmp(LuaTypeName::music, object_type) == 0)
-        api = { createMusic, getMusic, freeObject<Mix_Music> };
-    else
-    {
+    auto it = gc_object_apis.find(object_type);
+    if(it == gc_object_apis.cend())
         luaL_argerror(_lua, 2, std::format("unsupported type: {}", object_type).c_str());
-        throw std::runtime_error(nullptr); // For static analyzers, luaL_argerror never returns.
-    }
+    else
+        api = &it->second;
     luaL_argcheck(_lua, lua_isstring(_lua, 3), 3, "an object key expected");
     key = lua_tostring(_lua, 3);
 }
@@ -165,7 +151,7 @@ ObjectDescription::ObjectDescription(lua_State * _lua) :
 int luaApi_CreateObject(lua_State * _lua)
 {
     ObjectDescription description(_lua);
-    return description.api.create(_lua, *description.self, description.key);
+    return description.api->create(_lua, *description.self, description.key);
 }
 
 // 1 self
@@ -278,7 +264,7 @@ int createMusic(lua_State * _lua, const Self & _self, const std::string & _key)
 int luaApi_GetObject(lua_State * _lua)
 {
     ObjectDescription description(_lua);
-    return description.api.get(_lua, *description.self, description.key);
+    return description.api->get(_lua, *description.self, description.key);
 }
 
 int getSprite(lua_State * _lua, const Self & _self, const std::string & _key)
@@ -357,7 +343,7 @@ int getMusic(lua_State * _lua, const Self & _self, const std::string & _key)
 int luaApi_FreeObject(lua_State * _lua)
 {
     ObjectDescription description(_lua);
-    return description.api.free(_lua, *description.self, description.key);
+    return description.api->free(_lua, *description.self, description.key);
 }
 
 template<typename T>
