@@ -34,6 +34,7 @@ class BodyShape final
 
 public:
     BodyShape(const std::string & _key, std::optional<uint32_t> _tile_map_object_id);
+    ~BodyShape();
     const std::string & getKey() const;
     const std::optional<uint32_t> getTileMapObjectId() const;
     void addGraphic(const std::string & _key, const BodyShapeGraphic & _graphic);
@@ -44,7 +45,7 @@ public:
 private:
     const std::string m_key;
     const std::optional<uint32_t> m_tile_map_object_id;
-    Utils::KeyValueStorage<std::string, BodyShapeGraphic> m_graphics;
+    std::unordered_map<std::string, BodyShapeGraphic *> m_graphics;
     BodyShapeGraphic * mp_current_graphic;
 };
 
@@ -53,6 +54,12 @@ inline BodyShape::BodyShape(const std::string & _key, std::optional<uint32_t> _t
     m_tile_map_object_id(_tile_map_object_id),
     mp_current_graphic(nullptr)
 {
+}
+
+inline BodyShape::~BodyShape()
+{
+    for(auto & pair : m_graphics)
+        delete pair.second;
 }
 
 inline const std::string & BodyShape::getKey() const
@@ -67,7 +74,10 @@ inline const std::optional<uint32_t> BodyShape::getTileMapObjectId() const
 
 inline void BodyShape::addGraphic(const std::string & _key, const BodyShapeGraphic & _graphic)
 {
-    m_graphics.addOrReplaceItem(_key, new BodyShapeGraphic(_graphic));
+    auto it = m_graphics.find(_key);
+    if(it != m_graphics.end())
+        delete it->second;
+    m_graphics[_key] = new BodyShapeGraphic(_graphic);
 }
 
 inline bool BodyShape::setCurrentGraphic(const std::string & _key)
