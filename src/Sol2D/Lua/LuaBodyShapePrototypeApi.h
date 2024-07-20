@@ -21,6 +21,6 @@
 
 namespace Sol2D::Lua {
 
-void pushBodyShapePrototypeApi(lua_State * _lua, BodyShapePrototype & _body_shape_prototype);
+void pushBodyShapePrototypeApi(lua_State * _lua, std::shared_ptr<BodyShapePrototype> _body_shape_prototype);
 
 } // namespace Sol2D::Lua

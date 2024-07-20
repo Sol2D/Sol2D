@@ -86,10 +86,10 @@ int luaApi_CreatePolygonShape(lua_State * _lua) // TODO: split up: createBoxShap
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_shape_key_expected);
     Rect rect;
     Point point;
-    BodyShapePrototype * shape_prototype = nullptr;
+    std::shared_ptr<BodyShapePrototype> shape_prototype;
     if(tryGetRect(_lua, 3, rect))
     {
-        shape_prototype = &self->getBodyPrototype(_lua)->createPolygonShape(key, rect);
+        shape_prototype = self->getBodyPrototype(_lua)->createPolygonShape(key, rect);
     }
     else if(tryGetPoint(_lua, 3, point))
     {
@@ -104,14 +104,14 @@ int luaApi_CreatePolygonShape(lua_State * _lua) // TODO: split up: createBoxShap
             luaL_argcheck(_lua, tryGetPoint(_lua, idx, point), idx, "a point expected");
             points[i] = point;
         }
-        shape_prototype = &self->getBodyPrototype(_lua)->createPolygonShape(key, points);
+        shape_prototype = self->getBodyPrototype(_lua)->createPolygonShape(key, points);
     }
     else
     {
         luaL_argcheck(_lua, false, 3, "a rect or position expected");
         return 0; // Only for static code analyzers. This will never happen, luaL_argcheck will never return.
     }
-    pushBodyShapePrototypeApi(_lua, *shape_prototype);
+    pushBodyShapePrototypeApi(_lua, shape_prototype);
     return 1;
 }
 

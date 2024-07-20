@@ -29,16 +29,15 @@ class Form final : public Canvas
 {
 public:
     explicit Form(SDL_Renderer & _renderer);
-    ~Form() override;
     void render(const RenderState & _state) override;
     void setBackgroundColor(const Color & _color);
-    Label & createLabel(const std::string & _text);
-    Button & createButton(const std::string & _text);
+    std::shared_ptr<Label> createLabel(const std::string & _text);
+    std::shared_ptr<Button> createButton(const std::string & _text);
 
 private:
     SDL_Renderer & mr_renderer;
     Color m_bg_color;
-    std::vector<Widget *> m_widgets;
+    std::vector<std::shared_ptr<Widget>> m_widgets;
 };
 
 inline void Form::setBackgroundColor(const Color & _color)

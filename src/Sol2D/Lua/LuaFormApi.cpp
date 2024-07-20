@@ -57,7 +57,7 @@ int luaApi_CreateLabel(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * text = lua_tostring(_lua, 2);
-    Label & label = self->getForm(_lua)->createLabel(text ? std::string(text) : std::string());
+    std::shared_ptr<Label> label = self->getForm(_lua)->createLabel(text ? std::string(text) : std::string());
     pushLabelApi(_lua, label);
     return 1;
 }
@@ -68,7 +68,7 @@ int luaApi_CreateButton(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * text = lua_tostring(_lua, 2);
-    Button & button = self->getForm(_lua)->createButton(text ? std::string(text) : std::string());
+    std::shared_ptr<Button> button = self->getForm(_lua)->createButton(text ? std::string(text) : std::string());
     pushButtonApi(_lua, button, self->workspace);
     return 1;
 }

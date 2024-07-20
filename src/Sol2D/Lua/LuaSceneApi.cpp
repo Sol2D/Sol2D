@@ -62,17 +62,17 @@ struct Self : LuaSelfBase
 public:
     Self(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Scene> & _scene) :
         workspace(_workspace),
-        scene(_scene),
         callback_set_id_begin_contact(LuaCallbackStorage::generateUniqueSetId()),
         callback_set_id_end_contact(LuaCallbackStorage::generateUniqueSetId()),
-        mp_contact_observer(new LuaContactObserver(_lua, _workspace, callback_set_id_begin_contact, callback_set_id_end_contact))
+        mp_contact_observer(new LuaContactObserver(_lua, _workspace, callback_set_id_begin_contact, callback_set_id_end_contact)),
+        mp_scene(_scene)
     {
         _scene->addContactObserver(*mp_contact_observer);
     }
 
     std::shared_ptr<Scene> getScene(lua_State * _lua) const
     {
-        std::shared_ptr<Scene> ptr = scene.lock();
+        std::shared_ptr<Scene> ptr = mp_scene.lock();
         if(!ptr)
             luaL_error(_lua, "the scene is destroyed");
         return ptr;
@@ -84,19 +84,19 @@ protected:
         LuaCallbackStorage storage(_lua);
         storage.destroyCallbackSet(callback_set_id_begin_contact);
         storage.destroyCallbackSet(callback_set_id_end_contact);
-        if(std::shared_ptr<Scene> ptr = scene.lock())
+        if(std::shared_ptr<Scene> ptr = mp_scene.lock())
             ptr->removeContactObserver(*mp_contact_observer);
         delete mp_contact_observer;
     }
 
 public:
     const Workspace & workspace;
-    std::weak_ptr<Scene> scene;
     const uint32_t callback_set_id_begin_contact;
     const uint32_t callback_set_id_end_contact;
 
 private:
     ContactObserver * mp_contact_observer;
+    std::weak_ptr<Scene> mp_scene;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::scene>;

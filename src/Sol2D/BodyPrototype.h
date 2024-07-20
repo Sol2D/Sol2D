@@ -29,19 +29,21 @@ class BodyPrototype final
 
 public:
     explicit BodyPrototype(BodyType _type);
-    ~BodyPrototype();
     BodyType getType() const;
-    BodyCircleShapePrototype & createCircleShape(const std::string & _key, Point _position, float _radius);
-    BodyPolygonShapePrototype & createPolygonShape(const std::string & _key, const Rect & _rect);
-    BodyPolygonShapePrototype & createPolygonShape(const std::string & _key, const std::vector<Point> & _points);
+    std::shared_ptr<BodyCircleShapePrototype> createCircleShape(
+        const std::string & _key,
+        Point _position, float _radius);
+    std::shared_ptr<BodyPolygonShapePrototype> createPolygonShape(
+        const std::string & _key,
+        const Rect & _rect);
+    std::shared_ptr<BodyPolygonShapePrototype> createPolygonShape(
+        const std::string & _key,
+        const std::vector<Point> & _points);
     void forEachShape(std::function<void (const std::string &, const BodyShapePrototype &)> _callback) const;
 
 private:
-    void addShape(const std::string & _key, BodyShapePrototype * _shape);
-
-private:
     BodyType m_type;
-    std::unordered_map<std::string, BodyShapePrototype *> m_shapes;
+    std::unordered_map<std::string, std::shared_ptr<BodyShapePrototype>> m_shapes;
 };
 
 inline BodyPrototype::BodyPrototype(BodyType _type) :
@@ -49,49 +51,37 @@ inline BodyPrototype::BodyPrototype(BodyType _type) :
 {
 }
 
-inline BodyPrototype::~BodyPrototype()
-{
-    for(auto & shape : m_shapes)
-        delete shape.second;
-}
-
 inline BodyType BodyPrototype::getType() const
 {
     return m_type;
 }
 
-inline BodyCircleShapePrototype & BodyPrototype::createCircleShape(
+inline std::shared_ptr<BodyCircleShapePrototype> BodyPrototype::createCircleShape(
     const std::string & _key,
     Point _position,
     float _radius)
 {
-    BodyCircleShapePrototype * shape = new BodyCircleShapePrototype(_position, _radius);
-    addShape(_key, shape);
-    return *shape;
+    std::shared_ptr<BodyCircleShapePrototype> shape = std::make_shared<BodyCircleShapePrototype>(_position, _radius);
+    m_shapes[_key] = shape;
+    return shape;
 }
 
-inline void BodyPrototype::addShape(const std::string & _key, BodyShapePrototype * _shape)
+inline std::shared_ptr<BodyPolygonShapePrototype> BodyPrototype::createPolygonShape(
+    const std::string & _key,
+    const Rect & _rect)
 {
-    auto it = m_shapes.find(_key);
-    if(it != m_shapes.end())
-        delete it->second;
-    m_shapes[_key] = _shape;
+    std::shared_ptr<BodyPolygonShapePrototype> shape = std::make_shared<BodyPolygonShapePrototype>(_rect);
+    m_shapes[_key] = shape;
+    return shape;
 }
 
-inline BodyPolygonShapePrototype & BodyPrototype::createPolygonShape(const std::string & _key, const Rect & _rect)
-{
-    BodyPolygonShapePrototype * shape = new BodyPolygonShapePrototype(_rect);
-    addShape(_key, shape);
-    return *shape;
-}
-
-inline BodyPolygonShapePrototype & BodyPrototype::createPolygonShape(
+inline std::shared_ptr<BodyPolygonShapePrototype> BodyPrototype::createPolygonShape(
     const std::string & _key,
     const std::vector<Point> & _points)
 {
-    BodyPolygonShapePrototype * shape = new BodyPolygonShapePrototype(_points);
-    addShape(_key, shape);
-    return *shape;
+    std::shared_ptr<BodyPolygonShapePrototype> shape = std::make_shared<BodyPolygonShapePrototype>(_points);
+    m_shapes[_key] = shape;
+    return shape;
 }
 
 inline void BodyPrototype::forEachShape(

@@ -24,30 +24,24 @@ Form::Form(SDL_Renderer & _renderer) :
 {
 }
 
-Form::~Form()
-{
-    for(auto * widget : m_widgets)
-        delete widget;
-}
-
 void Form::render(const RenderState & _state)
 {
     SDL_SetRenderDrawColor(&mr_renderer, m_bg_color.r, m_bg_color.g, m_bg_color.b, m_bg_color.a);
     SDL_RenderClear(&mr_renderer);
-    for(auto * widget : m_widgets)
+    for(auto & widget : m_widgets)
         widget->render(_state);
 }
 
-Label & Form::createLabel(const std::string & _text)
+std::shared_ptr<Label> Form::createLabel(const std::string & _text)
 {
-    Label * label = new Label(*this, _text, mr_renderer);
-    m_widgets.push_back(label);
-    return *label;
+    std::shared_ptr<Label> widget = std::make_shared<Label>(*this, _text, mr_renderer);
+    m_widgets.push_back(widget);
+    return widget;
 }
 
-Button & Form::createButton(const std::string & _text)
+std::shared_ptr<Button> Form::createButton(const std::string & _text)
 {
-    Button * button = new Button(*this, _text, mr_renderer);
+    std::shared_ptr<Button> button = std::make_shared<Button>(*this, _text, mr_renderer);
     m_widgets.push_back(button);
-    return *button;
+    return button;
 }

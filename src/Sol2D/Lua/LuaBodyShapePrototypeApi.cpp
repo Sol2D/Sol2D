@@ -32,20 +32,46 @@ namespace {
 
 struct BodyPolygonShapePrototypeSelf : LuaSelfBase
 {
-    BodyPolygonShapePrototype * shape_prototype;
+    explicit BodyPolygonShapePrototypeSelf(std::shared_ptr<BodyPolygonShapePrototype> & _prototype) :
+        shape_prototype(_prototype)
+    {
+    }
+
+    std::shared_ptr<BodyPolygonShapePrototype> getShapePrototype(lua_State * _lua) const
+    {
+        std::shared_ptr<BodyPolygonShapePrototype> ptr = shape_prototype.lock();
+        if(!ptr)
+            luaL_error(_lua, "the polygon shape prototype is destroyed");
+        return ptr;
+    }
+
+    std::weak_ptr<BodyPolygonShapePrototype> shape_prototype;
 };
 
 using BodyPolygonShapePrototypeUserData = LuaUserData<BodyPolygonShapePrototypeSelf, LuaTypeName::body_polygon_shape_prototype>;
 
 struct BodyCircleShapePrototypeSelf : LuaSelfBase
 {
-    BodyCircleShapePrototype * shape_prototype;
+    explicit BodyCircleShapePrototypeSelf(std::shared_ptr<BodyCircleShapePrototype> & _prototype) :
+        shape_prototype(_prototype)
+    {
+    }
+
+    std::shared_ptr<BodyCircleShapePrototype> getShapePrototype(lua_State * _lua) const
+    {
+        std::shared_ptr<BodyCircleShapePrototype> ptr = shape_prototype.lock();
+        if(!ptr)
+            luaL_error(_lua, "the circle shape prototype is destroyed");
+        return ptr;
+    }
+
+    std::weak_ptr<BodyCircleShapePrototype> shape_prototype;
 };
 
 using BodyCircleShapePrototypeUserData = LuaUserData<BodyCircleShapePrototypeSelf, LuaTypeName::body_circle_shape_prototype>;
 
 
-BodyShapePrototype * getBodyShapePrototype(lua_State * _lua, int _idx)
+std::shared_ptr<BodyShapePrototype> getBodyShapePrototype(lua_State * _lua, int _idx)
 {
     void * user_data = luaL_testudata(_lua, _idx, LuaTypeName::body_polygon_shape_prototype);
     if(user_data == nullptr)
@@ -60,12 +86,12 @@ BodyShapePrototype * getBodyShapePrototype(lua_State * _lua, int _idx)
         }
         else
         {
-            return static_cast<BodyCircleShapePrototypeSelf *>(user_data)->shape_prototype;
+            return static_cast<BodyCircleShapePrototypeSelf *>(user_data)->getShapePrototype(_lua);
         }
     }
     else
     {
-        return static_cast<BodyPolygonShapePrototypeSelf *>(user_data)->shape_prototype;
+        return static_cast<BodyPolygonShapePrototypeSelf *>(user_data)->getShapePrototype(_lua);
     }
     return nullptr;
 }
@@ -90,7 +116,7 @@ bool tryReadShapeGraphicOptions(lua_State * _lua, int _idx, BodyShapeGraphicOpti
 // 1 self
 int luaApi_GetType(lua_State * _lua)
 {
-    BodyShapePrototype * prototype = getBodyShapePrototype(_lua, 1);
+    auto prototype = getBodyShapePrototype(_lua, 1);
     lua_pushinteger(_lua, static_cast<lua_Integer>(prototype->getType()));
     return 1;
 }
@@ -99,7 +125,7 @@ int luaApi_GetType(lua_State * _lua)
 // 2 is sensor?
 int luaApi_SetIsSensor(lua_State * _lua)
 {
-    BodyShapePrototype * prototype = getBodyShapePrototype(_lua, 1);
+    auto prototype = getBodyShapePrototype(_lua, 1);
     luaL_argcheck(_lua, lua_isboolean(_lua, 2), 2, "the is sensor flag expected");
     prototype->setIsSensor(lua_toboolean(_lua, 2));
     return 0;
@@ -108,7 +134,7 @@ int luaApi_SetIsSensor(lua_State * _lua)
 // 1 self
 int luaApi_IsSensor(lua_State * _lua)
 {
-    BodyShapePrototype * prototype = getBodyShapePrototype(_lua, 1);
+    auto prototype = getBodyShapePrototype(_lua, 1);
     lua_pushboolean(_lua, prototype->isSensor());
     return 1;
 }
@@ -119,7 +145,7 @@ int luaApi_IsSensor(lua_State * _lua)
 // 4 options (optional)
 int luaApi_AddSprite(lua_State * _lua)
 {
-    BodyShapePrototype * prototype = getBodyShapePrototype(_lua, 1);
+    auto prototype = getBodyShapePrototype(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, "a sprite key expected");
     std::shared_ptr<Sprite> sprite = tryGetSprite(_lua, 3);
@@ -136,7 +162,7 @@ int luaApi_AddSprite(lua_State * _lua)
 // 4 options (optional)
 int luaApi_AddSpriteAnimation(lua_State * _lua)
 {
-    BodyShapePrototype * prototype = getBodyShapePrototype(_lua, 1);
+    auto prototype = getBodyShapePrototype(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, "a sprite animation key expected");
     std::shared_ptr<SpriteAnimation> sprite_animation = tryGetSpriteAnimation(_lua, 3);
@@ -151,7 +177,7 @@ int luaApi_AddSpriteAnimation(lua_State * _lua)
 // 2 key
 int luaApi_RemoveGraphic(lua_State * _lua)
 {
-    BodyShapePrototype * prototype = getBodyShapePrototype(_lua, 1);
+    auto prototype = getBodyShapePrototype(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, "a graphic key expected");
     prototype->removeGraphic(key);
@@ -162,7 +188,7 @@ int luaApi_RemoveGraphic(lua_State * _lua)
 int luaApi_GetPoints(lua_State * _lua)
 {
     BodyPolygonShapePrototypeSelf * self = BodyPolygonShapePrototypeUserData::getUserData(_lua, 1);
-    const auto & points = self->shape_prototype->getPoints();
+    const auto & points = self->getShapePrototype(_lua)->getPoints();
     lua_newtable(_lua);
     for(size_t i = 0; i < points.size(); ++i)
     {
@@ -176,24 +202,26 @@ int luaApi_GetPoints(lua_State * _lua)
 int luaApi_GetRadius(lua_State * _lua)
 {
     BodyCircleShapePrototypeSelf * self = BodyCircleShapePrototypeUserData::getUserData(_lua, 1);
-    lua_pushnumber(_lua, self->shape_prototype->getRadius());
+    lua_pushnumber(_lua, self->getShapePrototype(_lua)->getRadius());
     return 1;
 }
 
 } // namespace name
 
-void Sol2D::Lua::pushBodyShapePrototypeApi(lua_State * _lua, BodyShapePrototype & _body_shape_prototype)
+void Sol2D::Lua::pushBodyShapePrototypeApi(lua_State * _lua, std::shared_ptr<BodyShapePrototype> _body_shape_prototype)
 {
     std::vector<luaL_Reg> funcs;
     MetatablePushResult metatable_push_result;
-    switch(_body_shape_prototype.getType())
+    switch(_body_shape_prototype->getType())
     {
     case BodyShapeType::Polygon:
     {
-        BodyPolygonShapePrototypeSelf * self = BodyPolygonShapePrototypeUserData::pushUserData(_lua);
-        self->shape_prototype = dynamic_cast<BodyPolygonShapePrototype *>(&_body_shape_prototype);
+        BodyPolygonShapePrototypeUserData::pushUserData(
+            _lua,
+            std::dynamic_pointer_cast<BodyPolygonShapePrototype>(_body_shape_prototype));
         metatable_push_result = BodyPolygonShapePrototypeUserData::pushMetatable(_lua);
-        funcs = {
+        funcs =
+        {
             { "__gc", BodyPolygonShapePrototypeUserData::luaGC },
             { "getPoints", luaApi_GetPoints }
         };
@@ -201,10 +229,12 @@ void Sol2D::Lua::pushBodyShapePrototypeApi(lua_State * _lua, BodyShapePrototype 
     }
     case BodyShapeType::Circle:
     {
-        BodyCircleShapePrototypeSelf * self = BodyCircleShapePrototypeUserData::pushUserData(_lua);
-        self->shape_prototype = dynamic_cast<BodyCircleShapePrototype *>(&_body_shape_prototype);
+        BodyCircleShapePrototypeUserData::pushUserData(
+            _lua,
+            std::dynamic_pointer_cast<BodyCircleShapePrototype>(_body_shape_prototype));
         metatable_push_result = BodyCircleShapePrototypeUserData::pushMetatable(_lua);
-        funcs = {
+        funcs =
+        {
             { "__gc", BodyCircleShapePrototypeUserData::luaGC },
             { "getRadius", luaApi_GetRadius }
         };
@@ -215,7 +245,8 @@ void Sol2D::Lua::pushBodyShapePrototypeApi(lua_State * _lua, BodyShapePrototype 
     }
     if(metatable_push_result == MetatablePushResult::Created)
     {
-        funcs.insert(funcs.end(), {
+        funcs.insert(funcs.end(),
+        {
             { "addSprite", luaApi_AddSprite },
             { "addSpriteAnimation", luaApi_AddSpriteAnimation },
             { "getType", luaApi_GetType },

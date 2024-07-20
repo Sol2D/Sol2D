@@ -24,8 +24,8 @@ namespace Sol2D::Lua {
 
 void pushWidgetStateEnum(lua_State * _lua);
 
-void pushLabelApi(lua_State * _lua, Forms::Label & _label);
+void pushLabelApi(lua_State * _lua, std::shared_ptr<Forms::Label> _label);
 
-void pushButtonApi(lua_State * _lua, Forms::Button & _button, const Workspace & _workspace);
+void pushButtonApi(lua_State * _lua, std::shared_ptr<Forms::Button> _button, const Workspace & _workspace);
 
 } // namespace Sol2D::Lua
