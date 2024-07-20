@@ -69,8 +69,8 @@ public:
     void applyForce(uint64_t _body_id, const Point & _force);
     void setBodyPosition(uint64_t _body_id, const Point & _position);
     std::optional<Point> getBodyPosition(uint64_t _body_id) const;
-    void addContactObserver(ContactObserver & _observer);
-    void removeContactObserver(ContactObserver & _observer);
+    void addObserver(ContactObserver & _observer);
+    void removeObserver(ContactObserver & _observer);
     std::optional<std::vector<Point> > findPath(uint64_t _body_id,
         const Point & _destination,
         bool _allow_diagonal_steps,

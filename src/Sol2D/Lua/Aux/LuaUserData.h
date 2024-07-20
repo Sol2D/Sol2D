@@ -24,42 +24,14 @@
 
 namespace Sol2D::Lua::Aux {
 
-struct LuaSelfBase;
-
-namespace __Private {
-
-struct LuaUserDataBase
-{
-private:
-    LuaUserDataBase() {} // Static struct must not be instantiated
-
-protected:
-    static void beforeDestroyLuaSelf(lua_State * _lua, LuaSelfBase & _lua_self);
-};
-
-} // namespace __Private
-
 struct LuaSelfBase
 {
-    friend struct __Private::LuaUserDataBase;
-
 public:
     virtual ~LuaSelfBase() { }
-
-protected:
-    virtual void beforeDestruction(lua_State * /*_lua*/) { }
 };
 
-inline void __Private::LuaUserDataBase::beforeDestroyLuaSelf(lua_State * _lua, LuaSelfBase & _lua_self)
-{
-    _lua_self.beforeDestruction(_lua);
-}
-
-template<typename T>
-concept LuaSelfConcept = std::derived_from<T, LuaSelfBase>;
-
-template<LuaSelfConcept LuaSelf, const char metatable[]>
-struct LuaUserData : __Private::LuaUserDataBase
+template<std::derived_from<LuaSelfBase> LuaSelf, const char metatable[]>
+struct LuaUserData
 {
     template<typename ...CtorArgs>
     static LuaSelf * pushUserData(lua_State * _lua, CtorArgs && ... _ctor_args)
@@ -87,7 +59,6 @@ struct LuaUserData : __Private::LuaUserDataBase
     static int luaGC(lua_State * _lua)
     {
         LuaSelf * self = getUserData(_lua, 1);
-        beforeDestroyLuaSelf(_lua, *self);
         self->~LuaSelf();
         return 0;
     }

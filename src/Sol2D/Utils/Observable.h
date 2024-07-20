@@ -31,6 +31,7 @@ public:
     void addObserver(Observer & _observer);
     bool removeObserver(Observer & _observer);
 
+protected:
     template<ObserverMethodConcept Method, typename ...Args>
     void callObservers(Method _method, Args ... _args);
 

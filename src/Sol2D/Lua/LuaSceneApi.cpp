@@ -23,8 +23,7 @@
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
-#include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
-#include <Sol2D/Lua/Aux/LuaWeakRegistryStorage.h>
+#include <Sol2D/Lua/Aux/LuaCallbackSubscribable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaScript.h>
 
@@ -38,92 +37,85 @@ const char gc_message_body_id_expected[] = "a body ID expected";
 const char gc_message_shape_key_expected[] = "a shape key expected";
 const char gc_message_graphic_key_expected[] = "a graphic key expected";
 const char gc_message_subscription_id_expected[] = "a subscriptin ID expected";
+const char gc_message_callback_expected[] = "callback expected";
+
+
+const uint16_t gc_event_begin_contact = 0;
+const uint16_t gc_event_end_contact = 1;
 
 class LuaContactObserver : public ContactObserver
 {
 public:
-    LuaContactObserver(
-        lua_State * _lua,
-        const Workspace & _workspace,
-        uint32_t _callback_set_id_begin_contact,
-        uint32_t _callback_set_id_end_contact);
+    LuaContactObserver(lua_State * _lua, const Workspace & _workspace, const void * _owner);
     void beginContact(Contact & _contact);
     void endContact(Contact & _contact);
 
 private:
     lua_State * mp_lua;
     const Workspace & mr_workspace;
-    uint32_t m_callback_set_id_begin_contact;
-    uint32_t m_callback_set_id_end_contact;
+    const void * mp_owner;
 };
 
-struct Self : LuaSelfBase
+struct Self : LuaSelfBase, LuaCallbackSubscribable<ContactObserver, Scene>
 {
+private:
+    using OnContact = LuaCallbackSubscribable<ContactObserver, Scene>;
+
 public:
     Self(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Scene> & _scene) :
-        workspace(_workspace),
-        callback_set_id_begin_contact(LuaCallbackStorage::generateUniqueSetId()),
-        callback_set_id_end_contact(LuaCallbackStorage::generateUniqueSetId()),
-        mp_contact_observer(new LuaContactObserver(_lua, _workspace, callback_set_id_begin_contact, callback_set_id_end_contact)),
-        mp_scene(_scene)
+        OnContact(_lua, _scene),
+        workspace(_workspace)
     {
-        _scene->addContactObserver(*mp_contact_observer);
     }
 
     std::shared_ptr<Scene> getScene(lua_State * _lua) const
     {
-        std::shared_ptr<Scene> ptr = mp_scene.lock();
+        std::shared_ptr<Scene> ptr = getObservable();
         if(!ptr)
             luaL_error(_lua, "the scene is destroyed");
         return ptr;
     }
 
-protected:
-    void beforeDestruction(lua_State * _lua) override
+    uint32_t subscribeOnContact(uint16_t _event_id, int _callback_idx)
     {
-        LuaCallbackStorage storage(_lua);
-        storage.destroyCallbackSet(callback_set_id_begin_contact);
-        storage.destroyCallbackSet(callback_set_id_end_contact);
-        if(std::shared_ptr<Scene> ptr = mp_scene.lock())
-            ptr->removeContactObserver(*mp_contact_observer);
-        delete mp_contact_observer;
+        return OnContact::subscribe(_event_id, _callback_idx);
+    }
+
+    void unsubscribeOnContact(uint16_t _event_id, int _subscription_id)
+    {
+        OnContact::unsubscribe(_event_id, _subscription_id);
+    }
+
+protected:
+    ContactObserver * createObserver(lua_State * _lua) override
+    {
+        return new LuaContactObserver(_lua, workspace, this);
+
     }
 
 public:
     const Workspace & workspace;
-    const uint32_t callback_set_id_begin_contact;
-    const uint32_t callback_set_id_end_contact;
-
-private:
-    ContactObserver * mp_contact_observer;
-    std::weak_ptr<Scene> mp_scene;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::scene>;
 
-LuaContactObserver::LuaContactObserver(
-    lua_State * _lua,
-    const Workspace & _workspace,
-    uint32_t _callback_set_id_begin_contact,
-    uint32_t _callback_set_id_end_contact
-) :
+LuaContactObserver::LuaContactObserver(lua_State * _lua, const Workspace & _workspace, const void * _owner) :
     mp_lua(_lua),
     mr_workspace(_workspace),
-    m_callback_set_id_begin_contact(_callback_set_id_begin_contact),
-    m_callback_set_id_end_contact(_callback_set_id_end_contact)
+    mp_owner(_owner)
 {
 }
 
 void LuaContactObserver::beginContact(Contact & _contact)
 {
     pushContact(mp_lua, _contact);
-    LuaCallbackStorage(mp_lua).callSet(mr_workspace, m_callback_set_id_begin_contact, 1);
+    LuaCallbackStorage(mp_lua).execute(mr_workspace, mp_owner, gc_event_begin_contact, 1);
 }
 
 void LuaContactObserver::endContact(Contact & _contact)
 {
     pushContact(mp_lua, _contact);
-    LuaCallbackStorage(mp_lua).callSet(mr_workspace, m_callback_set_id_end_contact, 1);
+    LuaCallbackStorage(mp_lua).execute(mr_workspace, mp_owner, gc_event_end_contact, 1);
 }
 
 // 1 self
@@ -348,9 +340,9 @@ int luaApi_FlipBodyShapeGraphic(lua_State * _lua)
 int luaApi_SubscribeToBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    LuaCallbackStorage storage(_lua);
-    uint32_t id = storage.addCallback(self->callback_set_id_begin_contact, 2);
-    lua_pushinteger(_lua, static_cast<lua_Integer>(id));
+    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    uint32_t id = self->subscribeOnContact(gc_event_begin_contact, 2);
+    lua_pushinteger(_lua, id);
     return 1;
 }
 
@@ -361,8 +353,7 @@ int luaApi_UnsubscribeFromBeginContact(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    LuaCallbackStorage storage(_lua);
-    storage.removeCallback(self->callback_set_id_begin_contact, subscription_id);
+    self->unsubscribeOnContact(gc_event_begin_contact, subscription_id);
     return 0;
 }
 
@@ -371,9 +362,9 @@ int luaApi_UnsubscribeFromBeginContact(lua_State * _lua)
 int luaApi_SubscribeToEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    LuaCallbackStorage storage(_lua);
-    uint32_t id = storage.addCallback(self->callback_set_id_end_contact, 2);
-    lua_pushinteger(_lua, static_cast<lua_Integer>(id));
+    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    uint32_t id = self->subscribeOnContact(gc_event_begin_contact, 2);
+    lua_pushinteger(_lua, id);
     return 1;
 }
 
@@ -384,8 +375,7 @@ int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    LuaCallbackStorage storage(_lua);
-    storage.removeCallback(self->callback_set_id_end_contact, subscription_id);
+    self->unsubscribeOnContact(gc_event_end_contact, subscription_id);
     return 0;
 }
 
@@ -421,14 +411,11 @@ int luaApi_FindPath(lua_State * _lua)
 
 void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Scene> _scene)
 {
-    LuaWeakRegistryStorage weak_registry(_lua);
-    if(weak_registry.tryGet(&_scene, LUA_TUSERDATA))
-        return;
-
     UserData::pushUserData(_lua, _lua, _workspace, _scene);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] = {
+        luaL_Reg funcs[] =
+        {
             { "__gc", UserData::luaGC },
             { "loadTileMap", luaApi_LoadTileMap },
             { "getTileMapObjectById", luaApi_GetTileMapObjectById },
@@ -453,8 +440,6 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
         luaL_setfuncs(_lua, funcs, 0);
     }
     lua_setmetatable(_lua, -2);
-
-    weak_registry.save(&_scene, -1);
 }
 
 std::shared_ptr<Scene> Sol2D::Lua::tryGetScene(lua_State * _lua, int _idx)

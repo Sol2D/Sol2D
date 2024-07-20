@@ -56,7 +56,7 @@ void Button::handleState(const RenderState & _state)
     case MouseClickState::Finished:
         setState(WidgetState::Focused);
         if(isPointIn(_state.mouse_state.lb_click.start, rect))
-            m_click_observable.callObservers(&ButtonClickObserver::onClick);
+            callObservers(&ButtonClickObserver::onClick);
         break;
     }
 }

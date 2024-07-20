@@ -32,24 +32,20 @@ public:
     {
     }
 
-    static uint32_t generateUniqueSetId()
-    {
-        return s_next_set_id++;
-    }
-
-    uint32_t addCallback(uint32_t _unique_set_id, int _callback_idx);
-    void removeCallback(uint32_t _unique_set_id, uint32_t _callback_id);
-    void callSet(const Workspace & _workspace, uint32_t _unique_set_id, uint16_t _args_count);
-    void destroyCallbackSet(int _set_unique_id);
+    uint32_t addCallback(const void * _owner, uint16_t _event_id, int _callback_idx);
+    void removeCallback(const void * _owner, uint16_t _event_id, uint32_t _subscription_id);
+    void execute(const Workspace & _workspace, const void * _owner, uint16_t _event_id, uint16_t _args_count);
+    void destroyCallbacks(const void * _owner);
 
 private:
-    bool tryGetCallbackTableFromIndexTable(uint32_t _unique_set_id);
-    void getIndexTable();
+    void getCallbackRegisty();
+    void createCallbackRegisty();
+    bool tryGetEventsTable(const void * _owner, uint16_t _event_id);
+    void ensureEventsTable(const void * _owner, uint16_t _event_id);
 
 private:
-    static const char sc_registry_key;
-    static uint32_t s_next_callback_id;
-    static uint32_t s_next_set_id;
+    static const char sc_callback_registry_key;
+    static uint32_t s_next_subscription_id;
     lua_State * mp_lua;
 };
 

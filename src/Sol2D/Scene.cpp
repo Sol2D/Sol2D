@@ -903,12 +903,12 @@ std::optional<Point> Scene::getBodyPosition(uint64_t _body_id) const
     return std::optional<Point>();
 }
 
-void Scene::addContactObserver(ContactObserver & _observer)
+void Scene::addObserver(ContactObserver & _observer)
 {
     mp_contact_listener->addObserver(_observer);
 }
 
-void Scene::removeContactObserver(ContactObserver & _observer)
+void Scene::removeObserver(ContactObserver & _observer)
 {
     mp_contact_listener->removeObserver(_observer);
 }

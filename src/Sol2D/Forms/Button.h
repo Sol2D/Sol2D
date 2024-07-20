@@ -28,30 +28,15 @@ public:
     virtual void onClick() = 0;
 };
 
-class Button : public Label
+class Button : public Label, public Utils::Observable<ButtonClickObserver>
 {
 public:
     Button(const Canvas & _parent, const std::string & _text, SDL_Renderer & _renderer);
     void render(const RenderState & _state) override;
-    void addObserver(ButtonClickObserver & _observer);
-    bool removeObserver(ButtonClickObserver & _observer);
 
 private:
     void handleState(const RenderState & _state);
     bool isPointIn(const Point & _point, const Rect & _rect) const;
-
-private:
-    Utils::Observable<ButtonClickObserver> m_click_observable;
 };
-
-inline void Button::addObserver(ButtonClickObserver & _observer)
-{
-    m_click_observable.addObserver(_observer);
-}
-
-inline bool Button::removeObserver(ButtonClickObserver & _observer)
-{
-    return m_click_observable.removeObserver(_observer);
-}
 
 } // namespace Sol2D::Forms

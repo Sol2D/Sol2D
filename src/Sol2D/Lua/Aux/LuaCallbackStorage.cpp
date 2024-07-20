@@ -17,27 +17,61 @@
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 
+//
+// Lua Global Registry
+// └── Callbacks Table
+//     ├── Owner 1
+//     │   ├── Event 1
+//     │   │   ├── Callback 1
+//     │   │   ├── …
+//     │   │   └── Callback N
+//     │   ├── …
+//     │   └── Event N
+//     │       ├── Callback 1
+//     │       ├── …
+//     │       └── Callback N
+//     ├── …
+//     └── Owner N
+//         ├── Event 1
+//         │   ├── Callback 1
+//         │   ├── …
+//         │   └── Callback N
+//         ├── …
+//         └── Event N
+//             ├── Callback 1
+//             ├── …
+//             └── Callback N
+//
+// Callbacks are records: (<Subscription ID>, <Lua Function>)
+//
+
 using namespace Sol2D;
 using namespace Sol2D::Lua::Aux;
 
-const char LuaCallbackStorage::sc_registry_key = '\0';
-uint32_t LuaCallbackStorage::s_next_callback_id = 1;
-uint32_t LuaCallbackStorage::s_next_set_id = 1;
+namespace {
 
-uint32_t LuaCallbackStorage::addCallback(uint32_t _unique_set_id, int _callback_idx)
+inline std::string makeOwnerKey(const void * _owner)
+{
+    return std::to_string(reinterpret_cast<size_t>(_owner));
+}
+
+inline std::string makeEventKey(uint16_t _event_id)
+{
+    return std::to_string(_event_id);
+}
+
+} // namespace
+
+const char LuaCallbackStorage::sc_callback_registry_key = '\0';
+uint32_t LuaCallbackStorage::s_next_subscription_id = 1;
+
+uint32_t LuaCallbackStorage::addCallback(const void * _owner, uint16_t _event_id, int _callback_idx)
 {
     const int callback_abs_idx = lua_absindex(mp_lua, _callback_idx);
-    const uint32_t id = s_next_callback_id++;
+    const uint32_t id = s_next_subscription_id++;
 
-    getIndexTable();
-    if(!tryGetCallbackTableFromIndexTable(_unique_set_id))
-    {
-        LuaTable callback_table = LuaTable::pushNew(mp_lua);
-        callback_table.setStringValue("__mode", "v");
-        lua_pushinteger(mp_lua, static_cast<lua_Integer>(_unique_set_id));
-        lua_pushvalue(mp_lua, -2);
-        lua_settable(mp_lua, -4);
-    }
+    getCallbackRegisty();
+    ensureEventsTable(_owner, _event_id);
 
     lua_pushinteger(mp_lua, id);
     lua_pushvalue(mp_lua, callback_abs_idx);
@@ -47,49 +81,81 @@ uint32_t LuaCallbackStorage::addCallback(uint32_t _unique_set_id, int _callback_
     return id;
 }
 
-bool LuaCallbackStorage::tryGetCallbackTableFromIndexTable(uint32_t _unique_set_id)
+void LuaCallbackStorage::getCallbackRegisty()
 {
-    lua_pushinteger(mp_lua, static_cast<lua_Integer>(_unique_set_id));
-    if(lua_gettable(mp_lua, -2) != LUA_TTABLE)
+    if(lua_rawgetp(mp_lua, LUA_REGISTRYINDEX, &sc_callback_registry_key) != LUA_TTABLE)
     {
         lua_pop(mp_lua, 1);
+        createCallbackRegisty();
+    }
+}
+
+void LuaCallbackStorage::createCallbackRegisty()
+{
+    lua_newtable(mp_lua);
+    lua_pushvalue(mp_lua, -1);
+    lua_rawsetp(mp_lua, LUA_REGISTRYINDEX, &sc_callback_registry_key);
+}
+
+// The callback registry must be on the top of the stack
+bool LuaCallbackStorage::tryGetEventsTable(const void * _owner, uint16_t _event_id)
+{
+    lua_pushstring(mp_lua, makeOwnerKey(_owner).c_str());
+    if(lua_gettable(mp_lua, -2) != LUA_TTABLE)
+    {
+         lua_pop(mp_lua, 1);
+         return false;
+    }
+
+    lua_pushstring(mp_lua, makeEventKey(_event_id).c_str());
+    if(lua_gettable(mp_lua, -2) != LUA_TTABLE)
+    {
+        lua_pop(mp_lua, 2);
         return false;
     }
+
+    lua_remove(mp_lua, -2);
+
     return true;
 }
 
-void LuaCallbackStorage::getIndexTable()
+// The callback registry must be on the top of the stack
+void LuaCallbackStorage::ensureEventsTable(const void * _owner, uint16_t _event_id)
 {
-    if(lua_rawgetp(mp_lua, LUA_REGISTRYINDEX, &sc_registry_key) != LUA_TTABLE)
+    luaL_getsubtable(mp_lua, -1, makeOwnerKey(_owner).c_str());
+    if(!luaL_getsubtable(mp_lua, -1, makeEventKey(_event_id).c_str()))
     {
-        lua_pop(mp_lua, 1);
-        lua_newtable(mp_lua);
-        lua_pushvalue(mp_lua, -1);
-        lua_rawsetp(mp_lua, LUA_REGISTRYINDEX, &sc_registry_key);
+        LuaTable table(mp_lua);
+        table.setStringValue("__mode", "v");
     }
+    lua_remove(mp_lua, -2);
 }
 
-void LuaCallbackStorage::removeCallback(uint32_t _unique_set_id, uint32_t _callback_id)
+void LuaCallbackStorage::removeCallback(const void * _owner, uint16_t _event_id, uint32_t _subscription_id)
 {
-    getIndexTable();
-    if(!tryGetCallbackTableFromIndexTable(_unique_set_id))
+    getCallbackRegisty();
+    if(!tryGetEventsTable(_owner, _event_id))
     {
         lua_pop(mp_lua, 1);
         return;
     }
 
-    lua_pushinteger(mp_lua, static_cast<lua_Integer>(_callback_id));
+    lua_pushinteger(mp_lua, static_cast<lua_Integer>(_subscription_id));
     lua_pushnil(mp_lua);
     lua_settable(mp_lua, -3);
 
     lua_pop(mp_lua, 2);
 }
 
-void LuaCallbackStorage::callSet(const Workspace & _workspace, uint32_t _unique_set_id, uint16_t _args_count)
+void LuaCallbackStorage::execute(
+    const Workspace & _workspace,
+    const void * _owner,
+    uint16_t _event_id,
+    uint16_t _args_count)
 {
     const int args_top = lua_gettop(mp_lua);
-    getIndexTable();
-    if(!tryGetCallbackTableFromIndexTable(_unique_set_id))
+    getCallbackRegisty();
+    if(!tryGetEventsTable(_owner, _event_id))
         return;
     const int callbacks_table_idx = lua_gettop(mp_lua);
     lua_pushnil(mp_lua);
@@ -111,10 +177,10 @@ void LuaCallbackStorage::callSet(const Workspace & _workspace, uint32_t _unique_
     lua_pop(mp_lua, _args_count + 2);
 }
 
-void LuaCallbackStorage::destroyCallbackSet(int _set_unique_id)
+void LuaCallbackStorage::destroyCallbacks(const void * _owner)
 {
-    getIndexTable();
-    lua_pushinteger(mp_lua, _set_unique_id);
+    getCallbackRegisty();
+    lua_pushstring(mp_lua, makeOwnerKey(_owner).c_str());
     lua_pushnil(mp_lua);
     lua_settable(mp_lua, -3);
 }
