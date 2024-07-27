@@ -17,6 +17,7 @@
 #pragma once
 
 #include <boost/container/slist.hpp>
+#include <algorithm>
 
 namespace Sol2D::Utils {
 

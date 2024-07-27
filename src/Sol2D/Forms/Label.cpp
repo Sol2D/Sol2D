@@ -19,31 +19,22 @@
 using namespace Sol2D::Forms;
 using namespace Sol2D::SDL;
 
-struct Label::SideEffect
-{
-    Label * label;
-
-    void operator ()(WidgetState)
-    {
-        label->resetTexture();
-    }
-};
-
 Label::Label(const Canvas & _parent, const std::string & _text, SDL_Renderer & _renderer) :
     Widget(_parent, _renderer),
-    mp_side_effect(new SideEffect),
     m_text(_text),
     mp_texture(nullptr),
-    horizontal_text_alignment(HorizontalTextAlignment::None, *mp_side_effect),
-    vertical_text_alignment(VerticalTextAlignment::None, *mp_side_effect)
+    horizontal_text_alignment(HorizontalTextAlignment::None),
+    vertical_text_alignment(VerticalTextAlignment::None)
 {
-    mp_side_effect->label = this;
+    m_horizontal_text_alignment_side_effect = std::make_unique<SideEffect<HorizontalTextAlignment>>(this);
+    m_vertical_text_alignment_side_effect = std::make_unique<SideEffect<VerticalTextAlignment>>(this);
+    horizontal_text_alignment.addObserver(*m_horizontal_text_alignment_side_effect);
+    vertical_text_alignment.addObserver(*m_vertical_text_alignment_side_effect);
 }
 
 Label::~Label()
 {
     resetTexture();
-    delete mp_side_effect;
 }
 
 void Label::resetTexture()

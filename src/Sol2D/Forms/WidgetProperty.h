@@ -17,9 +17,9 @@
 #pragma once
 
 #include <Sol2D/Forms/WidgetState.h>
+#include <Sol2D/Utils/Observable.h>
 #include <Sol2D/Def.h>
 #include <unordered_map>
-#include <functional>
 
 namespace Sol2D::Forms {
 
@@ -27,19 +27,23 @@ template<typename T>
 concept WidgetPropertyValueConcept = std::copyable<T> && std::default_initializable<T>;
 
 template<WidgetPropertyValueConcept T>
-class WidgetProperty
+class WidgetProperty;
+
+template<WidgetPropertyValueConcept PropertyType>
+class WidgetPropertyObserver
+{
+public:
+    virtual void onPropertyChanged(const WidgetProperty<PropertyType> & _property, WidgetState _state) = 0;
+};
+
+template<WidgetPropertyValueConcept T>
+class WidgetProperty : public Utils::Observable<WidgetPropertyObserver<T>>
 {
 public:
     S2_DEFAULT_COPY_AND_MOVE(WidgetProperty)
 
     WidgetProperty(const T & _value) :
-        WidgetProperty(_value, nullptr)
-    {
-    }
-
-    WidgetProperty(const T & _value, std::function<void(WidgetState)> _side_effect) :
-        m_values(1),
-        m_side_effect(_side_effect)
+        m_values(1)
     {
         m_values[WidgetState::Default] = _value;
     }
@@ -52,34 +56,30 @@ public:
     void setValue(const T & _value)
     {
         m_values[WidgetState::Default] = _value;
-        if(m_side_effect)
-            m_side_effect(WidgetState::Default);
+        raisePropertyChanged(WidgetState::Default);
     }
 
     void operator = (T && _value)
     {
-        setValue(std::move(_value));
+        setValue(std::forward(_value));
     }
 
     void setValue(T && _value)
     {
-        m_values[WidgetState::Default] = std::move(_value);
-        if(m_side_effect)
-            m_side_effect(WidgetState::Default);
+        m_values[WidgetState::Default] = std::forward(_value);
+        raisePropertyChanged(WidgetState::Default);
     }
 
     void setValue(WidgetState _state, const T & _value)
     {
         m_values[_state] = _value;
-        if(m_side_effect)
-            m_side_effect(_state);
+        raisePropertyChanged(_state);
     }
 
     void setValue(WidgetState _state, T && _value)
     {
         m_values[_state] = std::move(_value);
-        if(m_side_effect)
-            m_side_effect(_state);
+        raisePropertyChanged(_state);
     }
 
     bool unsetValue(WidgetState _state)
@@ -87,8 +87,7 @@ public:
         if(_state == WidgetState::Default)
             return false;
         m_values.erase(_state);
-        if(m_side_effect)
-            m_side_effect(_state);
+        raisePropertyChanged(_state);
         return true;
     }
 
@@ -123,6 +122,11 @@ public:
     }
 
 private:
+    void raisePropertyChanged(WidgetState _state)
+    {
+        Utils::Observable<WidgetPropertyObserver<T>>::callObservers(&WidgetPropertyObserver<T>::onPropertyChanged, *this, _state);
+    }
+
     T & getValue(WidgetState _state)
     {
         auto it = m_values.find(_state);
@@ -131,7 +135,6 @@ private:
 
 private:
     std::unordered_map<WidgetState, T> m_values;
-    std::function<void(WidgetState)> m_side_effect;
 };
 
 } // namespace Sol2D::Forms

@@ -21,6 +21,16 @@ project(sol2d
     VERSION 0.0.0
 )
 
+set(SOL2D_USE_GAMES
+    OFF
+    CACHE BOOL "Enables test games"
+)
+
+set(SOL2D_USE_ASAN
+    OFF
+    CACHE BOOL "Enables address sanitizer (ASAN)"
+)
+
 if(LINUX)
     list(APPEND CMAKE_MODULE_PATH "/usr/lib/x86_64-linux-gnu/cmake/")
 endif()
@@ -57,11 +67,19 @@ pkg_check_modules(ZSTD REQUIRED libzstd)
 add_executable(${PROJECT_NAME} ${SOL2D_SRC})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 20)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 
-target_compile_options(${PROJECT_NAME} PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
-)
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+    if(SOL2D_USE_ASAN)
+        target_link_options(${PROJECT_NAME} PRIVATE /fsanitize=address)
+    endif()
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    if(SOL2D_USE_ASAN)
+        target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+    endif()
+endif()
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src
@@ -89,11 +107,6 @@ target_link_libraries(${PROJECT_NAME}
     Boost::boost
     ${LUA_LINK_LIBRARIES}
     ${ZSTD_LINK_LIBRARIES}
-)
-
-set(SOL2D_USE_GAMES
-    OFF
-    CACHE BOOL "Enables test games"
 )
 
 if(SOL2D_USE_GAMES)

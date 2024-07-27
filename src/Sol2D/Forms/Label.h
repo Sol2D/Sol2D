@@ -25,8 +25,24 @@ namespace Sol2D::Forms {
 
 class Label : public Widget
 {
-    struct SideEffect;
-    friend struct SideEffect;
+private:
+    template<WidgetPropertyValueConcept PropertyType>
+    class SideEffect : public WidgetPropertyObserver<PropertyType>
+    {
+    public:
+        explicit SideEffect(Label * _label) :
+            mp_label(_label)
+        {
+        }
+
+        void onPropertyChanged(const WidgetProperty<PropertyType> &, WidgetState) override
+        {
+            mp_label->resetTexture();
+        }
+
+    private:
+        Label * mp_label;
+    };
 
 public:
     explicit Label(const Canvas & _parent, const std::string & _text, SDL_Renderer & _renderer);
@@ -37,7 +53,8 @@ public:
     void render(const RenderState & _state) override;
 
 private:
-    SideEffect * mp_side_effect;
+    std::unique_ptr<SideEffect<HorizontalTextAlignment>> m_horizontal_text_alignment_side_effect;
+    std::unique_ptr<SideEffect<VerticalTextAlignment>> m_vertical_text_alignment_side_effect;
     std::string m_text;
     SDL_Texture * mp_texture;
     float m_texture_width;

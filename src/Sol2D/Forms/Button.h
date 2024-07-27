@@ -17,7 +17,6 @@
 #pragma once
 
 #include <Sol2D/Forms/Label.h>
-#include <Sol2D/Utils/Observable.h>
 
 namespace Sol2D::Forms {
 
