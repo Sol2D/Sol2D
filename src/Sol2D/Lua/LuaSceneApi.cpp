@@ -119,6 +119,17 @@ void LuaContactObserver::endContact(Contact & _contact)
 }
 
 // 1 self
+// 2 gravity
+int luaApi_SetGravity(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    Point gravity;
+    luaL_argcheck(_lua, tryGetPoint(_lua, 2, gravity), 2, "gravity vector expected");
+    self->getScene(_lua)->setGravity(gravity);
+    return 1;
+}
+
+// 1 self
 // 2 file path
 int luaApi_LoadTileMap(lua_State * _lua)
 {
@@ -417,6 +428,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
         luaL_Reg funcs[] =
         {
             { "__gc", UserData::luaGC },
+            { "setGravity", luaApi_SetGravity },
             { "loadTileMap", luaApi_LoadTileMap },
             { "getTileMapObjectById", luaApi_GetTileMapObjectById },
             { "getTileMapObjectByName", luaApi_GetTileMapObjectByName },

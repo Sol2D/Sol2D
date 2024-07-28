@@ -43,6 +43,7 @@ class Scene final : public Canvas
 public:
     Scene(const Workspace & _workspace, SDL_Renderer & _renderer);
     ~Scene() override;
+    void setGravity(const Point & _vector);
     uint64_t createBody(const Point & _position, const BodyPrototype & _prototype);
     void createBodiesFromMapObjects(
         const std::string & _class,

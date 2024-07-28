@@ -35,9 +35,10 @@ private:
         {
         }
 
-        void onPropertyChanged(const WidgetProperty<PropertyType> &, WidgetState) override
+        void onPropertyChanged(const WidgetProperty<PropertyType> &, WidgetState _state) override
         {
-            mp_label->resetTexture();
+            if(mp_label->m_state == _state)
+                mp_label->resetTexture();
         }
 
     private:

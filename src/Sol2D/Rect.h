@@ -17,6 +17,7 @@
 #pragma once
 
 #include <SDL3/SDL_rect.h>
+#include <box2d/b2_math.h>
 
 namespace Sol2D {
 
@@ -33,6 +34,11 @@ struct Point
     const SDL_FPoint * toSdlPtr() const noexcept
     {
         return reinterpret_cast<const SDL_FPoint *>(this);
+    }
+
+    const b2Vec2 * toBox2DPtr() const noexcept
+    {
+        return reinterpret_cast<const b2Vec2 *>(this);
     }
 
     Point operator + (const Point & _point) const noexcept

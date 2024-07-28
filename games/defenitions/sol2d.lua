@@ -150,6 +150,9 @@ function __view:bindFragment(fragment_id, target) end
 ---@class sol.Scene
 local __scene
 
+---@param vector Point
+function __scene:setGravity(vector) end
+
 ---@param path string
 ---@return boolean
 function __scene:loadTileMap(path) end

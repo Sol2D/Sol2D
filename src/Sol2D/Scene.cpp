@@ -274,7 +274,7 @@ Scene::Scene(const Workspace & _workspace, SDL_Renderer & _renderer) :
     mr_workspace(_workspace),
     mr_renderer(_renderer),
     m_world_offset{.0f, .0f},
-    mp_b2_world(new b2World({ .0f, 10000.0f })), // TODO: from parameters
+    mp_b2_world(new b2World({ .0f, .0f })), // TODO: from parameters
     m_scale_factor(20.0f), // TODO: from parameters
     mp_followed_body(nullptr),
     mp_contact_listener(new Private::SceneContactListener)
@@ -298,6 +298,14 @@ void Scene::deinitialize()
     m_object_heap_ptr.reset();
     m_tile_map_ptr.reset();
     mp_followed_body = nullptr;
+}
+
+void Scene::setGravity(const Point & _vector)
+{
+    if(mp_b2_world->IsLocked())
+        m_defers.push_front([_vector, this]() { setGravity(_vector); });
+    else
+        mp_b2_world->SetGravity(*_vector.toBox2DPtr()); // TODO: scale factor?
 }
 
 uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _prototype)
