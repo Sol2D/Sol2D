@@ -16,18 +16,18 @@
 
 #pragma once
 
-#include <Sol2D/Def.h>
 #include <Sol2D/RenderState.h>
+#include <Sol2D/Object.h>
+#include <Sol2D/Def.h>
 
 namespace Sol2D {
 
-class Canvas
+class Canvas : public Object
 {
     S2_DISABLE_COPY_AND_MOVE(Canvas)
 
 public:
     Canvas() { }
-    virtual ~Canvas() { }
     void reconfigure(const Rect & _rect);
     float getWidth() const;
     float getHeight() const;

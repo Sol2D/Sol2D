@@ -38,6 +38,7 @@ public:
     void destroyCallbacks(const void * _owner);
 
 private:
+    static int luaGC(lua_State *);
     void getCallbackRegisty();
     void createCallbackRegisty();
     bool tryGetEventsTable(const void * _owner, uint16_t _event_id);
@@ -45,6 +46,7 @@ private:
 
 private:
     static const char sc_callback_registry_key;
+    static bool s_is_disposed;
     static uint32_t s_next_subscription_id;
     lua_State * mp_lua;
 };

@@ -16,6 +16,7 @@
 
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
+#include <Sol2D/Lua/Aux/LuaMetatable.h>
 
 //
 // Lua Global Registry
@@ -63,10 +64,19 @@ inline std::string makeEventKey(uint16_t _event_id)
 } // namespace
 
 const char LuaCallbackStorage::sc_callback_registry_key = '\0';
+bool LuaCallbackStorage::s_is_disposed = false;
 uint32_t LuaCallbackStorage::s_next_subscription_id = 1;
+
+int LuaCallbackStorage::luaGC(lua_State *)
+{
+    s_is_disposed = true;
+    return 0;
+}
 
 uint32_t LuaCallbackStorage::addCallback(const void * _owner, uint16_t _event_id, int _callback_idx)
 {
+    if(s_is_disposed) return 0;
+
     const int callback_abs_idx = lua_absindex(mp_lua, _callback_idx);
     const uint32_t id = s_next_subscription_id++;
 
@@ -93,6 +103,14 @@ void LuaCallbackStorage::getCallbackRegisty()
 void LuaCallbackStorage::createCallbackRegisty()
 {
     lua_newtable(mp_lua);
+    pushMetatable(mp_lua, "sol.Internal.CallbackStorage");
+    luaL_Reg funcs[] =
+    {
+        { "__gc", LuaCallbackStorage::luaGC }, // Lua is destroying, application is terminating
+        { nullptr, nullptr }
+    };
+    luaL_setfuncs(mp_lua, funcs, 0);
+    lua_setmetatable(mp_lua, -2);
     lua_pushvalue(mp_lua, -1);
     lua_rawsetp(mp_lua, LUA_REGISTRYINDEX, &sc_callback_registry_key);
 }
@@ -133,6 +151,8 @@ void LuaCallbackStorage::ensureEventsTable(const void * _owner, uint16_t _event_
 
 void LuaCallbackStorage::removeCallback(const void * _owner, uint16_t _event_id, uint32_t _subscription_id)
 {
+    if(s_is_disposed) return;
+
     getCallbackRegisty();
     if(!tryGetEventsTable(_owner, _event_id))
     {
@@ -153,6 +173,8 @@ void LuaCallbackStorage::execute(
     uint16_t _event_id,
     uint16_t _args_count)
 {
+    if(s_is_disposed) return;
+
     const int args_top = lua_gettop(mp_lua);
     getCallbackRegisty();
     if(!tryGetEventsTable(_owner, _event_id))
@@ -179,6 +201,8 @@ void LuaCallbackStorage::execute(
 
 void LuaCallbackStorage::destroyCallbacks(const void * _owner)
 {
+    if(s_is_disposed) return;
+
     getCallbackRegisty();
     lua_pushstring(mp_lua, makeOwnerKey(_owner).c_str());
     lua_pushnil(mp_lua);

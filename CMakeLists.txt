@@ -116,6 +116,7 @@ if(SOL2D_USE_GAMES)
     )
     set(SOL2D_GAME_CONFING
         "${CMAKE_CURRENT_LIST_DIR}/game.xml"
+        "${CMAKE_CURRENT_LIST_DIR}/game_rpg.xml"
     )
     file(GLOB_RECURSE SOL2D_GAMES_SRC
         "${SOL2D_GAMES_DIR}/*"

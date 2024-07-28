@@ -23,7 +23,8 @@
 #include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
-#include <Sol2D/Lua/Aux/LuaCallbackSubscribable.h>
+#include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
+#include <Sol2D/Object.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -35,36 +36,35 @@ namespace {
 const char gc_message_color_required[] = "color required";
 const char gc_message_alignment_required[] = "alignment required";
 
+const char gc_click_companion_key[] = "lua_click_observer";
+
 const uint16_t gc_event_click = 0;
 
-class LuaButtonClickObserver : public ButtonClickObserver
+class LuaButtonClickObserver : public ObjectCompanion, public ButtonClickObserver
 {
 public:
-    LuaButtonClickObserver(lua_State * _lua, const Workspace & _workspace, const void * _owner);
-    void onClick() override;
+    LuaButtonClickObserver(lua_State * _lua, const Workspace & _workspace) :
+        mp_lua(_lua),
+        mr_worksapce(_workspace)
+    {
+    }
+
+    ~LuaButtonClickObserver()
+    {
+        LuaCallbackStorage storage(mp_lua);
+        storage.destroyCallbacks(this);
+    }
+
+    void onClick() override
+    {
+        LuaCallbackStorage storage(mp_lua);
+        storage.execute(mr_worksapce, this, gc_event_click, 0);
+    }
 
 private:
     lua_State * mp_lua;
     const Workspace & mr_worksapce;
-    const void * mp_owner;
 };
-
-inline LuaButtonClickObserver::LuaButtonClickObserver(
-    lua_State * _lua,
-    const Workspace & _workspace,
-    const void * _owner
-) :
-    mp_lua(_lua),
-    mr_worksapce(_workspace),
-    mp_owner(_owner)
-{
-}
-
-void LuaButtonClickObserver::onClick()
-{
-    LuaCallbackStorage storage(mp_lua);
-    storage.execute(mr_worksapce, mp_owner, gc_event_click, 0);
-}
 
 template<typename WidgetT>
 struct Self : LuaSelfBase
@@ -95,39 +95,44 @@ struct LabelSelf : Self<Label>
 
 using LabelUserData = LuaUserData<LabelSelf, LuaTypeName::label>;
 
-struct ButtonSelf : Self<Button>, LuaCallbackSubscribable<ButtonClickObserver, Button>
+struct ButtonSelf : Self<Button>
 {
-private:
-    using OnClick = LuaCallbackSubscribable<ButtonClickObserver, Button>;
-
 public:
-    ButtonSelf(lua_State * _lua, std::shared_ptr<Button> & _button, const Workspace & _workspace) :
+    ButtonSelf(std::shared_ptr<Button> & _button, const Workspace & _workspace) :
         Self<Button>(_button),
-        OnClick(_lua, widget),
         mr_workspace(_workspace)
     {
     }
 
-    uint32_t subscribeOnClick(int _callback_idx)
-    {
-        return OnClick::subscribe(gc_event_click, _callback_idx);
-    }
-
-    void unsubscribeOnClick(int _subscription_id)
-    {
-        OnClick::unsubscribe(gc_event_click, _subscription_id);
-    }
-
-protected:
-    ButtonClickObserver * createObserver(lua_State * _lua) override
-    {
-        return new LuaButtonClickObserver(_lua, mr_workspace, this);
-    }
-
+    uint32_t subscribeOnClick(lua_State * _lua, int _callback_idx);
+    void unsubscribeOnClick(lua_State * _lua, int _subscription_id);
 
 private:
     const Workspace & mr_workspace;
 };
+
+uint32_t ButtonSelf::subscribeOnClick(lua_State * _lua, int _callback_idx)
+{
+    std::shared_ptr<Button> button = getWidget(_lua);
+    ObjectCompanion * owner = button->getCompanion(gc_click_companion_key);
+    if(owner == nullptr)
+    {
+        LuaButtonClickObserver * observer = new LuaButtonClickObserver(_lua, mr_workspace);
+        button->addCompanion(gc_click_companion_key, std::unique_ptr<ObjectCompanion>(observer));
+        button->addObserver(*observer);
+        owner = observer;
+    }
+    return LuaCallbackStorage(_lua).addCallback(owner, gc_event_click, _callback_idx);
+}
+
+void ButtonSelf::unsubscribeOnClick(lua_State * _lua, int _subscription_id)
+{
+    std::shared_ptr<Button> button = getWidget(_lua);
+    ObjectCompanion * owner = button->getCompanion(gc_click_companion_key);
+    if(owner == nullptr)
+        return;
+    return LuaCallbackStorage(_lua).removeCallback(owner, gc_event_click, _subscription_id);
+}
 
 using ButtonUserData = LuaUserData<ButtonSelf, LuaTypeName::button>;
 
@@ -323,7 +328,7 @@ int luaApi_ButtonSubscribeOnClick(lua_State * _lua)
 {
     ButtonSelf * self = ButtonUserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, "callback required");
-    uint32_t id = self->subscribeOnClick(2);
+    uint32_t id = self->subscribeOnClick(_lua, 2);
     lua_pushinteger(_lua, static_cast<lua_Integer>(id));
     return 1;
 }
@@ -335,7 +340,7 @@ int luaApi_ButtonUnsubscribeOnClick(lua_State * _lua)
     ButtonSelf * self = ButtonUserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "subscription ID required");
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    self->unsubscribeOnClick(subscription_id);
+    self->unsubscribeOnClick(_lua, subscription_id);
     return 0;
 }
 
@@ -413,7 +418,7 @@ void Sol2D::Lua::pushLabelApi(lua_State * _lua, std::shared_ptr<Label> _label)
 
 void Sol2D::Lua::pushButtonApi(lua_State * _lua, std::shared_ptr<Button> _button, const Workspace & _workspace)
 {
-    ButtonUserData::pushUserData(_lua, _lua, _button, _workspace);
+    ButtonUserData::pushUserData(_lua, _button, _workspace);
     if(ButtonUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         auto funcs =

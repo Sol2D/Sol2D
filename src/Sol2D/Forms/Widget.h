@@ -19,13 +19,14 @@
 #include <Sol2D/Forms/WidgetProperty.h>
 #include <Sol2D/Forms/WidgetPadding.h>
 #include <Sol2D/Canvas.h>
+#include <Sol2D/Object.h>
 #include <Sol2D/Color.h>
 #include <Sol2D/SDL/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
 namespace Sol2D::Forms {
 
-class Widget
+class Widget : public Object
 {
     S2_DISABLE_COPY_AND_MOVE(Widget)
 

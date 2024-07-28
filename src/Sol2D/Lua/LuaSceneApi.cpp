@@ -23,7 +23,7 @@
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
-#include <Sol2D/Lua/Aux/LuaCallbackSubscribable.h>
+#include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaScript.h>
 
@@ -39,84 +39,94 @@ const char gc_message_graphic_key_expected[] = "a graphic key expected";
 const char gc_message_subscription_id_expected[] = "a subscriptin ID expected";
 const char gc_message_callback_expected[] = "callback expected";
 
-
 const uint16_t gc_event_begin_contact = 0;
 const uint16_t gc_event_end_contact = 1;
 
-class LuaContactObserver : public ContactObserver
+const char gc_contact_companion_key[] = "lua_contact_observer";
+
+class LuaContactObserver : public ObjectCompanion, public ContactObserver
 {
 public:
-    LuaContactObserver(lua_State * _lua, const Workspace & _workspace, const void * _owner);
-    void beginContact(Contact & _contact);
-    void endContact(Contact & _contact);
+    LuaContactObserver(lua_State * _lua, const Workspace & _workspace) :
+        mp_lua(_lua),
+        mr_workspace(_workspace)
+    {
+    }
+
+    ~LuaContactObserver() override
+    {
+        LuaCallbackStorage storage(mp_lua);
+        storage.destroyCallbacks(this);
+    }
+
+    void beginContact(Contact & _contact) override
+    {
+        pushContact(mp_lua, _contact);
+        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_begin_contact, 1);
+    }
+
+    void endContact(Contact & _contact) override
+    {
+        pushContact(mp_lua, _contact);
+        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_end_contact, 1);
+    }
 
 private:
     lua_State * mp_lua;
     const Workspace & mr_workspace;
-    const void * mp_owner;
 };
 
-struct Self : LuaSelfBase, LuaCallbackSubscribable<ContactObserver, Scene>
+struct Self : LuaSelfBase
 {
-private:
-    using OnContact = LuaCallbackSubscribable<ContactObserver, Scene>;
-
 public:
-    Self(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Scene> & _scene) :
-        OnContact(_lua, _scene),
-        workspace(_workspace)
+    Self(const Workspace & _workspace, std::shared_ptr<Scene> & _scene) :
+        workspace(_workspace),
+        m_scene(_scene)
     {
     }
 
     std::shared_ptr<Scene> getScene(lua_State * _lua) const
     {
-        std::shared_ptr<Scene> ptr = getObservable();
+        std::shared_ptr<Scene> ptr =  m_scene.lock();
         if(!ptr)
             luaL_error(_lua, "the scene is destroyed");
         return ptr;
     }
 
-    uint32_t subscribeOnContact(uint16_t _event_id, int _callback_idx)
-    {
-        return OnContact::subscribe(_event_id, _callback_idx);
-    }
-
-    void unsubscribeOnContact(uint16_t _event_id, int _subscription_id)
-    {
-        OnContact::unsubscribe(_event_id, _subscription_id);
-    }
-
-protected:
-    ContactObserver * createObserver(lua_State * _lua) override
-    {
-        return new LuaContactObserver(_lua, workspace, this);
-
-    }
+    uint32_t subscribeOnContact(lua_State * _lua, uint16_t _event_id, int _callback_idx);
+    void unsubscribeOnContact(lua_State * _lua, uint16_t _event_id, int _subscription_id);
 
 public:
     const Workspace & workspace;
+
+private:
+    std::weak_ptr<Scene> m_scene;
 };
 
+uint32_t Self::subscribeOnContact(lua_State * _lua, uint16_t _event_id, int _callback_idx)
+{
+    std::shared_ptr<Scene> scene = getScene(_lua);
+    ObjectCompanion * owner = scene->getCompanion(gc_contact_companion_key);
+    if(owner == nullptr)
+    {
+        LuaContactObserver * observer = new LuaContactObserver(_lua, workspace);
+        scene->addCompanion(gc_contact_companion_key, std::unique_ptr<ObjectCompanion>(observer));
+        scene->addObserver(*observer);
+        owner = observer;
+    }
+    return LuaCallbackStorage(_lua).addCallback(owner, _event_id, _callback_idx);
+}
+
+void Self::unsubscribeOnContact(lua_State * _lua, uint16_t _event_id, int _subscription_id)
+{
+    std::shared_ptr<Scene> scene = getScene(_lua);
+    ObjectCompanion * owner = scene->getCompanion(gc_contact_companion_key);
+    if(owner == nullptr)
+        return;
+    return LuaCallbackStorage(_lua).removeCallback(owner, _event_id, _subscription_id);
+}
+
 using UserData = LuaUserData<Self, LuaTypeName::scene>;
-
-LuaContactObserver::LuaContactObserver(lua_State * _lua, const Workspace & _workspace, const void * _owner) :
-    mp_lua(_lua),
-    mr_workspace(_workspace),
-    mp_owner(_owner)
-{
-}
-
-void LuaContactObserver::beginContact(Contact & _contact)
-{
-    pushContact(mp_lua, _contact);
-    LuaCallbackStorage(mp_lua).execute(mr_workspace, mp_owner, gc_event_begin_contact, 1);
-}
-
-void LuaContactObserver::endContact(Contact & _contact)
-{
-    pushContact(mp_lua, _contact);
-    LuaCallbackStorage(mp_lua).execute(mr_workspace, mp_owner, gc_event_end_contact, 1);
-}
 
 // 1 self
 // 2 gravity
@@ -352,7 +362,7 @@ int luaApi_SubscribeToBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
-    uint32_t id = self->subscribeOnContact(gc_event_begin_contact, 2);
+    uint32_t id = self->subscribeOnContact(_lua, gc_event_begin_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
 }
@@ -364,7 +374,7 @@ int luaApi_UnsubscribeFromBeginContact(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    self->unsubscribeOnContact(gc_event_begin_contact, subscription_id);
+    self->unsubscribeOnContact(_lua, gc_event_begin_contact, subscription_id);
     return 0;
 }
 
@@ -374,7 +384,7 @@ int luaApi_SubscribeToEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
-    uint32_t id = self->subscribeOnContact(gc_event_begin_contact, 2);
+    uint32_t id = self->subscribeOnContact(_lua, gc_event_begin_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
 }
@@ -386,7 +396,7 @@ int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    self->unsubscribeOnContact(gc_event_end_contact, subscription_id);
+    self->unsubscribeOnContact(_lua, gc_event_end_contact, subscription_id);
     return 0;
 }
 
@@ -422,7 +432,7 @@ int luaApi_FindPath(lua_State * _lua)
 
 void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Scene> _scene)
 {
-    UserData::pushUserData(_lua, _lua, _workspace, _scene);
+    UserData::pushUserData(_lua, _workspace, _scene);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] =
