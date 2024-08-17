@@ -33,7 +33,7 @@ public:
     }
 
     uint32_t addCallback(const void * _owner, uint16_t _event_id, int _callback_idx);
-    void removeCallback(const void * _owner, uint16_t _event_id, uint32_t _subscription_id);
+    size_t removeCallback(const void * _owner, uint16_t _event_id, uint32_t _subscription_id);
     void execute(const Workspace & _workspace, const void * _owner, uint16_t _event_id, uint16_t _args_count);
     void destroyCallbacks(const void * _owner);
 

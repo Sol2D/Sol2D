@@ -125,7 +125,7 @@ private:
     void raisePropertyChanged(WidgetState _state)
     {
         Utils::Observable<WidgetPropertyObserver<T>>::callObservers(
-            &WidgetPropertyObserver<T>::onPropertyChanged, *this, _state);
+            &WidgetPropertyObserver<T>::onPropertyChanged, std::ref(*this), _state);
     }
 
     T & getValue(WidgetState _state)

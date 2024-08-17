@@ -53,6 +53,11 @@ public:
         return it == m_compaions.cend() ? nullptr : it->second.get();
     }
 
+    bool removeCompanion(const std::string & _key)
+    {
+        return m_compaions.erase(_key) > 0;
+    }
+
 private:
     std::unordered_map<std::string, std::unique_ptr<ObjectCompanion>> m_compaions;
 };

@@ -141,30 +141,30 @@ bool LuaCallbackStorage::tryGetEventsTable(const void * _owner, uint16_t _event_
 void LuaCallbackStorage::ensureEventsTable(const void * _owner, uint16_t _event_id)
 {
     luaL_getsubtable(mp_lua, -1, makeOwnerKey(_owner).c_str());
-    if(!luaL_getsubtable(mp_lua, -1, makeEventKey(_event_id).c_str()))
-    {
-        LuaTable table(mp_lua);
-        table.setStringValue("__mode", "v");
-    }
+    luaL_getsubtable(mp_lua, -1, makeEventKey(_event_id).c_str());
     lua_remove(mp_lua, -2);
 }
 
-void LuaCallbackStorage::removeCallback(const void * _owner, uint16_t _event_id, uint32_t _subscription_id)
+size_t LuaCallbackStorage::removeCallback(const void * _owner, uint16_t _event_id, uint32_t _subscription_id)
 {
-    if(s_is_disposed) return;
+    if(s_is_disposed) return 0;
 
     getCallbackRegisty();
     if(!tryGetEventsTable(_owner, _event_id))
     {
         lua_pop(mp_lua, 1);
-        return;
+        return 0;
     }
 
     lua_pushinteger(mp_lua, static_cast<lua_Integer>(_subscription_id));
     lua_pushnil(mp_lua);
     lua_settable(mp_lua, -3);
 
+    size_t callback_count = lua_rawlen(mp_lua, -1);
+
     lua_pop(mp_lua, 2);
+
+    return callback_count;
 }
 
 void LuaCallbackStorage::execute(

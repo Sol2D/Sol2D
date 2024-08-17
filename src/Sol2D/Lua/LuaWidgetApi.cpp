@@ -131,7 +131,11 @@ void ButtonSelf::unsubscribeOnClick(lua_State * _lua, int _subscription_id)
     ObjectCompanion * owner = button->getCompanion(gc_click_companion_key);
     if(owner == nullptr)
         return;
-    return LuaCallbackStorage(_lua).removeCallback(owner, gc_event_click, _subscription_id);
+    if(LuaCallbackStorage(_lua).removeCallback(owner, gc_event_click, _subscription_id) == 0)
+    {
+        button->removeObserver(*static_cast<LuaButtonClickObserver *>(owner));
+        button->removeCompanion(gc_click_companion_key);
+    }
 }
 
 using ButtonUserData = LuaUserData<ButtonSelf, LuaTypeName::button>;

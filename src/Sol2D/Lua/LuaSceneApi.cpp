@@ -123,7 +123,11 @@ void Self::unsubscribeOnContact(lua_State * _lua, uint16_t _event_id, int _subsc
     ObjectCompanion * owner = scene->getCompanion(gc_contact_companion_key);
     if(owner == nullptr)
         return;
-    return LuaCallbackStorage(_lua).removeCallback(owner, _event_id, _subscription_id);
+    if(LuaCallbackStorage(_lua).removeCallback(owner, _event_id, _subscription_id) == 0)
+    {
+        scene->removeObserver(*static_cast<LuaContactObserver *>(owner));
+        scene->removeCompanion(gc_contact_companion_key);
+    }
 }
 
 using UserData = LuaUserData<Self, LuaTypeName::scene>;

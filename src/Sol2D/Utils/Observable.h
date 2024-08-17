@@ -18,6 +18,9 @@
 
 #include <boost/container/slist.hpp>
 #include <algorithm>
+#include <functional>
+#include <memory>
+#include <atomic>
 
 namespace Sol2D::Utils {
 
@@ -27,43 +30,69 @@ concept ObserverMethodConcept = std::is_member_function_pointer<Method>::value;
 template<typename Observer>
 class Observable
 {
+private:
+    using ObserverList = boost::container::slist<Observer *>;
+
 public:
+    Observable();
     virtual ~Observable() { }
     void addObserver(Observer & _observer);
-    bool removeObserver(Observer & _observer);
+    void removeObserver(Observer & _observer);
 
 protected:
     template<ObserverMethodConcept Method, typename ...Args>
     void callObservers(Method _method, Args ... _args);
 
 private:
-    boost::container::slist<Observer *> m_observers;
+    void modifyObserverCollection(std::function<void(ObserverList&)> _callback);
+
+private:
+    std::atomic<std::shared_ptr<ObserverList>> m_observers;
 };
 
 template<typename Observer>
-inline void Observable<Observer>::addObserver(Observer & _observer)
+Observable<Observer>::Observable()
 {
-    m_observers.push_front(&_observer);
+    m_observers.store(std::shared_ptr<ObserverList>(new ObserverList), std::memory_order::relaxed);
 }
 
 template<typename Observer>
-bool Observable<Observer>::removeObserver(Observer & _observer)
+void Observable<Observer>::addObserver(Observer & _observer)
 {
-    auto it = std::find(m_observers.begin(), m_observers.end(), &_observer);
-    if(it != m_observers.end())
-    {
-        m_observers.erase(it);
-        return true;
-    }
-    return false;
+    modifyObserverCollection([&_observer](ObserverList & observers) {
+        observers.push_front(&_observer);
+    });
 }
 
+template<typename Observer>
+void Observable<Observer>::removeObserver(Observer & _observer)
+{
+    modifyObserverCollection([&_observer](ObserverList & observers) {
+        auto it = std::find(observers.begin(), observers.end(), &_observer);
+        if(it != observers.end())
+            observers.erase(it);
+    });
+}
+
+template<typename Observer>
+void Observable<Observer>::modifyObserverCollection(std::function<void(ObserverList&)> _callback)
+{
+    while(true)
+    {
+        auto origin = m_observers.load(std::memory_order::acquire);
+        std::shared_ptr<ObserverList> copy = std::make_shared<ObserverList>(*origin);
+        _callback(*copy);
+        if(m_observers.compare_exchange_strong(origin, copy, std::memory_order::release, std::memory_order::relaxed))
+            return;
+    }
+}
 
 template<typename Observer>
 template<ObserverMethodConcept Method, typename ...Args>
-inline void Observable<Observer>::callObservers(Method _method, Args... _args)
+void Observable<Observer>::callObservers(Method _method, Args... _args)
 {
-    for(auto & observer : m_observers)
+    auto observers = m_observers.load(std::memory_order::acquire);
+    for(auto & observer : *observers)
         (observer->*_method)(_args...);
 }
 
