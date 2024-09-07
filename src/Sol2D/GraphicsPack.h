@@ -35,11 +35,6 @@ struct GraphicsPackFrameOptions
 
 struct GraphicsPackSpriteOptions
 {
-    std::optional<Point> position;
-    std::optional<float> angle_rad;
-    std::optional<std::optional<Point>> flip_center;
-    std::optional<bool> is_flipped_horizontally;
-    std::optional<bool> is_flipped_vertically;
     std::optional<bool> is_visible;
 };
 
@@ -50,38 +45,19 @@ class GraphicsPack final
         S2_DEFAULT_COPY_AND_MOVE(Graphics)
 
         Graphics(const Sprite & _sprite, const GraphicsPackSpriteOptions & _options) :
-            Graphics(_sprite.getTexture(), _sprite.getSourceRect(), _sprite.getDestinationSize(), _options)
-        {
-        }
-
-        Graphics(
-            std::shared_ptr<SDL_Texture> _texture,
-            const Rect & _src_rect,
-            const Size & _dest_size,
-            const GraphicsPackSpriteOptions & _options
-        ) :
-            texture(_texture),
-            src_rect(_src_rect),
-            dest_size(_dest_size),
-            position(_options.position.value_or(Point {.0f, .0f})),
-            angle_rad(_options.angle_rad.value_or(.0f)),
-            flip_center(_options.flip_center.value_or(Point { .0f, .0f })),
-            is_flipped_horizontally(_options.is_flipped_horizontally.value_or(false)),
-            is_flipped_vertically(_options.is_flipped_vertically.value_or(false)),
+            sprite(_sprite),
             is_visible(_options.is_visible.value_or(true))
         {
         }
 
-        std::shared_ptr<SDL_Texture> texture;
-        Rect src_rect;
-        Size dest_size;
-        Point position;
-        float angle_rad;
-        std::optional<Point> flip_center;
-        bool is_flipped_horizontally;
-        bool is_flipped_vertically;
+        Graphics(Sprite && _sprite, const GraphicsPackSpriteOptions & _options) :
+            sprite(std::move(_sprite)),
+            is_visible(_options.is_visible.value_or(true))
+        {
+        }
+
+        Sprite sprite;
         bool is_visible;
-        std::shared_ptr<Sprite> sprite;
     };
 
     struct Frame
@@ -106,6 +82,7 @@ public:
     ~GraphicsPack();
 
     size_t addFrame(const GraphicsPackFrameOptions & _options);
+    size_t addFrames(size_t _count, const GraphicsPackFrameOptions & _options);
     size_t insertFrame(size_t _index, const GraphicsPackFrameOptions & _options);
     bool removeFrame(size_t _index);
     bool setFrameVisibility(size_t _index, bool _is_visible);
@@ -127,10 +104,13 @@ public:
         std::vector<size_t> _sprite_indices,
         const GraphicsPackSpriteOptions & _options);
     bool removeSprite(size_t _frame, size_t _sprite);
-    void render(const Point & _point, std::chrono::milliseconds _time_passed);
+    void render(
+        const Point & _position,
+        std::chrono::milliseconds _time_passed,
+        const GraphicsRenderOptions & _options = GraphicsRenderOptions());
 
 private:
-    void performRender(const Point & _point);
+    void performRender(const Point & _position, const GraphicsRenderOptions & _options);
     Frame * switchToNextVisibleFrame();
 
 private:

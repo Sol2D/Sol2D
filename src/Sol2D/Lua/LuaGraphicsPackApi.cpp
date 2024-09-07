@@ -78,30 +78,8 @@ void readGraphicsPackSpriteOptions(lua_State * _lua, int _idx, GraphicsPackSprit
 
     LuaTable table(_lua, _idx);
 
-    if(table.tryGetValue("position"))
-    {
-        Point point;
-        if(tryGetPoint(_lua, -1, point))
-            _options.position = point;
-        lua_pop(_lua, 1);
-
-        if(tryGetPoint(_lua, -1, point))
-            _options.flip_center = point;
-        lua_pop(_lua, 1);
-    }
-
-    {
-        lua_Number value;
-        if(table.tryGetNumber("angle", &value))
-            _options.angle_rad = static_cast<float>(value);
-    }
-
     {
         bool value;
-        if(table.tryGetBoolean("isFlippedHorizontally", &value))
-            _options.is_flipped_horizontally = value;
-        if(table.tryGetBoolean("isFlippedVertically", &value))
-            _options.is_flipped_vertically = value;
         if(table.tryGetBoolean("isVisible", &value))
             _options.is_visible = value;
     }
@@ -116,6 +94,24 @@ int luaApi_AddFrame(lua_State * _lua)
     if(lua_gettop(_lua) > 1)
         readGraphicsPackFrameOptions(_lua, 2, options);
     size_t idx = self->getGraphicsPack(_lua)->addFrame(options);
+    lua_pushinteger(_lua, idx);
+    return 1;
+}
+
+// 1 self
+// 2 count
+// 3 options (optional)
+int luaApi_AddFrames(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "frame count expected");
+    lua_Integer count = lua_tointeger(_lua, 2);
+    if(count <= 0)
+        luaL_argerror(_lua, 2, "frame count must be greater than zero");
+    GraphicsPackFrameOptions options;
+    if(lua_gettop(_lua) > 2)
+        readGraphicsPackFrameOptions(_lua, 3, options);
+    size_t idx = self->getGraphicsPack(_lua)->addFrames(static_cast<size_t>(count), options);
     lua_pushinteger(_lua, idx);
     return 1;
 }
@@ -230,8 +226,8 @@ int luaApi_AddSprite(lua_State * _lua)
     }
     if(std::shared_ptr<SpriteSheet> sprite_sheet = tryGetSpriteSheet(_lua, 3))
     {
-        luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, gc_message_sprite_index_expected);
-        size_t sprite_index = static_cast<size_t>(lua_tointeger(_lua, 3));
+        luaL_argcheck(_lua, lua_isinteger(_lua, 4), 4, gc_message_sprite_index_expected);
+        size_t sprite_index = static_cast<size_t>(lua_tointeger(_lua, 4));
         GraphicsPackSpriteOptions options;
         if(lua_gettop(_lua) > 4)
             readGraphicsPackSpriteOptions(_lua, 5, options);
@@ -308,6 +304,7 @@ void Sol2D::Lua::pushGraphicsPackApi(lua_State * _lua, std::shared_ptr<GraphicsP
         {
             { "__gc", UserData::luaGC },
             { "addFrame", luaApi_AddFrame },
+            { "addFrames", luaApi_AddFrames },
             { "insertFrame", luaApi_InsertFrame },
             { "removeFrame", luaApi_RemoveFrame },
             { "setFrameVisibility", luaApi_SetFrameVisibility },
@@ -326,6 +323,6 @@ void Sol2D::Lua::pushGraphicsPackApi(lua_State * _lua, std::shared_ptr<GraphicsP
 
 std::shared_ptr<GraphicsPack> Sol2D::Lua::tryGetGraphicsPack(lua_State * _lua, int _idx)
 {
-    Self * self = UserData::getUserData(_lua, _idx);
+    Self * self = UserData::tryGetUserData(_lua, _idx);
     return self ? self->graphics_pack.lock() : nullptr;
 }

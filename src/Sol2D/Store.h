@@ -54,11 +54,11 @@ struct Utils::ObjectFactory<SpriteSheet>
 };
 
 template<>
-struct Utils::ObjectFactory<SpriteAnimation>
+struct Utils::ObjectFactory<GraphicsPack>
 {
-    std::shared_ptr<SpriteAnimation> produce(SDL_Renderer & _renderer) const
+    std::shared_ptr<GraphicsPack> produce(SDL_Renderer & _renderer) const
     {
-        return std::make_shared<SpriteAnimation>(_renderer);
+        return std::make_shared<GraphicsPack>(_renderer);
     }
 };
 
@@ -120,7 +120,7 @@ using Store = Utils::ObjectStore<
     View,
     Sprite,
     SpriteSheet,
-    SpriteAnimation,
+    GraphicsPack,
     BodyPrototype,
     Scene,
     Forms::Form,

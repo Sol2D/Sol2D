@@ -102,29 +102,6 @@ view:bindFragment(score_fragment_id, form)
 
 sol.window:setView(view)
 
-local function createSpacesheep()
-    local body_proto = store:createObject('sol.BodyPrototype', 'spaceship', sol.BodyType.DYNAMIC)
-    local spaceship_rect = { x = 48, y = 48, w = 72, h = 96 }
-    local rect_proto = body_proto:createPolygonShape('main', spaceship_rect)
-    body_proto:createPolygonShape('polygon',
-        { x = 25, y = 25 },
-        { x = 15, y = 15 },
-        { x = 35, y = 15 }
-    )
-    body_proto:createCircleShape('circle', { x = 15, y = 15 }, 10)
-    local spacehip_sprite = store:createObject('sol.Sprite', 'spaceship')
-    if spacehip_sprite:loadFromFile('assets/spaceship/spaceship.png') then
-        print('Sprite loaded')
-        rect_proto:addSprite('spaceship', spacehip_sprite, {
-            position = { x = spaceship_rect.x, y = spaceship_rect.y },
-            size = { w = spaceship_rect.w, h = spaceship_rect.h }
-        })
-    else
-        print('Sprite loading failed')
-    end
-    return scene:createBody({ x = 100, y = 42 }, body_proto)
-end
-
 local function getStartPosition()
     local object = scene:getTileMapObjectByName('StartPosition')
     if object then
@@ -157,21 +134,44 @@ local function createPlayer()
         return
     end
     local frame_duration = 200
-    local animation_idle = store:createObject('sol.SpriteAnimation', 'player_idle') -- TODO: Load a sprite form a sheet, animation is overhead
-    animation_idle:addFrameFromSpriteSheet(sprite_sheet, 0)
-    local animation_right = store:createObject('sol.SpriteAnimation', 'player_right')
-    animation_right:addFrames(sprite_sheet, { 3, 7, 11, 15 }, { frame_duration = frame_duration })
-    local animation_left = store:createObject('sol.SpriteAnimation', 'player_left')
-    animation_left:addFrames(sprite_sheet, { 1, 5, 9, 13 }, { frame_duration = frame_duration })
-    local animation_up = store:createObject('sol.SpriteAnimation', 'player_up')
-    animation_up:addFrames(sprite_sheet, { 2, 6, 10, 14 }, { frame_duration = frame_duration })
-    local animation_down = store:createObject('sol.SpriteAnimation', 'player_down')
-    animation_down:addFrames(sprite_sheet, { 0, 4, 8, 12 }, { frame_duration = frame_duration })
-    shape_proto:addSpriteAnimation('idle', animation_idle, { position = position })
-    shape_proto:addSpriteAnimation('right', animation_right, { position = position })
-    shape_proto:addSpriteAnimation('left', animation_left, { position = position })
-    shape_proto:addSpriteAnimation('up', animation_up, { position = position })
-    shape_proto:addSpriteAnimation('down', animation_down, { position = position })
+
+    local graphics_idle = store:createObject('sol.GraphicsPack', 'player_idle')
+    graphics_idle:addFrame()
+    graphics_idle:addSprite(0, sprite_sheet, 0)
+
+    local graphics_right = store:createObject('sol.GraphicsPack', 'player_right')
+    graphics_right:addFrames(4, { duration = frame_duration })
+    graphics_right:addSprite(0, sprite_sheet, 3)
+    graphics_right:addSprite(1, sprite_sheet, 7)
+    graphics_right:addSprite(2, sprite_sheet, 11)
+    graphics_right:addSprite(3, sprite_sheet, 15)
+
+    local graphics_left = store:createObject('sol.GraphicsPack', 'player_left')
+    graphics_left:addFrames(4, { duration = frame_duration })
+    graphics_left:addSprite(0, sprite_sheet, 1)
+    graphics_left:addSprite(1, sprite_sheet, 5)
+    graphics_left:addSprite(2, sprite_sheet, 9)
+    graphics_left:addSprite(3, sprite_sheet, 13)
+
+    local graphics_up = store:createObject('sol.GraphicsPack', 'player_up')
+    graphics_up:addFrames(4, { duration = frame_duration })
+    graphics_up:addSprite(0, sprite_sheet, 2)
+    graphics_up:addSprite(1, sprite_sheet, 6)
+    graphics_up:addSprite(2, sprite_sheet, 10)
+    graphics_up:addSprite(3, sprite_sheet, 14)
+
+    local graphics_down = store:createObject('sol.GraphicsPack', 'player_down')
+    graphics_down:addFrames(4, { duration = frame_duration })
+    graphics_down:addSprite(0, sprite_sheet, 0)
+    graphics_down:addSprite(1, sprite_sheet, 4)
+    graphics_down:addSprite(2, sprite_sheet, 8)
+    graphics_down:addSprite(3, sprite_sheet, 12)
+
+    shape_proto:addGraphics('idle', graphics_idle, { position = position })
+    shape_proto:addGraphics('right', graphics_right, { position = position })
+    shape_proto:addGraphics('left', graphics_left, { position = position })
+    shape_proto:addGraphics('up', graphics_up, { position = position })
+    shape_proto:addGraphics('down', graphics_down, { position = position })
     return scene:createBody(getStartPosition(), body_proto)
 end
 
@@ -198,24 +198,60 @@ local function createSkeleton()
         return
     end
     local frame_duration = 80;
-    local animation_idle = store:createObject('sol.SpriteAnimation', 'skeleton_idle')
-    animation_idle:addFrameFromSpriteSheet(sprite_sheet, 18)
-    local animation_up = store:createObject('sol.SpriteAnimation', 'skeleton_up')
-    animation_up:addFrames(sprite_sheet, { 1, 2, 3, 4, 5, 6, 7, 8 }, { frame_duration = frame_duration })
-    local animation_left = store:createObject('sol.SpriteAnimation', 'skeleton_left')
-    animation_left:addFrames(sprite_sheet, { 10, 11, 12, 13, 14, 15, 16, 17 }, { frame_duration = frame_duration })
-    local animation_down = store:createObject('sol.SpriteAnimation','skeleton_down')
-    animation_down:addFrames(sprite_sheet, { 19, 20, 21, 22, 23, 24, 25, 26 }, { frame_duration = frame_duration })
-    local animation_right = store:createObject('sol.SpriteAnimation','skeleton_right')
-    animation_right:addFrames(sprite_sheet, { 28, 29, 30, 31, 32, 33, 34, 35 }, { frame_duration = frame_duration })
-    shape_proto:addSpriteAnimation('idle', animation_idle, { position = position })
-    shape_proto:addSpriteAnimation('right', animation_right, { position = position })
-    shape_proto:addSpriteAnimation('left', animation_left, { position = position })
-    shape_proto:addSpriteAnimation('up', animation_up, { position = position })
-    shape_proto:addSpriteAnimation('down', animation_down, { position = position })
-    -- scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 2 })
-    -- scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 3 })
-    -- scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 4 })
+
+    local graphics_idle = store:createObject('sol.GraphicsPack', 'skeleton_idle')
+    graphics_idle:addFrame()
+    graphics_idle:addSprite(0, sprite_sheet, 18)
+
+    local graphics_up = store:createObject('sol.GraphicsPack', 'skeleton_up')
+    graphics_up:addFrames(8, { duration = frame_duration })
+    graphics_up:addSprite(0, sprite_sheet, 1)
+    graphics_up:addSprite(1, sprite_sheet, 2)
+    graphics_up:addSprite(2, sprite_sheet, 3)
+    graphics_up:addSprite(3, sprite_sheet, 4)
+    graphics_up:addSprite(4, sprite_sheet, 5)
+    graphics_up:addSprite(5, sprite_sheet, 6)
+    graphics_up:addSprite(6, sprite_sheet, 7)
+    graphics_up:addSprite(7, sprite_sheet, 8)
+
+    local graphics_left = store:createObject('sol.GraphicsPack', 'skeleton_left')
+    graphics_left:addFrames(8, { duration = frame_duration })
+    graphics_left:addSprite(0, sprite_sheet, 10)
+    graphics_left:addSprite(1, sprite_sheet, 11)
+    graphics_left:addSprite(2, sprite_sheet, 12)
+    graphics_left:addSprite(3, sprite_sheet, 13)
+    graphics_left:addSprite(4, sprite_sheet, 14)
+    graphics_left:addSprite(5, sprite_sheet, 15)
+    graphics_left:addSprite(6, sprite_sheet, 16)
+    graphics_left:addSprite(7, sprite_sheet, 17)
+
+    local graphics_down = store:createObject('sol.GraphicsPack', 'skeleton_down')
+    graphics_down:addFrames(8, { duration = frame_duration })
+    graphics_down:addSprite(0, sprite_sheet, 19)
+    graphics_down:addSprite(1, sprite_sheet, 20)
+    graphics_down:addSprite(2, sprite_sheet, 21)
+    graphics_down:addSprite(3, sprite_sheet, 22)
+    graphics_down:addSprite(4, sprite_sheet, 23)
+    graphics_down:addSprite(5, sprite_sheet, 24)
+    graphics_down:addSprite(6, sprite_sheet, 25)
+    graphics_down:addSprite(7, sprite_sheet, 26)
+
+    local graphics_right = store:createObject('sol.GraphicsPack', 'skeleton_right')
+    graphics_right:addFrames(8, { duration = frame_duration })
+    graphics_right:addSprite(0, sprite_sheet, 28)
+    graphics_right:addSprite(1, sprite_sheet, 29)
+    graphics_right:addSprite(2, sprite_sheet, 30)
+    graphics_right:addSprite(3, sprite_sheet, 31)
+    graphics_right:addSprite(4, sprite_sheet, 32)
+    graphics_right:addSprite(5, sprite_sheet, 33)
+    graphics_right:addSprite(6, sprite_sheet, 34)
+    graphics_right:addSprite(7, sprite_sheet, 35)
+
+    shape_proto:addGraphics('idle', graphics_idle, { position = position })
+    shape_proto:addGraphics('right', graphics_right, { position = position })
+    shape_proto:addGraphics('left', graphics_left, { position = position })
+    shape_proto:addGraphics('up', graphics_up, { position = position })
+    shape_proto:addGraphics('down', graphics_down, { position = position })
     return scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 1 })
 end
 
@@ -228,7 +264,6 @@ end
     end
 end)()
 
--- local body_id = createSpacesheep()
 local player_body_id = createPlayer()
 local skeleton_body_id = createSkeleton()
 if player_body_id == nil or skeleton_body_id == nil then

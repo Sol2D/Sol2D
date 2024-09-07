@@ -43,6 +43,14 @@ size_t GraphicsPack::addFrame(const GraphicsPackFrameOptions & _options)
     return m_frames.size() - 1;
 }
 
+size_t GraphicsPack::addFrames(size_t _count, const GraphicsPackFrameOptions & _options)
+{
+    m_frames.reserve(m_frames.size() + _count);
+    for(size_t i = 0; i < _count; ++i)
+        addFrame(_options);
+    return m_frames.size() - 1;
+}
+
 size_t GraphicsPack::insertFrame(size_t _index, const GraphicsPackFrameOptions & _options)
 {
     Frame * frame = new Frame(_options);
@@ -144,12 +152,7 @@ std::pair<bool, size_t> GraphicsPack::addSprite(
     if(_sprite_index >= sheet_rects.size())
         return std::make_pair(false, 0);
     std::vector<Graphics> & graphics = m_frames[_frame]->graphics;
-    graphics.push_back(Graphics(
-        _sprite_sheet.getTexture(),
-        sheet_rects[_sprite_index],
-        sheet_rects[_sprite_index].getSize(),
-        _options
-    ));
+    graphics.push_back(Graphics(_sprite_sheet.toSprite(_sprite_index), _options));
     return std::make_pair(true, graphics.size() - 1);
 }
 
@@ -171,12 +174,7 @@ std::pair<bool, size_t> GraphicsPack::addSprites(
     graphics.reserve(graphics.size() + _sprite_indices.size());
     for(size_t i = 0; i < _sprite_indices.size(); ++i)
     {
-        graphics.push_back(Graphics(
-            _sprite_sheet.getTexture(),
-            sheet_rects[_sprite_indices[i]],
-            sheet_rects[_sprite_indices[i]].getSize(),
-            _options
-        ));
+        graphics.push_back(Graphics(_sprite_sheet.toSprite(i), _options));
     }
     return std::make_pair(true, graphics.size() - 1);
 }
@@ -192,11 +190,15 @@ bool GraphicsPack::removeSprite(size_t _frame, size_t _sprite)
     return true;
 }
 
-void GraphicsPack::render(const Point & _point, std::chrono::milliseconds _time_passed)
+void GraphicsPack::render(
+    const Point & _position,
+    std::chrono::milliseconds _time_passed,
+    const GraphicsRenderOptions & _options /*= SpriteRenderOptions()*/)
 {
     if(m_total_duration == std::chrono::milliseconds::zero())
     {
-        performRender(_point);
+        performRender(_position, _options);
+        return;
     }
     m_current_frame_duration += _time_passed;
     Frame * frame = m_frames[m_current_frame_index];
@@ -225,7 +227,7 @@ void GraphicsPack::render(const Point & _point, std::chrono::milliseconds _time_
             break;
         }
     }
-    performRender(_point);
+    performRender(_position, _options);
 }
 
 GraphicsPack::Frame * GraphicsPack::switchToNextVisibleFrame()
@@ -252,36 +254,16 @@ GraphicsPack::Frame * GraphicsPack::switchToNextVisibleFrame()
     return m_frames[m_current_frame_index]->is_visible ? m_frames[m_current_frame_index] : nullptr;
 }
 
-void GraphicsPack::performRender(const Point & _point)
+void GraphicsPack::performRender(const Point & _position, const GraphicsRenderOptions & _options)
 {
     if(m_frames.empty())
         return;
     Frame * frame = m_frames[m_current_frame_index];
     if(!frame->is_visible)
         return;
-    for(const Graphics & graphics : frame->graphics)
+    for(Graphics & graphics : frame->graphics)
     {
-        SDL_FRect dest_rect
-        {
-            .x = _point.x - graphics.position.x,
-            .y = _point.y - graphics.position.y,
-            .w = graphics.dest_size.w,
-            .h = graphics.dest_size.h
-        };
-        union { int as_int; SDL_FlipMode as_flip_mode; } flip;
-        flip.as_int = SDL_FLIP_NONE;
-        if(graphics.is_flipped_horizontally)
-            flip.as_int |= SDL_FLIP_HORIZONTAL;
-        if(graphics.is_flipped_vertically)
-            flip.as_int |= SDL_FLIP_VERTICAL;
-        SDL_RenderTextureRotated(
-            mp_renderer,
-            graphics.texture.get(),
-            graphics.src_rect.toSdlPtr(),
-            &dest_rect,
-            radiansToDegrees(graphics.angle_rad),
-            graphics.flip_center.has_value() ? graphics.flip_center->toSdlPtr() : nullptr,
-            flip.as_flip_mode
-        );
+        if(graphics.is_visible)
+            graphics.sprite.render(_position, _options);
     }
 }

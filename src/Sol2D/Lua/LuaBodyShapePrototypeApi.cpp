@@ -17,8 +17,7 @@
 #include <Sol2D/Lua/LuaBodyShapePrototypeApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaSizeApi.h>
-#include <Sol2D/Lua/LuaSpriteApi.h>
-#include <Sol2D/Lua/LuaSpriteAnimationApi.h>
+#include <Sol2D/Lua/LuaGraphicsPackApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
@@ -96,7 +95,7 @@ std::shared_ptr<BodyShapePrototype> getBodyShapePrototype(lua_State * _lua, int 
     return nullptr;
 }
 
-bool tryReadShapeGraphicOptions(lua_State * _lua, int _idx, BodyShapeGraphicOptions & _options)
+bool tryReadShapeGraphicOptions(lua_State * _lua, int _idx, BodyShapeGraphicsOptions & _options)
 {
     if(!lua_istable(_lua, _idx))
         return false;
@@ -141,46 +140,29 @@ int luaApi_IsSensor(lua_State * _lua)
 
 // 1 self
 // 2 key
-// 3 sprite
+// 3 graphic pack
 // 4 options (optional)
-int luaApi_AddSprite(lua_State * _lua)
+int luaApi_AddGraphics(lua_State * _lua)
 {
     auto prototype = getBodyShapePrototype(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, key != nullptr, 2, "a sprite key expected");
-    std::shared_ptr<Sprite> sprite = tryGetSprite(_lua, 3);
-    luaL_argcheck(_lua, sprite, 3, "a sprite expected");
-    BodyShapeGraphicOptions options;
+    luaL_argcheck(_lua, key != nullptr, 2, "a graphics pack key expected");
+    std::shared_ptr<GraphicsPack> graphics_pack = tryGetGraphicsPack(_lua, 3);
+    luaL_argcheck(_lua, graphics_pack, 3, "a graphics pack expected");
+    BodyShapeGraphicsOptions options;
     tryReadShapeGraphicOptions(_lua, 4, options);
-    prototype->addGraphic(key, *sprite, options);
+    prototype->addGraphics(key, *graphics_pack, options);
     return 0;
 }
 
 // 1 self
 // 2 key
-// 3 sprite animation
-// 4 options (optional)
-int luaApi_AddSpriteAnimation(lua_State * _lua)
-{
-    auto prototype = getBodyShapePrototype(_lua, 1);
-    const char * key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, key != nullptr, 2, "a sprite animation key expected");
-    std::shared_ptr<SpriteAnimation> sprite_animation = tryGetSpriteAnimation(_lua, 3);
-    luaL_argcheck(_lua, sprite_animation, 3, "a sprite animation expected");
-    BodyShapeGraphicOptions options;
-    tryReadShapeGraphicOptions(_lua, 4, options);
-    prototype->addGraphic(key, *sprite_animation, options);
-    return 0;
-}
-
-// 1 self
-// 2 key
-int luaApi_RemoveGraphic(lua_State * _lua)
+int luaApi_RemoveGraphics(lua_State * _lua)
 {
     auto prototype = getBodyShapePrototype(_lua, 1);
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, "a graphic key expected");
-    prototype->removeGraphic(key);
+    prototype->removeGraphics(key);
     return 0;
 }
 
@@ -247,12 +229,11 @@ void Sol2D::Lua::pushBodyShapePrototypeApi(lua_State * _lua, std::shared_ptr<Bod
     {
         funcs.insert(funcs.end(),
         {
-            { "addSprite", luaApi_AddSprite },
-            { "addSpriteAnimation", luaApi_AddSpriteAnimation },
+            { "addGraphics", luaApi_AddGraphics },
             { "getType", luaApi_GetType },
             { "setIsSensor", luaApi_SetIsSensor },
             { "isSensor", luaApi_IsSensor },
-            { "removeGraphic", luaApi_RemoveGraphic },
+            { "removeGraphics", luaApi_RemoveGraphics },
             { nullptr, nullptr }
         });
         luaL_setfuncs(_lua, funcs.data(), 0);

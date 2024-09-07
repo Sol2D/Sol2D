@@ -16,8 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/SpriteAnimation.h>
-#include <Sol2D/BodyShapeGraphic.h>
+#include <Sol2D/BodyShapeGraphics.h>
 #include <Sol2D/BodyShapeType.h>
 #include <unordered_map>
 #include <functional>
@@ -56,18 +55,20 @@ public:
         return m_is_sensor;
     }
 
-    void addGraphic(const std::string & _key, const Sprite & _sprite, const BodyShapeGraphicOptions & _options);
-    void addGraphic(const std::string & _key, const SpriteAnimation & _animation, const BodyShapeGraphicOptions & _options);
-    bool removeGraphic(const std::string & _key);
-    void forEachGraphic(std::function<void(const std::string & _key, const BodyShapeGraphic & _graphic)> _callback) const;
+    void addGraphics(
+        const std::string & _key,
+        const GraphicsPack & _graphics,
+        const BodyShapeGraphicsOptions & _options);
 
-private:
-    void addGraphic(const std::string & _key, BodyShapeGraphic * _graphic);
+    bool removeGraphics(const std::string & _key);
+
+    void forEachGraphic(
+        std::function<void(const std::string & _key, const BodyShapeGraphics & _graphic)> _callback) const;
 
 private:
     BodyShapeType m_type;
     bool m_is_sensor;
-    std::unordered_map<std::string, BodyShapeGraphic *> m_graphic_map;
+    std::unordered_map<std::string, BodyShapeGraphics *> m_graphic_map;
 };
 
 class BodyPolygonShapePrototype : public BodyShapePrototype
@@ -100,7 +101,6 @@ private:
 
 class BodyCircleShapePrototype : public BodyShapePrototype
 {
-
 public:
     BodyCircleShapePrototype(Point _center, float _radius) :
         BodyShapePrototype(BodyShapeType::Circle),

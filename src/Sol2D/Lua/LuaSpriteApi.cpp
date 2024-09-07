@@ -145,6 +145,6 @@ void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, s
 
 std::shared_ptr<Sprite> Sol2D::Lua::tryGetSprite(lua_State * _lua, int _idx)
 {
-    Self * self = UserData::getUserData(_lua, _idx);
+    Self * self = UserData::tryGetUserData(_lua, _idx);
     return self ? self->sprite.lock() : nullptr;
 }

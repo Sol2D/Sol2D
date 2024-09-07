@@ -25,37 +25,26 @@ BodyShapePrototype::~BodyShapePrototype()
         delete pair.second;
 }
 
-void BodyShapePrototype::addGraphic(
-    const std::string & _key,
-    const Sprite & _sprite,
-    const BodyShapeGraphicOptions & _options)
-{
-    addGraphic(_key, new BodyShapeGraphic { .graphic = _sprite, .options = _options });
-}
 
-void BodyShapePrototype::addGraphic(
+void BodyShapePrototype::addGraphics(
     const std::string & _key,
-    const SpriteAnimation & _animation,
-    const BodyShapeGraphicOptions & _options)
-{
-    addGraphic(_key, new BodyShapeGraphic { .graphic = _animation, .options = _options });
-}
-
-void BodyShapePrototype::addGraphic(const std::string & _key, BodyShapeGraphic * _graphic)
+    const GraphicsPack & _graphics,
+    const BodyShapeGraphicsOptions & _options)
 {
     auto existent_graphic_it = m_graphic_map.find(_key);
+    auto * body_shape_graphics = new BodyShapeGraphics { .graphics = _graphics, .options = _options };
     if(existent_graphic_it == m_graphic_map.end())
     {
-        m_graphic_map.insert(std::make_pair(_key, _graphic));
+        m_graphic_map.insert(std::make_pair(_key, body_shape_graphics));
     }
     else
     {
         delete existent_graphic_it->second;
-        existent_graphic_it->second = _graphic;
+        existent_graphic_it->second = body_shape_graphics;
     }
 }
 
-bool BodyShapePrototype::removeGraphic(const std::string & _key)
+bool BodyShapePrototype::removeGraphics(const std::string & _key)
 {
     auto it = m_graphic_map.find(_key);
     if(it != m_graphic_map.end())
@@ -67,7 +56,8 @@ bool BodyShapePrototype::removeGraphic(const std::string & _key)
     return false;
 }
 
-void BodyShapePrototype::forEachGraphic(std::function<void (const std::string &, const BodyShapeGraphic &)> _callback) const
+void BodyShapePrototype::forEachGraphic(
+    std::function<void (const std::string &, const BodyShapeGraphics &)> _callback) const
 {
     for(auto & pair : m_graphic_map)
         _callback(pair.first, *pair.second);

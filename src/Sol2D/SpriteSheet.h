@@ -46,7 +46,7 @@ public:
     bool loadFromFile(const std::filesystem::path & _path, const SpriteSheetOptions & _options);
     bool isValid() const;
     size_t getSpriteCount() const;
-    Sprite toSprite(size_t _idx);
+    Sprite toSprite(size_t _idx) const;
     const std::vector<Rect> & getRects() const; // TODO: delete
     std::shared_ptr<SDL_Texture> getTexture() const; // TODO: delete
 
@@ -66,7 +66,7 @@ inline size_t SpriteSheet::getSpriteCount() const
     return m_rects.size();
 }
 
-inline Sprite SpriteSheet::toSprite(size_t _idx)
+inline Sprite SpriteSheet::toSprite(size_t _idx) const
 {
     return _idx >= m_rects.size() ? Sprite(*mp_renderer) : Sprite(*mp_renderer, m_texture_ptr, m_rects[_idx]);
 }

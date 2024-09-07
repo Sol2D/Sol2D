@@ -28,24 +28,26 @@ local function createIdleAnimation(store, shape, scale_factor)
     local sprite_animation_options = {
         duration = 80
     }
-    local animation = store:createObject('sol.SpriteAnimation', 'player_idle')
-    for i = 1, 10, 1 do
+    local animation = store:createObject('sol.GraphicsPack', 'player_idle')
+    local frames_count = 10
+    animation:addFrames(frames_count, sprite_animation_options)
+    for i = 1, frames_count, 1 do
         local sprite = store:createObject('sol.Sprite', 'player-idle-' .. i)
         if not sprite:loadFromFile('sprites/knight/idle (' .. i .. ').png', sprite_loading_options) then
             print('Cannot load player-idle-' .. i)
         end
         sprite:scale(scale_factor) -- TODO: scale to options in loadFromFile
                                    -- TODO: add the scaleSource function to scale the source once
-        animation:addFrameFromSprite(sprite, sprite_animation_options)
+        animation:addSprite(i - 1, sprite)
     end
     local animation_position = {
         x = -(sprite_loading_options.rect.w * scale_factor) / 2,
         y = -sprite_loading_options.rect.h * scale_factor
     }
-    shape:addSpriteAnimation(proto_metatable.graphics.idle_right, animation, {
+    shape:addGraphics(proto_metatable.graphics.idle_right, animation, {
         position = animation_position
     })
-    shape:addSpriteAnimation(proto_metatable.graphics.idle_left, animation, {
+    shape:addGraphics(proto_metatable.graphics.idle_left, animation, {
         position = animation_position,
         isFlippedHorizontally = true
     })
@@ -65,24 +67,26 @@ local function createWalkAnimations(store, shape, scale_factor)
             y = -34 * scale_factor
         }
     }
-    local animation = store:createObject('sol.SpriteAnimation', 'player_walk')
-    for i = 1, 10, 1 do
+    local animation = store:createObject('sol.GraphicsPack', 'player_walk')
+    local frames_count = 10
+    animation:addFrames(frames_count, sprite_animation_options)
+    for i = 1, frames_count, 1 do
         local sprite = store:createObject('sol.Sprite', 'player-walk-' .. i)
         if not sprite:loadFromFile('sprites/knight/walk (' .. i .. ').png', sprite_loading_options) then
             print('Cannot load player-walk-' .. i) -- TODO: logger
         end
         sprite:scale(scale_factor) -- TODO: scale to options in loadFromFile
                                    -- TODO: add the scaleSource function to scale the source once
-        animation:addFrameFromSprite(sprite, sprite_animation_options)
+        animation:addSprite(i - 1, sprite)
     end
     local animation_position = {
         x = -(sprite_loading_options.rect.w * scale_factor) / 2,
         y = -sprite_loading_options.rect.h * scale_factor
     }
-    shape:addSpriteAnimation(proto_metatable.graphics.walk_right, animation, {
+    shape:addGraphics(proto_metatable.graphics.walk_right, animation, {
         position = animation_position
     })
-    shape:addSpriteAnimation(proto_metatable.graphics.walk_left, animation, {
+    shape:addGraphics(proto_metatable.graphics.walk_left, animation, {
         position = animation_position,
         isFlippedHorizontally = true
     })

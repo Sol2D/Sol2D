@@ -68,7 +68,7 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     return true;
 }
 
-void Sprite::render(const Point & _point, SpriteRenderOptions _options /*= SpriteRenderOptions()*/)
+void Sprite::render(const Point & _point, const GraphicsRenderOptions & _options /*= SpriteRenderOptions()*/)
 {
     if(!isValid())
         return;

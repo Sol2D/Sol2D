@@ -37,16 +37,16 @@ public:
     ~BodyShape();
     const std::string & getKey() const;
     const std::optional<uint32_t> getTileMapObjectId() const;
-    void addGraphic(const std::string & _key, const BodyShapeGraphic & _graphic);
+    void addGraphic(const std::string & _key, const BodyShapeGraphics & _graphic);
     bool setCurrentGraphic(const std::string & _key);
-    BodyShapeGraphic * getCurrentGraphics();
+    BodyShapeGraphics * getCurrentGraphics();
     bool flipGraphic(const std::string & _key, bool _flip_horizontally, bool _flip_vertically);
 
 private:
     const std::string m_key;
     const std::optional<uint32_t> m_tile_map_object_id;
-    std::unordered_map<std::string, BodyShapeGraphic *> m_graphics;
-    BodyShapeGraphic * mp_current_graphic;
+    std::unordered_map<std::string, BodyShapeGraphics *> m_graphics;
+    BodyShapeGraphics * mp_current_graphic;
 };
 
 inline BodyShape::BodyShape(const std::string & _key, std::optional<uint32_t> _tile_map_object_id) :
@@ -72,12 +72,12 @@ inline const std::optional<uint32_t> BodyShape::getTileMapObjectId() const
     return m_tile_map_object_id;
 }
 
-inline void BodyShape::addGraphic(const std::string & _key, const BodyShapeGraphic & _graphic)
+inline void BodyShape::addGraphic(const std::string & _key, const BodyShapeGraphics & _graphic)
 {
     auto it = m_graphics.find(_key);
     if(it != m_graphics.end())
         delete it->second;
-    m_graphics[_key] = new BodyShapeGraphic(_graphic);
+    m_graphics[_key] = new BodyShapeGraphics(_graphic);
 }
 
 inline bool BodyShape::setCurrentGraphic(const std::string & _key)
@@ -89,7 +89,7 @@ inline bool BodyShape::setCurrentGraphic(const std::string & _key)
     return true;
 }
 
-inline BodyShapeGraphic * BodyShape::getCurrentGraphics()
+inline BodyShapeGraphics * BodyShape::getCurrentGraphics()
 {
     return mp_current_graphic;
 }
@@ -168,38 +168,6 @@ inline BodyShape * Body::findShape(const std::string & _key)
     auto it = m_shapes.find(_key);
     return it == m_shapes.end() ? nullptr : it->second;
 }
-
-class GraphicRenderingVisitor
-{
-    S2_DISABLE_COPY_AND_MOVE(GraphicRenderingVisitor)
-
-public:
-    GraphicRenderingVisitor(
-        const Point & _point,
-        std::chrono::milliseconds _time_passed,
-        const SpriteRenderOptions & _options
-    ) :
-        mr_point(_point),
-        m_time_passed(_time_passed),
-        mr_options(_options)
-    {
-    }
-
-    void operator () (Sprite & _sprite)
-    {
-        _sprite.render(mr_point, mr_options);
-    }
-
-    void operator () (SpriteAnimation & _animation)
-    {
-        _animation.render(mr_point, m_time_passed, mr_options);
-    }
-
-private:
-    const Point & mr_point;
-    std::chrono::milliseconds m_time_passed;
-    const SpriteRenderOptions & mr_options;
-};
 
 inline Body * getUserData(b2Body * _body)
 {
@@ -389,7 +357,7 @@ uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _proto
         default: return;
         }
         __shape_proto.forEachGraphic(
-            [body_shape](const std::string & __key, const BodyShapeGraphic & __graphic) {
+            [body_shape](const std::string & __key, const BodyShapeGraphics & __graphic) {
                 body_shape->addGraphic(__key, __graphic);
             });
     });
@@ -647,7 +615,7 @@ void Scene::syncWorldWithFollowedBody()
 
 void Scene::drawBody(b2Body & _body, std::chrono::milliseconds _time_passed)
 {
-    SpriteRenderOptions options; // TODO: to FixtureUserData? How to rotate multiple shapes?
+    GraphicsRenderOptions options; // TODO: to FixtureUserData? How to rotate multiple shapes?
     Point body_position;
     {
         b2Vec2 pos = _body.GetPosition();
@@ -656,12 +624,11 @@ void Scene::drawBody(b2Body & _body, std::chrono::milliseconds _time_passed)
     for(b2Fixture * fixture = _body.GetFixtureList(); fixture; fixture = fixture->GetNext())
     {
         BodyShape * shape = getUserData(fixture);
-        BodyShapeGraphic * graphic = shape->getCurrentGraphics();
-        if(graphic)
+        BodyShapeGraphics * shape_graphic = shape->getCurrentGraphics();
+        if(shape_graphic)
         {
-            options.flip = graphic->options.getFlip();
-            GraphicRenderingVisitor rendering_visitor(body_position + graphic->options.position, _time_passed, options);
-            std::visit(rendering_visitor, graphic->graphic);
+            options.flip = shape_graphic->options.getFlip();
+            shape_graphic->graphics.render(body_position + shape_graphic->options.position, _time_passed, options);
         }
     }
 }

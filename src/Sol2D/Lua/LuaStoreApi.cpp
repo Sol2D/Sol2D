@@ -21,7 +21,7 @@
 #include <Sol2D/Lua/LuaBodyPrototypeApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
-#include <Sol2D/Lua/LuaSpriteAnimationApi.h>
+#include <Sol2D/Lua/LuaGraphicsPackApi.h>
 #include <Sol2D/Lua/LuaFontApi.h>
 #include <Sol2D/Lua/LuaSoundEffectApi.h>
 #include <Sol2D/Lua/LuaMusicApi.h>
@@ -64,7 +64,7 @@ int createScene(lua_State * _lua, const Self & _self, const std::string & _key);
 int createForm(lua_State * _lua, const Self & _self, const std::string & _key);
 int createSprite(lua_State * _lua, const Self & _self, const std::string & _key);
 int createSpriteSheet(lua_State * _lua, const Self & _self, const std::string & _key);
-int createSpriteAnimation(lua_State * _lua, const Self & _self, const std::string & _key);
+int createGraphicsPack(lua_State * _lua, const Self & _self, const std::string & _key);
 int createBodyPrototype(lua_State * _lua, const Self & _self, const std::string & _key);
 int createFont(lua_State * _lua, const Self & _self, const std::string & _key);
 int createSoundEffect(lua_State * _lua, const Self & _self, const std::string & _key);
@@ -75,7 +75,7 @@ int getScene(lua_State * _lua, const Self & _self, const std::string & _key);
 int getForm(lua_State * _lua, const Self & _self, const std::string & _key);
 int getSprite(lua_State * _lua, const Self & _self, const std::string & _key);
 int getSpriteSheet(lua_State * _lua, const Self & _self, const std::string & _key);
-int getSpriteAnimation(lua_State * _lua, const Self & _self, const std::string & _key);
+int getGraphicsPack(lua_State * _lua, const Self & _self, const std::string & _key);
 int getBodyPrototype(lua_State * _lua, const Self & _self, const std::string & _key);
 int getFont(lua_State * _lua, const Self & _self, const std::string & _key);
 int getSoundEffect(lua_State * _lua, const Self & _self, const std::string & _key);
@@ -125,8 +125,8 @@ const std::unordered_map<std::string, ObjectApi> gc_object_apis
         { createSpriteSheet, getSpriteSheet, freeObject<SpriteSheet> }
     },
     {
-        LuaTypeName::sprite_animation,
-        { createSpriteAnimation, getSpriteAnimation, freeObject<SpriteAnimation> }
+        LuaTypeName::graphics_pack,
+        { createGraphicsPack, getGraphicsPack, freeObject<GraphicsPack> }
     },
     {
         LuaTypeName::body_prototype,
@@ -229,12 +229,12 @@ int createSpriteSheet(lua_State * _lua, const Self & _self, const std::string & 
 // 1 self
 // 2 object type
 // 3 key
-int createSpriteAnimation(lua_State * _lua, const Self & _self, const std::string & _key)
+int createGraphicsPack(lua_State * _lua, const Self & _self, const std::string & _key)
 {
-    std::shared_ptr<SpriteAnimation> sprite_animation = _self.getStore(_lua)->createObject<SpriteAnimation>(
+    std::shared_ptr<GraphicsPack> graphics_pack = _self.getStore(_lua)->createObject<GraphicsPack>(
         _key,
         _self.renderer);
-    pushSpriteAnimationApi(_lua, sprite_animation);
+    pushGraphicsPackApi(_lua, graphics_pack);
     return 1;
 }
 
@@ -364,10 +364,10 @@ int getSpriteSheet(lua_State * _lua, const Self & _self, const std::string & _ke
     return 1;
 }
 
-int getSpriteAnimation(lua_State * _lua, const Self & _self, const std::string & _key)
+int getGraphicsPack(lua_State * _lua, const Self & _self, const std::string & _key)
 {
-    if(std::shared_ptr<SpriteAnimation> sprite_animation = _self.getStore(_lua)->getObject<SpriteAnimation>(_key))
-        pushSpriteAnimationApi(_lua, sprite_animation);
+    if(std::shared_ptr<GraphicsPack> graphics_pack = _self.getStore(_lua)->getObject<GraphicsPack>(_key))
+        pushGraphicsPackApi(_lua, graphics_pack);
     else
         lua_pushnil(_lua);
     return 1;

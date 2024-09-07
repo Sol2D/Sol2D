@@ -59,14 +59,17 @@ self = nil
 ---@field verticalSpacing integer?
 ---@field colorToAlpha Color?
 
----@class ShapeGraphicOptions
+---@class BodyShapeGraphicsOptions
 ---@field position Point?
 ---@field isFlippedHorizontally boolean?
 ---@field isFlippedVertically boolean?
 
----@class SpriteAnimationOptions
+---@class GraphicsPackFrameOptions
 ---@field duration integer? # milliseconds
----@field position? Point
+---@field isVisible boolean?
+
+---@class GraphicsPackSpriteOptions
+---@field isVisible boolean?
 
 ---@class BodyOptions
 ---@field type integer?
@@ -374,9 +377,9 @@ function __store:createObject(type, key) end
 ---@return sol.SpriteSheet
 function __store:createObject(type, key) end
 
----@param type 'sol.SpriteAnimation'
+---@param type 'sol.GraphicsPack'
 ---@param key string
----@return sol.SpriteAnimation
+---@return sol.GraphicsPack
 function __store:createObject(type, key) end
 
 ---@param type 'sol.BodyPrototype'
@@ -415,9 +418,9 @@ function __store:getObject(type, key) end
 ---@return sol.SpriteSheet | nil
 function __store:getObject(type, key) end
 
----@param type 'sol.SpriteAnimation'
+---@param type 'sol.GraphicsPack'
 ---@param key string
----@return sol.SpriteAnimation | nil
+---@return sol.GraphicsPack | nil
 function __store:getObject(type, key) end
 
 ---@param type 'sol.BodyPrototype'
@@ -446,7 +449,7 @@ function __store:getObject(type, key, file_path, font_size) end
 ---| 'sol.Form'
 ---| 'sol.Sprite'
 ---| 'sol.SpriteSheet'
----| 'sol.SpriteAnimation'
+---| 'sol.GraphicsPack'
 ---| 'sol.BodyPrototype'
 ---| 'sol.SoundEffect'
 ---| 'sol.Music'
@@ -489,14 +492,9 @@ function __body_prototype:attachScript(path) end
 local __body_shape_prototype
 
 ---@param key string
----@param sprite sol.Sprite
----@param options ShapeGraphicOptions?
-function __body_shape_prototype:addSprite(key, sprite, options) end
-
----@param key string
----@param sprite_animation sol.SpriteAnimation
----@param options ShapeGraphicOptions?
-function __body_shape_prototype:addSpriteAnimation(key, sprite_animation, options) end
+---@param graphics_pack sol.GraphicsPack
+---@param options BodyShapeGraphicsOptions?
+function __body_shape_prototype:addGraphics(key, graphics_pack, options) end
 
 ---@return integer
 ---@see sol.BodyShapeType
@@ -509,7 +507,7 @@ function __body_shape_prototype:setIsSensor(is_sensor) end
 function __body_shape_prototype:isSensor() end
 
 ---@param key string
-function __body_shape_prototype:removeGraphic(key) end
+function __body_shape_prototype:removeGraphics(key) end
 
 ---@class sol.BodyCircleShapePrototype : sol.BodyShapePrototype
 local __body_circle_shape_prototype
@@ -557,25 +555,69 @@ local __sprite_sheet
 ---@return boolean
 function __sprite_sheet:loadFromFile(path, options) end
 
----@class sol.SpriteAnimation
-local __sprite_animation
+---@class sol.GraphicsPack
+local __graphics_pack
 
+---@param options? GraphicsPackFrameOptions
+---@return integer # index of the new frame
+function __graphics_pack:addFrame(options) end
+
+---@param count integer
+---@param options? GraphicsPackFrameOptions
+---@return integer # index of the new frame
+function __graphics_pack:addFrames(count, options) end
+
+---@param frame_index integer # position to insert
+---@param options? GraphicsPackFrameOptions
+---@return integer # index of the new frame
+function __graphics_pack:insertFrame(frame_index, options) end
+
+---@param frame_index integer # position to insert
+---@return boolean
+function __graphics_pack:removeFrame(frame_index) end
+
+---@param frame_index integer
+---@param visibility boolean
+---@return boolean
+function __graphics_pack:setFrameVisibility(frame_index, visibility) end
+
+---@param frame_index integer
+---@return boolean | nil
+function __graphics_pack:isFrameVisible(frame_index) end
+
+---@param frame_index integer
+---@param duration integer # milliseconds
+---@return boolean
+function __graphics_pack:setFrameDuration(frame_index, duration) end
+
+---@param frame_index integer
+---@return integer | nil # milliseconds
+function __graphics_pack:getFrameDuration(frame_index) end
+
+---@param frame_index integer
 ---@param sprite sol.Sprite
----@param options? SpriteAnimationOptions
----@return boolean
-function __sprite_animation:addFrameFromSprite(sprite, options) end
+---@param options? GraphicsPackSpriteOptions
+---@return boolean, integer
+function __graphics_pack:addSprite(frame_index, sprite, options) end
 
+---@param frame_index integer
 ---@param sprite_sheet sol.SpriteSheet
----@param index integer
----@param options? SpriteAnimationOptions
----@return boolean
-function __sprite_animation:addFrameFromSpriteSheet(sprite_sheet, index, options) end
+---@param sprite_index integer
+---@param options? GraphicsPackSpriteOptions
+---@return boolean, integer
+function __graphics_pack:addSprite(frame_index, sprite_sheet, sprite_index, options) end
 
+---@param frame_index integer
 ---@param sprite_sheet sol.SpriteSheet
 ---@param indices integer[]
----@param options? SpriteAnimationOptions
+---@param options? GraphicsPackSpriteOptions
+---@return boolean, integer
+function __graphics_pack:addSprites(frame_index, sprite_sheet, indices, options) end
+
+---@param frame_index integer
+---@param sprite_index integerc
 ---@return boolean
-function __sprite_animation:addFrames(sprite_sheet, indices, options) end
+function __graphics_pack:removeSprite(frame_index, sprite_index) end
 
 ---@return Point[]
 function __body_polygon_shape_prototype:getPoints() end

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/SpriteRenderOptions.h>
+#include <Sol2D/GraphicsRenderOptions.h>
 #include <Sol2D/Def.h>
 #include <Sol2D/Color.h>
 #include <SDL3/SDL.h>
@@ -52,7 +52,7 @@ public:
     void setDesinationSize(const Size & _size);
     void scale(float _scale_factor);
     void scale(float _scale_factor_x, float _scale_factor_y);
-    void render(const Point & _point, SpriteRenderOptions _options = SpriteRenderOptions());
+    void render(const Point & _point, const GraphicsRenderOptions & _options = GraphicsRenderOptions());
 
 private:
     SDL_Renderer * mp_renderer;

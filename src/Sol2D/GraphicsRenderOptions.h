@@ -16,13 +16,24 @@
 
 #pragma once
 
-#include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/SpriteAnimation.h>
-#include <memory>
+#include <Sol2D/Rect.h>
+#include <SDL3/SDL_surface.h>
+#include <optional>
 
-namespace Sol2D::Lua {
+namespace Sol2D {
 
-void pushSpriteAnimationApi(lua_State * _lua, std::shared_ptr<SpriteAnimation> _animation);
-std::shared_ptr<SpriteAnimation> tryGetSpriteAnimation(lua_State * _lua, int _idx);
+struct GraphicsRenderOptions
+{
+    GraphicsRenderOptions() :
+        angle_rad(0.0),
+        flip(SDL_FLIP_NONE),
+        flip_center()
+    {
+    }
 
-} // namespace Sol2D::Lua
+    double angle_rad;
+    SDL_FlipMode flip;
+    std::optional<Point> flip_center;
+};
+
+} // namespace Sol2D
