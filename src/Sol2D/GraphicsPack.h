@@ -110,7 +110,7 @@ public:
     bool removeFrame(size_t _index);
     bool setFrameVisibility(size_t _index, bool _is_visible);
     std::optional<bool> isFrameVisible(size_t _index) const;
-    bool setFrameDuration(size_t _index, std::chrono::milliseconds & _duration);
+    bool setFrameDuration(size_t _index, std::chrono::milliseconds _duration);
     std::optional<std::chrono::milliseconds> getFrameDuration(size_t _index) const;
     std::pair<bool, size_t> addSprite(
         size_t _frame,

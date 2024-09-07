@@ -30,6 +30,7 @@ const char Sol2D::Lua::LuaTypeName::dimension_unit_type[]          = "sol.Dimens
 const char Sol2D::Lua::LuaTypeName::sprite[]                       = "sol.Sprite";
 const char Sol2D::Lua::LuaTypeName::sprite_sheet[]                 = "sol.SpriteSheet";
 const char Sol2D::Lua::LuaTypeName::sprite_animation[]             = "sol.SpriteAnimation";
+const char Sol2D::Lua::LuaTypeName::graphics_pack[]                = "sol.GraphicsPack";
 const char Sol2D::Lua::LuaTypeName::body_prototype[]               = "sol.BodyPrototype";
 const char Sol2D::Lua::LuaTypeName::body_type[]                    = "sol.BodyType";
 const char Sol2D::Lua::LuaTypeName::body_circle_shape_prototype[]  = "sol.BodyCircleShapePrototype";

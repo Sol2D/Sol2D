@@ -39,7 +39,7 @@ size_t GraphicsPack::addFrame(const GraphicsPackFrameOptions & _options)
     Frame * frame = new Frame(_options);
     m_frames.push_back(frame);
     if(frame->is_visible)
-        m_total_duration += _options.duration;
+        m_total_duration += frame->duration;
     return m_frames.size() - 1;
 }
 
@@ -48,7 +48,7 @@ size_t GraphicsPack::insertFrame(size_t _index, const GraphicsPackFrameOptions &
     Frame * frame = new Frame(_options);
     m_frames.insert(m_frames.begin() + _index, frame);
     if(frame->is_visible)
-        m_total_duration += _options.duration;
+        m_total_duration += frame->duration;
     return _index;
 }
 
@@ -98,7 +98,7 @@ std::optional<bool> GraphicsPack::isFrameVisible(size_t _index) const
     return std::optional<bool>();
 }
 
-bool GraphicsPack::setFrameDuration(size_t _index, std::chrono::milliseconds & _duration)
+bool GraphicsPack::setFrameDuration(size_t _index, std::chrono::milliseconds _duration)
 {
     if(_index < m_frames.size())
     {
