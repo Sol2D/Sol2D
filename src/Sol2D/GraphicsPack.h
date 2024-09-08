@@ -65,7 +65,8 @@ class GraphicsPack final
 
         Graphics(Sprite && _sprite, const GraphicsPackSpriteOptions & _options) :
             sprite(std::move(_sprite)),
-            is_visible(_options.is_visible)
+            is_visible(_options.is_visible),
+            position(_options.position)
         {
         }
 

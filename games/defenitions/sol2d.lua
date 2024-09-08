@@ -353,6 +353,18 @@ function __button:unsubscribeOnClick(subscription_id) end
 ---@class sol.Store
 local __store
 
+---@alias StoreObject
+---| 'sol.View'
+---| 'sol.Scene'
+---| 'sol.Form'
+---| 'sol.Sprite'
+---| 'sol.SpriteSheet'
+---| 'sol.GraphicsPack'
+---| 'sol.BodyPrototype'
+---| 'sol.SoundEffect'
+---| 'sol.Music'
+---| 'sol.Font'
+
 ---@param type 'sol.View'
 ---@param key string
 ---@return sol.View
@@ -393,21 +405,39 @@ function __store:createObject(type, key, body_type) end
 ---@param type 'sol.SoundEffect'
 ---@param key string
 ---@param file_path string
----@return sol.SoundEffect | nil
+---@return sol.SoundEffect
 function __store:createObject(type, key, file_path) end
 
 ---@param type 'sol.Music'
 ---@param key string
 ---@param file_path string
----@return sol.Music | nil
+---@return sol.Music
 function __store:createObject(type, key, file_path) end
 
 ---@param type 'sol.Font'
 ---@param key string
 ---@param file_path string
 ---@param font_size integer
----@return sol.Font | nil
+---@return sol.Font
 function __store:createObject(type, key, file_path, font_size) end
+
+--- This is a stub for the Lua language server, call only the overloaded variants.
+function __store:getObject() end
+
+---@param type 'sol.View'
+---@param key string
+---@return sol.View | nil
+function __store:getObject(type, key) end
+
+---@param type 'sol.Scene'
+---@param key string
+---@return sol.Scene | nil
+function __store:getObject(type, key) end
+
+---@param type 'sol.Form'
+---@param key string
+---@return sol.Form | nil
+function __store:getObject(type, key) end
 
 ---@param type 'sol.Sprite'
 ---@param key string
@@ -426,35 +456,30 @@ function __store:getObject(type, key) end
 
 ---@param type 'sol.BodyPrototype'
 ---@param key string
----@see sol.BodyType | nil
+---@param body_type sol.BodyType | nil
+---@return sol.BodyPrototype | nil
 function __store:getObject(type, key, body_type) end
 
 ---@param type 'sol.SoundEffect'
 ---@param key string
+---@param file_path string
 ---@return sol.SoundEffect | nil
 function __store:getObject(type, key, file_path) end
 
 ---@param type 'sol.Music'
 ---@param key string
+---@param file_path string
 ---@return sol.Music | nil
 function __store:getObject(type, key, file_path) end
 
 ---@param type 'sol.Font'
 ---@param key string
+---@param file_path string
+---@param font_size integer
 ---@return sol.Font | nil
 function __store:getObject(type, key, file_path, font_size) end
 
----@param type
----| 'sol.View'
----| 'sol.Scene'
----| 'sol.Form'
----| 'sol.Sprite'
----| 'sol.SpriteSheet'
----| 'sol.GraphicsPack'
----| 'sol.BodyPrototype'
----| 'sol.SoundEffect'
----| 'sol.Music'
----| 'sol.Font'
+---@param type StoreObject
 ---@param key string
 ---@return boolean
 function __store:freeObject(type, key) end
