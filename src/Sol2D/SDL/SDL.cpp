@@ -88,16 +88,17 @@ void Sol2D::SDL::sdlDetectContentRect(SDL_Surface & _surface, SDL_Rect & _rect)
     std::vector<bool> columns(_surface.w);
 
     const uint8_t * surface_pixels = static_cast<const uint8_t *>(_surface.pixels);
-    const Uint32 reference_pixel = SDL_MapRGBA(_surface.format, 0, 0, 0, 0);
+    const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails( _surface.format);
+    const Uint32 reference_pixel = SDL_MapRGBA(pixel_format, nullptr, 0, 0, 0, 0);
 
     for(int y = 0; y < _surface.h; ++y)
     {
         for(int x = 0; x < _surface.w; ++x)
         {
             const Uint32 * pixel = reinterpret_cast<const Uint32 *>(
-                &surface_pixels[(x + y * _surface.w) * _surface.format->bytes_per_pixel]
-                );
-            bool not_empty = std::memcmp(&reference_pixel, pixel, _surface.format->bytes_per_pixel) != 0;
+                &surface_pixels[(x + y * _surface.w) * pixel_format->bits_per_pixel]
+            );
+            bool not_empty = std::memcmp(&reference_pixel, pixel, pixel_format->bytes_per_pixel) != 0;
             rows[y] = rows[y] || not_empty;
             columns[x] = columns[x] || not_empty;
         }

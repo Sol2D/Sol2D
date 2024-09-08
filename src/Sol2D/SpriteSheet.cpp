@@ -38,11 +38,12 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
     if(_options.color_to_alpha.has_value())
     {
         Color color = _options.color_to_alpha.value();
+        const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
         SDL_SetSurfaceColorKey(
             surface,
             SDL_TRUE,
-            SDL_MapRGBA(surface->format, color.r, color.g, color.b, color.a)
-            );
+            SDL_MapRGBA(pixel_format, nullptr, color.r, color.g, color.b, color.a)
+        );
     }
     m_texture_ptr = wrapTexture(SDL_CreateTextureFromSurface(mp_renderer, surface));
     SDL_DestroySurface(surface);

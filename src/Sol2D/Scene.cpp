@@ -770,9 +770,9 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
 void Scene::drawImageLayer(const TileMapImageLayer & _layer)
 {
     std::shared_ptr<SDL_Texture> image = _layer.getImage();
-    int width, height;
-    SDL_QueryTexture(image.get(), NULL, NULL, &width, &height);
-    SDL_FRect dim { .0f, .0f, static_cast<float>(width), static_cast<float>(height) };
+    float width, height;
+    SDL_GetTextureSize(image.get(), &width, &height);
+    SDL_FRect dim { .0f, .0f, width, height };
     SDL_RenderTexture(&mr_renderer, image.get(), nullptr, &dim);
 }
 

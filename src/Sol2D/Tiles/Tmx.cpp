@@ -374,10 +374,11 @@ std::shared_ptr<SDL_Texture> XmlLoader::parseImage(const XMLElement & _xml)
         Color color;
         if(tryParseColor(trans, color))
         {
+            const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
             SDL_SetSurfaceColorKey(
                 surface,
                 SDL_TRUE,
-                SDL_MapRGBA(surface->format, color.r, color.g, color.b, color.a)
+                SDL_MapRGBA(pixel_format, nullptr, color.r, color.g, color.b, color.a)
             );
         }
     }
@@ -967,8 +968,8 @@ void TileSetXmlLoader::makeTiles(std::shared_ptr<SDL_Texture> _texture,
                                  uint32_t _spacing,
                                  uint32_t _margin)
 {
-    int width, height;
-    SDL_QueryTexture(_texture.get(), nullptr, nullptr, &width, &height);
+    float width, height;
+    SDL_GetTextureSize(_texture.get(), &width, &height);
     int max_x = width - _margin - _tile_width;
     int max_y = height - _margin - _tile_height;
     uint32_t gid = _first_gid;
@@ -993,11 +994,10 @@ void TileSetXmlLoader::makeTile(const XMLElement & _xml_tile, TileSet & _set, ui
         uint32_t height = xml_image->UnsignedAttribute("height");
         if(!width || !height)
         {
-            SDL_QueryTexture(texture.get(),
-                             nullptr,
-                             nullptr,
-                             reinterpret_cast<int *>(&width),
-                             reinterpret_cast<int *>(&height));
+            float w, h;
+            SDL_GetTextureSize(texture.get(), &w, &h);
+            width = static_cast<uint32_t>(w);
+            height = static_cast<uint32_t>(h);
         }
         mr_tile_heap.createTile(gid, _set, texture, x, y, width, height);
     }
