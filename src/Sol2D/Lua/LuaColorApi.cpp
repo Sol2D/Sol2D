@@ -43,7 +43,7 @@ bool Sol2D::Lua::tryGetColor(lua_State * _lua, int _idx, Color & _color)
         table.tryGetInteger(gc_key_g, &g) &&
         table.tryGetInteger(gc_key_b, &b))
     {
-        lua_Integer a = 0;
+        lua_Integer a = 255;
         table.tryGetInteger(gc_key_a, &a);
         _color.r = static_cast<Uint8>(r);
         _color.g = static_cast<Uint8>(g);

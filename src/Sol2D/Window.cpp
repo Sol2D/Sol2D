@@ -20,7 +20,7 @@ using namespace Sol2D;
 
 void Window::render(const RenderState & _state)
 {
-    SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 0); // TODO: from Lua
+    SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 255); // TODO: from Lua or TMX
     SDL_RenderClear(&mr_renderer);
     if(m_view) m_view->render(_state);
     SDL_RenderPresent(&mr_renderer);
