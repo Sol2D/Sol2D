@@ -21,7 +21,6 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/mem_fun.hpp>
-#include <optional>
 #include <chrono>
 #include <vector>
 
@@ -29,13 +28,26 @@ namespace Sol2D {
 
 struct GraphicsPackFrameOptions
 {
-    std::optional<std::chrono::milliseconds> duration;
-    std::optional<bool> is_visible;
+    GraphicsPackFrameOptions() :
+        duration(std::chrono::milliseconds::zero()),
+        is_visible(true)
+    {
+    }
+
+    std::chrono::milliseconds duration;
+    bool is_visible;
 };
 
 struct GraphicsPackSpriteOptions
 {
-    std::optional<bool> is_visible;
+    GraphicsPackSpriteOptions() :
+        is_visible(true),
+        position{.0f, .0f}
+    {
+    }
+
+    bool is_visible;
+    Point position;
 };
 
 class GraphicsPack final
@@ -46,18 +58,20 @@ class GraphicsPack final
 
         Graphics(const Sprite & _sprite, const GraphicsPackSpriteOptions & _options) :
             sprite(_sprite),
-            is_visible(_options.is_visible.value_or(true))
+            is_visible(_options.is_visible),
+            position(_options.position)
         {
         }
 
         Graphics(Sprite && _sprite, const GraphicsPackSpriteOptions & _options) :
             sprite(std::move(_sprite)),
-            is_visible(_options.is_visible.value_or(true))
+            is_visible(_options.is_visible)
         {
         }
 
         Sprite sprite;
         bool is_visible;
+        Point position;
     };
 
     struct Frame
@@ -65,8 +79,8 @@ class GraphicsPack final
         S2_DEFAULT_COPY_AND_MOVE(Frame)
 
         Frame(const GraphicsPackFrameOptions & _options) :
-            duration(_options.duration.value_or(std::chrono::milliseconds::zero())),
-            is_visible(_options.is_visible.value_or(true))
+            duration(_options.duration),
+            is_visible(_options.is_visible)
         {
         }
 

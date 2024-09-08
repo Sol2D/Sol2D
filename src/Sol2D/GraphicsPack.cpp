@@ -264,6 +264,6 @@ void GraphicsPack::performRender(const Point & _position, const GraphicsRenderOp
     for(Graphics & graphics : frame->graphics)
     {
         if(graphics.is_visible)
-            graphics.sprite.render(_position, _options);
+            graphics.sprite.render(_position + graphics.position, _options);
     }
 }

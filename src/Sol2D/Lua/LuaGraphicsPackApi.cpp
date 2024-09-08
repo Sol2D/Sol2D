@@ -58,17 +58,14 @@ void readGraphicsPackFrameOptions(lua_State * _lua, int _idx, GraphicsPackFrameO
 
     LuaTable table(_lua, _idx);
 
+    table.tryGetBoolean("isVisible", &_options.is_visible);
+
     {
         lua_Integer duration;
         if(table.tryGetInteger("duration", &duration))
             _options.duration = std::chrono::milliseconds(duration);
     }
 
-    {
-        bool is_visible;
-        if(table.tryGetBoolean("isVisible", &is_visible))
-            _options.is_visible = is_visible;
-    }
 }
 
 void readGraphicsPackSpriteOptions(lua_State * _lua, int _idx, GraphicsPackSpriteOptions & _options)
@@ -78,10 +75,12 @@ void readGraphicsPackSpriteOptions(lua_State * _lua, int _idx, GraphicsPackSprit
 
     LuaTable table(_lua, _idx);
 
+    table.tryGetBoolean("isVisible", &_options.is_visible);
+
+    if(table.tryGetValue("position"))
     {
-        bool value;
-        if(table.tryGetBoolean("isVisible", &value))
-            _options.is_visible = value;
+        tryGetPoint(_lua, -1, _options.position);
+        lua_pop(_lua, 1);
     }
 }
 

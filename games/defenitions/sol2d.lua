@@ -70,6 +70,7 @@ self = nil
 
 ---@class GraphicsPackSpriteOptions
 ---@field isVisible boolean?
+---@field position Point?
 
 ---@class BodyOptions
 ---@field type integer?

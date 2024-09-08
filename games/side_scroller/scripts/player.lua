@@ -77,7 +77,7 @@ local function createWalkAnimations(store, shape, scale_factor)
         end
         sprite:scale(scale_factor) -- TODO: scale to options in loadFromFile
                                    -- TODO: add the scaleSource function to scale the source once
-        animation:addSprite(i - 1, sprite)
+        animation:addSprite(i - 1, sprite, { position = { x = 0, y = 9 } })
     end
     local animation_position = {
         x = -(sprite_loading_options.rect.w * scale_factor) / 2,
