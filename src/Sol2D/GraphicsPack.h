@@ -90,10 +90,12 @@ class GraphicsPack final
     };
 
 public:
-    S2_DEFAULT_COPY_AND_MOVE(GraphicsPack)
-
     explicit GraphicsPack(SDL_Renderer & _renderer);
+    GraphicsPack(const GraphicsPack & _graphics_pack);
+    GraphicsPack(GraphicsPack && _graphics_pack);
     ~GraphicsPack();
+    GraphicsPack & operator = (const GraphicsPack & _graphics_pack);
+    GraphicsPack & operator = (GraphicsPack && _graphics_pack);
 
     size_t addFrame(const GraphicsPackFrameOptions & _options);
     size_t addFrames(size_t _count, const GraphicsPackFrameOptions & _options);
@@ -124,6 +126,7 @@ public:
         const GraphicsRenderOptions & _options = GraphicsRenderOptions());
 
 private:
+    void destroy();
     void performRender(const Point & _position, const GraphicsRenderOptions & _options);
     Frame * switchToNextVisibleFrame();
 

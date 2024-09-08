@@ -28,10 +28,77 @@ GraphicsPack::GraphicsPack(SDL_Renderer & _renderer) :
 {
 }
 
+GraphicsPack::GraphicsPack(const GraphicsPack & _graphics_pack) :
+    mp_renderer(_graphics_pack.mp_renderer),
+    m_current_frame_index(_graphics_pack.m_current_frame_index),
+    m_current_frame_duration(_graphics_pack.m_current_frame_duration),
+    m_total_duration(_graphics_pack.m_total_duration)
+{
+    m_frames.reserve(_graphics_pack.m_frames.size());
+    for(auto * frame : _graphics_pack.m_frames)
+        m_frames.push_back(new Frame(*frame));
+}
+
+GraphicsPack::GraphicsPack(GraphicsPack && _graphics_pack) :
+    mp_renderer(_graphics_pack.mp_renderer),
+    m_frames(std::move(_graphics_pack.m_frames)),
+    m_current_frame_index(_graphics_pack.m_current_frame_index),
+    m_current_frame_duration(_graphics_pack.m_current_frame_duration),
+    m_total_duration(_graphics_pack.m_total_duration)
+{
+    _graphics_pack.mp_renderer = nullptr;
+    _graphics_pack.m_current_frame_duration = std::chrono::milliseconds::zero();
+    _graphics_pack.m_total_duration = std::chrono::milliseconds::zero();
+    _graphics_pack.m_current_frame_index = 0;
+}
+
 GraphicsPack::~GraphicsPack()
+{
+    destroy();
+}
+
+GraphicsPack & GraphicsPack::operator = (const GraphicsPack & _graphics_pack)
+{
+    if(this != &_graphics_pack)
+    {
+        destroy();
+        m_frames.reserve(_graphics_pack.m_frames.size());
+        for(auto * frame : _graphics_pack.m_frames)
+            m_frames.push_back(new Frame(*frame));
+        mp_renderer = _graphics_pack.mp_renderer;
+        m_current_frame_index = _graphics_pack.m_current_frame_index;
+        m_current_frame_duration = _graphics_pack.m_current_frame_duration;
+        m_total_duration = _graphics_pack.m_total_duration;
+    }
+    return *this;
+}
+
+GraphicsPack & GraphicsPack::operator = (GraphicsPack && _graphics_pack)
+{
+    if(this != &_graphics_pack)
+    {
+        destroy();
+        m_frames.reserve(_graphics_pack.m_frames.size());
+        for(auto * frame : _graphics_pack.m_frames)
+            m_frames.push_back(frame);
+        _graphics_pack.m_frames.clear();
+        mp_renderer = _graphics_pack.mp_renderer;
+        _graphics_pack.mp_renderer = nullptr;
+        m_current_frame_index = _graphics_pack.m_current_frame_index;
+        _graphics_pack.m_current_frame_index = 0;
+        m_current_frame_duration = _graphics_pack.m_current_frame_duration;
+        _graphics_pack.m_current_frame_duration = std::chrono::milliseconds::zero();
+        m_total_duration = _graphics_pack.m_total_duration;
+        _graphics_pack.m_total_duration = std::chrono::milliseconds::zero();
+    }
+    return *this;
+}
+
+void GraphicsPack::destroy()
 {
     for(Frame * frame : m_frames)
         delete frame;
+    m_frames.clear();
 }
 
 size_t GraphicsPack::addFrame(const GraphicsPackFrameOptions & _options)
