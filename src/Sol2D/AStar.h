@@ -34,8 +34,9 @@ struct AStarOptions
     bool avoid_sensors;
 };
 
-std::optional<std::vector<b2Vec2>> aStarFindPath(const b2World & _world,
-    const b2Body & _body,
+std::optional<std::vector<b2Vec2>> aStarFindPath(
+    b2WorldId _world_id,
+    b2BodyId _body_id,
     const b2Vec2 & _destination,
     const AStarOptions & _options);
 

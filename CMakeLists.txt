@@ -54,9 +54,9 @@ add_subdirectory(third_party/SDL)
 add_subdirectory(third_party/SDL_image)
 add_subdirectory(third_party/SDL_ttf)
 add_subdirectory(third_party/SDL_mixer)
+add_subdirectory(third_party/box2d)
 
 find_package(ZLIB REQUIRED)
-find_package(box2d REQUIRED)
 find_package(tinyxml2 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED)
@@ -87,6 +87,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL_image/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL_ttf/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL_mixer/include
+    PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/box2d/include
     PRIVATE ${ZSTD_INCLUDEDIR}
     PRIVATE ${SDL3_INCLUDE_DIR}
     PRIVATE ${LUA_INCLUDEDIR}
@@ -143,7 +144,7 @@ if(SOL2D_USE_GAMES)
     add_custom_target(games SOURCES
         ${SOL2D_GAMES_SRC}
     )
-endif(SOL2D_USE_WORKSPACES)
+endif(SOL2D_USE_GAMES)
 
 add_custom_target(misc SOURCES
     .gitignore

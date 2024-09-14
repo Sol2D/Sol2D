@@ -17,7 +17,7 @@
 #pragma once
 
 #include <SDL3/SDL_rect.h>
-#include <box2d/b2_math.h>
+#include <box2d/math_functions.h>
 
 namespace Sol2D {
 

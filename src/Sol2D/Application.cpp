@@ -20,6 +20,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3_mixer/SDL_mixer.h>
+#include <box2d/base.h>
 #include <memory>
 #include <iostream>
 
@@ -59,9 +60,18 @@ private:
     LuaLibrary * mp_lua;
 };
 
-SDL_AssertState SDLCALL sdlAssertionHandler (const SDL_AssertData * _data, void * /*_userdata*/)
+SDL_AssertState SDLCALL sdlAssertionHandler(const SDL_AssertData * _data, void * /*_userdata*/)
 {
-    throw std::runtime_error(std::format("SDL Assertion failed: {}", _data->condition));
+    std::cerr << "SDL assertion failed: \"" << _data->condition <<
+        "\" at " << _data->filename << ":" << _data->linenum << std::endl;
+    return SDL_ASSERTION_BREAK;
+}
+
+int box2dAssertionHandler(const char * _condition, const char * _file_name, int _line_number)
+{
+    std::cerr << "Box2D assertion failed: \"" << _condition <<
+        "\" at " << _file_name << ":" << _line_number << std::endl;
+    return 1;
 }
 
 } // namespace
@@ -125,6 +135,7 @@ bool Application::initialize()
         return false;
     }
     SDL_SetAssertionHandler(sdlAssertionHandler, nullptr);
+    b2SetAssertFcn(box2dAssertionHandler);
     // TODO: SDL_WINDOW_VULKAN from manifest
     mp_sdl_window = SDL_CreateWindow(
         mr_workspace.getApplicationName().c_str(),

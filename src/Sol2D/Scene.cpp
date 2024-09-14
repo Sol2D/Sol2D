@@ -169,95 +169,107 @@ inline BodyShape * Body::findShape(const std::string & _key)
     return it == m_shapes.end() ? nullptr : it->second;
 }
 
-inline Body * getUserData(b2Body * _body)
+inline Body * getUserData(b2BodyId _body_id)
 {
-    return reinterpret_cast<Body *>(_body->GetUserData().pointer);
+    return static_cast<Body *>(b2Body_GetUserData(_body_id));
 }
 
-inline BodyShape * getUserData(b2Fixture * _fixture)
+inline BodyShape * getUserData(b2ShapeId _shape_id)
 {
-    return reinterpret_cast<BodyShape *>(_fixture->GetUserData().pointer);
+    return static_cast<BodyShape *>(b2Shape_GetUserData(_shape_id));
 }
 
 } // namespace
 
-namespace Sol2D::Private {
+//namespace Sol2D::Private {
 
-class SceneContactListener final : public b2ContactListener, public Observable<ContactObserver>
-{
-public:
-    void BeginContact(b2Contact * _contact) override;
-    void EndContact(b2Contact * _contact) override;
+// class SceneContactListener final : public b2ContactListener, public Observable<ContactObserver>
+// {
+// public:
+//     void BeginContact(b2Contact * _contact) override;
+//     void EndContact(b2Contact * _contact) override;
 
-private:
-    bool tryGetContact(b2Contact & _b2_contact, Contact & _contact);
-};
+// private:
+//     bool tryGetContact(b2Contact & _b2_contact, Contact & _contact);
+// };
 
-void SceneContactListener::BeginContact(b2Contact * _contact)
-{
-    if(!_contact->IsTouching())
-        return;
-    Contact contact;
-    if(tryGetContact(*_contact, contact))
-        callObservers(&ContactObserver::beginContact, contact);
-}
+// void SceneContactListener::BeginContact(b2Contact * _contact)
+// {
+//     if(!_contact->IsTouching())
+//         return;
+//     Contact contact;
+//     if(tryGetContact(*_contact, contact))
+//         callObservers(&ContactObserver::beginContact, contact);
+// }
 
-bool SceneContactListener::tryGetContact(b2Contact & _b2_contact, Contact & _contact)
-{
-    b2Fixture * b2_fixture_a = _b2_contact.GetFixtureA();
-    b2Fixture * b2_fixture_b = _b2_contact.GetFixtureB();
-    b2Body * b2_body_a = b2_fixture_a->GetBody();
-    b2Body * b2_body_b = b2_fixture_b->GetBody();
-    BodyShape * shape_a = getUserData(b2_fixture_a);
-    BodyShape * shape_b = getUserData(b2_fixture_b);
-    Body * body_a = getUserData(b2_body_a);
-    Body * body_b = getUserData(b2_body_b);
-    if(shape_a && shape_b && body_a && body_b)
-    {
-        _contact.side_a = {
-            .body_id = body_a->getId(),
-            .shape_key = shape_a->getKey(),
-            .tile_map_object_id = shape_a->getTileMapObjectId()
-        };
-        _contact.side_b = {
-            .body_id = body_b->getId(),
-            .shape_key = shape_b->getKey(),
-            .tile_map_object_id = shape_b->getTileMapObjectId()
-        };
-        return true;
-    }
-    return false;
-}
+// bool SceneContactListener::tryGetContact(b2Contact & _b2_contact, Contact & _contact)
+// {
+//     b2Fixture * b2_fixture_a = _b2_contact.GetFixtureA();
+//     b2Fixture * b2_fixture_b = _b2_contact.GetFixtureB();
+//     b2Body * b2_body_a = b2_fixture_a->GetBody();
+//     b2Body * b2_body_b = b2_fixture_b->GetBody();
+//     BodyShape * shape_a = getUserData(b2_fixture_a);
+//     BodyShape * shape_b = getUserData(b2_fixture_b);
+//     Body * body_a = getUserData(b2_body_a);
+//     Body * body_b = getUserData(b2_body_b);
+//     if(shape_a && shape_b && body_a && body_b)
+//     {
+//         _contact.side_a = {
+//             .body_id = body_a->getId(),
+//             .shape_key = shape_a->getKey(),
+//             .tile_map_object_id = shape_a->getTileMapObjectId()
+//         };
+//         _contact.side_b = {
+//             .body_id = body_b->getId(),
+//             .shape_key = shape_b->getKey(),
+//             .tile_map_object_id = shape_b->getTileMapObjectId()
+//         };
+//         return true;
+//     }
+//     return false;
+// }
 
-void SceneContactListener::EndContact(b2Contact * _contact)
-{
-    Contact contact;
-    if(tryGetContact(*_contact, contact))
-        callObservers(&ContactObserver::endContact, contact);
-}
+// void SceneContactListener::EndContact(b2Contact * _contact)
+// {
+//     Contact contact;
+//     if(tryGetContact(*_contact, contact))
+//         callObservers(&ContactObserver::endContact, contact);
+// }
 
-} // namespace Sol2D::Private
+//} // namespace Sol2D::Private
+
 
 Scene::Scene(const Workspace & _workspace, SDL_Renderer & _renderer) :
     mr_workspace(_workspace),
     mr_renderer(_renderer),
     m_world_offset{.0f, .0f},
-    mp_b2_world(new b2World({ .0f, .0f })), // TODO: from parameters
     m_scale_factor(20.0f), // TODO: from parameters
-    mp_followed_body(nullptr),
-    mp_contact_listener(new Private::SceneContactListener)
+    m_followed_body_id(b2_nullBodyId),
+    mp_box2d_debug_draw(nullptr)
 {
-    mp_b2_world->SetContactListener(mp_contact_listener);
+    b2WorldDef world_def = b2DefaultWorldDef();
+    world_def.gravity = { .0f, .0f }; // TODO: from parameters
+    m_b2_world_id = b2CreateWorld(&world_def);
+    mp_box2d_debug_draw = new Box2dDebugDraw( // TODO: enable/disable from parameters
+        mr_renderer,
+        m_b2_world_id,
+        [this](float __x, float __y) {
+            return toAbsoluteCoords(__x * m_scale_factor, __y * m_scale_factor);
+        },
+        [this](float __len) {
+            return __len * m_scale_factor;
+        }
+    );
 }
 
 Scene::~Scene()
 {
-    deinitialize();
-    delete mp_b2_world;
-    delete mp_contact_listener;
+    deinitializeTileMap();
+    b2DestroyWorld(m_b2_world_id);
+    delete mp_box2d_debug_draw;
 }
 
-void Scene::deinitialize()
+void Scene::deinitializeTileMap()
 {
     for(auto & pair : m_bodies)
         destroyBody(pair.second);
@@ -265,37 +277,42 @@ void Scene::deinitialize()
     m_tile_heap_ptr.reset();
     m_object_heap_ptr.reset();
     m_tile_map_ptr.reset();
-    mp_followed_body = nullptr;
+    m_followed_body_id = b2_nullBodyId;
 }
 
 void Scene::setGravity(const Point & _vector)
 {
-    if(mp_b2_world->IsLocked())
-        m_defers.push_front([_vector, this]() { setGravity(_vector); });
-    else
-        mp_b2_world->SetGravity(*_vector.toBox2DPtr()); // TODO: scale factor?
+    m_defers.push_front([this, _vector]() {
+        b2World_SetGravity(m_b2_world_id, *_vector.toBox2DPtr()); // TODO: scale factor?
+    });
 }
 
 uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _prototype)
 {
     Body * body = new Body;
-    b2BodyDef b2_body_def;
+    b2BodyDef b2_body_def = b2DefaultBodyDef();
     b2_body_def.type = mapBodyType(_prototype.getType());
-    b2_body_def.position.Set(
-        _position.x / m_scale_factor,
-        _position.y / m_scale_factor
-    );
+    b2_body_def.position = { .x = _position.x / m_scale_factor, .y = _position.y / m_scale_factor };
     b2_body_def.linearDamping = 100; // TODO: for top-down
     b2_body_def.angularDamping = 100; // TODO: must be controlled by user (prevent infinite rotation)
     b2_body_def.fixedRotation = true; // TODO: must be controlled by user
-    b2_body_def.userData.pointer = reinterpret_cast<uintptr_t>(body);
-    b2Body * b2_body = mp_b2_world->CreateBody(&b2_body_def);
-    m_bodies.insert(std::make_pair(body->getId(), b2_body));
+    b2BodyId b2_body_id = b2CreateBody(m_b2_world_id, &b2_body_def);
+    b2Body_SetUserData(b2_body_id, body);
+    m_bodies.insert(std::make_pair(body->getId(), b2_body_id));
 
-    _prototype.forEachShape([this, body, b2_body, &_prototype](
+    _prototype.forEachShape([this, body, b2_body_id, &_prototype](
                                 const std::string & __key,
                                 const BodyShapePrototype & __shape_proto) {
+
         BodyShape * body_shape = nullptr;
+
+        b2ShapeDef b2_shape_def = b2DefaultShapeDef();
+        if(_prototype.getType() == BodyType::Dynamic) // TODO: duplicated
+        {
+            b2_shape_def.density = .002f; // TODO: real value from user
+        }
+        b2_shape_def.isSensor = __shape_proto.isSensor();
+
         switch(__shape_proto.getType())
         {
         case BodyShapeType::Polygon:
@@ -307,24 +324,17 @@ uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _proto
             const std::vector<Point> & points = polygon_proto->getPoints();
             if(points.size() < 3 || points.size() > b2_maxPolygonVertices)
                 break;
-            b2PolygonShape b2_shape;
             std::vector<b2Vec2> shape_points(points.size());
             for(size_t i = 0; i < points.size(); ++i)
             {
                 shape_points[i].x = points[i].x / m_scale_factor;
                 shape_points[i].y = points[i].y / m_scale_factor;
             }
-            b2_shape.Set(shape_points.data(), shape_points.size());
-            b2FixtureDef fx_def;
-            fx_def.shape = &b2_shape;
-            fx_def.isSensor = polygon_proto->isSensor();
-            if(_prototype.getType() == BodyType::Dynamic) // TODO: duplicated
-            {
-                fx_def.density = .002f; // TODO: real value from user
-            }
+            b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
+            b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
+            b2ShapeId b2_shape_id = b2CreatePolygonShape(b2_body_id, &b2_shape_def, &b2_polygon);
             body_shape = &body->createShape(__key);
-            fx_def.userData.pointer = reinterpret_cast<uintptr_t>(body_shape);
-            b2_body->CreateFixture(&fx_def);
+            b2Shape_SetUserData(b2_shape_id, body_shape);
         }
         break;
         case BodyShapeType::Circle:
@@ -333,25 +343,17 @@ uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _proto
                 dynamic_cast<const BodyCircleShapePrototype *>(&__shape_proto);
             if(!circle_proto)
                 break;
-            const float radius = circle_proto->getRadius() / m_scale_factor;
-            if(radius <= .0f)
-                break;
             Point position = circle_proto->getCenter();
-            position.x /= m_scale_factor;
-            position.y /= m_scale_factor;
-            b2CircleShape b2_shape;
-            b2_shape.m_p.Set(position.x, position.y);
-            b2_shape.m_radius = radius;
-            b2FixtureDef fx_def;
-            fx_def.shape = &b2_shape;
-            fx_def.isSensor = circle_proto->isSensor();
-            if(_prototype.getType() == BodyType::Dynamic) // TODO: duplicated
+            b2Circle b2_circle
             {
-                fx_def.density = .002f; // TODO: real value from user
-            }
+                .center = { .x = position.x / m_scale_factor, .y = position.y / m_scale_factor },
+                .radius = circle_proto->getRadius() / m_scale_factor
+            };
+            if(b2_circle.radius <= .0f)
+                break;
+            b2ShapeId b2_shape_id = b2CreateCircleShape(b2_body_id, &b2_shape_def, &b2_circle);
             body_shape = &body->createShape(__key);
-            fx_def.userData.pointer = reinterpret_cast<uintptr_t>(body_shape);
-            b2_body->CreateFixture(&fx_def);
+            b2Shape_SetUserData(b2_shape_id, body_shape);
         }
         break;
         default: return;
@@ -375,20 +377,21 @@ void Scene::createBodiesFromMapObjects(
     m_object_heap_ptr->forEachObject([&](const TileMapObject & __map_object) {
         if(__map_object.getClass() != _class) return;
         Body * body = new Body;
-        b2BodyDef b2_body_def;
+        b2BodyDef b2_body_def = b2DefaultBodyDef();
         b2_body_def.type = body_type;
-        b2_body_def.position.Set(
-            __map_object.getX() / m_scale_factor,
-            __map_object.getY() / m_scale_factor
-        );
+        b2_body_def.position = b2Vec2(__map_object.getX() / m_scale_factor, __map_object.getY() / m_scale_factor);
         b2_body_def.linearDamping = _body_options.linear_damping;
         b2_body_def.angularDamping = _body_options.angular_damping;
         b2_body_def.fixedRotation = _body_options.fixed_rotation;
-        b2_body_def.userData.pointer = reinterpret_cast<uintptr_t>(body);
-        b2Body * b2_body = mp_b2_world->CreateBody(&b2_body_def);
-        m_bodies.insert(std::make_pair(body->getId(), b2_body));
+        b2_body_def.userData = body;
+        b2BodyId b2_body_id = b2CreateBody(m_b2_world_id, &b2_body_def);
+        m_bodies.insert(std::make_pair(body->getId(), b2_body_id));
 
-        BodyShape * body_shape = nullptr;
+        b2ShapeDef b2_shape_def = b2DefaultShapeDef();
+        b2_shape_def.isSensor = _shape_options.is_sensor;
+        if(_body_options.type == BodyType::Dynamic)
+            b2_shape_def.density = _shape_options.density;
+
         switch(__map_object.getObjectType())
         {
         case TileMapObjectType::Polygon:
@@ -397,24 +400,17 @@ void Scene::createBodiesFromMapObjects(
             const std::vector<Point> & points = polygon->getPoints();
             if(points.size() < 3 || points.size() > b2_maxPolygonVertices)
                 break;
-            b2PolygonShape b2_shape;
             std::vector<b2Vec2> shape_points(points.size());
             for(size_t i = 0; i < points.size(); ++i)
             {
                 shape_points[i].x = points[i].x / m_scale_factor;
                 shape_points[i].y = points[i].y / m_scale_factor;
             }
-            b2_shape.Set(shape_points.data(), shape_points.size());
-            b2FixtureDef fx_def;
-            fx_def.shape = &b2_shape;
-            fx_def.isSensor = _shape_options.is_sensor;
-            if(_body_options.type == BodyType::Dynamic)
-            {
-                fx_def.density = _shape_options.density;
-            }
-            body_shape = &body->createShape(_class, polygon->getId());
-            fx_def.userData.pointer = reinterpret_cast<uintptr_t>(body_shape);
-            b2_body->CreateFixture(&fx_def);
+            b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
+            b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
+            b2ShapeId b2_shape_id = b2CreatePolygonShape(b2_body_id, &b2_shape_def, &b2_polygon);
+            BodyShape * body_shape = &body->createShape(_class, polygon->getId());
+            b2Shape_SetUserData(b2_shape_id, body_shape);
         }
         break;
         case TileMapObjectType::Circle:
@@ -423,19 +419,14 @@ void Scene::createBodiesFromMapObjects(
             const float radius = circle->getRadius() / m_scale_factor;
             if(radius <= .0f)
                 break;
-            b2CircleShape b2_shape;
-            b2_shape.m_p.Set(0, 0);
-            b2_shape.m_radius = radius;
-            b2FixtureDef fx_def;
-            fx_def.shape = &b2_shape;
-            fx_def.isSensor = _shape_options.is_sensor;
-            if(_body_options.type == BodyType::Dynamic)
+            b2Circle b2_circle
             {
-                fx_def.density = _shape_options.density;
-            }
-            body_shape = &body->createShape(_class, circle->getId());
-            fx_def.userData.pointer = reinterpret_cast<uintptr_t>(body_shape);
-            b2_body->CreateFixture(&fx_def);
+                .center = { .x = .0f, .y = .0f },
+                .radius = radius
+            };
+            b2ShapeId b2_shape_id = b2CreateCircleShape(b2_body_id, &b2_shape_def, &b2_circle);
+            BodyShape * body_shape = &body->createShape(_class, circle->getId());
+            b2Shape_SetUserData(b2_shape_id, body_shape);
         }
         break;
         default: return;
@@ -445,28 +436,27 @@ void Scene::createBodiesFromMapObjects(
 
 bool Scene::destroyBody(uint64_t _body_id)
 {
-    b2Body * body = findBody(_body_id);
-    if(!body)
+    b2BodyId b2_body_id = findBody(_body_id);
+    if(B2_IS_NULL(b2_body_id))
         return false;
-    mp_b2_world->DestroyBody(body);
-    if(mp_followed_body == body)
-        mp_followed_body = nullptr;
+    if(B2_ID_EQUALS(m_followed_body_id, b2_body_id))
+        m_followed_body_id = b2_nullBodyId;
     m_bodies.erase(_body_id);
-    destroyBody(body);
+    destroyBody(b2_body_id);
     return true;
 }
 
-void Scene::destroyBody(b2Body * _body)
+void Scene::destroyBody(b2BodyId _body_id)
 {
-    Body * body = getUserData(_body);
-    mp_b2_world->DestroyBody(_body);
+    Body * body = getUserData(_body_id);
+    b2DestroyBody(_body_id);
     delete body;
 }
 
-b2Body * Scene::findBody(uint64_t _body_id) const
+b2BodyId Scene::findBody(uint64_t _body_id) const
 {
     auto it = m_bodies.find(_body_id);
-    return it == m_bodies.end() ? nullptr : it->second;
+    return it == m_bodies.end() ? b2_nullBodyId : it->second;
 }
 
 b2BodyType Scene::mapBodyType(BodyType _type)
@@ -484,21 +474,21 @@ b2BodyType Scene::mapBodyType(BodyType _type)
 
 bool Scene::setFollowedBody(uint64_t _body_id)
 {
-    mp_followed_body = findBody(_body_id);
-    return mp_followed_body != nullptr;
+    m_followed_body_id = findBody(_body_id);
+    return B2_IS_NON_NULL(m_followed_body_id);
 }
 
 void Scene::resetFollowedBody()
 {
-    mp_followed_body = nullptr;
+    m_followed_body_id = b2_nullBodyId;
 }
 
 bool Scene::setBodyLayer(uint64_t _body_id, const std::string & _layer)
 {
-    b2Body * body = findBody(_body_id);
-    if(body == nullptr)
+    b2BodyId b2_body_id = findBody(_body_id);
+    if(B2_IS_NULL(b2_body_id))
         return false;
-    getUserData(body)->setLayer(_layer);
+    getUserData(b2_body_id)->setLayer(_layer);
     return true;
 }
 
@@ -507,10 +497,10 @@ bool Scene::setBodyShapeCurrentGraphic(
     const std::string & _shape_key,
     const std::string & _graphic_key)
 {
-    b2Body * body = findBody(_body_id);
-    if(body == nullptr)
+    b2BodyId b2_body_id = findBody(_body_id);
+    if(B2_IS_NULL(b2_body_id))
         return false;
-    BodyShape * shape = getUserData(body)->findShape(_shape_key);
+    BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
     if(shape == nullptr)
         return false;
     return shape->setCurrentGraphic(_graphic_key);
@@ -523,10 +513,10 @@ bool Scene::flipBodyShapeGraphic(
     bool _flip_horizontally,
     bool _flip_vertically)
 {
-    b2Body * body = findBody(_body_id);
-    if(body == nullptr)
+    b2BodyId b2_body_id = findBody(_body_id);
+    if(B2_IS_NULL(b2_body_id))
         return false;
-    BodyShape * shape = getUserData(body)->findShape(_shape_key);
+    BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
     if(shape == nullptr)
         return false;
     return shape->flipGraphic(_graphic_key, _flip_horizontally, _flip_vertically);
@@ -534,7 +524,7 @@ bool Scene::flipBodyShapeGraphic(
 
 bool Scene::loadTileMap(const std::filesystem::path & _file_path)
 {
-    deinitialize();
+    deinitializeTileMap();
     m_tile_heap_ptr.reset();
     m_tile_map_ptr.reset();
     m_object_heap_ptr.reset();
@@ -552,7 +542,8 @@ void Scene::render(const RenderState & _state)
         return;
     }
     executeDefers();
-    mp_b2_world->Step(_state.time_passed.count() / 1000.0f, 8, 3); // TODO: stable rate (1.0f / 60.0f), all from user settings
+    b2World_Step(m_b2_world_id, _state.time_passed.count() / 1000.0f, 4); // TODO: stable rate (1.0f / 60.0f), all from user settings
+    handleBox2dContactEvents();
     syncWorldWithFollowedBody();
     const Color & bg_color = m_tile_map_ptr->getBackgroundColor();
     SDL_SetRenderDrawColor(&mr_renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
@@ -563,9 +554,10 @@ void Scene::render(const RenderState & _state)
         bodies_to_render.insert(pair.first);
     drawLayersAndBodies(*m_tile_map_ptr, bodies_to_render, _state.time_passed);
     for(const uint64_t body_id : bodies_to_render)
-        drawBody(*m_bodies[body_id], _state.time_passed);
+        drawBody(m_bodies[body_id], _state.time_passed);
 
-    drawBox2D();
+    if(mp_box2d_debug_draw)
+        mp_box2d_debug_draw->draw();
 }
 
 void Scene::executeDefers()
@@ -578,15 +570,77 @@ void Scene::executeDefers()
     }
 }
 
+void Scene::handleBox2dContactEvents()
+{
+    Contact contact;
+
+    {
+        b2ContactEvents contact_events = b2World_GetContactEvents(m_b2_world_id);
+        for(int i = 0; i < contact_events.beginCount; ++i)
+        {
+            b2ContactBeginTouchEvent & event = contact_events.beginEvents[i];
+            if(tryGetContact(event.shapeIdA, event.shapeIdB, contact))
+                callObservers(&ContactObserver::beginContact, contact);
+        }
+        for(int i = 0; i < contact_events.endCount; ++i)
+        {
+            b2ContactEndTouchEvent & event = contact_events.endEvents[i];
+            if(tryGetContact(event.shapeIdA, event.shapeIdB, contact))
+                callObservers(&ContactObserver::endContact, contact);
+        }
+    }
+
+    {
+        b2SensorEvents sensor_events = b2World_GetSensorEvents(m_b2_world_id);
+        for(int i = 0; i < sensor_events.beginCount; ++i)
+        {
+            b2SensorBeginTouchEvent & event = sensor_events.beginEvents[i];
+            if(tryGetContact(event.visitorShapeId, event.sensorShapeId, contact))
+                callObservers(&ContactObserver::beginContact, contact);
+        }
+        for(int i = 0; i < sensor_events.endCount; ++i)
+        {
+            b2SensorEndTouchEvent & event = sensor_events.endEvents[i];
+            if(tryGetContact(event.visitorShapeId, event.sensorShapeId, contact))
+                callObservers(&ContactObserver::endContact, contact);
+        }
+    }
+}
+
+bool Scene::tryGetContact(b2ShapeId _shape_id_a, b2ShapeId _shape_id_b, Contact & _contact)
+{
+    b2BodyId b2_body_id_a = b2Shape_GetBody(_shape_id_a);
+    b2BodyId b2_body_id_b = b2Shape_GetBody(_shape_id_b);
+    BodyShape * shape_a = getUserData(_shape_id_a);
+    BodyShape * shape_b = getUserData(_shape_id_b);
+    Body * body_a = getUserData(b2_body_id_a);
+    Body * body_b = getUserData(b2_body_id_b);
+    if(shape_a && shape_b && body_a && body_b)
+    {
+        _contact.side_a = {
+            .body_id = body_a->getId(),
+            .shape_key = shape_a->getKey(),
+            .tile_map_object_id = shape_a->getTileMapObjectId()
+        };
+        _contact.side_b = {
+            .body_id = body_b->getId(),
+            .shape_key = shape_b->getKey(),
+            .tile_map_object_id = shape_b->getTileMapObjectId()
+        };
+        return true;
+    }
+    return false;
+}
+
 void Scene::syncWorldWithFollowedBody()
 {
-    if(mp_followed_body == nullptr)
+    if(B2_IS_NULL(m_followed_body_id))
     {
         return;
     }
     int output_width, output_height;
     SDL_GetCurrentRenderOutputSize(&mr_renderer, &output_width, &output_height);
-    b2Vec2 followed_body_position = mp_followed_body->GetPosition();
+    b2Vec2 followed_body_position = b2Body_GetPosition(m_followed_body_id);
     m_world_offset.x = followed_body_position.x * m_scale_factor - static_cast<float>(output_width) / 2;
     m_world_offset.y = followed_body_position.y * m_scale_factor - static_cast<float>(output_height) / 2;
     const int32_t map_x = m_tile_map_ptr->getX() * m_tile_map_ptr->getTileWidth();
@@ -613,17 +667,20 @@ void Scene::syncWorldWithFollowedBody()
     }
 }
 
-void Scene::drawBody(b2Body & _body, std::chrono::milliseconds _time_passed)
+void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
 {
     GraphicsRenderOptions options; // TODO: to FixtureUserData? How to rotate multiple shapes?
     Point body_position;
     {
-        b2Vec2 pos = _body.GetPosition();
+        b2Vec2 pos = b2Body_GetPosition(_body_id);
         body_position = toAbsoluteCoords(pos.x * m_scale_factor, pos.y * m_scale_factor);
     }
-    for(b2Fixture * fixture = _body.GetFixtureList(); fixture; fixture = fixture->GetNext())
+    int shape_count = b2Body_GetShapeCount(_body_id);
+    std::vector<b2ShapeId> shapes(shape_count);
+    b2Body_GetShapes(_body_id, shapes.data(), shape_count);
+    for(const b2ShapeId & shape_id : shapes)
     {
-        BodyShape * shape = getUserData(fixture);
+        BodyShape * shape = getUserData(shape_id);
         BodyShapeGraphics * shape_graphic = shape->getCurrentGraphics();
         if(shape_graphic)
         {
@@ -660,17 +717,17 @@ void Scene::drawLayersAndBodies(
         }}
         for(const auto & pair : m_bodies)
         {
-            b2Body * box2d_body = pair.second;
-            Body * body = getUserData(box2d_body);
+            b2BodyId box2d_body_id = pair.second;
+            Body * body = getUserData(box2d_body_id);
             if(body->getLayer() == __layer.getName() && _bodies_to_render.erase(pair.first))
-                drawBody(*box2d_body, _time_passed);
+                drawBody(box2d_body_id, _time_passed);
         }
     });
 }
 
 void Scene::drawObjectLayer(const TileMapObjectLayer & _layer)
 {
-    SDL_SetRenderDrawColor(&mr_renderer, 10, 0, 200, 100);
+    SDL_SetRenderDrawColor(&mr_renderer, 10, 0, 200, 255);
     _layer.forEachObject([this](const TileMapObject & __object) {
         if(!__object.isVisible()) return;
         // TODO: if in viewport
@@ -739,7 +796,7 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
     const float start_y = first_row * m_tile_map_ptr->getTileHeight() - camera.y;
 
     SDL_FRect src_rect;
-    SDL_FRect dest_rect =
+    SDL_FRect dest_rect
     {
         .x = .0f,
         .y = .0f,
@@ -776,116 +833,48 @@ void Scene::drawImageLayer(const TileMapImageLayer & _layer)
     SDL_RenderTexture(&mr_renderer, image.get(), nullptr, &dim);
 }
 
-void Scene::drawBox2D()
-{
-    for(b2Body * body = mp_b2_world->GetBodyList(); body; body = body->GetNext())
-    {
-        const b2Vec2 & body_pos = body->GetPosition();
-        const Point body_abs_pos = toAbsoluteCoords(body_pos.x * m_scale_factor, body_pos.y * m_scale_factor);
-        SDL_SetRenderDrawColor(&mr_renderer, 20, 255, 255, 100);
-        SDL_RenderLine(&mr_renderer, body_abs_pos.x, body_abs_pos.y - 8, body_abs_pos.x, body_abs_pos.y + 8);
-        SDL_RenderLine(&mr_renderer, body_abs_pos.x - 8, body_abs_pos.y, body_abs_pos.x + 8, body_abs_pos.y);
-        for(b2Fixture * fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
-        {
-            if(fixture->IsSensor())
-                SDL_SetRenderDrawColor(&mr_renderer, 20, 255, 20, 100);
-            else
-                SDL_SetRenderDrawColor(&mr_renderer, 255, 20, 20, 100);
-            b2Shape * shape = fixture->GetShape();
-            switch(shape->GetType()) {
-            case b2Shape::e_polygon:
-            {
-                b2PolygonShape * polygon = dynamic_cast<b2PolygonShape *>(shape);
-                float angle = body->GetAngle();
-                std::unique_ptr<VectorRotator> rotator;
-                if(angle)
-                    rotator.reset(new VectorRotator(angle));
-                for(int32 i = 1; i < polygon->m_count; ++i)
-                {
-                    Point a = makePoint(polygon->m_vertices[i - 1].x, polygon->m_vertices[i - 1].y);
-                    Point b = makePoint(polygon->m_vertices[i].x, polygon->m_vertices[i].y);
-                    if(rotator)
-                    {
-                        a = rotator->rotate(a);
-                        b = rotator->rotate(b);
-                    }
-                    a = toAbsoluteCoords((a.x + body_pos.x) * m_scale_factor, (a.y + body_pos.y) * m_scale_factor);
-                    b = toAbsoluteCoords((b.x + body_pos.x) * m_scale_factor, (b.y + body_pos.y) * m_scale_factor);
-                    SDL_RenderLine(&mr_renderer, a.x, a.y, b.x, b.y);
-                }
-                Point a =  makePoint(polygon->m_vertices[0].x, polygon->m_vertices[0].y);
-                Point b = makePoint(
-                    polygon->m_vertices[polygon->m_count - 1].x,
-                    polygon->m_vertices[polygon->m_count - 1].y);
-                if(rotator)
-                {
-                    a = rotator->rotate(a);
-                    b = rotator->rotate(b);
-                }
-                a = toAbsoluteCoords((a.x + body_pos.x) * m_scale_factor, (a.y + body_pos.y) * m_scale_factor);
-                b = toAbsoluteCoords((b.x + body_pos.x) * m_scale_factor, (b.y + body_pos.y) * m_scale_factor);
-                SDL_RenderLine(&mr_renderer, a.x, a.y, b.x, b.y);
-                break;
-            }
-            case b2Shape::e_circle:
-            {
-                b2CircleShape * circle = dynamic_cast<b2CircleShape *>(shape);
-                Point center = toAbsoluteCoords(
-                    body_pos.x * m_scale_factor,
-                    body_pos.y * m_scale_factor
-                );
-                sdlRenderCircle(&mr_renderer, center, static_cast<uint32_t>(circle->m_radius * m_scale_factor));
-                break;
-            }
-            default:
-                break;
-            }
-        }
-    }
-}
-
 Point Scene::toAbsoluteCoords(float _world_x, float _world_y) const
 {
-    Point result;
-    result.x = _world_x - m_world_offset.x;
-    result.y = _world_y - m_world_offset.y;
-    return result;
+    return { .x = _world_x - m_world_offset.x, .y = _world_y - m_world_offset.y };
 }
 
 void Scene::applyForce(uint64_t _body_id, const Point & _force)
 {
-    if(mp_b2_world->IsLocked())
-        m_defers.push_front([=, this]() { applyForce(_body_id, _force); });
-    else if(b2Body * body = findBody(_body_id))
-        body->ApplyForceToCenter(b2Vec2(_force.x / m_scale_factor, _force.y / m_scale_factor), true); // TODO: what is wake?
+    m_defers.push_front([this, _body_id, _force]() {
+        b2BodyId b2_body_id = findBody(_body_id);
+        if(B2_IS_NON_NULL(b2_body_id))
+        {
+            b2Body_ApplyForceToCenter(
+                b2_body_id,
+                b2Vec2(_force.x / m_scale_factor, _force.y / m_scale_factor),
+                true); // TODO: what is wake?
+        }
+    });
 }
 
 void Scene::setBodyPosition(uint64_t _body_id, const Point & _position)
 {
-    if(mp_b2_world->IsLocked())
-        m_defers.push_front([=, this]() { setBodyPosition(_body_id, _position); });
-    else if(b2Body * body = findBody(_body_id))
-        body->SetTransform(b2Vec2(_position.x / m_scale_factor, _position.y / m_scale_factor), body->GetAngle());
+    m_defers.push_front([this, _body_id, _position]() {
+        b2BodyId b2_body_id = findBody(_body_id);
+        if(B2_IS_NON_NULL(b2_body_id))
+        {
+            b2Body_SetTransform(
+                b2_body_id,
+                b2Vec2(_position.x / m_scale_factor, _position.y / m_scale_factor),
+                b2Body_GetRotation(b2_body_id));
+        }
+    });
 }
 
 std::optional<Point> Scene::getBodyPosition(uint64_t _body_id) const
 {
-    if(b2Body * body = findBody(_body_id))
+    b2BodyId b2_body_id = findBody(_body_id);
+    if(B2_IS_NON_NULL(b2_body_id))
     {
-        b2Vec2 pos = body->GetPosition();
+        b2Vec2 pos = b2Body_GetPosition(b2_body_id);
         return makePoint(pos.x * m_scale_factor, pos.y * m_scale_factor);
     }
     return std::optional<Point>();
-}
-
-void Scene::addObserver(ContactObserver & _observer)
-{
-    mp_contact_listener->addObserver(_observer);
-}
-
-void Scene::removeObserver(ContactObserver & _observer)
-{
-    mp_contact_listener->removeObserver(_observer);
 }
 
 std::optional<std::vector<Point>> Scene::findPath(
@@ -894,14 +883,14 @@ std::optional<std::vector<Point>> Scene::findPath(
     bool _allow_diagonal_steps,
     bool _avoid_sensors) const
 {
-    const b2Body * body = findBody(_body_id);
-    if(!body)
+    const b2BodyId b2_body_id = findBody(_body_id);
+    if(B2_IS_NULL(b2_body_id))
         return std::optional<std::vector<Point>>();
     b2Vec2 dest(_destination.x / m_scale_factor, _destination.y / m_scale_factor);
     AStarOptions options;
     options.allow_diagonal_steps = _allow_diagonal_steps;
     options.avoid_sensors = _avoid_sensors;
-    auto b2_result = aStarFindPath(*mp_b2_world, *body, dest, options);
+    auto b2_result = aStarFindPath(m_b2_world_id, b2_body_id, dest, options);
     if(!b2_result.has_value())
         return std::optional<std::vector<Point>>();
     std::vector<Point> result(b2_result.value().size());

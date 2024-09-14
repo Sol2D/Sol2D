@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <Sol2D/Box2dDebugDraw.h>
+#include <Sol2D/Utils/Observable.h>
 #include <Sol2D/BodyPrototype.h>
 #include <Sol2D/BodyOptions.h>
 #include <Sol2D/BodyShapeOptions.h>
@@ -23,8 +25,7 @@
 #include <Sol2D/Canvas.h>
 #include <Sol2D/Workspace.h>
 #include <Sol2D/Tiles/TileMap.h>
-#include <box2d/b2_world.h>
-#include <box2d/b2_body.h>
+#include <box2d/types.h>
 #include <boost/container/slist.hpp>
 #include <filesystem>
 #include <unordered_set>
@@ -32,13 +33,7 @@
 
 namespace Sol2D {
 
-namespace Private {
-
-class SceneContactListener;
-
-} // namespace Private
-
-class Scene final : public Canvas
+class Scene final : public Canvas, public Utils::Observable<ContactObserver>
 {
 public:
     Scene(const Workspace & _workspace, SDL_Renderer & _renderer);
@@ -70,45 +65,44 @@ public:
     void applyForce(uint64_t _body_id, const Point & _force);
     void setBodyPosition(uint64_t _body_id, const Point & _position);
     std::optional<Point> getBodyPosition(uint64_t _body_id) const;
-    void addObserver(ContactObserver & _observer);
-    void removeObserver(ContactObserver & _observer);
     std::optional<std::vector<Point> > findPath(uint64_t _body_id,
         const Point & _destination,
         bool _allow_diagonal_steps,
         bool _avoid_sensors) const;
 
 private:
-    void deinitialize();
-    void destroyBody(b2Body * _body);
+    void deinitializeTileMap();
+    void destroyBody(b2BodyId _body_id);
     static b2BodyType mapBodyType(BodyType _type);
     void executeDefers();
+    void handleBox2dContactEvents();
+    bool tryGetContact(b2ShapeId _shape_id_a, b2ShapeId _shape_id_b, Contact & _contact);
     void syncWorldWithFollowedBody();
     void drawLayersAndBodies(const Tiles::TileMapLayerContainer & _container,
                              std::unordered_set<uint64_t> & _bodies_to_render,
                              std::chrono::milliseconds _time_passed);
-    b2Body * findBody(uint64_t _body_id) const;
-    void drawBody(b2Body & _body, std::chrono::milliseconds _time_passed);
+    b2BodyId findBody(uint64_t _body_id) const;
+    void drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed);
     void drawObjectLayer(const Tiles::TileMapObjectLayer & _layer);
     void drawPolyXObject(const Tiles::TileMapPolyX & _poly, bool _close);
     void drawCircle(const Tiles::TileMapCircle & _circle);
     void drawTileLayer(const Tiles::TileMapTileLayer & _layer);
     void drawImageLayer(const Tiles::TileMapImageLayer & _layer);
-    void drawBox2D();
     Point toAbsoluteCoords(float _world_x, float _world_y) const;
 
 private:
     const Workspace & mr_workspace;
     SDL_Renderer & mr_renderer;
     Point m_world_offset;
-    b2World * mp_b2_world;
+    b2WorldId m_b2_world_id;
     float m_scale_factor;
-    std::unordered_map<uint64_t, b2Body *> m_bodies;
-    b2Body * mp_followed_body;
-    Private::SceneContactListener * mp_contact_listener;
+    std::unordered_map<uint64_t, b2BodyId> m_bodies;
+    b2BodyId m_followed_body_id;
     std::unique_ptr<Tiles::TileHeap> m_tile_heap_ptr;
     std::unique_ptr<Tiles::ObjectHeap> m_object_heap_ptr;
     std::unique_ptr<Tiles::TileMap> m_tile_map_ptr;
     boost::container::slist<std::function<void()>> m_defers;
+    Box2dDebugDraw * mp_box2d_debug_draw;
 };
 
 inline const Tiles::TileMapObject * Scene::getTileMapObjectById(uint32_t _id) const
