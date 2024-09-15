@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <Sol2D/Rect.h>
 #include <cstdint>
 #include <string>
 #include <optional>
@@ -41,6 +42,14 @@ struct SensorContact
     ContactSide sensor;
 };
 
+struct PreSolveContact
+{
+    ContactSide side_a;
+    ContactSide side_b;
+    Point normal;
+    // TODO: points
+};
+
 class ContactObserver
 {
 public:
@@ -49,6 +58,7 @@ public:
     virtual void endContact(const Contact & _contact) = 0;
     virtual void beginSensorContact(const SensorContact & _contact) = 0;
     virtual void endSensorContact(const SensorContact & _contact) = 0;
+    virtual bool preSolveContact(const PreSolveContact & _contact) = 0;
 };
 
 } // namespace Sol2D

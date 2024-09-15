@@ -2,14 +2,18 @@
 ---@field scene sol.Scene
 ---@field store sol.Store
 
+require 'player'
+
 ---@class Resources
 ---@field platformSpriteSheet sol.SpriteSheet
+
+local platform_shape_key = 'platform'
 
 ---@param level Level01
 ---@return Resources
 local function loadResources(level)
     local resources = {}
-    resources.platformSpriteSheet = level.store:createObject('sol.SpriteSheet', 'platform')
+    resources.platformSpriteSheet = level.store:createObject('sol.SpriteSheet', platform_shape_key)
     if (not resources.platformSpriteSheet:loadFromFile(
             'sprites/platform/platform.png',
             { colCount = 3, rowCount = 1, spriteWidth = 128, spriteHeight = 64 }
@@ -44,6 +48,30 @@ local function createPlatform(level, resources)
     end
 end
 
+---@param contact PreSolveContact
+---@return boolean
+local function preSolveContact(contact)
+    local player_side = nil
+    local platform_side = nil
+    local sign = 0
+    if contact.sideA.shapeKey == Player.getMetadata().shapes.main then
+        player_side = contact.sideA
+        platform_side = contact.sideB
+        sign = 1
+    elseif contact.sideB.shapeKey == Player.getMetadata().shapes.main then
+        player_side = contact.sideB
+        platform_side = contact.sideA
+        sign = -1
+    end
+    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= platform_shape_key then
+        return true
+    end
+    if contact.normal.y * sign <= 0.95 then
+        return false;
+    end
+    return true
+end
+
 ---@return Level01
 local function createLevel()
     local store = sol.stores:createStore('level-01')
@@ -56,6 +84,7 @@ local function createLevel()
     }
     local resources = loadResources(level)
     createPlatform(level, resources)
+    scene:subscribeToPreSolveContact(preSolveContact)
     return level
 end
 

@@ -171,7 +171,9 @@ void LuaCallbackStorage::execute(
     const Workspace & _workspace,
     const void * _owner,
     uint16_t _event_id,
-    uint16_t _args_count)
+    uint16_t _args_count,
+    uint16_t _return_count /*= 0*/,
+    std::optional<std::function<bool()>> _callback /*= std::nullopt*/)
 {
     if(s_is_disposed) return;
 
@@ -181,7 +183,7 @@ void LuaCallbackStorage::execute(
         return;
     const int callbacks_table_idx = lua_gettop(mp_lua);
     lua_pushnil(mp_lua);
-    while(lua_next(mp_lua, callbacks_table_idx))
+    for(bool exit = false; !exit && lua_next(mp_lua, callbacks_table_idx);)
     {
         if(lua_type(mp_lua, -2) != LUA_TNUMBER)
         {
@@ -190,11 +192,15 @@ void LuaCallbackStorage::execute(
         }
         for(uint32_t i = 1; i <= _args_count; ++i)
             lua_pushvalue(mp_lua, args_top - _args_count + i);
-        if(lua_pcall(mp_lua, _args_count, 0, 0) != LUA_OK)
+        if(lua_pcall(mp_lua, _args_count, _return_count, 0) != LUA_OK)
         {
             _workspace.getMainLogger().error(lua_tostring(mp_lua, -1));
             lua_pop(mp_lua, 1);
         }
+        if(_callback.has_value() && !_callback.value()())
+            exit = true;
+        if(_return_count)
+            lua_pop(mp_lua, _return_count);
     }
     lua_pop(mp_lua, _args_count + 2);
 }

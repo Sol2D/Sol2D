@@ -42,6 +42,7 @@ public:
 protected:
     template<ObserverMethodConcept Method, typename ...Args>
     void callObservers(Method _method, Args ... _args);
+    void forEachObserver(std::function<bool(Observer &)> _callback);
 
 private:
     void modifyObserverCollection(std::function<void(ObserverList&)> _callback);
@@ -94,6 +95,17 @@ void Observable<Observer>::callObservers(Method _method, Args... _args)
     auto observers = m_observers.load(std::memory_order::acquire);
     for(auto & observer : *observers)
         (observer->*_method)(_args...);
+}
+
+template<typename Observer>
+void Observable<Observer>::forEachObserver(std::function<bool(Observer &)> _callback)
+{
+    auto observers = m_observers.load(std::memory_order::acquire);
+    for(auto & observer : *observers)
+    {
+        if(!_callback(*observer))
+            return;
+    }
 }
 
 } // namespace Sol2D::Utils

@@ -80,6 +80,7 @@ self = nil
 
 ---@class BodyShapeOptions
 ---@field isSensor boolean?
+---@field isPreSolveEnabled boolean?
 ---@field density number?
 
 ---@class Fragment
@@ -219,6 +220,7 @@ function __scene:flipBodyShapeGraphic(body_id, shape_key, graphic_key, flip_hori
 
 ---@alias ContactCallback fun(contact: Contact)
 ---@alias SensorContactCallback fun(contact: SensorContact)
+---@alias PreSolveContactCallback fun(contact: PreSolveContact)
 
 ---@param callback ContactCallback
 ---@return integer subscription ID
@@ -247,6 +249,13 @@ function __scene:subscribeToSensorEndContact(callback) end
 
 ---@param subscription_id integer
 function __scene:unsubscribeFromSesnsorEndContact(subscription_id) end
+
+---@param callback PreSolveContactCallback
+---@return integer subscription ID
+function __scene:subscribeToPreSolveContact(callback) end
+
+---@param subscription_id integer
+function __scene:unsubscribePreSolveContact(subscription_id) end
 
 ---@param body_id integer
 ---@param destination Point
@@ -363,6 +372,11 @@ function __button:unsubscribeOnClick(subscription_id) end
 ---@class SensorContact
 ---@field sensor ContactSide
 ---@field visitor ContactSide
+
+---@class PreSolveContact
+---@field sideA ContactSide
+---@field sideB ContactSide
+---@field normal Point
 
 ---@class ContactSide
 ---@field bodyId integer
@@ -545,11 +559,17 @@ function __body_shape_prototype:addGraphics(key, graphics_pack, options) end
 ---@see sol.BodyShapeType
 function __body_shape_prototype:getType() end
 
----@param is_sensor boolean
+---@param is_sensor boolean?
 function __body_shape_prototype:setIsSensor(is_sensor) end
 
 ---@return boolean
 function __body_shape_prototype:isSensor() end
+
+---@param enabled boolean?
+function __body_shape_prototype:setIsPreSolveEnabled(enabled) end
+
+---@return boolean
+function __body_shape_prototype:isPreSolveEnabled() end
 
 ---@param key string
 function __body_shape_prototype:removeGraphics(key) end

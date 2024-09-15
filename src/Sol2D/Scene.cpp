@@ -116,7 +116,7 @@ public:
     const std::optional<std::string> & getLayer() const;
     BodyShape & createShape(
         const std::string & _key,
-        std::optional<uint32_t> _tile_map_object_id = std::optional<uint32_t>());
+        std::optional<uint32_t> _tile_map_object_id = std::nullopt);
     BodyShape * findShape(const std::string & _key);
 
 private:
@@ -156,7 +156,7 @@ inline const std::optional<std::string> & Body::getLayer() const
 
 inline BodyShape & Body::createShape(
     const std::string & _key,
-    std::optional<uint32_t> _tile_map_object_id /*= std::optional<uint32_t>()*/)
+    std::optional<uint32_t> _tile_map_object_id /*= std::nullopt*/)
 {
     BodyShape * shape = new BodyShape(_key, _tile_map_object_id);
     m_shapes.insert(std::make_pair(_key, shape));
@@ -181,64 +181,6 @@ inline BodyShape * getUserData(b2ShapeId _shape_id)
 
 } // namespace
 
-//namespace Sol2D::Private {
-
-// class SceneContactListener final : public b2ContactListener, public Observable<ContactObserver>
-// {
-// public:
-//     void BeginContact(b2Contact * _contact) override;
-//     void EndContact(b2Contact * _contact) override;
-
-// private:
-//     bool tryGetContact(b2Contact & _b2_contact, Contact & _contact);
-// };
-
-// void SceneContactListener::BeginContact(b2Contact * _contact)
-// {
-//     if(!_contact->IsTouching())
-//         return;
-//     Contact contact;
-//     if(tryGetContact(*_contact, contact))
-//         callObservers(&ContactObserver::beginContact, contact);
-// }
-
-// bool SceneContactListener::tryGetContact(b2Contact & _b2_contact, Contact & _contact)
-// {
-//     b2Fixture * b2_fixture_a = _b2_contact.GetFixtureA();
-//     b2Fixture * b2_fixture_b = _b2_contact.GetFixtureB();
-//     b2Body * b2_body_a = b2_fixture_a->GetBody();
-//     b2Body * b2_body_b = b2_fixture_b->GetBody();
-//     BodyShape * shape_a = getUserData(b2_fixture_a);
-//     BodyShape * shape_b = getUserData(b2_fixture_b);
-//     Body * body_a = getUserData(b2_body_a);
-//     Body * body_b = getUserData(b2_body_b);
-//     if(shape_a && shape_b && body_a && body_b)
-//     {
-//         _contact.side_a = {
-//             .body_id = body_a->getId(),
-//             .shape_key = shape_a->getKey(),
-//             .tile_map_object_id = shape_a->getTileMapObjectId()
-//         };
-//         _contact.side_b = {
-//             .body_id = body_b->getId(),
-//             .shape_key = shape_b->getKey(),
-//             .tile_map_object_id = shape_b->getTileMapObjectId()
-//         };
-//         return true;
-//     }
-//     return false;
-// }
-
-// void SceneContactListener::EndContact(b2Contact * _contact)
-// {
-//     Contact contact;
-//     if(tryGetContact(*_contact, contact))
-//         callObservers(&ContactObserver::endContact, contact);
-// }
-
-//} // namespace Sol2D::Private
-
-
 Scene::Scene(const Workspace & _workspace, SDL_Renderer & _renderer) :
     mr_workspace(_workspace),
     mr_renderer(_renderer),
@@ -250,6 +192,7 @@ Scene::Scene(const Workspace & _workspace, SDL_Renderer & _renderer) :
     b2WorldDef world_def = b2DefaultWorldDef();
     world_def.gravity = { .0f, .0f }; // TODO: from parameters
     m_b2_world_id = b2CreateWorld(&world_def);
+    b2World_SetPreSolveCallback(m_b2_world_id, &Scene::box2dPreSolveContact, this);
     mp_box2d_debug_draw = new Box2dDebugDraw( // TODO: enable/disable from parameters
         mr_renderer,
         m_b2_world_id,
@@ -312,6 +255,7 @@ uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _proto
             b2_shape_def.density = .002f; // TODO: real value from user
         }
         b2_shape_def.isSensor = __shape_proto.isSensor();
+        b2_shape_def.enablePreSolveEvents = __shape_proto.isPreSolveEnabled();
 
         switch(__shape_proto.getType())
         {
@@ -389,6 +333,7 @@ void Scene::createBodiesFromMapObjects(
 
         b2ShapeDef b2_shape_def = b2DefaultShapeDef();
         b2_shape_def.isSensor = _shape_options.is_sensor;
+        b2_shape_def.enablePreSolveEvents = _shape_options.is_pre_solve_enalbed;
         if(_body_options.type == BodyType::Dynamic)
             b2_shape_def.density = _shape_options.density;
 
@@ -568,6 +513,22 @@ void Scene::executeDefers()
             action();
         m_defers.clear();
     }
+}
+
+bool Scene::box2dPreSolveContact(b2ShapeId _shape_id_a, b2ShapeId _shape_id_b, b2Manifold * _manifold, void * _context)
+{
+    Scene * self = static_cast<Scene *>(_context);
+    bool result = true;
+    PreSolveContact contact;
+    if(!tryGetContactSide(_shape_id_a, contact.side_a) || !tryGetContactSide(_shape_id_b, contact.side_b))
+        return true;
+    contact.normal = { .x = _manifold->normal.x, .y = _manifold->normal.y }; // TODO: scale?
+    self->forEachObserver([&result, &contact](ContactObserver & __observer) {
+        if(!__observer.preSolveContact(contact))
+            result = false;
+        return result;
+    });
+    return result;
 }
 
 void Scene::handleBox2dContactEvents()
@@ -870,7 +831,7 @@ std::optional<Point> Scene::getBodyPosition(uint64_t _body_id) const
         b2Vec2 pos = b2Body_GetPosition(b2_body_id);
         return makePoint(pos.x * m_scale_factor, pos.y * m_scale_factor);
     }
-    return std::optional<Point>();
+    return std::nullopt;
 }
 
 std::optional<std::vector<Point>> Scene::findPath(
@@ -881,14 +842,14 @@ std::optional<std::vector<Point>> Scene::findPath(
 {
     const b2BodyId b2_body_id = findBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
-        return std::optional<std::vector<Point>>();
+        return std::nullopt;
     b2Vec2 dest(_destination.x / m_scale_factor, _destination.y / m_scale_factor);
     AStarOptions options;
     options.allow_diagonal_steps = _allow_diagonal_steps;
     options.avoid_sensors = _avoid_sensors;
     auto b2_result = aStarFindPath(m_b2_world_id, b2_body_id, dest, options);
     if(!b2_result.has_value())
-        return std::optional<std::vector<Point>>();
+        return std::nullopt;
     std::vector<Point> result(b2_result.value().size());
     for(size_t i = 0; i < b2_result.value().size(); ++i)
         result[i] = makePoint(b2_result.value()[i].x * m_scale_factor, b2_result.value()[i].y * m_scale_factor);

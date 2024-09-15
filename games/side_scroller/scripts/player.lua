@@ -105,6 +105,7 @@ function Player.createPrototype(store)
     hit_box.x = -(hit_box.w / 2)
     hit_box.y = -hit_box.h
     local shape = data.proto:createPolygonShape(data.shapes.main, hit_box)
+    shape:setIsPreSolveEnabled(true)
     createIdleAnimation(store, shape, SCALE_FACTOR)
     createWalkAnimations(store, shape, SCALE_FACTOR)
     return data

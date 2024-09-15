@@ -22,11 +22,13 @@ struct BodyShapeOptions
 {
     BodyShapeOptions() :
         is_sensor(false),
+        is_pre_solve_enalbed(false),
         density(.0f)
     {
     }
 
     bool is_sensor;
+    bool is_pre_solve_enalbed;
     float density;
 };
 

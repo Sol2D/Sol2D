@@ -12,6 +12,16 @@ local function createFragment(view, options)
     }
 end
 
+---@param scene sol.Scene
+---@return Point
+local function getStartPosition(scene)
+    local start_postion = scene:getTileMapObjectByName('start-position')
+    if start_postion then
+        return start_postion.position
+    end
+    return { x = 410, y = 200 }
+end
+
 (function()
     local main_store = sol.stores:createStore('main')
     local main_view = main_store:createObject('sol.View', 'main')
@@ -22,7 +32,7 @@ end
     sol.window:setView(main_view)
 
     local player_proto = Player.createPrototype(main_store)
-    local player_id = level_01.scene:createBody({ x = 410, y = 200 }, player_proto.proto)
+    local player_id = level_01.scene:createBody(getStartPosition(level_01.scene), player_proto.proto)
     level_01.scene:setBodyShapeCurrentGraphic(
         player_id,
         player_proto.shapes.main,

@@ -33,7 +33,8 @@ class BodyShapePrototype
 private:
     explicit BodyShapePrototype(BodyShapeType _type) :
         m_type(_type),
-        m_is_sensor(false)
+        m_is_sensor(false),
+        m_is_pre_solve_enabled(false)
     {
     }
 
@@ -55,6 +56,16 @@ public:
         return m_is_sensor;
     }
 
+    void setIsPreSolveEnabled(bool _enabled)
+    {
+        m_is_pre_solve_enabled = _enabled;
+    }
+
+    bool isPreSolveEnabled() const
+    {
+        return m_is_pre_solve_enabled;
+    }
+
     void addGraphics(
         const std::string & _key,
         const GraphicsPack & _graphics,
@@ -68,6 +79,7 @@ public:
 private:
     BodyShapeType m_type;
     bool m_is_sensor;
+    bool m_is_pre_solve_enabled;
     std::unordered_map<std::string, BodyShapeGraphics *> m_graphic_map;
 };
 

@@ -65,7 +65,8 @@ public:
     void applyForce(uint64_t _body_id, const Point & _force);
     void setBodyPosition(uint64_t _body_id, const Point & _position);
     std::optional<Point> getBodyPosition(uint64_t _body_id) const;
-    std::optional<std::vector<Point> > findPath(uint64_t _body_id,
+    std::optional<std::vector<Point> > findPath(
+        uint64_t _body_id,
         const Point & _destination,
         bool _allow_diagonal_steps,
         bool _avoid_sensors) const;
@@ -75,12 +76,18 @@ private:
     void destroyBody(b2BodyId _body_id);
     static b2BodyType mapBodyType(BodyType _type);
     void executeDefers();
+    static bool box2dPreSolveContact(
+        b2ShapeId _shape_id_a,
+        b2ShapeId _shape_id_b,
+        b2Manifold * _manifold,
+        void * _context);
     void handleBox2dContactEvents();
-    bool tryGetContactSide(b2ShapeId _shape_id, ContactSide & _contact_side);
+    static bool tryGetContactSide(b2ShapeId _shape_id, ContactSide & _contact_side);
     void syncWorldWithFollowedBody();
-    void drawLayersAndBodies(const Tiles::TileMapLayerContainer & _container,
-                             std::unordered_set<uint64_t> & _bodies_to_render,
-                             std::chrono::milliseconds _time_passed);
+    void drawLayersAndBodies(
+        const Tiles::TileMapLayerContainer & _container,
+        std::unordered_set<uint64_t> & _bodies_to_render,
+        std::chrono::milliseconds _time_passed);
     b2BodyId findBody(uint64_t _body_id) const;
     void drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed);
     void drawObjectLayer(const Tiles::TileMapObjectLayer & _layer);

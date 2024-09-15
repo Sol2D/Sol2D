@@ -23,6 +23,7 @@ using namespace Sol2D::Lua::Aux;
 namespace {
 
 constexpr char gc_key_is_sensor[] = "isSensor";
+constexpr char gc_key_is_pre_solve_enabled[] = "isPreSolveEnabled";
 constexpr char gc_key_density[] = "density";
 
 } // namespace name
@@ -43,6 +44,7 @@ bool Sol2D::Lua::tryGetBodyShapeOptions(lua_State * _lua, int _idx, BodyShapeOpt
     }
 
     table.tryGetBoolean(gc_key_is_sensor, &_body_shape_options.is_sensor);
+    table.tryGetBoolean(gc_key_is_pre_solve_enabled, &_body_shape_options.is_pre_solve_enalbed);
 
     return true;
 }

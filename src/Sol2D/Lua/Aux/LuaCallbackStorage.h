@@ -19,6 +19,8 @@
 #include <Sol2D/Workspace.h>
 #include <lua.hpp>
 #include <cstdint>
+#include <functional>
+#include <optional>
 
 namespace Sol2D::Lua::Aux {
 
@@ -34,7 +36,13 @@ public:
 
     uint32_t addCallback(const void * _owner, uint16_t _event_id, int _callback_idx);
     size_t removeCallback(const void * _owner, uint16_t _event_id, uint32_t _subscription_id);
-    void execute(const Workspace & _workspace, const void * _owner, uint16_t _event_id, uint16_t _args_count);
+    void execute(
+        const Workspace & _workspace,
+        const void * _owner,
+        uint16_t _event_id,
+        uint16_t _args_count,
+        uint16_t _return_count = 0,
+        std::optional<std::function<bool()>> _callback = std::nullopt);
     void destroyCallbacks(const void * _owner);
 
 private:

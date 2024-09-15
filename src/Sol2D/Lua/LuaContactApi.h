@@ -23,5 +23,6 @@ namespace Sol2D::Lua {
 
 void pushContact(lua_State * _lua, const Contact & _contact);
 void pushContact(lua_State * _lua, const SensorContact & _contact);
+void pushContact(lua_State * _lua, const PreSolveContact & _contact);
 
 } // namespace Sol2D::Lua

@@ -43,6 +43,7 @@ const uint16_t gc_event_begin_contact = 0;
 const uint16_t gc_event_end_contact = 1;
 const uint16_t gc_event_begin_sensor_contact = 2;
 const uint16_t gc_event_end_sensor_contact = 3;
+const uint16_t gc_event_pre_solve_contact = 4;
 
 const char gc_contact_companion_key[] = "lua_contact_observer";
 
@@ -83,6 +84,18 @@ public:
     {
         pushContact(mp_lua, _contact);
         LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_end_sensor_contact, 1);
+    }
+
+    bool preSolveContact(const PreSolveContact & _contact) override
+    {
+        bool result = true;
+        pushContact(mp_lua, _contact);
+        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_pre_solve_contact, 1, 1, [this, &result]() {
+            if(lua_isboolean(mp_lua, -1))
+                result = lua_toboolean(mp_lua, -1) != 0;
+            return result;
+        });
+        return result;
     }
 
 private:
@@ -463,6 +476,28 @@ int luaApi_UnsubscribeFromSesnsorEndContact(lua_State * _lua)
 }
 
 // 1 self
+// 2 callback
+int luaApi_SubscribeToPreSolveContact(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    uint32_t id = self->subscribeOnContact(_lua, gc_event_pre_solve_contact, 2);
+    lua_pushinteger(_lua, id);
+    return 1;
+}
+
+// 1 self
+// 2 subscription ID
+int luaApi_UnsubscribePreSolveContact(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
+    self->unsubscribeOnContact(_lua, gc_event_pre_solve_contact, subscription_id);
+    return 0;
+}
+
+// 1 self
 // 2 body id
 // 3 destination
 // TODO: options
@@ -522,6 +557,8 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "unsubscribeFromBeginSensorContact", luaApi_UnsubscribeFromBeginSensorContact },
             { "subscribeToSensorEndContact", luaApi_SubscribeToSensorEndContact },
             { "unsubscribeFromSesnsorEndContact", luaApi_UnsubscribeFromSesnsorEndContact },
+            { "subscribeToPreSolveContact", luaApi_SubscribeToPreSolveContact },
+            { "unsubscribePreSolveContact", luaApi_UnsubscribePreSolveContact },
             { "findPath", luaApi_FindPath },
             { nullptr, nullptr }
         };
