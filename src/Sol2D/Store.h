@@ -74,9 +74,12 @@ struct Utils::ObjectFactory<BodyPrototype>
 template<>
 struct Utils::ObjectFactory<Scene>
 {
-    std::shared_ptr<Scene> produce(const Workspace & _workspace, SDL_Renderer & _renderer) const
+    std::shared_ptr<Scene> produce(
+        const SceneOptions & _options,
+        const Workspace & _workspace,
+        SDL_Renderer & _renderer) const
     {
-        return std::make_shared<Scene>(_workspace, _renderer);
+        return std::make_shared<Scene>(_options, _workspace, _renderer);
     }
 };
 

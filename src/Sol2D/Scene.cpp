@@ -181,28 +181,31 @@ inline BodyShape * getUserData(b2ShapeId _shape_id)
 
 } // namespace
 
-Scene::Scene(const Workspace & _workspace, SDL_Renderer & _renderer) :
+Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Renderer & _renderer) :
     mr_workspace(_workspace),
     mr_renderer(_renderer),
     m_world_offset{.0f, .0f},
-    m_scale_factor(20.0f), // TODO: from parameters
+    m_scale_factor(_options.scale_factor),
     m_followed_body_id(b2_nullBodyId),
     mp_box2d_debug_draw(nullptr)
 {
     b2WorldDef world_def = b2DefaultWorldDef();
-    world_def.gravity = { .0f, .0f }; // TODO: from parameters
+    world_def.gravity = _options.gravity;
     m_b2_world_id = b2CreateWorld(&world_def);
     b2World_SetPreSolveCallback(m_b2_world_id, &Scene::box2dPreSolveContact, this);
-    mp_box2d_debug_draw = new Box2dDebugDraw( // TODO: enable/disable from parameters
-        mr_renderer,
-        m_b2_world_id,
-        [this](float __x, float __y) {
-            return toAbsoluteCoords(__x * m_scale_factor, __y * m_scale_factor);
-        },
-        [this](float __len) {
-            return __len * m_scale_factor;
-        }
-    );
+    if(_workspace.isDebugRenderingEnabled())
+    {
+        mp_box2d_debug_draw = new Box2dDebugDraw(
+            mr_renderer,
+            m_b2_world_id,
+            [this](float __x, float __y) {
+                return toAbsoluteCoords(__x * m_scale_factor, __y * m_scale_factor);
+            },
+            [this](float __len) {
+                return __len * m_scale_factor;
+            }
+        );
+    }
 }
 
 Scene::~Scene()
@@ -660,7 +663,8 @@ void Scene::drawLayersAndBodies(
             drawTileLayer(dynamic_cast<const TileMapTileLayer &>(__layer));
             break;
         case TileMapLayerType::Object:
-            drawObjectLayer(dynamic_cast<const TileMapObjectLayer &>(__layer)); // TODO: _viewport
+            if(mr_workspace.isDebugRenderingEnabled())
+                drawObjectLayer(dynamic_cast<const TileMapObjectLayer &>(__layer)); // TODO: _viewport
             break;
         case TileMapLayerType::Image:
             drawImageLayer(dynamic_cast<const TileMapImageLayer &>(__layer)); // TODO: _viewport

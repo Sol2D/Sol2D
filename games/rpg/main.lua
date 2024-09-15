@@ -1,6 +1,6 @@
 local store = sol.stores:createStore('main')
 local view = store:createObject('sol.View', 'main')
-local scene = store:createObject('sol.Scene', 'level-01')
+local scene = store:createObject('sol.Scene', 'level-01', { scaleFactor = 200 })
 
 scene:loadTileMap('tiled/tmx/level-01.tmx')
 -- scene:loadTileMap('tiled/tmx/level-03.tmx')
@@ -274,8 +274,6 @@ scene:setBodyLayer(skeleton_body_id, 'Ground')
 local followed_body_id = player_body_id;
 scene:setFollowedBody(followed_body_id)
 
-local FORCE_MULTIPLYER = 100
-
 local graphic = 'idle'
 scene:setBodyShapeCurrentGraphic(player_body_id, 'main', graphic)
 scene:setBodyShapeCurrentGraphic(skeleton_body_id, 'main', graphic)
@@ -352,9 +350,6 @@ sol.heartbeat:subscribe(function()
     if down then force.y = 1 end
     if left then force.x = -1 end
     if force.x == force.y == 0 then return end
-
-    force.x = force.x * FORCE_MULTIPLYER
-    force.y = force.y * FORCE_MULTIPLYER
 
     if l_shift or r_shift then
         force.x = force.x * 4

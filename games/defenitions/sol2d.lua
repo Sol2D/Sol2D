@@ -43,6 +43,10 @@ self = nil
 ---@field b integer
 ---@field a integer?
 
+---@class SceneOptions
+---@field scaleFactor number?
+---@field gravity Point?
+
 ---@class SpriteOptions
 ---@field colorToAlpha Color?
 ---@field rect Rectangle?
@@ -405,8 +409,9 @@ function __store:createObject(type, key) end
 
 ---@param type 'sol.Scene'
 ---@param key string
+---@param options SceneOptions?
 ---@return sol.Scene
-function __store:createObject(type, key) end
+function __store:createObject(type, key, options) end
 
 ---@param type 'sol.Form'
 ---@param key string
@@ -680,7 +685,7 @@ function __graphics_pack:addSprite(frame_index, sprite_sheet, sprite_index, opti
 function __graphics_pack:addSprites(frame_index, sprite_sheet, indices, options) end
 
 ---@param frame_index integer
----@param sprite_index integerc
+---@param sprite_index integer
 ---@return boolean
 function __graphics_pack:removeSprite(frame_index, sprite_index) end
 

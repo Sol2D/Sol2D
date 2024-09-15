@@ -33,10 +33,22 @@
 
 namespace Sol2D {
 
+struct SceneOptions
+{
+    SceneOptions() :
+        scale_factor(100.0f),
+        gravity{.0f, .0f}
+    {
+    }
+
+    float scale_factor;
+    Point gravity;
+};
+
 class Scene final : public Canvas, public Utils::Observable<ContactObserver>
 {
 public:
-    Scene(const Workspace & _workspace, SDL_Renderer & _renderer);
+    Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Renderer & _renderer);
     ~Scene() override;
     void setGravity(const Point & _vector);
     uint64_t createBody(const Point & _position, const BodyPrototype & _prototype);

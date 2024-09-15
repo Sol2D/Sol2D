@@ -2,6 +2,7 @@
 <game directory="games/rpg">
     <engine>
         <graphics fps="120" />
+        <debug rendering="true" />
         <logging level="trace" />
     </engine>
     <application name="My Game">

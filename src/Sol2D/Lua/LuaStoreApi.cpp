@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+#include <Sol2D/Lua/LuaSceneOptionsApi.h>
 #include <Sol2D/Lua/LuaStoreApi.h>
 #include <Sol2D/Lua/LuaFormApi.h>
 #include <Sol2D/Lua/LuaSceneApi.h>
@@ -189,9 +190,12 @@ int createView(lua_State * _lua, const Self & _self, const std::string & _key)
 // 1 self
 // 2 object type
 // 3 key
+// 4 options (optional)
 int createScene(lua_State * _lua, const Self & _self, const std::string & _key)
 {
-    std::shared_ptr<Scene> scene = _self.getStore(_lua)->createObject<Scene>(_key, _self.workspace, _self.renderer);
+    SceneOptions options;
+    tryGetSceneOptions(_lua, 4, options);
+    std::shared_ptr<Scene> scene = _self.getStore(_lua)->createObject<Scene>(_key, options, _self.workspace, _self.renderer);
     pushSceneApi(_lua, _self.workspace, scene);
     return 1;
 }

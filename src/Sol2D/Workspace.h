@@ -53,6 +53,11 @@ public:
         return m_frame_rate;
     }
 
+    bool isDebugRenderingEnabled() const
+    {
+        return m_is_debug_rendering_enabled;
+    }
+
     std::filesystem::path getResourceFullPath(const std::filesystem::path & _resource_path) const
     {
         return getFullPath(m_resources_directory, _resource_path);
@@ -87,6 +92,7 @@ private:
     std::filesystem::path m_scripts_directory;
     std::filesystem::path m_resources_directory;
     uint16_t m_frame_rate;
+    bool m_is_debug_rendering_enabled;
     std::shared_ptr<spdlog::logger> m_main_logger_ptr;
     std::shared_ptr<spdlog::logger> m_lua_logger_ptr;
 };

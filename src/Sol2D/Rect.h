@@ -31,6 +31,11 @@ struct Point
         return *toSdlPtr();
     }
 
+    operator const b2Vec2 & () const noexcept
+    {
+        return *toBox2DPtr();
+    }
+
     const SDL_FPoint * toSdlPtr() const noexcept
     {
         return reinterpret_cast<const SDL_FPoint *>(this);

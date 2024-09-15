@@ -65,6 +65,10 @@ std::unique_ptr<Workspace> Workspace::load(const std::filesystem::path & _config
             if(const char * log_level = xlogging->Attribute("level"))
                 workspace->m_main_logger_ptr->set_level(spdlog::level::from_str(log_level));
         }
+        if(const XMLElement * xdebug = xengine->FirstChildElement("debug"))
+        {
+            workspace->m_is_debug_rendering_enabled = xdebug->BoolAttribute("rendering");
+        }
     }
     if(const XMLElement * xapp = xroot->FirstChildElement("application"))
     {
