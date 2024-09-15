@@ -7,6 +7,7 @@ require 'player'
 ---@class Resources
 ---@field platformSpriteSheet sol.SpriteSheet
 
+local meters_per_pixel = 0.01
 local platform_shape_key = 'platform'
 
 ---@param level Level01
@@ -42,7 +43,7 @@ local function createPlatform(level, resources)
     graphics:addSprite(frame, resources.platformSpriteSheet, 1, { position = { x = 128, y = 0 } })
     graphics:addSprite(frame, resources.platformSpriteSheet, 2, { position = { x = 256, y = 0 } })
     shape_proto:addGraphics('platform', graphics)
-    local body = level.scene:createBody(map_object.position, body_proto)
+    local body = level.scene:createBody(Level01.pixelPointToPhisical(map_object.position), body_proto)
     if(not level.scene:setBodyShapeCurrentGraphic(body, 'platform', 'platform')) then
         print('Unable to set current graphics to platform-01')
     end
@@ -75,7 +76,11 @@ end
 ---@return Level01
 local function createLevel()
     local store = sol.stores:createStore('level-01')
-    local scene = store:createObject('sol.Scene', 'main', { gravity = { x = 0, y = 3500 } })
+    local scene = store:createObject(
+        'sol.Scene',
+        'main',
+        { gravity = { x = 0, y = 2000 }, metersPerPixel = meters_per_pixel }
+    )
     scene:loadTileMap('tilemaps/level-01.tmx')
     local level = {
         scene = scene,
@@ -88,7 +93,14 @@ local function createLevel()
 end
 
 Level01 = {
-    createLevel = createLevel
+    createLevel = createLevel,
+    metersPerPixel = meters_per_pixel
 }
+
+---@param point Point
+---@return Point
+function Level01.pixelPointToPhisical(point)
+    return { x = point.x * meters_per_pixel, y = point.y * meters_per_pixel }
+end
 
 return Level01

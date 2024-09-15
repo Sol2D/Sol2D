@@ -30,8 +30,8 @@ bool Sol2D::Lua::tryGetSceneOptions(lua_State * _lua, int _idx, SceneOptions & _
 
     {
         lua_Number scale_factor;
-        if(table.tryGetNumber("scaleFactor", &scale_factor))
-            _options.scale_factor = static_cast<float>(scale_factor);
+        if(table.tryGetNumber("metersPerPixel", &scale_factor))
+            _options.meters_per_pixel = static_cast<float>(scale_factor);
     }
 
     if(table.tryGetValue("gravity"))

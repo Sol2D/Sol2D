@@ -44,7 +44,7 @@ self = nil
 ---@field a integer?
 
 ---@class SceneOptions
----@field scaleFactor number?
+---@field metersPerPixel number?
 ---@field gravity Point?
 
 ---@class SpriteOptions

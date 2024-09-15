@@ -1,3 +1,5 @@
+require 'def'
+
 local body_id = self.bodyId
 local scene = self.scene
 
@@ -23,7 +25,7 @@ for i = 1, #points, 1 do
     points[i].y = points[i].y + skeleton_track.position.y
 end
 
-scene:setBodyPosition(body_id, points[self.arg.startPoint])
+scene:setBodyPosition(body_id, Def.pixelPointToPhisical(points[self.arg.startPoint]))
 
 local path = scene:findPath(body_id, points[3])
 if path == nil then
@@ -71,15 +73,15 @@ local function getForce(position, destination)
     local delta_y = destination.y - position.y
     if math.abs(delta_x) > math.abs(delta_y) then
         if delta_x > 0 then
-            return { x = 150, y = 0 }
+            return { x = 7, y = 0 }
         else
-            return { x = -150, y = 0 }
+            return { x = -7, y = 0 }
         end
     else
         if delta_y > 0 then
-            return { x = 0, y = 150 }
+            return { x = 0, y = 7 }
         else
-            return { x = 0, y = -150 }
+            return { x = 0, y = -7 }
         end
     end
 end
@@ -98,7 +100,7 @@ local function getGraphics(force)
             return 'left'
         end
     end
-end 
+end
 
 -- TODO: how to unsubscribe when the body is dead?
 sol.heartbeat:subscribe(function ()

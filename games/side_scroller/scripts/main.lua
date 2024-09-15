@@ -17,9 +17,9 @@ end
 local function getStartPosition(scene)
     local start_postion = scene:getTileMapObjectByName('start-position')
     if start_postion then
-        return start_postion.position
+        return Level01.pixelPointToPhisical(start_postion.position)
     end
-    return { x = 410, y = 200 }
+    return Level01.pixelPointToPhisical({ x = 410, y = 200 })
 end
 
 (function()

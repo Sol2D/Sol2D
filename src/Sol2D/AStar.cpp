@@ -269,10 +269,11 @@ inline bool AStar::arePointsInRow(int32_t x1, int32_t y1, int32_t x2, int32_t y2
     return (x1 == x2 && x1 == x3) || (y1 == y2 && y1 == y3); // TODO: diagonal
 }
 
-std::optional<std::vector<b2Vec2>> Sol2D::aStarFindPath(b2WorldId _world,
-                                                        b2BodyId _body_id,
-                                                        const b2Vec2 & _destination,
-                                                        const AStarOptions & _options)
+std::optional<std::vector<b2Vec2>> Sol2D::aStarFindPath(
+    b2WorldId _world,
+    b2BodyId _body_id,
+    const b2Vec2 & _destination,
+    const AStarOptions & _options)
 {
     AStar a(_world, _body_id, _destination, _options);
     return a.exec();

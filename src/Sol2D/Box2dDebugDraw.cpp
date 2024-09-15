@@ -55,7 +55,7 @@ void Box2dDebugDraw::drawPolygon(const b2Vec2 * _vertices, int _vertex_count, b2
     std::vector<SDL_FPoint> sdl_points;
     sdl_points.reserve(_vertex_count + 1);
     for(int i = 0; i < _vertex_count; ++i)
-        sdl_points.push_back(*self->m_translate_point(_vertices[i].x, _vertices[i].y).toSdlPtr());
+        sdl_points.push_back(self->m_translate_point(_vertices[i].x, _vertices[i].y));
     sdl_points.push_back(sdl_points[0]);
     self->setRendererDrawColor(_color);
     SDL_RenderLines(self->mp_renderer, sdl_points.data(), sdl_points.size());
@@ -96,7 +96,7 @@ void Box2dDebugDraw::drawSolidPolygon(
             x = _vertices[i].x + _transform.p.x;
             y = _vertices[i].y + _transform.p.y;
         }
-        sdl_points.push_back(*self->m_translate_point(x, y).toSdlPtr());
+        sdl_points.push_back(self->m_translate_point(x, y));
     }
     sdl_points.push_back(sdl_points[0]);
     self->setRendererDrawColor(_color);
@@ -109,7 +109,7 @@ void Box2dDebugDraw::drawCircle(b2Vec2 _center, float _radius, b2HexColor _color
     self->setRendererDrawColor(_color);
     Sol2D::SDL::sdlRenderCircle(
         self->mp_renderer,
-        *self->m_translate_point(_center.x, _center.y).toSdlPtr(),
+        self->m_translate_point(_center.x, _center.y),
         self->m_translate_length(_radius));
 }
 

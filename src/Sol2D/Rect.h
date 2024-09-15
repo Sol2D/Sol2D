@@ -101,6 +101,11 @@ inline constexpr Point makePoint(float _x, float _y) noexcept
     return { _x,  _y };
 }
 
+inline const Point & asPoint(const b2Vec2 & _vec) noexcept
+{
+    return *reinterpret_cast<const Point *>(&_vec);
+}
+
 inline constexpr Size makeSize(float _w, float _h) noexcept
 {
     return { _w, _h };

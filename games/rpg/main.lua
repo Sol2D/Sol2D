@@ -1,6 +1,9 @@
+require 'def'
+
 local store = sol.stores:createStore('main')
 local view = store:createObject('sol.View', 'main')
-local scene = store:createObject('sol.Scene', 'level-01', { scaleFactor = 200 })
+local player_walk_force = 5
+local scene = store:createObject('sol.Scene', 'level-01', { metersPerPixel = Def.metersPerPixel })
 
 scene:loadTileMap('tiled/tmx/level-01.tmx')
 -- scene:loadTileMap('tiled/tmx/level-03.tmx')
@@ -105,9 +108,9 @@ sol.window:setView(view)
 local function getStartPosition()
     local object = scene:getTileMapObjectByName('StartPosition')
     if object then
-        return object.position
+        return Def.pixelPointToPhisical(object.position)
     else
-        return { x = 350, y = 400 }
+        return Def.pixelPointToPhisical({ x = 350, y = 400 })
     end
 end
 
@@ -345,15 +348,15 @@ sol.heartbeat:subscribe(function()
     end
 
     local force = { x = 0, y = 0 }
-    if up then force.y = -1 end
-    if right then force.x = 1 end
-    if down then force.y = 1 end
-    if left then force.x = -1 end
+    if up then force.y = -player_walk_force end
+    if right then force.x = player_walk_force end
+    if down then force.y = player_walk_force end
+    if left then force.x = -player_walk_force end
     if force.x == force.y == 0 then return end
 
     if l_shift or r_shift then
-        force.x = force.x * 4
-        force.y = force.y * 4
+        force.x = force.x * 2
+        force.y = force.y * 2
     end
 
     scene:applyForce(player_body_id, force)

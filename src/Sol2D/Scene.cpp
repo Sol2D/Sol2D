@@ -185,10 +185,12 @@ Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Re
     mr_workspace(_workspace),
     mr_renderer(_renderer),
     m_world_offset{.0f, .0f},
-    m_scale_factor(_options.scale_factor),
+    m_meters_per_pixel(_options.meters_per_pixel),
     m_followed_body_id(b2_nullBodyId),
     mp_box2d_debug_draw(nullptr)
 {
+    if(m_meters_per_pixel <= .0f)
+        m_meters_per_pixel = SceneOptions::default_meters_per_pixel;
     b2WorldDef world_def = b2DefaultWorldDef();
     world_def.gravity = _options.gravity;
     m_b2_world_id = b2CreateWorld(&world_def);
@@ -199,10 +201,10 @@ Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Re
             mr_renderer,
             m_b2_world_id,
             [this](float __x, float __y) {
-                return toAbsoluteCoords(__x * m_scale_factor, __y * m_scale_factor);
+                return toAbsoluteCoords(physicalToGraphical(__x), physicalToGraphical(__y));
             },
             [this](float __len) {
-                return __len * m_scale_factor;
+                return physicalToGraphical(__len);
             }
         );
     }
@@ -238,7 +240,7 @@ uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _proto
     Body * body = new Body;
     b2BodyDef b2_body_def = b2DefaultBodyDef();
     b2_body_def.type = mapBodyType(_prototype.getType());
-    b2_body_def.position = { .x = _position.x / m_scale_factor, .y = _position.y / m_scale_factor };
+    b2_body_def.position = { .x = _position.x, .y = _position.y };
     b2_body_def.linearDamping = 100; // TODO: for top-down
     b2_body_def.angularDamping = 100; // TODO: must be controlled by user (prevent infinite rotation)
     b2_body_def.fixedRotation = true; // TODO: must be controlled by user
@@ -247,9 +249,9 @@ uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _proto
     m_bodies.insert(std::make_pair(body->getId(), b2_body_id));
 
     _prototype.forEachShape([this, body, b2_body_id, &_prototype](
-                                const std::string & __key,
-                                const BodyShapePrototype & __shape_proto) {
-
+        const std::string & __key,
+        const BodyShapePrototype & __shape_proto)
+    {
         BodyShape * body_shape = nullptr;
 
         b2ShapeDef b2_shape_def = b2DefaultShapeDef();
@@ -274,8 +276,8 @@ uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _proto
             std::vector<b2Vec2> shape_points(points.size());
             for(size_t i = 0; i < points.size(); ++i)
             {
-                shape_points[i].x = points[i].x / m_scale_factor;
-                shape_points[i].y = points[i].y / m_scale_factor;
+                shape_points[i].x = graphicalToPhysical(points[i].x);
+                shape_points[i].y = graphicalToPhysical(points[i].y);
             }
             b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
             b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
@@ -293,8 +295,8 @@ uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _proto
             Point position = circle_proto->getCenter();
             b2Circle b2_circle
             {
-                .center = { .x = position.x / m_scale_factor, .y = position.y / m_scale_factor },
-                .radius = circle_proto->getRadius() / m_scale_factor
+                .center = { .x = graphicalToPhysical(position.x), .y = graphicalToPhysical(position.y) },
+                .radius = graphicalToPhysical(circle_proto->getRadius())
             };
             if(b2_circle.radius <= .0f)
                 break;
@@ -326,7 +328,11 @@ void Scene::createBodiesFromMapObjects(
         Body * body = new Body;
         b2BodyDef b2_body_def = b2DefaultBodyDef();
         b2_body_def.type = body_type;
-        b2_body_def.position = b2Vec2(__map_object.getX() / m_scale_factor, __map_object.getY() / m_scale_factor);
+        b2_body_def.position =
+        {
+            .x = graphicalToPhysical(__map_object.getX()),
+            .y = graphicalToPhysical(__map_object.getY())
+        };
         b2_body_def.linearDamping = _body_options.linear_damping;
         b2_body_def.angularDamping = _body_options.angular_damping;
         b2_body_def.fixedRotation = _body_options.fixed_rotation;
@@ -351,8 +357,8 @@ void Scene::createBodiesFromMapObjects(
             std::vector<b2Vec2> shape_points(points.size());
             for(size_t i = 0; i < points.size(); ++i)
             {
-                shape_points[i].x = points[i].x / m_scale_factor;
-                shape_points[i].y = points[i].y / m_scale_factor;
+                shape_points[i].x = graphicalToPhysical(points[i].x);
+                shape_points[i].y = graphicalToPhysical(points[i].y);
             }
             b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
             b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
@@ -364,7 +370,7 @@ void Scene::createBodiesFromMapObjects(
         case TileMapObjectType::Circle:
         {
             const TileMapCircle * circle = static_cast<const TileMapCircle *>(&__map_object);
-            const float radius = circle->getRadius() / m_scale_factor;
+            const float radius = graphicalToPhysical(circle->getRadius());
             if(radius <= .0f)
                 break;
             b2Circle b2_circle
@@ -601,8 +607,8 @@ void Scene::syncWorldWithFollowedBody()
     int output_width, output_height;
     SDL_GetCurrentRenderOutputSize(&mr_renderer, &output_width, &output_height);
     b2Vec2 followed_body_position = b2Body_GetPosition(m_followed_body_id);
-    m_world_offset.x = followed_body_position.x * m_scale_factor - static_cast<float>(output_width) / 2;
-    m_world_offset.y = followed_body_position.y * m_scale_factor - static_cast<float>(output_height) / 2;
+    m_world_offset.x = physicalToGraphical(followed_body_position.x) - static_cast<float>(output_width) / 2;
+    m_world_offset.y = physicalToGraphical(followed_body_position.y) - static_cast<float>(output_height) / 2;
     const int32_t map_x = m_tile_map_ptr->getX() * m_tile_map_ptr->getTileWidth();
     const int32_t map_y = m_tile_map_ptr->getY() * m_tile_map_ptr->getTileHeight();
     if(m_world_offset.x < map_x)
@@ -633,7 +639,7 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
     Point body_position;
     {
         b2Vec2 pos = b2Body_GetPosition(_body_id);
-        body_position = toAbsoluteCoords(pos.x * m_scale_factor, pos.y * m_scale_factor);
+        body_position = toAbsoluteCoords(physicalToGraphical(pos.x), physicalToGraphical(pos.y));
     }
     int shape_count = b2Body_GetShapeCount(_body_id);
     std::vector<b2ShapeId> shapes(shape_count);
@@ -794,22 +800,12 @@ void Scene::drawImageLayer(const TileMapImageLayer & _layer)
     SDL_RenderTexture(&mr_renderer, image.get(), nullptr, &dim);
 }
 
-Point Scene::toAbsoluteCoords(float _world_x, float _world_y) const
-{
-    return { .x = _world_x - m_world_offset.x, .y = _world_y - m_world_offset.y };
-}
-
 void Scene::applyForce(uint64_t _body_id, const Point & _force)
 {
     m_defers.push_front([this, _body_id, _force]() {
         b2BodyId b2_body_id = findBody(_body_id);
         if(B2_IS_NON_NULL(b2_body_id))
-        {
-            b2Body_ApplyForceToCenter(
-                b2_body_id,
-                b2Vec2(_force.x / m_scale_factor, _force.y / m_scale_factor),
-                true); // TODO: what is wake?
-        }
+            b2Body_ApplyForceToCenter(b2_body_id, _force, true); // TODO: what is wake?
     });
 }
 
@@ -818,12 +814,7 @@ void Scene::setBodyPosition(uint64_t _body_id, const Point & _position)
     m_defers.push_front([this, _body_id, _position]() {
         b2BodyId b2_body_id = findBody(_body_id);
         if(B2_IS_NON_NULL(b2_body_id))
-        {
-            b2Body_SetTransform(
-                b2_body_id,
-                b2Vec2(_position.x / m_scale_factor, _position.y / m_scale_factor),
-                b2Body_GetRotation(b2_body_id));
-        }
+            b2Body_SetTransform(b2_body_id, _position, b2Body_GetRotation(b2_body_id));
     });
 }
 
@@ -831,10 +822,7 @@ std::optional<Point> Scene::getBodyPosition(uint64_t _body_id) const
 {
     b2BodyId b2_body_id = findBody(_body_id);
     if(B2_IS_NON_NULL(b2_body_id))
-    {
-        b2Vec2 pos = b2Body_GetPosition(b2_body_id);
-        return makePoint(pos.x * m_scale_factor, pos.y * m_scale_factor);
-    }
+        return asPoint(b2Body_GetPosition(b2_body_id));
     return std::nullopt;
 }
 
@@ -847,15 +835,15 @@ std::optional<std::vector<Point>> Scene::findPath(
     const b2BodyId b2_body_id = findBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
         return std::nullopt;
-    b2Vec2 dest(_destination.x / m_scale_factor, _destination.y / m_scale_factor);
     AStarOptions options;
     options.allow_diagonal_steps = _allow_diagonal_steps;
     options.avoid_sensors = _avoid_sensors;
-    auto b2_result = aStarFindPath(m_b2_world_id, b2_body_id, dest, options);
+    auto b2_result = aStarFindPath(m_b2_world_id, b2_body_id, _destination, options);
     if(!b2_result.has_value())
         return std::nullopt;
-    std::vector<Point> result(b2_result.value().size());
+    std::vector<Point> result;
+    result.reserve(b2_result.value().size());
     for(size_t i = 0; i < b2_result.value().size(); ++i)
-        result[i] = makePoint(b2_result.value()[i].x * m_scale_factor, b2_result.value()[i].y * m_scale_factor);
+        result.push_back(makePoint(b2_result.value()[i].x, b2_result.value()[i].y));
     return result;
 }

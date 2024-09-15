@@ -36,12 +36,14 @@ namespace Sol2D {
 struct SceneOptions
 {
     SceneOptions() :
-        scale_factor(100.0f),
+        meters_per_pixel(default_meters_per_pixel),
         gravity{.0f, .0f}
     {
     }
 
-    float scale_factor;
+    static constexpr float default_meters_per_pixel = 0.01f;
+
+    float meters_per_pixel;
     Point gravity;
 };
 
@@ -84,6 +86,8 @@ public:
         bool _avoid_sensors) const;
 
 private:
+    float physicalToGraphical(float _value);
+    float graphicalToPhysical(float _value);
     void deinitializeTileMap();
     void destroyBody(b2BodyId _body_id);
     static b2BodyType mapBodyType(BodyType _type);
@@ -114,7 +118,7 @@ private:
     SDL_Renderer & mr_renderer;
     Point m_world_offset;
     b2WorldId m_b2_world_id;
-    float m_scale_factor;
+    float m_meters_per_pixel;
     std::unordered_map<uint64_t, b2BodyId> m_bodies;
     b2BodyId m_followed_body_id;
     std::unique_ptr<Tiles::TileHeap> m_tile_heap_ptr;
@@ -123,6 +127,21 @@ private:
     boost::container::slist<std::function<void()>> m_defers;
     Box2dDebugDraw * mp_box2d_debug_draw;
 };
+
+inline float Scene::physicalToGraphical(float _value)
+{
+    return _value / m_meters_per_pixel;
+}
+
+inline float Scene::graphicalToPhysical(float _value)
+{
+    return _value * m_meters_per_pixel;
+}
+
+inline Point Scene::toAbsoluteCoords(float _world_x, float _world_y) const
+{
+    return { .x = _world_x - m_world_offset.x, .y = _world_y - m_world_offset.y };
+}
 
 inline const Tiles::TileMapObject * Scene::getTileMapObjectById(uint32_t _id) const
 {
