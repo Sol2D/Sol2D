@@ -48,7 +48,7 @@ end
 local function createLevel()
     local store = sol.stores:createStore('level-01')
     local scene = store:createObject('sol.Scene', 'main')
-    scene:setGravity({ x = 0, y = 8000 })
+    scene:setGravity({ x = 0, y = 6000 })
     scene:loadTileMap('tilemaps/level-01.tmx')
     local level = {
         scene = scene,

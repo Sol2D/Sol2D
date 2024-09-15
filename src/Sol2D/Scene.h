@@ -76,7 +76,7 @@ private:
     static b2BodyType mapBodyType(BodyType _type);
     void executeDefers();
     void handleBox2dContactEvents();
-    bool tryGetContact(b2ShapeId _shape_id_a, b2ShapeId _shape_id_b, Contact & _contact);
+    bool tryGetContactSide(b2ShapeId _shape_id, ContactSide & _contact_side);
     void syncWorldWithFollowedBody();
     void drawLayersAndBodies(const Tiles::TileMapLayerContainer & _container,
                              std::unordered_set<uint64_t> & _bodies_to_render,

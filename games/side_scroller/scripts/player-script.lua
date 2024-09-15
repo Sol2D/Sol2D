@@ -50,13 +50,13 @@ sol.heartbeat:subscribe(function()
     )
     local y_force = 0
     if space_key then
-        y_force = -20000
+        y_force = -15000
     end
     if right_key then
-        scene:applyForce(player_id, { x = 2800, y = y_force })
+        scene:applyForce(player_id, { x = 5500, y = y_force })
         state:set(Direction.RIGHT, Action.WALK)
     elseif left_key then
-        scene:applyForce(player_id, { x = -2800, y = y_force })
+        scene:applyForce(player_id, { x = -5500, y = y_force })
         state:set(Direction.LEFT, Action.WALK)
     else
         if y_force then

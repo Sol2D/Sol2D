@@ -38,11 +38,20 @@ void pushContactSide(lua_State * _lua, const ContactSide & _side)
 
 } // namespace name
 
-void Sol2D::Lua::pushContact(lua_State * _lua, Contact & _contact)
+void Sol2D::Lua::pushContact(lua_State * _lua, const Contact & _contact)
 {
     LuaTable contact_table = LuaTable::pushNew(_lua);
     pushContactSide(_lua, _contact.side_a);
     contact_table.setValueFromTop("sideA");
     pushContactSide(_lua, _contact.side_b);
     contact_table.setValueFromTop("sideB");
+}
+
+void Sol2D::Lua::pushContact(lua_State * _lua, const SensorContact & _contact)
+{
+    LuaTable contact_table = LuaTable::pushNew(_lua);
+    pushContactSide(_lua, _contact.sensor);
+    contact_table.setValueFromTop("sensor");
+    pushContactSide(_lua, _contact.visitor);
+    contact_table.setValueFromTop("visitor");
 }

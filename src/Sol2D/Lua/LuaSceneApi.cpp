@@ -41,6 +41,8 @@ const char gc_message_callback_expected[] = "callback expected";
 
 const uint16_t gc_event_begin_contact = 0;
 const uint16_t gc_event_end_contact = 1;
+const uint16_t gc_event_begin_sensor_contact = 2;
+const uint16_t gc_event_end_sensor_contact = 3;
 
 const char gc_contact_companion_key[] = "lua_contact_observer";
 
@@ -59,16 +61,28 @@ public:
         storage.destroyCallbacks(this);
     }
 
-    void beginContact(Contact & _contact) override
+    void beginContact(const Contact & _contact) override
     {
         pushContact(mp_lua, _contact);
         LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_begin_contact, 1);
     }
 
-    void endContact(Contact & _contact) override
+    void endContact(const Contact & _contact) override
     {
         pushContact(mp_lua, _contact);
         LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_end_contact, 1);
+    }
+
+    void beginSensorContact(const SensorContact & _contact) override
+    {
+        pushContact(mp_lua, _contact);
+        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_begin_sensor_contact, 1);
+    }
+
+    void endSensorContact(const SensorContact & _contact) override
+    {
+        pushContact(mp_lua, _contact);
+        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_end_sensor_contact, 1);
     }
 
 private:
@@ -388,7 +402,7 @@ int luaApi_SubscribeToEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
-    uint32_t id = self->subscribeOnContact(_lua, gc_event_begin_contact, 2);
+    uint32_t id = self->subscribeOnContact(_lua, gc_event_end_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
 }
@@ -401,6 +415,50 @@ int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     self->unsubscribeOnContact(_lua, gc_event_end_contact, subscription_id);
+    return 0;
+}
+
+// 1 self
+// 2 callback
+int luaApi_SubscribeToBeginSensorContact(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    uint32_t id = self->subscribeOnContact(_lua, gc_event_begin_sensor_contact, 2);
+    lua_pushinteger(_lua, id);
+    return 1;
+}
+
+// 1 self
+// 2 subscription ID
+int luaApi_UnsubscribeFromBeginSensorContact(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
+    self->unsubscribeOnContact(_lua, gc_event_begin_sensor_contact, subscription_id);
+    return 0;
+}
+
+// 1 self
+// 2 callback
+int luaApi_SubscribeToSensorEndContact(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    uint32_t id = self->subscribeOnContact(_lua, gc_event_end_sensor_contact, 2);
+    lua_pushinteger(_lua, id);
+    return 1;
+}
+
+// 1 self
+// 2 subscription ID
+int luaApi_UnsubscribeFromSesnsorEndContact(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
+    self->unsubscribeOnContact(_lua, gc_event_end_sensor_contact, subscription_id);
     return 0;
 }
 
@@ -460,6 +518,10 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "unsubscribeFromBeginContact", luaApi_UnsubscribeFromBeginContact },
             { "subscribeToEndContact", luaApi_SubscribeToEndContact },
             { "unsubscribeFromEndContact", luaApi_UnsubscribeFromEndContact },
+            { "subscribeToBeginSensorContact", luaApi_SubscribeToBeginSensorContact },
+            { "unsubscribeFromBeginSensorContact", luaApi_UnsubscribeFromBeginSensorContact },
+            { "subscribeToSensorEndContact", luaApi_SubscribeToSensorEndContact },
+            { "unsubscribeFromSesnsorEndContact", luaApi_UnsubscribeFromSesnsorEndContact },
             { "findPath", luaApi_FindPath },
             { nullptr, nullptr }
         };

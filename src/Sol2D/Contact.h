@@ -35,12 +35,20 @@ struct Contact
     ContactSide side_b;
 };
 
+struct SensorContact
+{
+    ContactSide visitor;
+    ContactSide sensor;
+};
+
 class ContactObserver
 {
 public:
     virtual ~ContactObserver() { }
-    virtual void beginContact(Contact & _contact) = 0;
-    virtual void endContact(Contact & _contact) = 0;
+    virtual void beginContact(const Contact & _contact) = 0;
+    virtual void endContact(const Contact & _contact) = 0;
+    virtual void beginSensorContact(const SensorContact & _contact) = 0;
+    virtual void endSensorContact(const SensorContact & _contact) = 0;
 };
 
 } // namespace Sol2D

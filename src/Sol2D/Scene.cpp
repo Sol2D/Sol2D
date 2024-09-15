@@ -572,61 +572,57 @@ void Scene::executeDefers()
 
 void Scene::handleBox2dContactEvents()
 {
-    Contact contact;
-
     {
+        Contact contact;
         b2ContactEvents contact_events = b2World_GetContactEvents(m_b2_world_id);
         for(int i = 0; i < contact_events.beginCount; ++i)
         {
             b2ContactBeginTouchEvent & event = contact_events.beginEvents[i];
-            if(tryGetContact(event.shapeIdA, event.shapeIdB, contact))
+            if(tryGetContactSide(event.shapeIdA, contact.side_a) && tryGetContactSide(event.shapeIdB, contact.side_b))
                 callObservers(&ContactObserver::beginContact, contact);
         }
         for(int i = 0; i < contact_events.endCount; ++i)
         {
             b2ContactEndTouchEvent & event = contact_events.endEvents[i];
-            if(tryGetContact(event.shapeIdA, event.shapeIdB, contact))
+            if(tryGetContactSide(event.shapeIdA, contact.side_a) && tryGetContactSide(event.shapeIdB, contact.side_b))
                 callObservers(&ContactObserver::endContact, contact);
         }
     }
 
     {
+        SensorContact contact;
         b2SensorEvents sensor_events = b2World_GetSensorEvents(m_b2_world_id);
         for(int i = 0; i < sensor_events.beginCount; ++i)
         {
             b2SensorBeginTouchEvent & event = sensor_events.beginEvents[i];
-            if(tryGetContact(event.visitorShapeId, event.sensorShapeId, contact))
-                callObservers(&ContactObserver::beginContact, contact);
+            if(tryGetContactSide(event.sensorShapeId, contact.sensor) &&
+                tryGetContactSide(event.visitorShapeId, contact.visitor))
+            {
+                callObservers(&ContactObserver::beginSensorContact, contact);
+            }
         }
         for(int i = 0; i < sensor_events.endCount; ++i)
         {
             b2SensorEndTouchEvent & event = sensor_events.endEvents[i];
-            if(tryGetContact(event.visitorShapeId, event.sensorShapeId, contact))
-                callObservers(&ContactObserver::endContact, contact);
+            if(tryGetContactSide(event.sensorShapeId, contact.sensor) &&
+                tryGetContactSide(event.visitorShapeId, contact.visitor))
+            {
+                callObservers(&ContactObserver::endSensorContact, contact);
+            }
         }
     }
 }
 
-bool Scene::tryGetContact(b2ShapeId _shape_id_a, b2ShapeId _shape_id_b, Contact & _contact)
+bool Scene::tryGetContactSide(b2ShapeId _shape_id, ContactSide & _contact_side)
 {
-    b2BodyId b2_body_id_a = b2Shape_GetBody(_shape_id_a);
-    b2BodyId b2_body_id_b = b2Shape_GetBody(_shape_id_b);
-    BodyShape * shape_a = getUserData(_shape_id_a);
-    BodyShape * shape_b = getUserData(_shape_id_b);
-    Body * body_a = getUserData(b2_body_id_a);
-    Body * body_b = getUserData(b2_body_id_b);
-    if(shape_a && shape_b && body_a && body_b)
+    b2BodyId b2_body_id = b2Shape_GetBody(_shape_id);
+    BodyShape * shape = getUserData(_shape_id);
+    Body * body = getUserData(b2_body_id);
+    if(shape && body)
     {
-        _contact.side_a = {
-            .body_id = body_a->getId(),
-            .shape_key = shape_a->getKey(),
-            .tile_map_object_id = shape_a->getTileMapObjectId()
-        };
-        _contact.side_b = {
-            .body_id = body_b->getId(),
-            .shape_key = shape_b->getKey(),
-            .tile_map_object_id = shape_b->getTileMapObjectId()
-        };
+        _contact_side.body_id = body->getId();
+        _contact_side.shape_key = shape->getKey();
+        _contact_side.tile_map_object_id = shape->getTileMapObjectId();
         return true;
     }
     return false;

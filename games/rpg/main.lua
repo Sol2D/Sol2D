@@ -281,26 +281,19 @@ scene:setBodyShapeCurrentGraphic(player_body_id, 'main', graphic)
 scene:setBodyShapeCurrentGraphic(skeleton_body_id, 'main', graphic)
 
 scene:subscribeToBeginContact(function(contact)
-    print('Contact')
+    print('Begin Contact')
     print('    Body A:', contact.sideA.bodyId)
     print('    Shape A', contact.sideA.shapeKey)
     print('    Object A', contact.sideA.tileMapObjectId)
     print('    Body B:', contact.sideB.bodyId)
     print('    Shape B', contact.sideB.shapeKey)
     print('    Object B', contact.sideB.tileMapObjectId)
-
-    if (player_body_id == contact.sideA.bodyId and contact.sideB.shapeKey == 'Sensor') or
-        (player_body_id == contact.sideB.bodyId and contact.sideA.shapeKey == 'Sensor') then
-        teleport_sound_effect:play()
-        scene:setBodyPosition(player_body_id, getStartPosition())
-    else
-        score:increment()
-        score_label:setText(score:formatMessage())
-    end
+    score:increment()
+    score_label:setText(score:formatMessage())
 end)
 
 scene:subscribeToEndContact(function(contact)
-    print('Discontact')
+    print('End Contact')
     print('    Body A:', contact.sideA.bodyId)
     print('    Shape A', contact.sideA.shapeKey)
     print('    Object A', contact.sideA.tileMapObjectId)
@@ -309,6 +302,12 @@ scene:subscribeToEndContact(function(contact)
     print('    Object B', contact.sideB.tileMapObjectId)
 end)
 
+scene:subscribeToBeginSensorContact(function (contact)
+    if player_body_id == contact.visitor.bodyId and contact.sensor.shapeKey == 'Sensor' then
+        teleport_sound_effect:play()
+        scene:setBodyPosition(player_body_id, getStartPosition())
+    end
+end)
 
 switch_view_button:subscribeOnClick(function()
     if followed_body_id == player_body_id then

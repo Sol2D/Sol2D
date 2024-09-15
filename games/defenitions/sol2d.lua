@@ -218,6 +218,7 @@ function __scene:setBodyShapeCurrentGraphic(body_id, shape_key, graphic_key) end
 function __scene:flipBodyShapeGraphic(body_id, shape_key, graphic_key, flip_horizontally, flip_vertically) end
 
 ---@alias ContactCallback fun(contact: Contact)
+---@alias SensorContactCallback fun(contact: SensorContact)
 
 ---@param callback ContactCallback
 ---@return integer subscription ID
@@ -232,6 +233,20 @@ function __scene:subscribeToEndContact(callback) end
 
 ---@param subscription_id integer
 function __scene:unsubscribeFromEndContact(subscription_id) end
+
+---@param callback SensorContactCallback
+---@return integer subscription ID
+function __scene:subscribeToBeginSensorContact(callback) end
+
+---@param subscription_id integer
+function __scene:unsubscribeFromBeginSensorContact(subscription_id) end
+
+---@param callback SensorContactCallback
+---@return integer subscription ID
+function __scene:subscribeToSensorEndContact(callback) end
+
+---@param subscription_id integer
+function __scene:unsubscribeFromSesnsorEndContact(subscription_id) end
 
 ---@param body_id integer
 ---@param destination Point
@@ -344,6 +359,10 @@ function __button:unsubscribeOnClick(subscription_id) end
 ---@class Contact
 ---@field sideA ContactSide
 ---@field sideB ContactSide
+
+---@class SensorContact
+---@field sensor ContactSide
+---@field visitor ContactSide
 
 ---@class ContactSide
 ---@field bodyId integer
