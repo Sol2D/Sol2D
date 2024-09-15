@@ -170,7 +170,7 @@ std::optional<bool> GraphicsPack::isFrameVisible(size_t _index) const
     {
         return m_frames[_index]->is_visible;
     }
-    return std::optional<bool>();
+    return std::nullopt;
 }
 
 bool GraphicsPack::setFrameDuration(size_t _index, std::chrono::milliseconds _duration)
@@ -192,7 +192,7 @@ std::optional<std::chrono::milliseconds> GraphicsPack::getFrameDuration(size_t _
     {
         return m_frames[_index]->duration;
     }
-    return std::optional<std::chrono::milliseconds>();
+    return std::nullopt;
 }
 
 std::pair<bool, size_t> GraphicsPack::addSprite(

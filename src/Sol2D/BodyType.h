@@ -37,7 +37,7 @@ std::optional<BodyType> castToBodyType(std::integral auto _integer)
     case static_cast<decltype(_integer)>(BodyType::Kinematic):
         return BodyType::Kinematic;
     default:
-        return std::optional<BodyType>();
+        return std::nullopt;
     }
 }
 

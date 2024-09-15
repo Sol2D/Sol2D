@@ -156,7 +156,7 @@ std::optional<std::vector<b2Vec2>> AStar::exec()
         if(!isDeadEnd(position))
             emplaceSuccessors(*node);
     }
-    return std::optional<std::vector<b2Vec2>>();
+    return std::nullopt;
 }
 
 void AStar::emplaceSuccessors(const Node & _node)

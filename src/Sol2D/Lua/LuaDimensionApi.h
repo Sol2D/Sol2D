@@ -31,9 +31,9 @@ inline std::optional<Dimension<Number>> tryGetDimension(lua_State * _lua, int _i
 {
     double value;
     DimensionUnit unit;
-    return tryGetDimension(_lua, _idx, &value, &unit)
-        ? Dimension<Number>(static_cast<Number>(value), unit)
-        : std::optional<Dimension<Number>>();
+    if(tryGetDimension(_lua, _idx, &value, &unit))
+        return Dimension<Number>(static_cast<Number>(value), unit);
+    return std::nullopt;
 }
 
 } // namespace Sol2D::Lua

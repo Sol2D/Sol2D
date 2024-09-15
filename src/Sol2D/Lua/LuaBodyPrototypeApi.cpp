@@ -159,5 +159,5 @@ std::optional<LuaBodyPrototype> Sol2D::Lua::tryGetBodyPrototype(lua_State * _lua
             return result;
         }
     }
-    return std::optional<LuaBodyPrototype>();
+    return std::nullopt;
 }

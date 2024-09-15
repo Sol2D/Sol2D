@@ -55,7 +55,7 @@ inline std::optional<DimensionUnit> tryParseDimensionUnit(lua_Integer _unit)
     case static_cast<lua_Integer>(DimensionUnit::Percent):
         return DimensionUnit::Percent;
     default:
-        return std::optional<DimensionUnit>();
+        return std::nullopt;
     }
 }
 

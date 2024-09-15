@@ -34,7 +34,7 @@ std::optional<BodyShapeType> castToBodyShapeType(std::integral auto _integer)
     case static_cast<decltype(_integer)>(BodyShapeType::Circle):
         return BodyShapeType::Circle;
     default:
-        return std::optional<BodyShapeType>();
+        return std::nullopt;
     }
 }
 
