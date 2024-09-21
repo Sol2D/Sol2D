@@ -531,7 +531,7 @@ bool Scene::box2dPreSolveContact(b2ShapeId _shape_id_a, b2ShapeId _shape_id_b, b
     PreSolveContact contact;
     if(!tryGetContactSide(_shape_id_a, contact.side_a) || !tryGetContactSide(_shape_id_b, contact.side_b))
         return true;
-    contact.normal = { .x = _manifold->normal.x, .y = _manifold->normal.y }; // TODO: scale?
+    contact.manifold = _manifold;
     self->forEachObserver([&result, &contact](ContactObserver & __observer) {
         if(!__observer.preSolveContact(contact))
             result = false;

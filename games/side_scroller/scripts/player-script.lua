@@ -50,7 +50,7 @@ sol.heartbeat:subscribe(function()
     )
     local y_force = 0
     if space_key then
-        y_force = -10
+        y_force = -6
     end
     if right_key then
         scene:applyForce(player_id, { x = 2.5, y = y_force })

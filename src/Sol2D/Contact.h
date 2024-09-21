@@ -17,6 +17,8 @@
 #pragma once
 
 #include <Sol2D/Rect.h>
+#include <Sol2D/Def.h>
+#include <box2d/types.h>
 #include <cstdint>
 #include <string>
 #include <optional>
@@ -46,8 +48,7 @@ struct PreSolveContact
 {
     ContactSide side_a;
     ContactSide side_b;
-    Point normal;
-    // TODO: points
+    const b2Manifold * manifold;
 };
 
 class ContactObserver

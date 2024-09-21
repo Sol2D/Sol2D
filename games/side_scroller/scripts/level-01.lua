@@ -67,9 +67,17 @@ local function preSolveContact(contact)
     if player_side == nil or platform_side == nil or platform_side.shapeKey ~= platform_shape_key then
         return true
     end
-    if contact.normal.y * sign <= 0.95 then
+
+    if contact.manifold.normal.y * sign < 0.95 then
         return false;
     end
+
+    for _, point in ipairs(contact.manifold.points) do
+        if point.separation < -0.1 then
+            return false
+        end
+    end
+
     return true
 end
 
@@ -92,15 +100,19 @@ local function createLevel()
     return level
 end
 
-Level01 = {
+local level01 = {
     createLevel = createLevel,
     metersPerPixel = meters_per_pixel
 }
 
+level01.__index = level01
+
 ---@param point Point
 ---@return Point
-function Level01.pixelPointToPhisical(point)
+function level01.pixelPointToPhisical(point)
     return { x = point.x * meters_per_pixel, y = point.y * meters_per_pixel }
 end
 
+Level01 = { }
+setmetatable(Level01, level01)
 return Level01

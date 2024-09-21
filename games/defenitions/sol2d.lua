@@ -380,7 +380,20 @@ function __button:unsubscribeOnClick(subscription_id) end
 ---@class PreSolveContact
 ---@field sideA ContactSide
 ---@field sideB ContactSide
+---@field manifold Manifold
+
+---@class Manifold
 ---@field normal Point
+---@field points ManifoldPoint[]
+
+---@class ManifoldPoint
+---@field point Point
+---@field anchorA Point
+---@field anchorB Point
+---@field separation number
+---@field normalImpulse number
+---@field tangentImpulse number
+---@field normalVelocity number
 
 ---@class ContactSide
 ---@field bodyId integer
