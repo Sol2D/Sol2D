@@ -36,12 +36,25 @@ using RectShapeDefinition = Rect;
 
 struct CircleShapeDefinition
 {
+    CircleShapeDefinition() :
+        center{ .x = .0f, .y = .0f },
+        radius(1.0f)
+    {
+    }
+
     Point center;
     float radius;
 };
 
 struct BodyShapeGraphics
 {
+    BodyShapeGraphics() :
+        position{ .x = .0f, .y = .0f },
+        is_flipped_horizontally(false),
+        is_flipped_vertically(false)
+    {
+    }
+
     std::shared_ptr<GraphicsPack> graphics;
     Point position;
     bool is_flipped_horizontally;
@@ -51,6 +64,12 @@ struct BodyShapeGraphics
 template<BodyShapeType shape_type>
 struct BodyBasicShapeDefinition
 {
+    BodyBasicShapeDefinition() :
+        is_sensor(false),
+        is_pre_solve_enabled(false)
+    {
+    }
+
     const BodyShapeType type = shape_type;
     std::unordered_map<std::string, BodyShapeGraphics> graphics;
     bool is_sensor;
@@ -67,6 +86,11 @@ using BodyVariantShapeDefinition = std::variant<BodyPolygonDefinition, BodyRectD
 
 struct BodyDefinition
 {
+    BodyDefinition() :
+        type(BodyType::Static)
+    {
+    }
+
     BodyType type;
     std::optional<std::filesystem::path> script;
     std::unordered_map<std::string, BodyVariantShapeDefinition> shapes;

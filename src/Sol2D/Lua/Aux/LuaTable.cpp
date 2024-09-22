@@ -21,8 +21,7 @@ using namespace Sol2D::Lua::Aux;
 bool LuaTable::tryGetNumber(const char * _key, lua_Number * _value) const
 {
     lua_pushstring(mp_lua, _key);
-    lua_gettable(mp_lua, m_idx);
-    bool result = lua_isnumber(mp_lua, -1);
+    bool result = lua_gettable(mp_lua, m_idx) == LUA_TNUMBER;
     if(result)
         *_value = lua_tonumber(mp_lua, -1);
     lua_pop(mp_lua, 1);
@@ -43,8 +42,7 @@ bool LuaTable::tryGetInteger(const char * _key, lua_Integer * _value) const
 bool LuaTable::tryGetBoolean(const char * _key, bool * _value) const
 {
     lua_pushstring(mp_lua, _key);
-    lua_gettable(mp_lua, m_idx);
-    bool result = lua_isboolean(mp_lua, -1);
+    bool result =  lua_gettable(mp_lua, m_idx) == LUA_TBOOLEAN;
     if(result)
         *_value = lua_toboolean(mp_lua, -1);
     lua_pop(mp_lua, 1);
@@ -54,8 +52,7 @@ bool LuaTable::tryGetBoolean(const char * _key, bool * _value) const
 bool LuaTable::tryGetString(const char * _key, std::string & _value) const
 {
     lua_pushstring(mp_lua, _key);
-    lua_gettable(mp_lua, m_idx);
-    bool result = lua_isstring(mp_lua, -1);
+    bool result = lua_gettable(mp_lua, m_idx) == LUA_TSTRING;
     if(result)
         _value = lua_tostring(mp_lua, -1);
     lua_pop(mp_lua, 1);

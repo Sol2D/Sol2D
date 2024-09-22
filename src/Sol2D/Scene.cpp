@@ -264,7 +264,7 @@ void Scene::BodyShapeCreator::operator ()(const BodyRectDefinition & _rect)
         half_h,
         {
             .x = (_rect.x ? mr_scene.graphicalToPhysical(_rect.x) : .0f) + half_w,
-            .y = (_rect.y ?  mr_scene.graphicalToPhysical(_rect.y) : .0f) + half_w
+            .y = (_rect.y ?  mr_scene.graphicalToPhysical(_rect.y) : .0f) + half_h
         },
         b2Rot_identity);
     b2ShapeDef b2_shape_def = createBox2dShapeDef(_rect);

@@ -69,7 +69,6 @@ void getShapes(lua_State * _lua, int _idx, std::unordered_map<std::string, BodyV
             addShape(_lua, -1, lua_tostring(_lua, -2), _shapes);
         lua_pop(_lua, 1);
     }
-    lua_pop(_lua, 1);
 }
 
 void addShape(
@@ -104,24 +103,27 @@ void addPolygon(
 {
     if(!_table.tryGetValue("points"))
         return;
-    {
-        BodyRectDefinition def;
-        if(tryGetRect(_table.getLua(), -1, def))
+    do {
         {
-            readBasicShape(_table, def);
-            _shapes.insert(std::make_pair(_key, def));
-            return;
+            BodyRectDefinition def;
+            if(tryGetRect(_table.getLua(), -1, def))
+            {
+                readBasicShape(_table, def);
+                _shapes.insert(std::make_pair(_key, def));
+                break;
+            }
         }
-    }
-    {
-        BodyPolygonDefinition def;
-        if(tryGetPoints(_table.getLua(), -1, def.points))
         {
-            readBasicShape(_table, def);
-            _shapes.insert(std::make_pair(_key, def));
-            return;
+            BodyPolygonDefinition def;
+            if(tryGetPoints(_table.getLua(), -1, def.points))
+            {
+                readBasicShape(_table, def);
+                _shapes.insert(std::make_pair(_key, def));
+                break;
+            }
         }
-    }
+    } while(false);
+    lua_pop(_table.getLua(), 1);
 }
 
 template<BodyShapeType shape_type>
@@ -139,7 +141,7 @@ void readBasicShape(LuaTable & _table, BodyBasicShapeDefinition<shape_type> & _s
                 addGraphics(_table.getLua(), -1, lua_tostring(_table.getLua(), -2), _shape.graphics);
             lua_pop(_table.getLua(), 1);
         }
-        lua_pop(_table.getLua(), 2);
+        lua_pop(_table.getLua(), 1);
     }
 }
 

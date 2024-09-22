@@ -22,7 +22,7 @@
   <object id="9" type="obstacle" x="0.102273" y="510.303" width="127.864" height="1537.5"/>
   <object id="10" type="water" x="4989.33" y="2079.33" width="515.667" height="480"/>
   <object id="11" type="water" x="9728.58" y="2208.17" width="1661.92" height="351.333"/>
-  <object id="12" name="start-position" x="287" y="2023">
+  <object id="12" name="start-position" x="284.758" y="2046.03">
    <point/>
   </object>
   <object id="13" name="finish" x="12414" y="-6" width="382" height="900"/>
