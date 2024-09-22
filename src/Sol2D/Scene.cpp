@@ -241,27 +241,27 @@ uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _proto
     b2BodyDef b2_body_def = b2DefaultBodyDef();
     b2_body_def.type = mapBodyType(_prototype.getType());
     b2_body_def.position = { .x = _position.x, .y = _position.y };
-    b2_body_def.linearDamping = 100; // TODO: for top-down
+    // b2_body_def.linearDamping = 100; // TODO: for top-down
+
     b2_body_def.angularDamping = 100; // TODO: must be controlled by user (prevent infinite rotation)
     b2_body_def.fixedRotation = true; // TODO: must be controlled by user
     b2BodyId b2_body_id = b2CreateBody(m_b2_world_id, &b2_body_def);
     b2Body_SetUserData(b2_body_id, body);
     m_bodies.insert(std::make_pair(body->getId(), b2_body_id));
 
-    _prototype.forEachShape([this, body, b2_body_id, &_prototype](
+    _prototype.forEachShape([this, body, b2_body_id/*, &_prototype*/](
         const std::string & __key,
         const BodyShapePrototype & __shape_proto)
     {
         BodyShape * body_shape = nullptr;
 
         b2ShapeDef b2_shape_def = b2DefaultShapeDef();
-        if(_prototype.getType() == BodyType::Dynamic) // TODO: duplicated
-        {
-            b2_shape_def.density = .002f; // TODO: real value from user
-        }
+        // if(_prototype.getType() == BodyType::Dynamic) // TODO: duplicated
+        // {
+        //     b2_shape_def.density = .002f; // TODO: real value from user
+        // }
         b2_shape_def.isSensor = __shape_proto.isSensor();
         b2_shape_def.enablePreSolveEvents = __shape_proto.isPreSolveEnabled();
-
         switch(__shape_proto.getType())
         {
         case BodyShapeType::Polygon:
@@ -807,6 +807,23 @@ void Scene::applyForce(uint64_t _body_id, const Point & _force)
         if(B2_IS_NON_NULL(b2_body_id))
             b2Body_ApplyForceToCenter(b2_body_id, _force, true); // TODO: what is wake?
     });
+}
+
+void Scene::applyImpulse(uint64_t _body_id, const Point & _impulse)
+{
+    m_defers.push_front([this, _body_id, _impulse]() {
+        b2BodyId b2_body_id = findBody(_body_id);
+        if(B2_IS_NON_NULL(b2_body_id))
+            b2Body_ApplyLinearImpulseToCenter(b2_body_id, _impulse, true); // TODO: what is wake?
+    });
+}
+
+Point Scene::getLinearVelocity(uint64_t _body_id) const
+{
+    b2BodyId b2_body = findBody(_body_id);
+    if(B2_IS_NULL(b2_body))
+        return makePoint(.0f, .0f);
+    return asPoint(b2Body_GetLinearVelocity(b2_body));
 }
 
 void Scene::setBodyPosition(uint64_t _body_id, const Point & _position)

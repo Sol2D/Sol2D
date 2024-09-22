@@ -36,6 +36,7 @@ Box2dDebugDraw::Box2dDebugDraw(
     m_b2_debug_draw.drawShapes = true; // TODO: from user config
     m_b2_debug_draw.drawAABBs = false; // TODO: from user config
     m_b2_debug_draw.drawJoints = true; // TODO: from user config
+    m_b2_debug_draw.drawContacts = true; // TODO: from user config
     m_b2_debug_draw.DrawPolygon = &Box2dDebugDraw::drawPolygon;
     m_b2_debug_draw.DrawSolidPolygon = &Box2dDebugDraw::drawSolidPolygon;
     m_b2_debug_draw.DrawCircle = &Box2dDebugDraw::drawCircle;
@@ -122,15 +123,14 @@ void Box2dDebugDraw::drawPoint(b2Vec2 _point, float _size, b2HexColor _color, vo
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
     self->setRendererDrawColor(_color);
-    const Point point = self->m_translate_point(_point.x, _point.x);
-    const float size = self->m_translate_length(_size);
-    const float half_size = size / 2;
+    const Point point = self->m_translate_point(_point.x, _point.y);
+    const float half_size = _size / 2;
     const SDL_FRect rect =
     {
         .x = point.x - half_size,
         .y = point.y - half_size,
-        .w = size,
-        .h = size
+        .w = _size,
+        .h = _size
     };
     SDL_RenderFillRect(self->mp_renderer, &rect);
 }

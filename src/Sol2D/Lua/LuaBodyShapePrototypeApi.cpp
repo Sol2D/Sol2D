@@ -139,12 +139,18 @@ int luaApi_IsSensor(lua_State * _lua)
 }
 
 // 1 self
-// 2 is pre-solve enabled?
-int luaApi_SetIsPreSolveEnabled(lua_State * _lua)
+int luaApi_EnablePreSolve(lua_State * _lua)
 {
     auto prototype = getBodyShapePrototype(_lua, 1);
-    luaL_argcheck(_lua, lua_isboolean(_lua, 2), 2, "the is pre-solve enabled flag expected");
-    prototype->setIsPreSolveEnabled(lua_toboolean(_lua, 2));
+    prototype->setIsPreSolveEnabled(true);
+    return 0;
+}
+
+// 1 self
+int luaApi_DisablePreSolve(lua_State * _lua)
+{
+    auto prototype = getBodyShapePrototype(_lua, 1);
+    prototype->setIsPreSolveEnabled(false);
     return 0;
 }
 
@@ -251,7 +257,8 @@ void Sol2D::Lua::pushBodyShapePrototypeApi(lua_State * _lua, std::shared_ptr<Bod
             { "getType", luaApi_GetType },
             { "setIsSensor", luaApi_SetIsSensor },
             { "isSensor", luaApi_IsSensor },
-            { "setIsPreSolveEnabled", luaApi_SetIsPreSolveEnabled },
+            { "enablePreSolve", luaApi_EnablePreSolve },
+            { "disablePreSolve", luaApi_DisablePreSolve },
             { "isPreSolveEnabled", luaApi_IsPreSolveEnabled },
             { "removeGraphics", luaApi_RemoveGraphics },
             { nullptr, nullptr }

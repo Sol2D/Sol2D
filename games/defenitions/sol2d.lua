@@ -190,6 +190,14 @@ function __scene:createBodiesFromMapObjects(class, body_options, body_shape_opti
 function __scene:applyForce(body_id, force_vector) end
 
 ---@param body_id integer
+---@param impulse_vector Point
+function __scene:applyImpulse(body_id, impulse_vector) end
+
+---@param body_id integer
+---@return Point
+function __scene:getLinearVelocity(body_id) end
+
+---@param body_id integer
 ---@param position Point
 function __scene:setBodyPosition(body_id, position) end
 
@@ -583,8 +591,9 @@ function __body_shape_prototype:setIsSensor(is_sensor) end
 ---@return boolean
 function __body_shape_prototype:isSensor() end
 
----@param enabled boolean?
-function __body_shape_prototype:setIsPreSolveEnabled(enabled) end
+function __body_shape_prototype:enablePreSolve() end
+
+function __body_shape_prototype:disablePreSolve() end
 
 ---@return boolean
 function __body_shape_prototype:isPreSolveEnabled() end

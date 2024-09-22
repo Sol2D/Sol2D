@@ -49,7 +49,7 @@ void Sol2D::Lua::pushManifold(lua_State * _lua, const b2Manifold & _manifold)
     for(int i = 0; i < _manifold.pointCount; ++i)
     {
         pushManifoldPoint(_lua, _manifold.points[i]);
-        lua_rawseti(_lua, -2, i);
+        lua_rawseti(_lua, -2, i + 1);
     }
     table.setValueFromTop("points");
 }

@@ -283,6 +283,32 @@ int luaApi_ApplyForce(lua_State * _lua)
 
 // 1 self
 // 2 body id
+// 3 force vector (point)
+int luaApi_ApplyImpulse(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
+    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    Point impulse;
+    luaL_argcheck(_lua, tryGetPoint(_lua, 3, impulse), 3, "an impulse vector expected");
+    self->getScene(_lua)->applyImpulse(body_id, impulse);
+    return 0;
+}
+
+// 1 self
+// 2 body id
+int luaApi_GetLinearVelocity(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
+    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    Point velocity = self->getScene(_lua)->getLinearVelocity(body_id);
+    pushPoint(_lua, velocity.x, velocity.y);
+    return 1;
+}
+
+// 1 self
+// 2 body id
 // 3 position
 int luaApi_SetBodyPosition(lua_State * _lua)
 {
@@ -542,6 +568,8 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "createBody", luaApi_CreateBody },
             { "createBodiesFromMapObjects", luaApi_CreateBodiesFromMapObjects },
             { "applyForce", luaApi_ApplyForce },
+            { "applyImpulse", luaApi_ApplyImpulse },
+            { "getLinearVelocity", luaApi_GetLinearVelocity },
             { "setBodyPosition", luaApi_SetBodyPosition },
             { "getBodyPosition", luaApi_GetBodyPosition },
             { "setFollowedBody", luaApi_SetFollowedBody },

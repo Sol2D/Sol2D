@@ -27,7 +27,7 @@ end
 ---@param level Level01
 ---@param resources Resources
 local function createPlatform(level, resources)
-    local body_proto = level.store:createObject('sol.BodyPrototype', 'platform-01', sol.BodyType.STATIC)
+    local body_proto = level.store:createObject('sol.BodyPrototype', 'platform-01', sol.BodyType.KINEMATIC)
     local map_object = level.scene:getTileMapObjectByName('platform-01')
     if map_object == nil then
         print('Unable to get the "platofm-01" object')
@@ -73,12 +73,12 @@ local function preSolveContact(contact)
     end
 
     for _, point in ipairs(contact.manifold.points) do
-        if point.separation < -0.1 then
-            return false
+        if point.separation > -0.2 then
+            return true
         end
     end
 
-    return true
+    return false
 end
 
 ---@return Level01
@@ -87,7 +87,7 @@ local function createLevel()
     local scene = store:createObject(
         'sol.Scene',
         'main',
-        { gravity = { x = 0, y = 2000 }, metersPerPixel = meters_per_pixel }
+        { gravity = { x = 0, y = 80 }, metersPerPixel = meters_per_pixel }
     )
     scene:loadTileMap('tilemaps/level-01.tmx')
     local level = {

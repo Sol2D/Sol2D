@@ -1,3 +1,4 @@
+require 'math'
 require 'player'
 
 local player_id = self.bodyId
@@ -42,26 +43,39 @@ function state:set(direction, action)
     end
 end
 
+local in_air = false
+local jump_timeout = 0
+
 sol.heartbeat:subscribe(function()
     local right_key, left_key, space_key = sol.keyboard:getState(
         sol.Scancode.RIGHT_ARROW,
         sol.Scancode.LEFT_ARROW,
         sol.Scancode.SPACE
     )
-    local y_force = 0
-    if space_key then
-        y_force = -6
+
+    if jump_timeout > 0 then
+        jump_timeout = jump_timeout - 1
     end
+
+    if in_air or space_key then
+        local velocity = scene:getLinearVelocity(player_id)
+        if math.abs(velocity.y) < 0.01 then
+            in_air = false
+            if space_key and jump_timeout == 0 then
+                jump_timeout = 40
+                scene:applyImpulse(player_id, { x = 0, y = -18 })
+                in_air = true
+            end
+        end
+    end
+
     if right_key then
-        scene:applyForce(player_id, { x = 2.5, y = y_force })
+        scene:applyForce(player_id, { x = 60, y = 0 })
         state:set(Direction.RIGHT, Action.WALK)
     elseif left_key then
-        scene:applyForce(player_id, { x = -2.5, y = y_force })
+        scene:applyForce(player_id, { x = -60, y = 0 })
         state:set(Direction.LEFT, Action.WALK)
     else
-        if y_force then
-            scene:applyForce(player_id, { x = 0, y = y_force })
-        end
         state:set(state.direction, Action.IDLE)
     end
 end)
