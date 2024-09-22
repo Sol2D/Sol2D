@@ -180,7 +180,10 @@ void LuaCallbackStorage::execute(
     const int args_top = lua_gettop(mp_lua);
     getCallbackRegisty();
     if(!tryGetEventsTable(_owner, _event_id))
+    {
+        lua_pop(mp_lua, 1);
         return;
+    }
     const int callbacks_table_idx = lua_gettop(mp_lua);
     lua_pushnil(mp_lua);
     for(bool exit = false; !exit && lua_next(mp_lua, callbacks_table_idx);)

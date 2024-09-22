@@ -20,6 +20,7 @@
 #include <Sol2D/BodyType.h>
 #include <Sol2D/BodyShapeType.h>
 #include <Sol2D/Rect.h>
+#include <SDL3/SDL_surface.h>
 #include <filesystem>
 #include <variant>
 #include <vector>
@@ -50,15 +51,27 @@ struct BodyShapeGraphics
 {
     BodyShapeGraphics() :
         position{ .x = .0f, .y = .0f },
-        is_flipped_horizontally(false),
-        is_flipped_vertically(false)
+        flip_mode(SDL_FLIP_NONE)
     {
+    }
+
+    void setFilippedHorizontally(bool _flipped)
+    {
+        flip_mode = _flipped
+            ? static_cast<SDL_FlipMode>(static_cast<int>(flip_mode) | SDL_FLIP_HORIZONTAL)
+            : static_cast<SDL_FlipMode>(static_cast<int>(flip_mode) & ~SDL_FLIP_HORIZONTAL);
+    }
+
+    void setFilippedVertically(bool _flipped)
+    {
+        flip_mode = _flipped
+            ? static_cast<SDL_FlipMode>(static_cast<int>(flip_mode) | SDL_FLIP_VERTICAL)
+            : static_cast<SDL_FlipMode>(static_cast<int>(flip_mode) & ~SDL_FLIP_VERTICAL);
     }
 
     std::shared_ptr<GraphicsPack> graphics;
     Point position;
-    bool is_flipped_horizontally;
-    bool is_flipped_vertically;
+    SDL_FlipMode flip_mode;
 };
 
 template<BodyShapeType shape_type>

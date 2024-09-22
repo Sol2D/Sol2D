@@ -99,8 +99,8 @@ inline bool BodyShape::flipGraphic(const std::string & _key, bool _flip_horizont
     auto it = m_graphics.find(_key);
     if(it == m_graphics.end())
         return false;
-    it->second->is_flipped_horizontally = _flip_horizontally;
-    it->second->is_flipped_vertically = _flip_vertically;
+    it->second->setFilippedHorizontally(_flip_horizontally);
+    it->second->setFilippedVertically(_flip_vertically);
     return true;
 }
 
@@ -699,7 +699,10 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
         BodyShape * shape = getUserData(shape_id);
         BodyShapeGraphics * shape_graphic = shape->getCurrentGraphics();
         if(shape_graphic)
+        {
+            options.flip = shape_graphic->flip_mode;
             shape_graphic->graphics->render(body_position + shape_graphic->position, _time_passed, options);
+        }
     }
 }
 

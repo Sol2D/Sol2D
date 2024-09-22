@@ -168,8 +168,13 @@ void addGraphics(
             tryGetPoint(_lua, -1, graphics.position);
             lua_pop(_lua, 1);
         }
-        table.tryGetBoolean("isFlippedHorizontally", &graphics.is_flipped_horizontally);
-        table.tryGetBoolean("isFlippedVertically", &graphics.is_flipped_vertically);
+        {
+            bool flipped;
+            if(table.tryGetBoolean("isFlippedHorizontally", &flipped))
+                graphics.setFilippedHorizontally(flipped);
+            if(table.tryGetBoolean("isFlippedVertically", &flipped))
+                graphics.setFilippedVertically(flipped);
+        }
         lua_pop(_lua, 1);
         _graphics.insert(std::make_pair(_key, graphics));
     }
