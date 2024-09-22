@@ -16,8 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/BodyPrototype.h>
-#include <Sol2D/Workspace.h>
+#include <Sol2D/BodyDefinition.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
 #include <memory>
 
@@ -25,12 +24,11 @@ namespace Sol2D::Lua {
 
 struct LuaBodyPrototype
 {
-    std::shared_ptr<BodyPrototype> proto;
-    std::optional<std::filesystem::path> script_path;
+    std::shared_ptr<BodyDefinition> definition;
 };
 
-void pushBodyPrototypeApi(lua_State * _lua, std::shared_ptr<BodyPrototype> _body_prototype);
-
-std::optional<LuaBodyPrototype> tryGetBodyPrototype(lua_State * _lua, int _idx);
+void pushBodyPrototype(lua_State * _lua, std::shared_ptr<BodyDefinition> _definition);
+bool tryGetBodyPrototype(lua_State * _lua, int _idx, LuaBodyPrototype & _prototype);
 
 } // namespace Sol2D::Lua
+

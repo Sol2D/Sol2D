@@ -56,6 +56,6 @@ void Sol2D::Lua::pushFontApi(lua_State * _lua, std::shared_ptr<TTF_Font> _font)
 
 std::shared_ptr<TTF_Font> Sol2D::Lua::tryGetFont(lua_State * _lua, int _idx)
 {
-    Self * self = UserData::getUserData(_lua, _idx);
+    Self * self = UserData::tryGetUserData(_lua, _idx);
     return self ? self->font.lock() : nullptr;
 }

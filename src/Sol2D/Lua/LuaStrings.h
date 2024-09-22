@@ -35,11 +35,9 @@ struct LuaTypeName
     static const char sprite[];
     static const char sprite_sheet[];
     static const char graphics_pack[];
-    static const char body_prototype[];
     static const char body_type[];
-    static const char body_circle_shape_prototype[];
-    static const char body_polygon_shape_prototype[];
     static const char body_shape_type[];
+    static const char body_prototype[];
     static const char font[];
     static const char form[];
     static const char vertical_text_alignment[];

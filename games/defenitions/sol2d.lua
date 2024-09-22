@@ -87,6 +87,26 @@ self = nil
 ---@field isPreSolveEnabled boolean?
 ---@field density number?
 
+---@class BodyDefinition
+---@field type integer
+---@field script string?
+---@field shapes table<string, BodyShapeDefinition>?
+---@see sol.BodyType
+
+---@class BodyShapeDefinition
+---@field type integer
+---@field points Point[]
+---@field isSensor boolean?
+---@field isPreSolveEnabled boolean?
+---@field graphics table<string, BodyShapeGraphicsDefinition>?
+---@see sol.BodyShapeType
+
+---@class BodyShapeGraphicsDefinition
+---@field position Point?
+---@field isFlippedHorizontally boolean?
+---@field isFlippedVertically boolean?
+---@field graphics sol.GraphicsPack
+
 ---@class Fragment
 ---@field top Dimension?
 ---@field right Dimension?
@@ -175,10 +195,10 @@ function __scene:getTileMapObjectById(id) end
 function __scene:getTileMapObjectByName(name) end
 
 ---@param position Point | nil
----@param body_prototype sol.BodyPrototype
----@param argument? any
+---@param proto_or_definition sol.BodyPrototype | BodyDefinition
+---@param script_argument? any
 ---@return integer
-function __scene:createBody(position, body_prototype, argument) end
+function __scene:createBody(position, proto_or_definition, script_argument) end
 
 ---@param class string
 ---@param body_options BodyOptions?
@@ -408,207 +428,143 @@ function __button:unsubscribeOnClick(subscription_id) end
 ---@field shapeKey string
 ---@field tileMapObjectId integer?
 
+---@class sol.BodyPrototype
+
 ---@class sol.Store
 local __store
 
----@alias StoreObject
----| 'sol.View'
----| 'sol.Scene'
----| 'sol.Form'
----| 'sol.Sprite'
----| 'sol.SpriteSheet'
----| 'sol.GraphicsPack'
----| 'sol.BodyPrototype'
----| 'sol.SoundEffect'
----| 'sol.Music'
----| 'sol.Font'
-
----@param type 'sol.View'
 ---@param key string
 ---@return sol.View
-function __store:createObject(type, key) end
+function __store:createView(key) end
 
----@param type 'sol.Scene'
+---@param key string
+---@return sol.View | nil
+function __store:getView(key) end
+
+---@param key string
+---@return boolean
+function __store:freeView(key) end
+
 ---@param key string
 ---@param options SceneOptions?
 ---@return sol.Scene
-function __store:createObject(type, key, options) end
+function __store:createScene(key, options) end
 
----@param type 'sol.Form'
+---@param key string
+---@return sol.Scene | nil
+function __store:getScene(key) end
+
+---@param key string
+---@return boolean
+function __store:freeScene(key) end
+
 ---@param key string
 ---@return sol.Form
-function __store:createObject(type, key) end
+function __store:createForm(key) end
 
----@param type 'sol.Sprite'
+---@param key string
+---@return sol.Form | nil
+function __store:getForm(key) end
+
+---@param key string
+---@return boolean
+function __store:freeForm(key) end
+
 ---@param key string
 ---@return sol.Sprite
-function __store:createObject(type, key) end
+function __store:createSprite(key) end
 
----@param type 'sol.SpriteSheet'
+---@param key string
+---@return sol.Sprite | nil
+function __store:getSprite(type, key) end
+
+---@param key string
+---@return boolean
+function __store:freeSprite(key) end
+
 ---@param key string
 ---@return sol.SpriteSheet
-function __store:createObject(type, key) end
+function __store:createSpriteSheet(key) end
 
----@param type 'sol.GraphicsPack'
+---@param key string
+---@return sol.SpriteSheet | nil
+function __store:getSpriteSheet(key) end
+
+---@param key string
+---@return boolean
+function __store:freeSpriteSheet(key) end
+
 ---@param key string
 ---@return sol.GraphicsPack
-function __store:createObject(type, key) end
+function __store:createGraphicsPack(key) end
 
----@param type 'sol.BodyPrototype'
 ---@param key string
----@param body_type integer
----@return sol.BodyPrototype
----@see sol.BodyType
-function __store:createObject(type, key, body_type) end
+---@return sol.GraphicsPack | nil
+function __store:getGraphicsPack(key) end
 
----@param type 'sol.SoundEffect'
+---@param key string
+---@return boolean
+function __store:freeGraphicsPack(key) end
+
+---@param key string
+---@param definition BodyDefinition
+---@return sol.BodyPrototype
+function __store:createBodyPrototype(key, definition) end
+
+---@param key string
+---@return sol.BodyPrototype | nil
+function __store:getBodyPrototype(key, definition) end
+
+---@param key string
+function __store:freeBodyPrototype(key) end
+
 ---@param key string
 ---@param file_path string
 ---@return sol.SoundEffect
-function __store:createObject(type, key, file_path) end
+function __store:createSoundEffect(key, file_path) end
 
----@param type 'sol.Music'
+---@param key string
+---@param file_path string
+---@return sol.SoundEffect | nil
+function __store:getSoundEffect(key, file_path) end
+
+---@param key string
+---@return boolean
+function __store:freeSoundEffect(key) end
+
 ---@param key string
 ---@param file_path string
 ---@return sol.Music
-function __store:createObject(type, key, file_path) end
+function __store:createMusic(key, file_path) end
 
----@param type 'sol.Font'
+---@param key string
+---@param file_path string
+---@return sol.Music | nil
+function __store:getMusic(key, file_path) end
+
+---@param key string
+---@return boolean
+function __store:freeMusic(key) end
+
 ---@param key string
 ---@param file_path string
 ---@param font_size integer
 ---@return sol.Font
-function __store:createObject(type, key, file_path, font_size) end
+function __store:createFont(key, file_path, font_size) end
 
---- This is a stub for the Lua language server, call only the overloaded variants.
-function __store:getObject() end
-
----@param type 'sol.View'
----@param key string
----@return sol.View | nil
-function __store:getObject(type, key) end
-
----@param type 'sol.Scene'
----@param key string
----@return sol.Scene | nil
-function __store:getObject(type, key) end
-
----@param type 'sol.Form'
----@param key string
----@return sol.Form | nil
-function __store:getObject(type, key) end
-
----@param type 'sol.Sprite'
----@param key string
----@return sol.Sprite | nil
-function __store:getObject(type, key) end
-
----@param type 'sol.SpriteSheet'
----@param key string
----@return sol.SpriteSheet | nil
-function __store:getObject(type, key) end
-
----@param type 'sol.GraphicsPack'
----@param key string
----@return sol.GraphicsPack | nil
-function __store:getObject(type, key) end
-
----@param type 'sol.BodyPrototype'
----@param key string
----@param body_type sol.BodyType | nil
----@return sol.BodyPrototype | nil
-function __store:getObject(type, key, body_type) end
-
----@param type 'sol.SoundEffect'
----@param key string
----@param file_path string
----@return sol.SoundEffect | nil
-function __store:getObject(type, key, file_path) end
-
----@param type 'sol.Music'
----@param key string
----@param file_path string
----@return sol.Music | nil
-function __store:getObject(type, key, file_path) end
-
----@param type 'sol.Font'
 ---@param key string
 ---@param file_path string
 ---@param font_size integer
 ---@return sol.Font | nil
-function __store:getObject(type, key, file_path, font_size) end
+function __store:getFont(key, file_path, font_size) end
 
----@param type StoreObject
 ---@param key string
 ---@return boolean
-function __store:freeObject(type, key) end
-
----@class sol.BodyPrototype
-local __body_prototype
-
----@return integer # type of the body
----@see sol.BodyType
-function __body_prototype:getType() end
-
----@param key string
----@param position Point
----@param radius number
----@return sol.BodyCircleShapePrototype
-function __body_prototype:createCircleShape(key, position, radius) end
-
----@param key string
----@param rect Rectangle
----@return sol.BodyPolygonShapePrototype
-function __body_prototype:createPolygonShape(key, rect) end
-
----@param key string
----@param ... Point points related to the position
----@return sol.BodyPolygonShapePrototype
-function __body_prototype:createPolygonShape(key, ...) end
-
----@param path string
-function __body_prototype:attachScript(path) end
+function __store:freeFont(key) end
 
 ---@class sol.BodyShapeType
 ---@field CIRCLE integer
 ---@field POLYGON integer
-
----@class sol.BodyShapePrototype
-local __body_shape_prototype
-
----@param key string
----@param graphics_pack sol.GraphicsPack
----@param options BodyShapeGraphicsOptions?
-function __body_shape_prototype:addGraphics(key, graphics_pack, options) end
-
----@return integer
----@see sol.BodyShapeType
-function __body_shape_prototype:getType() end
-
----@param is_sensor boolean?
-function __body_shape_prototype:setIsSensor(is_sensor) end
-
----@return boolean
-function __body_shape_prototype:isSensor() end
-
-function __body_shape_prototype:enablePreSolve() end
-
-function __body_shape_prototype:disablePreSolve() end
-
----@return boolean
-function __body_shape_prototype:isPreSolveEnabled() end
-
----@param key string
-function __body_shape_prototype:removeGraphics(key) end
-
----@class sol.BodyCircleShapePrototype : sol.BodyShapePrototype
-local __body_circle_shape_prototype
-
----@return number
-function __body_circle_shape_prototype:getRadius() end
-
----@class sol.BodyPolygonShapePrototype : sol.BodyShapePrototype
-local __body_polygon_shape_prototype
 
 ---@class sol.Sprite
 local __sprite
@@ -710,9 +666,6 @@ function __graphics_pack:addSprites(frame_index, sprite_sheet, indices, options)
 ---@param sprite_index integer
 ---@return boolean
 function __graphics_pack:removeSprite(frame_index, sprite_index) end
-
----@return Point[]
-function __body_polygon_shape_prototype:getPoints() end
 
 ---@class sol.BodyType
 ---@field STATIC integer

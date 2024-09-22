@@ -17,6 +17,7 @@
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaBodyPrototypeApi.h>
+#include <Sol2D/Lua/LuaBodyDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyOptionsApi.h>
 #include <Sol2D/Lua/LuaBodyShapeOptionsApi.h>
 #include <Sol2D/Lua/LuaContactApi.h>
@@ -213,7 +214,7 @@ int luaApi_GetTileMapObjectByName(lua_State * _lua)
 
 // 1 self
 // 2 position or nil
-// 3 body prototype
+// 3 body prototype OR body definition
 // 4 script argument (optional)
 int luaApi_CreateBody(lua_State * _lua)
 {
@@ -222,13 +223,26 @@ int luaApi_CreateBody(lua_State * _lua)
     Point position = { .0f, .0f };
     if(!lua_isnil(_lua, 2))
         luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "body position expected");
-    std::optional<LuaBodyPrototype> lua_proto = tryGetBodyPrototype(_lua, 3);
-    if(!lua_proto.has_value())
-        luaL_argerror(_lua, 3, "invalid body brototype");
-    uint64_t body_id = self->getScene(_lua)->createBody(position, *lua_proto->proto);
-    lua_pushinteger(_lua, body_id);
 
-    if(lua_proto->script_path.has_value())
+    uint64_t body_id = 0;
+    LuaBodyPrototype proto;
+    std::optional<std::filesystem::path> script_path;
+    if(tryGetBodyPrototype(_lua, 3, proto))
+    {
+        body_id = self->getScene(_lua)->createBody(position, *proto.definition);
+        script_path = proto.definition->script;
+    }
+    else if(std::unique_ptr<BodyDefinition> definition = tryGetBodyDefinition(_lua, 3))
+    {
+        body_id = self->getScene(_lua)->createBody(position, *definition);
+        script_path = definition->script;
+    }
+    else
+    {
+        luaL_argerror(_lua, 3, "body prototype or defenition expected");
+    }
+
+    if(script_path.has_value())
     {
         LuaTable table = LuaTable::pushNew(_lua);
         table.setIntegerValue("bodyId", body_id);
@@ -238,9 +252,10 @@ int luaApi_CreateBody(lua_State * _lua)
             lua_pushvalue(_lua, 4);
             table.setValueFromTop("arg");
         }
-        executeScriptWithContext(_lua, self->workspace, lua_proto->script_path.value());
+        executeScriptWithContext(_lua, self->workspace, script_path.value());
     }
 
+    lua_pushinteger(_lua, body_id);
     return 1;
 }
 

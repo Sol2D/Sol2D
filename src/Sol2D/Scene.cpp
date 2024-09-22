@@ -99,8 +99,8 @@ inline bool BodyShape::flipGraphic(const std::string & _key, bool _flip_horizont
     auto it = m_graphics.find(_key);
     if(it == m_graphics.end())
         return false;
-    it->second->options.is_flipped_horizontally = _flip_horizontally;
-    it->second->options.is_flipped_vertically = _flip_vertically;
+    it->second->is_flipped_horizontally = _flip_horizontally;
+    it->second->is_flipped_vertically = _flip_vertically;
     return true;
 }
 
@@ -181,6 +181,117 @@ inline BodyShape * getUserData(b2ShapeId _shape_id)
 
 } // namespace
 
+class Scene::BodyShapeCreator
+{
+public:
+    explicit BodyShapeCreator(Scene & _scene, Body & _body, const b2BodyId & _b2_body_id, const std::string & _key);
+    void operator ()(const BodyPolygonDefinition & _polygon);
+    void operator ()(const BodyRectDefinition & _rect);
+    void operator ()(const BodyCircleDefinition & _circle);
+
+private:
+    template<BodyShapeType shape_type>
+    b2ShapeDef createBox2dShapeDef(const BodyBasicShapeDefinition<shape_type> & _def) const;
+    template<BodyShapeType shape_type>
+    BodyShape & createShape(const BodyBasicShapeDefinition<shape_type> & _def) const;
+
+private:
+    Scene & mr_scene;
+    Body & mr_body;
+    const b2BodyId & mr_b2_body_id;
+    const std::string & mr_key;
+};
+
+Scene::BodyShapeCreator::BodyShapeCreator(
+    Scene & _scene,
+    Body & _body,
+    const b2BodyId & _b2_body_id,
+    const std::string & _key
+) :
+    mr_scene(_scene),
+    mr_body(_body),
+    mr_b2_body_id(_b2_body_id),
+    mr_key(_key)
+{
+}
+
+void Scene::BodyShapeCreator::operator ()(const BodyPolygonDefinition & _polygon)
+{
+    if(_polygon.points.size() < 3 || _polygon.points.size() > b2_maxPolygonVertices)
+        return; // TODO: log
+    std::vector<b2Vec2> shape_points(_polygon.points.size());
+    for(size_t i = 0; i < _polygon.points.size(); ++i)
+    {
+        shape_points[i].x = mr_scene.graphicalToPhysical(_polygon.points[i].x);
+        shape_points[i].y = mr_scene.graphicalToPhysical(_polygon.points[i].y);
+    }
+    b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
+    b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
+    b2ShapeDef b2_shape_def = createBox2dShapeDef(_polygon);
+    b2ShapeId b2_shape_id = b2CreatePolygonShape(mr_b2_body_id, &b2_shape_def, &b2_polygon);
+    BodyShape & body_shape = createShape(_polygon);
+    b2Shape_SetUserData(b2_shape_id, &body_shape);
+}
+
+template<BodyShapeType shape_type>
+inline b2ShapeDef Scene::BodyShapeCreator::createBox2dShapeDef(const BodyBasicShapeDefinition<shape_type> & _def) const
+{
+    b2ShapeDef b2_shape_def = b2DefaultShapeDef();
+    // if(<body type> == BodyType::Dynamic)
+    // {
+    //     b2_shape_def.density = .002f; // TODO: real value from user
+    // }
+    b2_shape_def.isSensor = _def.is_sensor;
+    b2_shape_def.enablePreSolveEvents = _def.is_pre_solve_enabled;
+    return b2_shape_def;
+}
+
+template<BodyShapeType shape_type>
+BodyShape & Scene::BodyShapeCreator::createShape(const BodyBasicShapeDefinition<shape_type> & _def) const
+{
+    BodyShape & body_shape = mr_body.createShape(mr_key);
+    for(const auto & graphics_kv : _def.graphics)
+        body_shape.addGraphic(graphics_kv.first, graphics_kv.second);
+    return body_shape;
+}
+
+void Scene::BodyShapeCreator::operator ()(const BodyRectDefinition & _rect)
+{
+    const float half_w = mr_scene.graphicalToPhysical(_rect.w) / 2.0f;
+    const float half_h = mr_scene.graphicalToPhysical(_rect.h) / 2.0f;
+    b2Polygon b2_polygon = b2MakeOffsetBox(
+        half_w,
+        half_h,
+        {
+            .x = (_rect.x ? mr_scene.graphicalToPhysical(_rect.x) : .0f) + half_w,
+            .y = (_rect.y ?  mr_scene.graphicalToPhysical(_rect.y) : .0f) + half_w
+        },
+        b2Rot_identity);
+    b2ShapeDef b2_shape_def = createBox2dShapeDef(_rect);
+    b2ShapeId b2_shape_id = b2CreatePolygonShape(mr_b2_body_id, &b2_shape_def, &b2_polygon);
+    BodyShape & body_shape = createShape(_rect);
+    b2Shape_SetUserData(b2_shape_id, &body_shape);
+}
+
+void Scene::BodyShapeCreator::operator ()(const BodyCircleDefinition & _circle)
+{
+    b2Circle b2_circle
+        {
+            .center =
+            {
+                .x = mr_scene.graphicalToPhysical(_circle.center.x),
+                .y = mr_scene.graphicalToPhysical(_circle.center.y)
+            },
+            .radius = mr_scene.graphicalToPhysical(_circle.radius)
+        };
+    if(b2_circle.radius <= .0f)
+        return; // TODO: log
+    b2ShapeDef b2_shape_def = createBox2dShapeDef(_circle);
+    b2ShapeId b2_shape_id = b2CreateCircleShape(mr_b2_body_id, &b2_shape_def, &b2_circle);
+    BodyShape & body_shape = createShape(_circle);
+    b2Shape_SetUserData(b2_shape_id, &body_shape);
+}
+
 Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Renderer & _renderer) :
     mr_workspace(_workspace),
     mr_renderer(_renderer),
@@ -235,84 +346,23 @@ void Scene::setGravity(const Point & _vector)
     });
 }
 
-uint64_t Scene::createBody(const Point & _position, const BodyPrototype & _prototype)
+uint64_t Scene::createBody(const Point & _position, const BodyDefinition & _definition)
 {
     Body * body = new Body;
     b2BodyDef b2_body_def = b2DefaultBodyDef();
-    b2_body_def.type = mapBodyType(_prototype.getType());
+    b2_body_def.type = mapBodyType(_definition.type);
     b2_body_def.position = { .x = _position.x, .y = _position.y };
     // b2_body_def.linearDamping = 100; // TODO: for top-down
-
     b2_body_def.angularDamping = 100; // TODO: must be controlled by user (prevent infinite rotation)
     b2_body_def.fixedRotation = true; // TODO: must be controlled by user
     b2BodyId b2_body_id = b2CreateBody(m_b2_world_id, &b2_body_def);
     b2Body_SetUserData(b2_body_id, body);
     m_bodies.insert(std::make_pair(body->getId(), b2_body_id));
-
-    _prototype.forEachShape([this, body, b2_body_id/*, &_prototype*/](
-        const std::string & __key,
-        const BodyShapePrototype & __shape_proto)
+    for(const auto & shape_kv : _definition.shapes)
     {
-        BodyShape * body_shape = nullptr;
-
-        b2ShapeDef b2_shape_def = b2DefaultShapeDef();
-        // if(_prototype.getType() == BodyType::Dynamic) // TODO: duplicated
-        // {
-        //     b2_shape_def.density = .002f; // TODO: real value from user
-        // }
-        b2_shape_def.isSensor = __shape_proto.isSensor();
-        b2_shape_def.enablePreSolveEvents = __shape_proto.isPreSolveEnabled();
-        switch(__shape_proto.getType())
-        {
-        case BodyShapeType::Polygon:
-        {
-            const BodyPolygonShapePrototype * polygon_proto =
-                dynamic_cast<const BodyPolygonShapePrototype *>(&__shape_proto);
-            if(!polygon_proto)
-                break;
-            const std::vector<Point> & points = polygon_proto->getPoints();
-            if(points.size() < 3 || points.size() > b2_maxPolygonVertices)
-                break;
-            std::vector<b2Vec2> shape_points(points.size());
-            for(size_t i = 0; i < points.size(); ++i)
-            {
-                shape_points[i].x = graphicalToPhysical(points[i].x);
-                shape_points[i].y = graphicalToPhysical(points[i].y);
-            }
-            b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
-            b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
-            b2ShapeId b2_shape_id = b2CreatePolygonShape(b2_body_id, &b2_shape_def, &b2_polygon);
-            body_shape = &body->createShape(__key);
-            b2Shape_SetUserData(b2_shape_id, body_shape);
-        }
-        break;
-        case BodyShapeType::Circle:
-        {
-            const BodyCircleShapePrototype * circle_proto =
-                dynamic_cast<const BodyCircleShapePrototype *>(&__shape_proto);
-            if(!circle_proto)
-                break;
-            Point position = circle_proto->getCenter();
-            b2Circle b2_circle
-            {
-                .center = { .x = graphicalToPhysical(position.x), .y = graphicalToPhysical(position.y) },
-                .radius = graphicalToPhysical(circle_proto->getRadius())
-            };
-            if(b2_circle.radius <= .0f)
-                break;
-            b2ShapeId b2_shape_id = b2CreateCircleShape(b2_body_id, &b2_shape_def, &b2_circle);
-            body_shape = &body->createShape(__key);
-            b2Shape_SetUserData(b2_shape_id, body_shape);
-        }
-        break;
-        default: return;
-        }
-        __shape_proto.forEachGraphic(
-            [body_shape](const std::string & __key, const BodyShapeGraphics & __graphic) {
-                body_shape->addGraphic(__key, __graphic);
-            });
-    });
-
+        BodyShapeCreator visitor(*this, *body, b2_body_id, shape_kv.first);
+        std::visit(visitor, shape_kv.second);
+    }
     return body->getId();
 }
 
@@ -649,10 +699,7 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
         BodyShape * shape = getUserData(shape_id);
         BodyShapeGraphics * shape_graphic = shape->getCurrentGraphics();
         if(shape_graphic)
-        {
-            options.flip = shape_graphic->options.getFlip();
-            shape_graphic->graphics.render(body_position + shape_graphic->options.position, _time_passed, options);
-        }
+            shape_graphic->graphics->render(body_position + shape_graphic->position, _time_passed, options);
     }
 }
 

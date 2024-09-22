@@ -18,7 +18,7 @@
 
 #include <Sol2D/Box2dDebugDraw.h>
 #include <Sol2D/Utils/Observable.h>
-#include <Sol2D/BodyPrototype.h>
+#include <Sol2D/BodyDefinition.h>
 #include <Sol2D/BodyOptions.h>
 #include <Sol2D/BodyShapeOptions.h>
 #include <Sol2D/Contact.h>
@@ -49,11 +49,15 @@ struct SceneOptions
 
 class Scene final : public Canvas, public Utils::Observable<ContactObserver>
 {
+private:
+    class BodyShapeCreator;
+    friend class Scene::BodyShapeCreator;
+
 public:
     Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Renderer & _renderer);
     ~Scene() override;
     void setGravity(const Point & _vector);
-    uint64_t createBody(const Point & _position, const BodyPrototype & _prototype);
+    uint64_t createBody(const Point & _position, const BodyDefinition & _definition);
     void createBodiesFromMapObjects(
         const std::string & _class,
         const BodyOptions & _body_options,

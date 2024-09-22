@@ -24,7 +24,7 @@ end
 
 (function()
     local main_store = sol.stores:createStore('main')
-    local main_view = main_store:createObject('sol.View', 'main')
+    local main_view = main_store:createView('main')
     local main_fragment = createFragment(main_view, {}) -- TODO: allow creation without arguments, default: 0, 0, 100%, 100%
     local level_01 = Level01.createLevel()
     level_01.scene:createBodiesFromMapObjects('obstacle')

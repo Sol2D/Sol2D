@@ -63,11 +63,11 @@ struct Utils::ObjectFactory<GraphicsPack>
 };
 
 template<>
-struct Utils::ObjectFactory<BodyPrototype>
+struct Utils::ObjectFactory<BodyDefinition>
 {
-    std::shared_ptr<BodyPrototype> produce(BodyType _type) const
+    std::shared_ptr<BodyDefinition> produce(std::shared_ptr<BodyDefinition> _definition) const
     {
-        return std::make_shared<BodyPrototype>(_type);
+        return _definition;
     }
 };
 
@@ -124,7 +124,7 @@ using Store = Utils::ObjectStore<
     Sprite,
     SpriteSheet,
     GraphicsPack,
-    BodyPrototype,
+    BodyDefinition,
     Scene,
     Forms::Form,
     TTF_Font,

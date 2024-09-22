@@ -18,21 +18,21 @@ function Player.getMetadata()
     return setmetatable({}, proto_metatable)
 end
 
+---@param definitions table<string, BodyShapeGraphicsDefinition>
 ---@param store sol.Store
----@param shape sol.BodyShapePrototype
 ---@param scale_factor number
-local function createIdleAnimation(store, shape, scale_factor)
+local function addIdleAnimation(definitions, store, scale_factor)
     local sprite_loading_options = {
         rect = { x = 58, y = 42, w = 434, h = 615 }
     }
     local sprite_animation_options = {
         duration = 80
     }
-    local animation = store:createObject('sol.GraphicsPack', 'player_idle')
+    local animation = store:createGraphicsPack('player_idle')
     local frames_count = 10
     animation:addFrames(frames_count, sprite_animation_options)
     for i = 1, frames_count, 1 do
-        local sprite = store:createObject('sol.Sprite', 'player-idle-' .. i)
+        local sprite = store:createSprite('player-idle-' .. i)
         if not sprite:loadFromFile('sprites/knight/idle (' .. i .. ').png', sprite_loading_options) then
             print('Cannot load player-idle-' .. i)
         end
@@ -44,19 +44,21 @@ local function createIdleAnimation(store, shape, scale_factor)
         x = -(sprite_loading_options.rect.w * scale_factor) / 2,
         y = -sprite_loading_options.rect.h * scale_factor
     }
-    shape:addGraphics(proto_metatable.graphics.idle_right, animation, {
+    definitions[proto_metatable.graphics.idle_right] = {
+        graphics = animation,
         position = animation_position
-    })
-    shape:addGraphics(proto_metatable.graphics.idle_left, animation, {
+    }
+    definitions[proto_metatable.graphics.idle_left] = {
+        graphics = animation,
         position = animation_position,
         isFlippedHorizontally = true
-    })
+    }
 end
 
+---@param definitions table<string, BodyShapeGraphicsDefinition>
 ---@param store sol.Store
----@param shape sol.BodyShapePrototype
 ---@param scale_factor number
-local function createWalkAnimations(store, shape, scale_factor)
+local function addWalkAnimations(definitions, store, scale_factor)
     local sprite_loading_options = {
         rect = { x = 55, y = 31, w = 444, h = 662 }
     }
@@ -67,11 +69,11 @@ local function createWalkAnimations(store, shape, scale_factor)
             y = -34 * scale_factor
         }
     }
-    local animation = store:createObject('sol.GraphicsPack', 'player_walk')
+    local animation = store:createGraphicsPack('player_walk')
     local frames_count = 10
     animation:addFrames(frames_count, sprite_animation_options)
     for i = 1, frames_count, 1 do
-        local sprite = store:createObject('sol.Sprite', 'player-walk-' .. i)
+        local sprite = store:createSprite('player-walk-' .. i)
         if not sprite:loadFromFile('sprites/knight/walk (' .. i .. ').png', sprite_loading_options) then
             print('Cannot load player-walk-' .. i) -- TODO: logger
         end
@@ -83,31 +85,42 @@ local function createWalkAnimations(store, shape, scale_factor)
         x = -(sprite_loading_options.rect.w * scale_factor) / 2,
         y = -sprite_loading_options.rect.h * scale_factor
     }
-    shape:addGraphics(proto_metatable.graphics.walk_right, animation, {
+    definitions[proto_metatable.graphics.walk_right] = {
+        graphics = animation,
         position = animation_position
-    })
-    shape:addGraphics(proto_metatable.graphics.walk_left, animation, {
+    }
+    definitions[proto_metatable.graphics.walk_left] = {
+        graphics = animation,
         position = animation_position,
         isFlippedHorizontally = true
-    })
+    }
 end
 
 ---@param store sol.Store store where the prototype will be created
 function Player.createPrototype(store)
     local SCALE_FACTOR = 0.25
     local data = setmetatable({}, proto_metatable)
-    data.proto = store:createObject('sol.BodyPrototype', data.key, sol.BodyType.DYNAMIC)
-    data.proto:attachScript('player-script.lua')
     local hit_box = {
         w = 240 * SCALE_FACTOR,
         h = 525 * SCALE_FACTOR
     }
     hit_box.x = -(hit_box.w / 2)
     hit_box.y = -hit_box.h
-    local shape = data.proto:createPolygonShape(data.shapes.main, hit_box)
-    shape:enablePreSolve()
-    createIdleAnimation(store, shape, SCALE_FACTOR)
-    createWalkAnimations(store, shape, SCALE_FACTOR)
+    ---@type BodyDefinition
+    local body_definition = {
+        type = sol.BodyType.DYNAMIC,
+        script = 'player-script.lua',
+        shapes = {
+            [data.shapes.main] = {
+                type = sol.BodyShapeType.POLYGON,
+                points = hit_box,
+                graphics = {}
+            }
+        }
+    }
+    addIdleAnimation(body_definition.shapes[data.shapes.main].graphics, store, SCALE_FACTOR)
+    addWalkAnimations(body_definition.shapes[data.shapes.main].graphics, store, SCALE_FACTOR)
+    data.proto = store:createBodyPrototype(data.key, body_definition)
     return data
 end
 

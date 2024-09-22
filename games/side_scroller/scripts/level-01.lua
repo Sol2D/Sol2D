@@ -14,7 +14,7 @@ local platform_shape_key = 'platform'
 ---@return Resources
 local function loadResources(level)
     local resources = {}
-    resources.platformSpriteSheet = level.store:createObject('sol.SpriteSheet', platform_shape_key)
+    resources.platformSpriteSheet = level.store:createSpriteSheet(platform_shape_key)
     if (not resources.platformSpriteSheet:loadFromFile(
             'sprites/platform/platform.png',
             { colCount = 3, rowCount = 1, spriteWidth = 128, spriteHeight = 64 }
@@ -27,24 +27,33 @@ end
 ---@param level Level01
 ---@param resources Resources
 local function createPlatform(level, resources)
-    local body_proto = level.store:createObject('sol.BodyPrototype', 'platform-01', sol.BodyType.KINEMATIC)
+    local platformGraphics = level.store:createGraphicsPack('platform-01-left')
+    local frame = platformGraphics:addFrame()
+    platformGraphics:addSprite(frame, resources.platformSpriteSheet, 0, { position = { x = 0, y = 0 } })
+    platformGraphics:addSprite(frame, resources.platformSpriteSheet, 1, { position = { x = 128, y = 0 } })
+    platformGraphics:addSprite(frame, resources.platformSpriteSheet, 2, { position = { x = 256, y = 0 } })
     local map_object = level.scene:getTileMapObjectByName('platform-01')
     if map_object == nil then
         print('Unable to get the "platofm-01" object')
         return nil
     end
-    local shape_proto = body_proto:createPolygonShape(
-        'platform',
-        { x = 0, y = 0, w = 384, h = 64 }
-    )
-    local graphics = level.store:createObject('sol.GraphicsPack', 'platform-01-left')
-    local frame = graphics:addFrame()
-    graphics:addSprite(frame, resources.platformSpriteSheet, 0, { position = { x = 0, y = 0 } })
-    graphics:addSprite(frame, resources.platformSpriteSheet, 1, { position = { x = 128, y = 0 } })
-    graphics:addSprite(frame, resources.platformSpriteSheet, 2, { position = { x = 256, y = 0 } })
-    shape_proto:addGraphics('platform', graphics)
-    local body = level.scene:createBody(Level01.pixelPointToPhisical(map_object.position), body_proto)
-    if(not level.scene:setBodyShapeCurrentGraphic(body, 'platform', 'platform')) then
+    local body = level.scene:createBody(
+        Level01.pixelPointToPhisical(map_object.position),
+        {
+            type = sol.BodyType.KINEMATIC,
+            shapes = {
+                [platform_shape_key] = {
+                    type = sol.BodyShapeType.POLYGON,
+                    points = { x = 0, y = 0, w = 384, h = 64 },
+                    graphics = {
+                        platform = {
+                            graphics = platformGraphics
+                        }
+                    }
+                }
+            }
+        })
+    if (not level.scene:setBodyShapeCurrentGraphic(body, 'platform', 'platform')) then
         print('Unable to set current graphics to platform-01')
     end
 end
@@ -84,10 +93,12 @@ end
 ---@return Level01
 local function createLevel()
     local store = sol.stores:createStore('level-01')
-    local scene = store:createObject(
-        'sol.Scene',
+    local scene = store:createScene(
         'main',
-        { gravity = { x = 0, y = 80 }, metersPerPixel = meters_per_pixel }
+        {
+            gravity = { x = 0, y = 80 },
+            metersPerPixel = meters_per_pixel
+        }
     )
     scene:loadTileMap('tilemaps/level-01.tmx')
     local level = {
@@ -113,6 +124,6 @@ function level01.pixelPointToPhisical(point)
     return { x = point.x * meters_per_pixel, y = point.y * meters_per_pixel }
 end
 
-Level01 = { }
+Level01 = {}
 setmetatable(Level01, level01)
 return Level01

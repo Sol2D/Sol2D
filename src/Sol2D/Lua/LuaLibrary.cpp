@@ -20,7 +20,6 @@
 #include <Sol2D/Lua/LuaHeartbeatApi.h>
 #include <Sol2D/Lua/LuaScancodeApi.h>
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
-#include <Sol2D/Lua/LuaBodyShapePrototypeApi.h>
 #include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
 #include <Sol2D/Lua/LuaKeyboardApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>

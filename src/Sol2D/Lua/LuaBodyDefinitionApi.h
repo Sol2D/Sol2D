@@ -16,11 +16,12 @@
 
 #pragma once
 
+#include <Sol2D/BodyDefinition.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/BodyShapePrototype.h>
+#include <memory>
 
 namespace Sol2D::Lua {
 
-void pushBodyShapePrototypeApi(lua_State * _lua, std::shared_ptr<BodyShapePrototype> _body_shape_prototype);
+std::unique_ptr<BodyDefinition> tryGetBodyDefinition(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua
