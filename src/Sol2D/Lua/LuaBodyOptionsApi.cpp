@@ -48,5 +48,10 @@ bool Sol2D::Lua::tryGetBodyOptions(lua_State * _lua, int _idx, BodyOptions & _bo
         tryGetBodyShapePhysicsDefinition(_lua, -1, _body_options.shape_physics);
         lua_pop(_lua, 1);
     }
+    {
+        std::string value;
+        if(table.tryGetString("shapeKey", value))
+            _body_options.shape_key = value;
+    }
     return true;
 }

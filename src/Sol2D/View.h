@@ -49,7 +49,8 @@ private:
 };
 
 inline View::View(SDL_Renderer & _renderer) :
-    mr_renderer(_renderer)
+    mr_renderer(_renderer),
+    m_next_fragment_id(1)
 {
 }
 

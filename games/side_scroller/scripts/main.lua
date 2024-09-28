@@ -27,13 +27,12 @@ end
     local main_view = main_store:createView('main')
     local main_fragment = createFragment(main_view, {}) -- TODO: allow creation without arguments, default: 0, 0, 100%, 100%
     local level_01 = Level01.createLevel()
-    level_01.scene:createBodiesFromMapObjects('obstacle')
     main_fragment:bind(level_01.scene)
     sol.window:setView(main_view)
 
     local player_proto = Player.createPrototype(main_store)
     local player_id = level_01.scene:createBody(getStartPosition(level_01.scene), player_proto.proto)
-    level_01.scene:setBodyShapeCurrentGraphic(
+    level_01.scene:setBodyShapeCurrentGraphic( -- TODO: delete
         player_id,
         player_proto.shapes.main,
         player_proto.graphics.idle_right

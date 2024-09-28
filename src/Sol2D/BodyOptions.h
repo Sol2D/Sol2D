@@ -19,12 +19,19 @@
 #include <Sol2D/BodyType.h>
 #include <Sol2D/BodyPhysicsDefinition.h>
 #include <Sol2D/BodyShapePhysicsDefinition.h>
+#include <string>
 
 namespace Sol2D {
 
 struct BodyOptions
 {
+    BodyOptions() :
+        type(BodyType::Static)
+    {
+    }
+
     BodyType type;
+    std::optional<std::string> shape_key;
     BodyPhysicsDefinition body_physics;
     BodyShapePhysicsDefinition shape_physics;
 };

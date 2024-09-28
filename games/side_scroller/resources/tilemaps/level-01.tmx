@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#55aaff" nextlayerid="10" nextobjectid="17">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#55aaff" nextlayerid="10" nextobjectid="29">
  <tileset firstgid="1" source="freetileset/tiles.tsx"/>
  <tileset firstgid="19" source="freetileset/objects.tsx"/>
  <layer id="3" name="ground-2" width="100" height="20">
@@ -29,5 +29,16 @@
   <object id="16" name="platform-01" type="platform" x="690.909" y="1833.33">
    <point/>
   </object>
+  <object id="17" type="one-way-platfrom" x="1537" y="1664" width="894" height="57"/>
+  <object id="18" type="one-way-platfrom" x="2047" y="1408" width="1663" height="59"/>
+  <object id="19" type="one-way-platfrom" x="4481" y="1280" width="1020" height="65"/>
+  <object id="20" type="one-way-platfrom" x="8962" y="894" width="891" height="56"/>
+  <object id="22" type="one-way-platfrom" x="9857" y="255" width="767" height="65"/>
+  <object id="23" type="one-way-platfrom" x="10112" y="1151" width="255" height="65"/>
+  <object id="24" type="one-way-platfrom" x="10498.7" y="1668" width="1018.67" height="82.6667"/>
+  <object id="25" type="one-way-platfrom" x="10626.7" y="1408" width="762.667" height="76"/>
+  <object id="26" type="obstacle" x="10751.5" y="512.121" width="764.848" height="636"/>
+  <object id="27" type="obstacle" x="11520" y="642.667" width="381.333" height="505.333"/>
+  <object id="28" type="obstacle" x="11904" y="897.333" width="893.333" height="253.333"/>
  </objectgroup>
 </map>

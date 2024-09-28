@@ -418,7 +418,7 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
             b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
             b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
             b2ShapeId b2_shape_id = b2CreatePolygonShape(b2_body_id, &b2_shape_def, &b2_polygon);
-            BodyShape * body_shape = &body->createShape(_class, polygon->getId());
+            BodyShape * body_shape = &body->createShape(_body_options.shape_key.value_or(_class), polygon->getId());
             b2Shape_SetUserData(b2_shape_id, body_shape);
         }
         break;
@@ -434,7 +434,7 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
                 .radius = radius
             };
             b2ShapeId b2_shape_id = b2CreateCircleShape(b2_body_id, &b2_shape_def, &b2_circle);
-            BodyShape * body_shape = &body->createShape(_class, circle->getId());
+            BodyShape * body_shape = &body->createShape(_body_options.shape_key.value_or(_class), circle->getId());
             b2Shape_SetUserData(b2_shape_id, body_shape);
         }
         break;
@@ -749,7 +749,7 @@ void Scene::drawLayersAndBodies(
 
 void Scene::drawObjectLayer(const TileMapObjectLayer & _layer)
 {
-    SDL_SetRenderDrawColor(&mr_renderer, 10, 0, 200, 255);
+    SDL_SetRenderDrawColor(&mr_renderer, 255, 20, 0, 255);
     _layer.forEachObject([this](const TileMapObject & __object) {
         if(!__object.isVisible()) return;
         // TODO: if in viewport

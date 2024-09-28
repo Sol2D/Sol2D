@@ -55,7 +55,7 @@ int luaApi_LoadFromFile(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, "path expected");
     const char * path = lua_tostring(_lua, 2);
-    SpriteSheetOptions options;
+    SpriteSheetOptions options = {};
     luaL_argcheck(_lua,  tryGetSpriteSheetOptions(_lua, 3, options), 3, "sprite sheet options expected");
     bool result = self->getSpriteSheet(_lua)->loadFromFile(self->workspace.getResourceFullPath(path), options);
     lua_pushboolean(_lua, result);

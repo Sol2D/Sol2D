@@ -7,14 +7,14 @@ require 'player'
 ---@class Resources
 ---@field platformSpriteSheet sol.SpriteSheet
 
-local meters_per_pixel = 0.01
-local platform_shape_key = 'platform'
+local METERS_PER_PIXEL = 0.01
+local ONE_WAY_PLATFORM_SHAPE_KEY = 'platform'
 
----@param level Level01
+---@param store sol.Store
 ---@return Resources
-local function loadResources(level)
+local function loadResources(store)
     local resources = {}
-    resources.platformSpriteSheet = level.store:createSpriteSheet(platform_shape_key)
+    resources.platformSpriteSheet = store:createSpriteSheet(ONE_WAY_PLATFORM_SHAPE_KEY)
     if (not resources.platformSpriteSheet:loadFromFile(
             'sprites/platform/platform.png',
             { colCount = 3, rowCount = 1, spriteWidth = 128, spriteHeight = 64 }
@@ -34,15 +34,16 @@ local function createPlatform(level, resources)
     platformGraphics:addSprite(frame, resources.platformSpriteSheet, 2, { position = { x = 256, y = 0 } })
     local map_object = level.scene:getTileMapObjectByName('platform-01')
     if map_object == nil then
-        print('Unable to get the "platofm-01" object')
+        print('Unable to get the "platform-01" object')
         return nil
     end
+    local PLATFORM_GRAPHICS_KEY = 'main'
     local body = level.scene:createBody(
         Level01.pixelPointToPhisical(map_object.position),
         {
             type = sol.BodyType.KINEMATIC,
             shapes = {
-                [platform_shape_key] = {
+                [ONE_WAY_PLATFORM_SHAPE_KEY] = {
                     type = sol.BodyShapeType.POLYGON,
                     physics = {
                         isPreSolveEnabled = true,
@@ -50,14 +51,14 @@ local function createPlatform(level, resources)
                     },
                     rect = { x = 0, y = 0, w = 384, h = 64 },
                     graphics = {
-                        platform = {
+                        [PLATFORM_GRAPHICS_KEY] = {
                             graphics = platformGraphics
                         }
                     }
                 }
             }
         })
-    if (not level.scene:setBodyShapeCurrentGraphic(body, 'platform', 'platform')) then
+    if (not level.scene:setBodyShapeCurrentGraphic(body, ONE_WAY_PLATFORM_SHAPE_KEY, PLATFORM_GRAPHICS_KEY)) then
         print('Unable to set current graphics to platform-01')
     end
 end
@@ -77,7 +78,7 @@ local function preSolveContact(contact)
         platform_side = contact.sideA
         sign = -1
     end
-    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= platform_shape_key then
+    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= ONE_WAY_PLATFORM_SHAPE_KEY then
         return true
     end
 
@@ -96,28 +97,35 @@ end
 
 ---@return Level01
 local function createLevel()
-    local store = sol.stores:createStore('level-01')
-    local scene = store:createScene(
+    local level = {};
+    level.store = sol.stores:createStore('level-01')
+    level.scene = level.store:createScene(
         'main',
         {
             gravity = { x = 0, y = 80 },
-            metersPerPixel = meters_per_pixel
+            metersPerPixel = METERS_PER_PIXEL
         }
     )
-    scene:loadTileMap('tilemaps/level-01.tmx')
-    local level = {
-        scene = scene,
-        store = store
-    }
-    local resources = loadResources(level)
+    level.scene:loadTileMap('tilemaps/level-01.tmx')
+    level.scene:createBodiesFromMapObjects('obstacle')
+    level.scene:createBodiesFromMapObjects(
+        'one-way-platfrom',
+        {
+            shapeKey = ONE_WAY_PLATFORM_SHAPE_KEY,
+            shapePhysics = {
+                isPreSolveEnabled = true
+            }
+        }
+    )
+    local resources = loadResources(level.store)
     createPlatform(level, resources)
-    scene:subscribeToPreSolveContact(preSolveContact)
+    level.scene:subscribeToPreSolveContact(preSolveContact)
     return level
 end
 
 local level01 = {
     createLevel = createLevel,
-    metersPerPixel = meters_per_pixel
+    metersPerPixel = METERS_PER_PIXEL
 }
 
 level01.__index = level01
@@ -125,7 +133,7 @@ level01.__index = level01
 ---@param point Point
 ---@return Point
 function level01.pixelPointToPhisical(point)
-    return { x = point.x * meters_per_pixel, y = point.y * meters_per_pixel }
+    return { x = point.x * METERS_PER_PIXEL, y = point.y * METERS_PER_PIXEL }
 end
 
 Level01 = {}

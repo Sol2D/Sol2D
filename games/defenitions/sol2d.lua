@@ -90,6 +90,7 @@ self = nil
 
 ---@class BodyOptions
 ---@field type integer?
+---@field shapeKey string?
 ---@field bodyPhysics BodyPhysicsDefinition?
 ---@field shapePhysics BodyShapePhysicsDefinition?
 
