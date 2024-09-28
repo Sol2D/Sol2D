@@ -3,6 +3,7 @@ require 'player'
 
 local player_id = self.bodyId
 local scene = self.scene
+local player_mass = scene:getBodyMass(player_id)
 
 local metadata = Player.getMetadata()
 
@@ -43,8 +44,14 @@ function state:set(direction, action)
     end
 end
 
+local function getForce(current_velocity, desired_velocity)
+    local change = desired_velocity - current_velocity
+    return player_mass * change / (1/60) -- TODO: frame rate
+end
+
 local in_air = false
 local jump_timeout = 0
+local PLAYER_WALK_VELOCITY = 5
 
 sol.heartbeat:subscribe(function()
     local right_key, left_key, space_key = sol.keyboard:getState(
@@ -63,17 +70,29 @@ sol.heartbeat:subscribe(function()
             in_air = false
             if space_key and jump_timeout == 0 then
                 jump_timeout = 40
-                scene:applyImpulse(player_id, { x = 0, y = -18 })
+                scene:applyImpulse(player_id, { x = 0, y = -1300 })
                 in_air = true
             end
         end
     end
 
     if right_key then
-        scene:applyForce(player_id, { x = 60, y = 0 })
+        scene:applyForce(
+            player_id,
+            {
+                x = getForce(scene:getLinearVelocity(player_id).x, PLAYER_WALK_VELOCITY),
+                y = 0
+            }
+        )
         state:set(Direction.RIGHT, Action.WALK)
     elseif left_key then
-        scene:applyForce(player_id, { x = -60, y = 0 })
+        scene:applyForce(
+            player_id,
+            {
+                x = getForce(scene:getLinearVelocity(player_id).x, -PLAYER_WALK_VELOCITY),
+                y = 0
+            }
+        )
         state:set(Direction.LEFT, Action.WALK)
     else
         state:set(state.direction, Action.IDLE)

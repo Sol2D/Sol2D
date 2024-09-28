@@ -881,6 +881,14 @@ Point Scene::getLinearVelocity(uint64_t _body_id) const
     return asPoint(b2Body_GetLinearVelocity(b2_body));
 }
 
+float Scene::getBodyMass(uint64_t _body_id) const
+{
+    b2BodyId b2_body = findBody(_body_id);
+    if(B2_IS_NULL(b2_body))
+        return .0f;
+    return b2Body_GetMass(b2_body);
+}
+
 void Scene::setBodyPosition(uint64_t _body_id, const Point & _position)
 {
     m_defers.push_front([this, _body_id, _position]() {

@@ -116,7 +116,10 @@ function Player.createPrototype(store)
         shapes = {
             [data.shapes.main] = {
                 type = sol.BodyShapeType.POLYGON,
-                friction = 1.1,
+                physics = {
+                    friction = 1.1,
+                    density = 80
+                },
                 rect = hit_box,
                 graphics = {}
             }

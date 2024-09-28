@@ -315,6 +315,17 @@ int luaApi_GetLinearVelocity(lua_State * _lua)
 
 // 1 self
 // 2 body id
+int luaApi_GetBodyMass(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
+    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    lua_pushnumber(_lua, self->getScene(_lua)->getBodyMass(body_id));
+    return 1;
+}
+
+// 1 self
+// 2 body id
 // 3 position
 int luaApi_SetBodyPosition(lua_State * _lua)
 {
@@ -576,6 +587,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "applyForce", luaApi_ApplyForce },
             { "applyImpulse", luaApi_ApplyImpulse },
             { "getLinearVelocity", luaApi_GetLinearVelocity },
+            { "getBodyMass", luaApi_GetBodyMass },
             { "setBodyPosition", luaApi_SetBodyPosition },
             { "getBodyPosition", luaApi_GetBodyPosition },
             { "setFollowedBody", luaApi_SetFollowedBody },

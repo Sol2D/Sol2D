@@ -79,6 +79,7 @@ public:
     void applyForce(uint64_t _body_id, const Point & _force);
     void applyImpulse(uint64_t _body_id, const Point & _impulse);
     Point getLinearVelocity(uint64_t _body_id) const;
+    float getBodyMass(uint64_t _body_id) const;
     void setBodyPosition(uint64_t _body_id, const Point & _position);
     std::optional<Point> getBodyPosition(uint64_t _body_id) const;
     std::optional<std::vector<Point> > findPath(

@@ -233,6 +233,10 @@ function __scene:applyImpulse(body_id, impulse_vector) end
 function __scene:getLinearVelocity(body_id) end
 
 ---@param body_id integer
+---@return number
+function __scene:getBodyMass(body_id) end
+
+---@param body_id integer
 ---@param position Point
 function __scene:setBodyPosition(body_id, position) end
 
