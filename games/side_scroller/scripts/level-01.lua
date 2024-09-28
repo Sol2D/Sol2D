@@ -48,7 +48,7 @@ local function createPlatform(level, resources)
                         isPreSolveEnabled = true,
                         restitution = 0.2
                     },
-                    points = { x = 0, y = 0, w = 384, h = 64 },
+                    rect = { x = 0, y = 0, w = 384, h = 64 },
                     graphics = {
                         platform = {
                             graphics = platformGraphics

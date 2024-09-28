@@ -97,15 +97,24 @@ self = nil
 ---@field type integer
 ---@field script string?
 ---@field physics BodyPhysicsDefinition?
----@field shapes table<string, BodyShapeDefinition>?
+---@field shapes table<string, BodyShapeRectDefinition | BodyShapePolygonDefinition | BodyShapeCircleDefinition>?
 ---@see sol.BodyType
 
----@class BodyShapeDefinition
+---@class BodyShapeDefinitionBase
 ---@field type integer
----@field points Point[] | Rectangle
 ---@field physics BodyShapePhysicsDefinition?
 ---@field graphics table<string, BodyShapeGraphicsDefinition>?
 ---@see sol.BodyShapeType
+
+---@class BodyShapeRectDefinition: BodyShapeDefinitionBase
+---@field rect Rectangle
+
+---@class BodyShapePolygonDefinition: BodyShapeDefinitionBase
+---@field points Point[]
+
+---@class BodyShapeCircleDefinition: BodyShapeDefinitionBase
+---@field center Point
+---@field radius number
 
 ---@class BodyShapeGraphicsDefinition
 ---@field position Point?

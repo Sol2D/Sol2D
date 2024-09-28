@@ -103,29 +103,26 @@ void addPolygon(
     const std::string & _key,
     std::unordered_map<std::string, BodyVariantShapeDefinition> & _shapes)
 {
-    if(!_table.tryGetValue("points"))
-        return;
-    do {
+    if(_table.tryGetValue("rect"))
+    {
+        BodyRectDefinition def;
+        if(tryGetRect(_table.getLua(), -1, def))
         {
-            BodyRectDefinition def;
-            if(tryGetRect(_table.getLua(), -1, def))
-            {
-                readBasicShape(_table, def);
-                _shapes.insert(std::make_pair(_key, def));
-                break;
-            }
+            readBasicShape(_table, def);
+            _shapes.insert(std::make_pair(_key, def));
         }
+        lua_pop(_table.getLua(), 1);
+    }
+    else if(_table.tryGetValue("points"))
+    {
+        BodyPolygonDefinition def;
+        if(tryGetPoints(_table.getLua(), -1, def.points))
         {
-            BodyPolygonDefinition def;
-            if(tryGetPoints(_table.getLua(), -1, def.points))
-            {
-                readBasicShape(_table, def);
-                _shapes.insert(std::make_pair(_key, def));
-                break;
-            }
+            readBasicShape(_table, def);
+            _shapes.insert(std::make_pair(_key, def));
         }
-    } while(false);
-    lua_pop(_table.getLua(), 1);
+        lua_pop(_table.getLua(), 1);
+    }
 }
 
 template<BodyShapeType shape_type>

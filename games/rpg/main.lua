@@ -186,7 +186,7 @@ local function createPlayer()
             shapes = {
                 main = {
                     type = sol.BodyShapeType.POLYGON,
-                    points = { x = position.x, y = position.y, w = size.w, h = size.h },
+                    rect = { x = position.x, y = position.y, w = size.w, h = size.h },
                     graphics = {
                         idle = {
                             position = position,
@@ -296,7 +296,7 @@ local function createSkeleton()
             shapes = {
                 main = {
                     type = sol.BodyShapeType.POLYGON,
-                    points = { x = position.x, y = position.y, w = size.w, h = size.h },
+                    rect = { x = position.x, y = position.y, w = size.w, h = size.h },
                     graphics = {
                         idle = {
                             position = position,

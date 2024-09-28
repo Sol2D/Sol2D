@@ -117,7 +117,7 @@ function Player.createPrototype(store)
             [data.shapes.main] = {
                 type = sol.BodyShapeType.POLYGON,
                 friction = 1.1,
-                points = hit_box,
+                rect = hit_box,
                 graphics = {}
             }
         }
