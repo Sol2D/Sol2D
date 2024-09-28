@@ -279,7 +279,10 @@ int main(int _argc, const char ** _argv)
         std::cerr << "Executable path not set" << std::endl;
         return 1;
     }
-    auto workspace = Workspace::load(fs::path(_argv[0]).parent_path().append(_argc > 1 ? _argv[1] : "game.xml"));
+    auto workspace = Workspace::load(
+        fs::absolute(fs::path(_argv[0]))
+            .parent_path()
+            .append(_argc > 1 ? _argv[1] : "game.xml"));
     if(!workspace)
     {
         std::cerr << "Unable to load manifest file" << std::endl;
