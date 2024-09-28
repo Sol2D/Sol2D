@@ -73,15 +73,15 @@ local function getForce(position, destination)
     local delta_y = destination.y - position.y
     if math.abs(delta_x) > math.abs(delta_y) then
         if delta_x > 0 then
-            return { x = 7, y = 0 }
+            return { x = 2000, y = 0 }
         else
-            return { x = -7, y = 0 }
+            return { x = -2000, y = 0 }
         end
     else
         if delta_y > 0 then
-            return { x = 0, y = 7 }
+            return { x = 0, y = 2000 }
         else
-            return { x = 0, y = -7 }
+            return { x = 0, y = -2000 }
         end
     end
 end

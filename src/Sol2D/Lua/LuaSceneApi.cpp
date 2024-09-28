@@ -19,7 +19,6 @@
 #include <Sol2D/Lua/LuaBodyPrototypeApi.h>
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyOptionsApi.h>
-#include <Sol2D/Lua/LuaBodyShapeOptionsApi.h>
 #include <Sol2D/Lua/LuaContactApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaStrings.h>
@@ -261,24 +260,16 @@ int luaApi_CreateBody(lua_State * _lua)
 
 // 1 self
 // 2 class
-// 3 body options (optional)
-// 4 shape options (optional)
+// 3 options (optional)
 int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * class_name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, class_name != nullptr, 2, "a class name expected");
-
-    int arg_count = lua_gettop(_lua);
-    BodyOptions body_options;
-    BodyShapeOptions body_shape_options;
-    if(arg_count >= 3)
-    {
-        tryGetBodyOptions(_lua, 3, body_options);
-        if(arg_count >= 4)
-            tryGetBodyShapeOptions(_lua, 4, body_shape_options);
-    }
-    self->getScene(_lua)->createBodiesFromMapObjects(class_name, body_options, body_shape_options);
+    BodyOptions options;
+    if(lua_gettop(_lua) >= 3)
+        luaL_argcheck(_lua, tryGetBodyOptions(_lua, 3, options), 3, "body options expected");
+    self->getScene(_lua)->createBodiesFromMapObjects(class_name, options);
     return 0;
 }
 

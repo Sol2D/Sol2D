@@ -76,28 +76,34 @@ self = nil
 ---@field isVisible boolean?
 ---@field position Point?
 
----@class BodyOptions
----@field type integer?
+---@class BodyPhysicsDefinition
 ---@field linearDamping number?
 ---@field angularDamping number?
 ---@field fixedRotation boolean?
 
----@class BodyShapeOptions
+---@class BodyShapePhysicsDefinition
+---@field density number?
+---@field restitution number?
+---@field friction number?
 ---@field isSensor boolean?
 ---@field isPreSolveEnabled boolean?
----@field density number?
+
+---@class BodyOptions
+---@field type integer?
+---@field bodyPhysics BodyPhysicsDefinition?
+---@field shapePhysics BodyShapePhysicsDefinition?
 
 ---@class BodyDefinition
 ---@field type integer
 ---@field script string?
+---@field physics BodyPhysicsDefinition?
 ---@field shapes table<string, BodyShapeDefinition>?
 ---@see sol.BodyType
 
 ---@class BodyShapeDefinition
 ---@field type integer
----@field points Point[]
----@field isSensor boolean?
----@field isPreSolveEnabled boolean?
+---@field points Point[] | Rectangle
+---@field physics BodyShapePhysicsDefinition?
 ---@field graphics table<string, BodyShapeGraphicsDefinition>?
 ---@see sol.BodyShapeType
 
@@ -202,8 +208,7 @@ function __scene:createBody(position, proto_or_definition, script_argument) end
 
 ---@param class string
 ---@param body_options BodyOptions?
----@param body_shape_options BodyShapeOptions?
-function __scene:createBodiesFromMapObjects(class, body_options, body_shape_options) end
+function __scene:createBodiesFromMapObjects(class, body_options) end
 
 ---@param body_id integer
 ---@param force_vector Point

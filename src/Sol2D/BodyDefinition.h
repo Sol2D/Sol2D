@@ -19,6 +19,8 @@
 #include <Sol2D/GraphicsPack.h>
 #include <Sol2D/BodyType.h>
 #include <Sol2D/BodyShapeType.h>
+#include <Sol2D/BodyShapePhysicsDefinition.h>
+#include <Sol2D/BodyPhysicsDefinition.h>
 #include <Sol2D/Rect.h>
 #include <SDL3/SDL_surface.h>
 #include <filesystem>
@@ -77,16 +79,10 @@ struct BodyShapeGraphics
 template<BodyShapeType shape_type>
 struct BodyBasicShapeDefinition
 {
-    BodyBasicShapeDefinition() :
-        is_sensor(false),
-        is_pre_solve_enabled(false)
-    {
-    }
-
-    const BodyShapeType type = shape_type;
+    BodyShapePhysicsDefinition physics;
     std::unordered_map<std::string, BodyShapeGraphics> graphics;
-    bool is_sensor;
-    bool is_pre_solve_enabled;
+    const BodyShapeType type = shape_type;
+
 };
 
 struct BodyPolygonDefinition : BodyBasicShapeDefinition<BodyShapeType::Polygon>, PolygonShapeDefinition { };
@@ -106,6 +102,7 @@ struct BodyDefinition
 
     BodyType type;
     std::optional<std::filesystem::path> script;
+    BodyPhysicsDefinition physics;
     std::unordered_map<std::string, BodyVariantShapeDefinition> shapes;
 };
 

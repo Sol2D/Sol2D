@@ -18,6 +18,8 @@
 #include <Sol2D/Lua/LuaRectApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaGraphicsPackApi.h>
+#include <Sol2D/Lua/LuaBodyPhysicsDefinitionApi.h>
+#include <Sol2D/Lua/LuaBodyShapePhysicsDefinitionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D;
@@ -129,8 +131,11 @@ void addPolygon(
 template<BodyShapeType shape_type>
 void readBasicShape(LuaTable & _table, BodyBasicShapeDefinition<shape_type> & _shape)
 {
-    _table.tryGetBoolean("isSensor", &_shape.is_sensor);
-    _table.tryGetBoolean("isPreSolveEnabled", &_shape.is_pre_solve_enabled);
+    if(_table.tryGetValue("physics"))
+    {
+        tryGetBodyShapePhysicsDefinition(_table.getLua(), -1, _shape.physics);
+        lua_pop(_table.getLua(), 1);
+    }
     if(_table.tryGetValue("graphics"))
     {
         int graphics_table_idx = lua_gettop(_table.getLua());
@@ -250,12 +255,15 @@ std::unique_ptr<BodyDefinition> Sol2D::Lua::tryGetBodyDefinition(lua_State * _lu
             return nullptr;
         }
     }
+    if(table.tryGetValue("physics"))
     {
-        if(table.tryGetValue("shapes"))
-        {
-            getShapes(_lua, -1, def->shapes);
-            lua_pop(_lua, 1);
-        }
+        tryGetBodyPhysicsDefinition(_lua, -1, def->physics);
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetValue("shapes"))
+    {
+        getShapes(_lua, -1, def->shapes);
+        lua_pop(_lua, 1);
     }
     {
         std::string script;

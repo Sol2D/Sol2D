@@ -110,9 +110,13 @@ function Player.createPrototype(store)
     local body_definition = {
         type = sol.BodyType.DYNAMIC,
         script = 'player-script.lua',
+        physics = {
+            fixedRotation = true
+        },
         shapes = {
             [data.shapes.main] = {
                 type = sol.BodyShapeType.POLYGON,
+                friction = 1.1,
                 points = hit_box,
                 graphics = {}
             }

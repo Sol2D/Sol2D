@@ -16,11 +16,20 @@
 
 #pragma once
 
-#include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/BodyShapeOptions.h>
+#include <optional>
 
-namespace Sol2D::Lua {
+namespace Sol2D {
 
-bool tryGetBodyShapeOptions(lua_State * _lua, int _idx, BodyShapeOptions & _body_shape_options);
+struct BodyPhysicsDefinition
+{
+    BodyPhysicsDefinition() :
+        fixed_rotation(false)
+    {
+    }
 
-} // namespace Sol2D::Lua
+    std::optional<float> linear_damping;
+    std::optional<float> angular_damping;
+    bool fixed_rotation;
+};
+
+} // namespace Sol2D

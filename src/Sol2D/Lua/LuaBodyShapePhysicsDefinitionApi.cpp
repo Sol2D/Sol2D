@@ -14,37 +14,27 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/LuaBodyShapeOptionsApi.h>
+#include <Sol2D/Lua/LuaBodyShapePhysicsDefinitionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua::Aux;
 
-namespace {
-
-constexpr char gc_key_is_sensor[] = "isSensor";
-constexpr char gc_key_is_pre_solve_enabled[] = "isPreSolveEnabled";
-constexpr char gc_key_density[] = "density";
-
-} // namespace name
-
-bool Sol2D::Lua::tryGetBodyShapeOptions(lua_State * _lua, int _idx, BodyShapeOptions & _body_shape_options)
+bool Sol2D::Lua::tryGetBodyShapePhysicsDefinition(lua_State * _lua, int _idx, BodyShapePhysicsDefinition & _definition)
 {
     if(!lua_istable(_lua, _idx))
-    {
         return false;
-    }
-
     LuaTable table(_lua, _idx);
-
     {
-        lua_Number lua_num;
-        if(table.tryGetNumber(gc_key_density, &lua_num))
-            _body_shape_options.density = static_cast<float>(lua_num);
+        lua_Number value;
+        if(table.tryGetNumber("density", &value))
+            _definition.density = static_cast<float>(value);
+        if(table.tryGetNumber("restitution", &value))
+            _definition.restitution = static_cast<float>(value);
+        if(table.tryGetNumber("friction", &value))
+            _definition.friction = static_cast<float>(value);
     }
-
-    table.tryGetBoolean(gc_key_is_sensor, &_body_shape_options.is_sensor);
-    table.tryGetBoolean(gc_key_is_pre_solve_enabled, &_body_shape_options.is_pre_solve_enalbed);
-
+    table.tryGetBoolean("isSensor", &_definition.is_sensor);
+    table.tryGetBoolean("isPreSolveEnabled", &_definition.is_pre_solve_enabled);
     return true;
 }

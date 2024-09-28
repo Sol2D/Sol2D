@@ -28,6 +28,27 @@ using namespace Sol2D::Utils;
 
 namespace {
 
+void initBodyPhysics(b2BodyDef & _b2_def, const BodyPhysicsDefinition & _physics)
+{
+    if(_physics.linear_damping.has_value())
+        _b2_def.linearDamping = _physics.linear_damping.value();
+    if(_physics.angular_damping.has_value())
+        _b2_def.angularDamping = _physics.angular_damping.value();
+    _b2_def.fixedRotation = _physics.fixed_rotation;
+}
+
+void initShapePhysics(b2ShapeDef & _b2_shape_def, const BodyShapePhysicsDefinition & _physics)
+{
+    _b2_shape_def.isSensor = _physics.is_sensor;
+    _b2_shape_def.enablePreSolveEvents = _physics.is_pre_solve_enabled;
+    if(_physics.density.has_value())
+        _b2_shape_def.density = _physics.density.value();
+    if(_physics.restitution.has_value())
+        _b2_shape_def.restitution = _physics.restitution.value();
+    if(_physics.friction.has_value())
+        _b2_shape_def.friction = _physics.friction.value();
+}
+
 class BodyShape final
 {
     S2_DISABLE_COPY_AND_MOVE(BodyShape)
@@ -237,12 +258,7 @@ template<BodyShapeType shape_type>
 inline b2ShapeDef Scene::BodyShapeCreator::createBox2dShapeDef(const BodyBasicShapeDefinition<shape_type> & _def) const
 {
     b2ShapeDef b2_shape_def = b2DefaultShapeDef();
-    // if(<body type> == BodyType::Dynamic)
-    // {
-    //     b2_shape_def.density = .002f; // TODO: real value from user
-    // }
-    b2_shape_def.isSensor = _def.is_sensor;
-    b2_shape_def.enablePreSolveEvents = _def.is_pre_solve_enabled;
+    initShapePhysics(b2_shape_def, _def.physics);
     return b2_shape_def;
 }
 
@@ -352,9 +368,7 @@ uint64_t Scene::createBody(const Point & _position, const BodyDefinition & _defi
     b2BodyDef b2_body_def = b2DefaultBodyDef();
     b2_body_def.type = mapBodyType(_definition.type);
     b2_body_def.position = { .x = _position.x, .y = _position.y };
-    // b2_body_def.linearDamping = 100; // TODO: for top-down
-    b2_body_def.angularDamping = 100; // TODO: must be controlled by user (prevent infinite rotation)
-    b2_body_def.fixedRotation = true; // TODO: must be controlled by user
+    initBodyPhysics(b2_body_def, _definition.physics);
     b2BodyId b2_body_id = b2CreateBody(m_b2_world_id, &b2_body_def);
     b2Body_SetUserData(b2_body_id, body);
     m_bodies.insert(std::make_pair(body->getId(), b2_body_id));
@@ -366,10 +380,7 @@ uint64_t Scene::createBody(const Point & _position, const BodyDefinition & _defi
     return body->getId();
 }
 
-void Scene::createBodiesFromMapObjects(
-    const std::string & _class,
-    const BodyOptions & _body_options,
-    const BodyShapeOptions & _shape_options)
+void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options)
 {
     b2BodyType body_type = mapBodyType(_body_options.type);
 
@@ -378,23 +389,17 @@ void Scene::createBodiesFromMapObjects(
         Body * body = new Body;
         b2BodyDef b2_body_def = b2DefaultBodyDef();
         b2_body_def.type = body_type;
+        initBodyPhysics(b2_body_def, _body_options.body_physics);
         b2_body_def.position =
         {
             .x = graphicalToPhysical(__map_object.getX()),
             .y = graphicalToPhysical(__map_object.getY())
         };
-        b2_body_def.linearDamping = _body_options.linear_damping;
-        b2_body_def.angularDamping = _body_options.angular_damping;
-        b2_body_def.fixedRotation = _body_options.fixed_rotation;
         b2_body_def.userData = body;
         b2BodyId b2_body_id = b2CreateBody(m_b2_world_id, &b2_body_def);
         m_bodies.insert(std::make_pair(body->getId(), b2_body_id));
-
         b2ShapeDef b2_shape_def = b2DefaultShapeDef();
-        b2_shape_def.isSensor = _shape_options.is_sensor;
-        b2_shape_def.enablePreSolveEvents = _shape_options.is_pre_solve_enalbed;
-        if(_body_options.type == BodyType::Dynamic)
-            b2_shape_def.density = _shape_options.density;
+        initShapePhysics(b2_shape_def, _body_options.shape_physics);
 
         switch(__map_object.getObjectType())
         {

@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/BodyType.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
 #include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/BodyType.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;

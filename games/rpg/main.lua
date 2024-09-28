@@ -1,34 +1,41 @@
 require 'def'
 
 local store = sol.stores:createStore('main')
-local view = store:createObject('sol.View', 'main')
-local player_walk_force = 5
-local scene = store:createObject('sol.Scene', 'level-01', { metersPerPixel = Def.metersPerPixel })
+local view = store:createView('main')
+local scene = store:createScene('level-01', { metersPerPixel = Def.metersPerPixel })
 
 scene:loadTileMap('tiled/tmx/level-01.tmx')
 -- scene:loadTileMap('tiled/tmx/level-03.tmx')
 -- scene:loadTileMap('tiled/tmx/test2.tmx')
 scene:createBodiesFromMapObjects('Obstacle')
-scene:createBodiesFromMapObjects('Sensor', nil, { isSensor = true })
+scene:createBodiesFromMapObjects(
+    'Sensor',
+    {
+        type = sol.BodyType.STATIC,
+        shapePhysics = {
+            isSensor = true
+        }
+    }
+)
 
 local main_fragment_id = view:createFragment({
     top = { unit = sol.DimensionUnit.PIXEL, value = 50 }
 })
 view:bindFragment(main_fragment_id, scene)
 
-local font_roboto = store:createObject('sol.Font', 'roboto-18', 'fonts/Roboto/Roboto-Bold.ttf', 18)
+local font_roboto = store:createFont('roboto-18', 'fonts/Roboto/Roboto-Bold.ttf', 18)
 if font_roboto == nil then
     print('Font is not loaded')
     return
 end
 
-local teleport_sound_effect = store:createObject('sol.SoundEffect', 'teleport', 'sounds/teleport/teleport.wav')
+local teleport_sound_effect = store:createSoundEffect('teleport', 'sounds/teleport/teleport.wav')
 if teleport_sound_effect == nil then
     print('The teleport sound effect is not loaded')
     return
 end
 
-local click_sound_effect = store:createObject('sol.SoundEffect', 'click', 'sounds/click/click.mp3')
+local click_sound_effect = store:createSoundEffect('click', 'sounds/click/click.mp3')
 if click_sound_effect == nil then
     print('The click sound effect is not loaded')
     return
@@ -44,7 +51,7 @@ local score = {
     end
 }
 
-local form = store:createObject('sol.Form', 'score')
+local form = store:createForm('score')
 
 local function createScoreLabel()
     local label = form:createLabel(score:formatMessage())
@@ -115,12 +122,8 @@ local function getStartPosition()
 end
 
 local function createPlayer()
-    local body_proto = store:createObject('sol.BodyPrototype', 'player', sol.BodyType.DYNAMIC)
-    body_proto:attachScript('player.lua')
     local size = { w = 32, h = 36 }
-    local position = { x = -(size.w / 2), y = -(size.h / 2) }
-    local shape_proto = body_proto:createPolygonShape('main', { x = position.x, y = position.y, w = size.w, h = size.h })
-    local sprite_sheet = store:createObject('sol.SpriteSheet', 'player')
+    local sprite_sheet = store:createSpriteSheet('player')
     if sprite_sheet:loadFromFile('assets/player/george.png', {
             spriteWidth = size.w,
             spriteHeight = size.h,
@@ -138,53 +141,83 @@ local function createPlayer()
     end
     local frame_duration = 200
 
-    local graphics_idle = store:createObject('sol.GraphicsPack', 'player_idle')
+    local graphics_idle = store:createGraphicsPack('player_idle')
     graphics_idle:addFrame()
     graphics_idle:addSprite(0, sprite_sheet, 0)
 
-    local graphics_right = store:createObject('sol.GraphicsPack', 'player_right')
+    local graphics_right = store:createGraphicsPack('player_right')
     graphics_right:addFrames(4, { duration = frame_duration })
     graphics_right:addSprite(0, sprite_sheet, 3)
     graphics_right:addSprite(1, sprite_sheet, 7)
     graphics_right:addSprite(2, sprite_sheet, 11)
     graphics_right:addSprite(3, sprite_sheet, 15)
 
-    local graphics_left = store:createObject('sol.GraphicsPack', 'player_left')
+    local graphics_left = store:createGraphicsPack('player_left')
     graphics_left:addFrames(4, { duration = frame_duration })
     graphics_left:addSprite(0, sprite_sheet, 1)
     graphics_left:addSprite(1, sprite_sheet, 5)
     graphics_left:addSprite(2, sprite_sheet, 9)
     graphics_left:addSprite(3, sprite_sheet, 13)
 
-    local graphics_up = store:createObject('sol.GraphicsPack', 'player_up')
+    local graphics_up = store:createGraphicsPack('player_up')
     graphics_up:addFrames(4, { duration = frame_duration })
     graphics_up:addSprite(0, sprite_sheet, 2)
     graphics_up:addSprite(1, sprite_sheet, 6)
     graphics_up:addSprite(2, sprite_sheet, 10)
     graphics_up:addSprite(3, sprite_sheet, 14)
 
-    local graphics_down = store:createObject('sol.GraphicsPack', 'player_down')
+    local graphics_down = store:createGraphicsPack('player_down')
     graphics_down:addFrames(4, { duration = frame_duration })
     graphics_down:addSprite(0, sprite_sheet, 0)
     graphics_down:addSprite(1, sprite_sheet, 4)
     graphics_down:addSprite(2, sprite_sheet, 8)
     graphics_down:addSprite(3, sprite_sheet, 12)
 
-    shape_proto:addGraphics('idle', graphics_idle, { position = position })
-    shape_proto:addGraphics('right', graphics_right, { position = position })
-    shape_proto:addGraphics('left', graphics_left, { position = position })
-    shape_proto:addGraphics('up', graphics_up, { position = position })
-    shape_proto:addGraphics('down', graphics_down, { position = position })
-    return scene:createBody(getStartPosition(), body_proto)
+    local position = { x = -(size.w / 2), y = -(size.h / 2) }
+    return scene:createBody(
+        getStartPosition(),
+        {
+            type = sol.BodyType.DYNAMIC,
+            script = 'player.lua',
+            physics = {
+                linearDamping = 100,
+                fixedRotation = true
+            },
+            shapes = {
+                main = {
+                    type = sol.BodyShapeType.POLYGON,
+                    points = { x = position.x, y = position.y, w = size.w, h = size.h },
+                    graphics = {
+                        idle = {
+                            position = position,
+                            graphics = graphics_idle
+                        },
+                        right = {
+                            position = position,
+                            graphics = graphics_right
+                        },
+                        left = {
+                            position = position,
+                            graphics = graphics_left
+                        },
+                        down = {
+                            position = position,
+                            graphics = graphics_down
+                        },
+                        up = {
+                            position = position,
+                            graphics = graphics_up
+                        }
+                    }
+                }
+            }
+        }
+    )
 end
 
 local function createSkeleton()
-    local body_proto = store:createObject('sol.BodyPrototype', 'skeleton', sol.BodyType.DYNAMIC)
-    body_proto:attachScript('skeleton.lua')
     local size = { w = 34, h = 50 }
-    local position = { x = -(size.w / 2), y = -(size.h / 2) }
-    local shape_proto = body_proto:createPolygonShape('main', { x = position.x, y = position.y, w = size.w, h = size.h })
-    local sprite_sheet = store:createObject('sol.SpriteSheet', 'skeleton-walkcycle')
+    local sprite_sheet = store:createSpriteSheet('skeleton-walkcycle')
     if sprite_sheet:loadFromFile('assets/skeleton/walkcycle.png', {
             spriteWidth = size.w,
             spriteHeight = size.h,
@@ -202,11 +235,11 @@ local function createSkeleton()
     end
     local frame_duration = 80;
 
-    local graphics_idle = store:createObject('sol.GraphicsPack', 'skeleton_idle')
+    local graphics_idle = store:createGraphicsPack('skeleton_idle')
     graphics_idle:addFrame()
     graphics_idle:addSprite(0, sprite_sheet, 18)
 
-    local graphics_up = store:createObject('sol.GraphicsPack', 'skeleton_up')
+    local graphics_up = store:createGraphicsPack('skeleton_up')
     graphics_up:addFrames(8, { duration = frame_duration })
     graphics_up:addSprite(0, sprite_sheet, 1)
     graphics_up:addSprite(1, sprite_sheet, 2)
@@ -217,7 +250,7 @@ local function createSkeleton()
     graphics_up:addSprite(6, sprite_sheet, 7)
     graphics_up:addSprite(7, sprite_sheet, 8)
 
-    local graphics_left = store:createObject('sol.GraphicsPack', 'skeleton_left')
+    local graphics_left = store:createGraphicsPack('skeleton_left')
     graphics_left:addFrames(8, { duration = frame_duration })
     graphics_left:addSprite(0, sprite_sheet, 10)
     graphics_left:addSprite(1, sprite_sheet, 11)
@@ -228,7 +261,7 @@ local function createSkeleton()
     graphics_left:addSprite(6, sprite_sheet, 16)
     graphics_left:addSprite(7, sprite_sheet, 17)
 
-    local graphics_down = store:createObject('sol.GraphicsPack', 'skeleton_down')
+    local graphics_down = store:createGraphicsPack('skeleton_down')
     graphics_down:addFrames(8, { duration = frame_duration })
     graphics_down:addSprite(0, sprite_sheet, 19)
     graphics_down:addSprite(1, sprite_sheet, 20)
@@ -239,7 +272,7 @@ local function createSkeleton()
     graphics_down:addSprite(6, sprite_sheet, 25)
     graphics_down:addSprite(7, sprite_sheet, 26)
 
-    local graphics_right = store:createObject('sol.GraphicsPack', 'skeleton_right')
+    local graphics_right = store:createGraphicsPack('skeleton_right')
     graphics_right:addFrames(8, { duration = frame_duration })
     graphics_right:addSprite(0, sprite_sheet, 28)
     graphics_right:addSprite(1, sprite_sheet, 29)
@@ -250,16 +283,52 @@ local function createSkeleton()
     graphics_right:addSprite(6, sprite_sheet, 34)
     graphics_right:addSprite(7, sprite_sheet, 35)
 
-    shape_proto:addGraphics('idle', graphics_idle, { position = position })
-    shape_proto:addGraphics('right', graphics_right, { position = position })
-    shape_proto:addGraphics('left', graphics_left, { position = position })
-    shape_proto:addGraphics('up', graphics_up, { position = position })
-    shape_proto:addGraphics('down', graphics_down, { position = position })
+    local position = { x = -(size.w / 2), y = -(size.h / 2) }
+    local body_proto = store:createBodyPrototype(
+        'skeleton',
+        {
+            type = sol.BodyType.DYNAMIC,
+            script = 'skeleton.lua',
+            physics = {
+                fixedRotation = true,
+                linearDamping = 100
+            },
+            shapes = {
+                main = {
+                    type = sol.BodyShapeType.POLYGON,
+                    points = { x = position.x, y = position.y, w = size.w, h = size.h },
+                    graphics = {
+                        idle = {
+                            position = position,
+                            graphics = graphics_idle
+                        },
+                        right = {
+                            position = position,
+                            graphics = graphics_right
+                        },
+                        left = {
+                            position = position,
+                            graphics = graphics_left
+                        },
+                        up = {
+                            position = position,
+                            graphics = graphics_up
+                        },
+                        down = {
+                            position = position,
+                            graphics = graphics_down
+                        }
+                    }
+                }
+            }
+        }
+    )
+
     return scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 1 })
 end
 
-(function ()
-    local music = store:createObject('sol.Music', 'village-сin-despair', 'sounds/village_in_despair/village_in_despair.flac')
+(function()
+    local music = store:createMusic('village-сin-despair', 'sounds/village_in_despair/village_in_despair.flac')
     if music == nil then
         print('Unable to load music')
     else
@@ -303,7 +372,7 @@ scene:subscribeToEndContact(function(contact)
     print('    Object B', contact.sideB.tileMapObjectId)
 end)
 
-scene:subscribeToBeginSensorContact(function (contact)
+scene:subscribeToBeginSensorContact(function(contact)
     if player_body_id == contact.visitor.bodyId and contact.sensor.shapeKey == 'Sensor' then
         teleport_sound_effect:play()
         scene:setBodyPosition(player_body_id, getStartPosition())
@@ -320,6 +389,7 @@ switch_view_button:subscribeOnClick(function()
     click_sound_effect:play()
 end)
 
+local PLAYER_WALK_FORCE = 1700
 sol.heartbeat:subscribe(function()
     local up, right, down, left, l_shift, r_shift = sol.keyboard:getState(
         sol.Scancode.UP_ARROW,
@@ -348,15 +418,15 @@ sol.heartbeat:subscribe(function()
     end
 
     local force = { x = 0, y = 0 }
-    if up then force.y = -player_walk_force end
-    if right then force.x = player_walk_force end
-    if down then force.y = player_walk_force end
-    if left then force.x = -player_walk_force end
+    if up then force.y = -PLAYER_WALK_FORCE end
+    if right then force.x = PLAYER_WALK_FORCE end
+    if down then force.y = PLAYER_WALK_FORCE end
+    if left then force.x = -PLAYER_WALK_FORCE end
     if force.x == force.y == 0 then return end
 
     if l_shift or r_shift then
-        force.x = force.x * 2
-        force.y = force.y * 2
+        force.x = force.x * 3
+        force.y = force.y * 3
     end
 
     scene:applyForce(player_body_id, force)

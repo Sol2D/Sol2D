@@ -20,7 +20,6 @@
 #include <Sol2D/Utils/Observable.h>
 #include <Sol2D/BodyDefinition.h>
 #include <Sol2D/BodyOptions.h>
-#include <Sol2D/BodyShapeOptions.h>
 #include <Sol2D/Contact.h>
 #include <Sol2D/Canvas.h>
 #include <Sol2D/Workspace.h>
@@ -58,10 +57,7 @@ public:
     ~Scene() override;
     void setGravity(const Point & _vector);
     uint64_t createBody(const Point & _position, const BodyDefinition & _definition);
-    void createBodiesFromMapObjects(
-        const std::string & _class,
-        const BodyOptions & _body_options,
-        const BodyShapeOptions & _shape_options);
+    void createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options);
     bool destroyBody(uint64_t _body_id);
     bool setFollowedBody(uint64_t _body_id);
     void resetFollowedBody();

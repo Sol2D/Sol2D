@@ -16,20 +16,23 @@
 
 #pragma once
 
+#include <optional>
+
 namespace Sol2D {
 
-struct BodyShapeOptions
+struct BodyShapePhysicsDefinition
 {
-    BodyShapeOptions() :
+    BodyShapePhysicsDefinition() :
         is_sensor(false),
-        is_pre_solve_enalbed(false),
-        density(.0f)
+        is_pre_solve_enabled(false)
     {
     }
 
+    std::optional<float> density;
+    std::optional<float> restitution;
+    std::optional<float> friction;
     bool is_sensor;
-    bool is_pre_solve_enalbed;
-    float density;
+    bool is_pre_solve_enabled;
 };
 
 } // namespace Sol2D
