@@ -74,7 +74,8 @@ public:
         bool _flip_vertically);
     bool loadTileMap(const std::filesystem::path & _file_path);
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
-    const Tiles::TileMapObject * getTileMapObjectByName(std::string _name) const;
+    const Tiles::TileMapObject * getTileMapObjectByName(const std::string & _name) const;
+    boost::container::slist<const Tiles::TileMapObject *> getTileMapObjectsByClass(const std::string & _class) const;
     void render(const RenderState & _state) override;
     void applyForceToBodyCenter(uint64_t _body_id, const Point & _force);
     void applyImpulseToBodyCenter(uint64_t _body_id, const Point & _impulse);
@@ -149,12 +150,18 @@ inline Point Scene::toAbsoluteCoords(float _world_x, float _world_y) const
 
 inline const Tiles::TileMapObject * Scene::getTileMapObjectById(uint32_t _id) const
 {
-    return m_object_heap_ptr->findObject<Tiles::TileMapObject>(_id);
+    return m_object_heap_ptr->findBasicObject(_id);
 }
 
-inline const Tiles::TileMapObject * Scene::getTileMapObjectByName(std::string _name) const
+inline const Tiles::TileMapObject * Scene::getTileMapObjectByName(const std::string & _name) const
 {
-    return m_object_heap_ptr->findObject<Tiles::TileMapObject>(_name);
+    return m_object_heap_ptr->findBasicObject(_name);
+}
+
+inline boost::container::slist<const Tiles::TileMapObject *>
+    Scene::getTileMapObjectsByClass(const std::string & _class) const
+{
+    return m_object_heap_ptr->findBasicObjects(_class);
 }
 
 } // namespace Sol2D

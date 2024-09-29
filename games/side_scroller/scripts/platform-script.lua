@@ -6,8 +6,8 @@ end
 local platform_id = self.bodyId
 local scene = self.scene
 
-local DELTA = 0.01
-local VELOCITY = 3
+local DELTA = 0.05
+local VELOCITY = 2
 
 local function makePlaces()
     local places = {}

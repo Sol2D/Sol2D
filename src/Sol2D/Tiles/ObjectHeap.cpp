@@ -69,3 +69,12 @@ void ObjectHeap::forEachObject(std::function<void(TileMapObject &)> _cb)
     for(const auto & obj : m_objects)
         _cb(*obj);
 }
+
+boost::container::slist<const TileMapObject *> ObjectHeap::findBasicObjects(const std::string & _class) const
+{
+    auto range = mr_objects_by_class.equal_range(_class);
+    boost::container::slist<const TileMapObject *> result;
+    for(auto it = range.first; it != range.second; ++it)
+        result.push_front(it->get());
+    return result;
+}

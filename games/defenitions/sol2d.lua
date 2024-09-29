@@ -210,6 +210,10 @@ function __scene:getTileMapObjectById(id) end
 ---@return TileMapObject | nil
 function __scene:getTileMapObjectByName(name) end
 
+---@param class string
+---@return TileMapObject[]
+function __scene:getTileMapObjectsByClass(class) end
+
 ---@param position Point | nil
 ---@param proto_or_definition sol.BodyPrototype | BodyDefinition
 ---@param script_argument? any

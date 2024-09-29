@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#55aaff" nextlayerid="10" nextobjectid="30">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#55aaff" nextlayerid="10" nextobjectid="36">
  <tileset firstgid="1" source="freetileset/tiles.tsx"/>
  <tileset firstgid="19" source="freetileset/objects.tsx"/>
  <layer id="3" name="ground-2" width="100" height="20">
@@ -37,8 +37,18 @@
   <object id="26" type="obstacle" x="10751.5" y="512.121" width="764.848" height="636"/>
   <object id="27" type="obstacle" x="11520" y="642.667" width="381.333" height="505.333"/>
   <object id="28" type="obstacle" x="11904" y="897.333" width="893.333" height="253.333"/>
-  <object id="29" name="platform-01" type="platform" x="624.242" y="1612.12">
-   <polyline points="70.6667,230.667 71.6131,-208.315 348.498,-445.788 1107.39,-445.576"/>
+  <object id="29" name="platform-01" type="platform" x="599.94" y="1696.5">
+   <polyline points="40.0602,223.495 40.0602,-288.505 424.06,-544.505 1064.06,-544.505"/>
   </object>
+  <object id="30" name="platform-02" type="platform" x="3457.58" y="1281.82">
+   <polyline points="-1.57576,-1.81818 638.424,-1.81818"/>
+  </object>
+  <object id="31" name="platform-03" type="platform" x="9608" y="2048">
+   <polyline points="-5.33333,-57.3333 78.303,-774.788"/>
+  </object>
+  <object id="34" name="platform-04" type="platform" x="10236.4" y="1009.09">
+   <polyline points="0,0 4.9697,-549.758"/>
+  </object>
+  <object id="35" type="one-way-platfrom" x="9088" y="510" width="640" height="60"/>
  </objectgroup>
 </map>

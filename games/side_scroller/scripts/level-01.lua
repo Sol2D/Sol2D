@@ -8,13 +8,15 @@ require 'player'
 ---@field platformSpriteSheet sol.SpriteSheet
 
 local METERS_PER_PIXEL = 0.01
-local ONE_WAY_PLATFORM_SHAPE_KEY = 'platform'
+local PLATFORM_SHAPE_KEY = 'platform'
+local PLATFORM_BODY_PROTO_KEY = 'platform'
+local PLATFORM_GRAPHICS_KEY = 'main'
 
 ---@param store sol.Store
 ---@return Resources
 local function loadResources(store)
     local resources = {}
-    resources.platformSpriteSheet = store:createSpriteSheet(ONE_WAY_PLATFORM_SHAPE_KEY)
+    resources.platformSpriteSheet = store:createSpriteSheet(PLATFORM_SHAPE_KEY)
     if (not resources.platformSpriteSheet:loadFromFile(
             'sprites/platform/platform.png',
             { colCount = 3, rowCount = 1, spriteWidth = 128, spriteHeight = 64 }
@@ -26,7 +28,8 @@ end
 
 ---@param level Level01
 ---@param resources Resources
-local function createPlatform(level, resources)
+---@return sol.BodyPrototype | nil
+local function createPlatformPrototype(level, resources)
     local platformGraphics = level.store:createGraphicsPack('platform-01-left')
     local frame = platformGraphics:addFrame()
     platformGraphics:addSprite(frame, resources.platformSpriteSheet, 0, { position = { x = 0, y = 0 } })
@@ -47,14 +50,13 @@ local function createPlatform(level, resources)
             })
         )
     end
-    local PLATFORM_GRAPHICS_KEY = 'main'
-    local body = level.scene:createBody(
-        points[1],
+    return level.store:createBodyPrototype(
+        PLATFORM_BODY_PROTO_KEY,
         {
             type = sol.BodyType.KINEMATIC,
             script = 'platform-script.lua',
             shapes = {
-                [ONE_WAY_PLATFORM_SHAPE_KEY] = {
+                [PLATFORM_SHAPE_KEY] = {
                     type = sol.BodyShapeType.POLYGON,
                     physics = {
                         isPreSolveEnabled = true,
@@ -68,11 +70,32 @@ local function createPlatform(level, resources)
                     }
                 }
             }
-        },
-        { points = points }
+        }
     )
-    if (not level.scene:setBodyShapeCurrentGraphic(body, ONE_WAY_PLATFORM_SHAPE_KEY, PLATFORM_GRAPHICS_KEY)) then
-        print('Unable to set current graphics to platform-01')
+end
+
+---@param level Level01
+---@param resources Resources
+local function createPlatforms(level, resources)
+    local proto = createPlatformPrototype(level, resources)
+    if proto == nil then
+        print('Unable to create platform prototype')
+        return
+    end
+    local platfroms = level.scene:getTileMapObjectsByClass('platform')
+    for _, platfrom in ipairs(platfroms) do
+        local points = {}
+        for _, point in ipairs(platfrom.points) do
+            table.insert(
+                points,
+                Level01.pixelPointToPhisical({
+                    x = platfrom.position.x + point.x,
+                    y = platfrom.position.y + point.y
+                })
+            )
+        end
+        local body = level.scene:createBody(points[1], proto, { points = points })
+        level.scene:setBodyShapeCurrentGraphic(body, PLATFORM_SHAPE_KEY, PLATFORM_GRAPHICS_KEY)
     end
 end
 
@@ -91,7 +114,7 @@ local function preSolveContact(contact)
         platform_side = contact.sideA
         sign = -1
     end
-    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= ONE_WAY_PLATFORM_SHAPE_KEY then
+    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= PLATFORM_SHAPE_KEY then
         return true
     end
 
@@ -124,14 +147,14 @@ local function createLevel()
     level.scene:createBodiesFromMapObjects(
         'one-way-platfrom',
         {
-            shapeKey = ONE_WAY_PLATFORM_SHAPE_KEY,
+            shapeKey = PLATFORM_SHAPE_KEY,
             shapePhysics = {
                 isPreSolveEnabled = true
             }
         }
     )
     local resources = loadResources(level.store)
-    createPlatform(level, resources)
+    createPlatforms(level, resources)
     level.scene:subscribeToPreSolveContact(preSolveContact)
     return level
 end

@@ -212,6 +212,24 @@ int luaApi_GetTileMapObjectByName(lua_State * _lua)
 }
 
 // 1 self
+// 2 class
+int luaApi_GetTileMapObjectsByClass(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    const char * class_name = lua_tostring(_lua, 2);
+    luaL_argcheck(_lua, class_name, 2, "class expected");
+    auto objects = self->getScene(_lua)->getTileMapObjectsByClass(class_name);
+    lua_newtable(_lua);
+    int i = 0;
+    for(const auto * object : objects)
+    {
+        pushTileMapObject(_lua, *object);
+        lua_rawseti(_lua, -2, ++i);
+    }
+    return 1;
+}
+
+// 1 self
 // 2 position or nil
 // 3 body prototype OR body definition
 // 4 script argument (optional)
@@ -596,6 +614,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "loadTileMap", luaApi_LoadTileMap },
             { "getTileMapObjectById", luaApi_GetTileMapObjectById },
             { "getTileMapObjectByName", luaApi_GetTileMapObjectByName },
+            { "getTileMapObjectsByClass", luaApi_GetTileMapObjectsByClass },
             { "createBody", luaApi_CreateBody },
             { "createBodiesFromMapObjects", luaApi_CreateBodiesFromMapObjects },
             { "applyForceToBodyCenter", luaApi_ApplyForceToBodyCenter },

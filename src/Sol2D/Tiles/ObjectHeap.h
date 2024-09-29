@@ -24,6 +24,7 @@
 #include <boost/multi_index/tag.hpp>
 #include <functional>
 #include <memory>
+#include <boost/container/slist.hpp>
 
 namespace Sol2D::Tiles {
 
@@ -133,6 +134,7 @@ public:
 
     const TileMapObject * findBasicObject(const std::string _name) const;
     const TileMapObject * findBasicObject(uint32_t _gid) const;
+    boost::container::slist<const TileMapObject *> findBasicObjects(const std::string & _class) const;
     void forEachObject(uint32_t _layer_id, std::function<void(const TileMapObject &)> _cb) const;
     void forEachObject(uint32_t _layer_id, std::function<void(TileMapObject &)> _cb);
     void forEachObject(const std::string & _class, std::function<void(const TileMapObject &)> _cb) const;
@@ -192,6 +194,5 @@ inline const T * ObjectHeap::findObject(uint32_t _gid) const
     const TileMapObject * object = findBasicObject(_gid);
     return object ? dynamic_cast<const T *>(object) : nullptr;
 }
-
 
 } // namespace Sol2D::Tiles
