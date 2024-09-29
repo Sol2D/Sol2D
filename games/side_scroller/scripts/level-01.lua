@@ -37,11 +37,22 @@ local function createPlatform(level, resources)
         print('Unable to get the "platform-01" object')
         return nil
     end
+    local points = {}
+    for _, point in ipairs(map_object.points) do
+        table.insert(
+            points,
+            Level01.pixelPointToPhisical({
+                x = map_object.position.x + point.x,
+                y = map_object.position.y + point.y
+            })
+        )
+    end
     local PLATFORM_GRAPHICS_KEY = 'main'
     local body = level.scene:createBody(
-        Level01.pixelPointToPhisical(map_object.position),
+        points[1],
         {
             type = sol.BodyType.KINEMATIC,
+            script = 'platform-script.lua',
             shapes = {
                 [ONE_WAY_PLATFORM_SHAPE_KEY] = {
                     type = sol.BodyShapeType.POLYGON,
@@ -57,7 +68,9 @@ local function createPlatform(level, resources)
                     }
                 }
             }
-        })
+        },
+        { points = points }
+    )
     if (not level.scene:setBodyShapeCurrentGraphic(body, ONE_WAY_PLATFORM_SHAPE_KEY, PLATFORM_GRAPHICS_KEY)) then
         print('Unable to set current graphics to platform-01')
     end

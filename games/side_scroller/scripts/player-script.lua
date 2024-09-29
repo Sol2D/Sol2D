@@ -65,31 +65,31 @@ sol.heartbeat:subscribe(function()
     end
 
     if in_air or space_key then
-        local velocity = scene:getLinearVelocity(player_id)
+        local velocity = scene:getBodyLinearVelocity(player_id)
         if math.abs(velocity.y) < 0.01 then
             in_air = false
             if space_key and jump_timeout == 0 then
                 jump_timeout = 40
-                scene:applyImpulse(player_id, { x = 0, y = -1300 })
+                scene:applyImpulseToBodyCenter(player_id, { x = 0, y = -1300 })
                 in_air = true
             end
         end
     end
 
     if right_key then
-        scene:applyForce(
+        scene:applyForceToBodyCenter(
             player_id,
             {
-                x = getForce(scene:getLinearVelocity(player_id).x, PLAYER_WALK_VELOCITY),
+                x = getForce(scene:getBodyLinearVelocity(player_id).x, PLAYER_WALK_VELOCITY),
                 y = 0
             }
         )
         state:set(Direction.RIGHT, Action.WALK)
     elseif left_key then
-        scene:applyForce(
+        scene:applyForceToBodyCenter(
             player_id,
             {
-                x = getForce(scene:getLinearVelocity(player_id).x, -PLAYER_WALK_VELOCITY),
+                x = getForce(scene:getBodyLinearVelocity(player_id).x, -PLAYER_WALK_VELOCITY),
                 y = 0
             }
         )

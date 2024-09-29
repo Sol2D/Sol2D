@@ -112,5 +112,5 @@ sol.heartbeat:subscribe(function ()
     end
     local force = getForce(position, next_point)
     scene:setBodyShapeCurrentGraphic(body_id, 'main', getGraphics(force))
-    scene:applyForce(body_id, force)
+    scene:applyForceToBodyCenter(body_id, force)
 end)

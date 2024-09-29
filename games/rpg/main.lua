@@ -429,5 +429,5 @@ sol.heartbeat:subscribe(function()
         force.y = force.y * 3
     end
 
-    scene:applyForce(player_body_id, force)
+    scene:applyForceToBodyCenter(player_body_id, force)
 end)

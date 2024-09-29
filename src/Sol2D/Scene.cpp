@@ -855,7 +855,7 @@ void Scene::drawImageLayer(const TileMapImageLayer & _layer)
     SDL_RenderTexture(&mr_renderer, image.get(), nullptr, &dim);
 }
 
-void Scene::applyForce(uint64_t _body_id, const Point & _force)
+void Scene::applyForceToBodyCenter(uint64_t _body_id, const Point & _force)
 {
     m_defers.push_front([this, _body_id, _force]() {
         b2BodyId b2_body_id = findBody(_body_id);
@@ -864,7 +864,7 @@ void Scene::applyForce(uint64_t _body_id, const Point & _force)
     });
 }
 
-void Scene::applyImpulse(uint64_t _body_id, const Point & _impulse)
+void Scene::applyImpulseToBodyCenter(uint64_t _body_id, const Point & _impulse)
 {
     m_defers.push_front([this, _body_id, _impulse]() {
         b2BodyId b2_body_id = findBody(_body_id);
@@ -873,12 +873,21 @@ void Scene::applyImpulse(uint64_t _body_id, const Point & _impulse)
     });
 }
 
-Point Scene::getLinearVelocity(uint64_t _body_id) const
+Point Scene::getBodyLinearVelocity(uint64_t _body_id) const
 {
     b2BodyId b2_body = findBody(_body_id);
     if(B2_IS_NULL(b2_body))
         return makePoint(.0f, .0f);
     return asPoint(b2Body_GetLinearVelocity(b2_body));
+}
+
+bool Scene::setBodyLinearVelocity(uint64_t _body_id, const Point & _velocity) const
+{
+    b2BodyId b2_body = findBody(_body_id);
+    if(B2_IS_NULL(b2_body))
+        return false;
+    b2Body_SetLinearVelocity(b2_body, asBox2dVec2(_velocity));
+    return true;
 }
 
 float Scene::getBodyMass(uint64_t _body_id) const

@@ -106,6 +106,11 @@ inline const Point & asPoint(const b2Vec2 & _vec) noexcept
     return *reinterpret_cast<const Point *>(&_vec);
 }
 
+inline const b2Vec2 & asBox2dVec2(const Point & _point) noexcept
+{
+    return *reinterpret_cast<const b2Vec2 *>(&_point);
+}
+
 inline constexpr Size makeSize(float _w, float _h) noexcept
 {
     return { _w, _h };

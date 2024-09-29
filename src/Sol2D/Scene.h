@@ -76,9 +76,10 @@ public:
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(std::string _name) const;
     void render(const RenderState & _state) override;
-    void applyForce(uint64_t _body_id, const Point & _force);
-    void applyImpulse(uint64_t _body_id, const Point & _impulse);
-    Point getLinearVelocity(uint64_t _body_id) const;
+    void applyForceToBodyCenter(uint64_t _body_id, const Point & _force);
+    void applyImpulseToBodyCenter(uint64_t _body_id, const Point & _impulse);
+    Point getBodyLinearVelocity(uint64_t _body_id) const;
+    bool setBodyLinearVelocity(uint64_t _body_id, const Point & _velocity) const;
     float getBodyMass(uint64_t _body_id) const;
     void setBodyPosition(uint64_t _body_id, const Point & _position);
     std::optional<Point> getBodyPosition(uint64_t _body_id) const;

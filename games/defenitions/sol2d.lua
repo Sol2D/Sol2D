@@ -222,15 +222,20 @@ function __scene:createBodiesFromMapObjects(class, body_options) end
 
 ---@param body_id integer
 ---@param force_vector Point
-function __scene:applyForce(body_id, force_vector) end
+function __scene:applyForceToBodyCenter(body_id, force_vector) end
 
 ---@param body_id integer
 ---@param impulse_vector Point
-function __scene:applyImpulse(body_id, impulse_vector) end
+function __scene:applyImpulseToBodyCenter(body_id, impulse_vector) end
 
 ---@param body_id integer
 ---@return Point
-function __scene:getLinearVelocity(body_id) end
+function __scene:getBodyLinearVelocity(body_id) end
+
+---@param body_id integer
+---@param velocity Point
+---@return boolean
+function __scene:setBodyLinearVelocity(body_id, velocity) end
 
 ---@param body_id integer
 ---@return number
