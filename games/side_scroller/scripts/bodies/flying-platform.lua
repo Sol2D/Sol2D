@@ -17,7 +17,7 @@ local function makePlaces()
         local delta_y = self.arg.points[i].y - prev_point.y
         local length = math.sqrt(delta_x ^ 2 + delta_y ^ 2)
         local d = math.abs(length) / VELOCITY
-        table.insert(places,{
+        table.insert(places, {
             source = prev_point,
             destination = self.arg.points[i],
             velocity = {
@@ -52,9 +52,9 @@ local function areSamePoints(point1, point2)
 end
 
 sol.heartbeat:subscribe( -- FIXME: this subscription must die with the object
-    function ()
+    function()
         local position = scene:getBodyPosition(platform_id)
-        if position == nil then
+        if not position then
             print('Platform position is nil')
             return
         end

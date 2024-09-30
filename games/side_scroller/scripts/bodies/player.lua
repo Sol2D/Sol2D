@@ -1,11 +1,10 @@
 require 'math'
-require 'player'
+
+local keys = require 'resources.keys'
 
 local player_id = self.bodyId
 local scene = self.scene
 local player_mass = scene:getBodyMass(player_id)
-
-local metadata = Player.getMetadata()
 
 local Direction = {
     LEFT = 0,
@@ -27,26 +26,26 @@ function state:set(direction, action)
         local graphic
         if action == Action.IDLE then
             if direction == Direction.LEFT then
-                graphic = metadata.graphics.idle_left
+                graphic = keys.shapeGraphics.player.idleLeft
             else
-                graphic = metadata.graphics.idle_right
+                graphic = keys.shapeGraphics.player.idleRight
             end
         elseif action == Action.WALK then
             if direction == Direction.LEFT then
-                graphic = metadata.graphics.walk_left
+                graphic = keys.shapeGraphics.player.walkLeft
             else
-                graphic = metadata.graphics.walk_right
+                graphic = keys.shapeGraphics.player.walkRight
             end
         end
         self.action = action
         self.direction = direction
-        scene:setBodyShapeCurrentGraphic(player_id, metadata.shapes.main, graphic)
+        scene:setBodyShapeCurrentGraphic(player_id, keys.shapes.player, graphic)
     end
 end
 
 local function getForce(current_velocity, desired_velocity)
     local change = desired_velocity - current_velocity
-    return player_mass * change / (1/60) -- TODO: frame rate
+    return player_mass * change / (1 / 60) -- TODO: frame rate
 end
 
 local in_air = false

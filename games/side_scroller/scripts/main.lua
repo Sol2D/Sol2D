@@ -1,41 +1,12 @@
-require 'level-01'
-require 'player'
+local resources = require 'resources.all'
 
----@param view sol.View
----@param options Fragment
-local function createFragment(view, options)
-    return {
-        id = view:createFragment(options),
-        bind = function(self, target)
-            view:bindFragment(self.id, target)
-        end
-    }
+local global_store = sol.stores:createStore('global')
+resources.init(global_store)
+
+local function runLevel01()
+    local level = require('level-01')
+    local run = level.run(global_store)
+    -- run.destroy()
 end
 
----@param scene sol.Scene
----@return Point
-local function getStartPosition(scene)
-    local start_postion = scene:getTileMapObjectByName('start-position')
-    if start_postion then
-        return Level01.pixelPointToPhisical(start_postion.position)
-    end
-    return Level01.pixelPointToPhisical({ x = 410, y = 200 })
-end
-
-(function()
-    local main_store = sol.stores:createStore('main')
-    local main_view = main_store:createView('main')
-    local main_fragment = createFragment(main_view, {}) -- TODO: allow creation without arguments, default: 0, 0, 100%, 100%
-    local level_01 = Level01.createLevel()
-    main_fragment:bind(level_01.scene)
-    sol.window:setView(main_view)
-
-    local player_proto = Player.createPrototype(main_store)
-    local player_id = level_01.scene:createBody(getStartPosition(level_01.scene), player_proto.proto)
-    level_01.scene:setBodyShapeCurrentGraphic( -- TODO: delete
-        player_id,
-        player_proto.shapes.main,
-        player_proto.graphics.idle_right
-    )
-    level_01.scene:setFollowedBody(player_id)
-end)()
+runLevel01()
