@@ -9,7 +9,7 @@ local contact_observer = self.arg.contactObserver
 local player_mass = scene:getBodyMass(player_id)
 
 local WALK_VELOCITY = 5
-local JUMP_DELAY = 40
+local JUMP_DELAY = 15
 
 local Direction = {
     LEFT = 0,
@@ -23,6 +23,7 @@ local Action = {
 
 local state = {
     inAir = false,
+    footings = {},
     jumpTimeout = 0,
     direction = Direction.LEFT,
     action = Action.IDLE
@@ -50,8 +51,15 @@ function state:setAction(direction, action)
     end
 end
 
-local function getForce(current_velocity, desired_velocity)
-    local change = desired_velocity - current_velocity
+local function getFootingVelocity()
+    if #state.footings > 0 then
+        return scene:getBodyLinearVelocity(state.footings[1].bodyId)
+    end
+    return { x = 0, y = 0 }
+end
+
+local function getHorizontalForce(current_velocity, footing_velocity, desired_velocity)
+    local change = desired_velocity - (current_velocity - footing_velocity)
     return player_mass * change / (1 / 60) -- TODO: frame rate
 end
 
@@ -75,7 +83,11 @@ sol.heartbeat:subscribe(function()
         scene:applyForceToBodyCenter(
             player_id,
             {
-                x = getForce(scene:getBodyLinearVelocity(player_id).x, WALK_VELOCITY),
+                x = getHorizontalForce(
+                    scene:getBodyLinearVelocity(player_id).x,
+                    getFootingVelocity().x,
+                    WALK_VELOCITY
+                ),
                 y = 0
             }
         )
@@ -84,7 +96,11 @@ sol.heartbeat:subscribe(function()
         scene:applyForceToBodyCenter(
             player_id,
             {
-                x = getForce(scene:getBodyLinearVelocity(player_id).x, -WALK_VELOCITY),
+                x = getHorizontalForce(
+                    scene:getBodyLinearVelocity(player_id).x,
+                    getFootingVelocity().x,
+                    -WALK_VELOCITY
+                ),
                 y = 0
             }
         )
@@ -96,12 +112,19 @@ end)
 
 contact_observer.setSensorBeginContactListener(player_id, function (sensor, visitor)
     if sensor.bodyId == player_id and sensor.shapeKey == keys.shapes.player.bottomSensor then
+        table.insert(state.footings, visitor)
         state.inAir = false
     end
 end)
 
 contact_observer.setSensorEndContactListener(player_id, function(sensor, visitor)
     if sensor.bodyId == player_id and sensor.shapeKey == keys.shapes.player.bottomSensor then
-        state.inAir = true
+        for index, footing in ipairs(state.footings) do
+            if footing.bodyId == visitor.bodyId and footing.shapeKey == visitor.shapeKey then
+                table.remove(state.footings, index)
+                break
+            end
+        end
+        state.inAir = #state.footings == 0
     end
 end)
