@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#55aaff" nextlayerid="10" nextobjectid="36">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#55aaff" nextlayerid="10" nextobjectid="37">
  <tileset firstgid="1" source="freetileset/tiles.tsx"/>
  <tileset firstgid="19" source="freetileset/objects.tsx"/>
  <layer id="3" name="ground-2" width="100" height="20">
   <data encoding="base64" compression="zstd">
-   KLUv/WBAHgUCAJgAAQAAAAIDAAQAAAAFBgAREhESEKDwtnWQgt0dtSpcaWRSih4qXppTtl5X/WtddCuTP8agnpnbgno2Zwt6DAM=
+   KLUv/WBAHj0CAKAAAQAAAAIDAAQAAAAFBgAXERIREhOg8LZ10ILdHbVUWNLIJIpeKkaapaxeR31qDd1IJQ6FserMJIpjVM/MbVE9M2cL+gYD
   </data>
  </layer>
  <layer id="1" name="ground-1" width="100" height="20">
@@ -50,5 +50,6 @@
    <polyline points="0,0 4.9697,-549.758"/>
   </object>
   <object id="35" type="one-way-platfrom" x="9088" y="510" width="640" height="60"/>
+  <object id="36" type="obstacle" x="7297" y="1715.67" width="75.6667" height="76"/>
  </objectgroup>
 </map>

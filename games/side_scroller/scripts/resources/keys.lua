@@ -6,8 +6,13 @@ local keys_meta = {
         flyingPlatform3 = 'flying-platform3'
     },
     shapes = {
-        oneWayPlatfrom = ONE_WAY_PLATFORM_SHAPE_KEY,
-        player = 'player-main'
+        oneWayPlatfrom = {
+            main = ONE_WAY_PLATFORM_SHAPE_KEY
+        },
+        player = {
+            main = 'player-main',
+            bottomSensor = 'player-sensor-bottom'
+        }
     },
     shapeGraphics = {
         player = {

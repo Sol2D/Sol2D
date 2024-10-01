@@ -1,10 +1,15 @@
-require 'math'
-
 local keys = require 'resources.keys'
 
 local player_id = self.bodyId
 local scene = self.scene
+
+---@type BodyContactObserver
+local contact_observer = self.arg.contactObserver
+
 local player_mass = scene:getBodyMass(player_id)
+
+local WALK_VELOCITY = 5
+local JUMP_DELAY = 40
 
 local Direction = {
     LEFT = 0,
@@ -17,11 +22,13 @@ local Action = {
 }
 
 local state = {
+    inAir = false,
+    jumpTimeout = 0,
     direction = Direction.LEFT,
     action = Action.IDLE
 }
 
-function state:set(direction, action)
+function state:setAction(direction, action)
     if direction ~= self.direction or action ~= self.action then
         local graphic
         if action == Action.IDLE then
@@ -39,7 +46,7 @@ function state:set(direction, action)
         end
         self.action = action
         self.direction = direction
-        scene:setBodyShapeCurrentGraphic(player_id, keys.shapes.player, graphic)
+        scene:setBodyShapeCurrentGraphic(player_id, keys.shapes.player.main, graphic)
     end
 end
 
@@ -48,10 +55,6 @@ local function getForce(current_velocity, desired_velocity)
     return player_mass * change / (1 / 60) -- TODO: frame rate
 end
 
-local in_air = false
-local jump_timeout = 0
-local PLAYER_WALK_VELOCITY = 5
-
 sol.heartbeat:subscribe(function()
     local right_key, left_key, space_key = sol.keyboard:getState(
         sol.Scancode.RIGHT_ARROW,
@@ -59,19 +62,12 @@ sol.heartbeat:subscribe(function()
         sol.Scancode.SPACE
     )
 
-    if jump_timeout > 0 then
-        jump_timeout = jump_timeout - 1
-    end
-
-    if in_air or space_key then
-        local velocity = scene:getBodyLinearVelocity(player_id)
-        if math.abs(velocity.y) < 0.01 then
-            in_air = false
-            if space_key and jump_timeout == 0 then
-                jump_timeout = 40
-                scene:applyImpulseToBodyCenter(player_id, { x = 0, y = -1300 })
-                in_air = true
-            end
+    if not state.inAir then
+        if state.jumpTimeout > 0 then
+            state.jumpTimeout = state.jumpTimeout - 1
+        elseif space_key then
+            state.jumpTimeout = JUMP_DELAY
+            scene:applyImpulseToBodyCenter(player_id, { x = 0, y = -1300 })
         end
     end
 
@@ -79,21 +75,33 @@ sol.heartbeat:subscribe(function()
         scene:applyForceToBodyCenter(
             player_id,
             {
-                x = getForce(scene:getBodyLinearVelocity(player_id).x, PLAYER_WALK_VELOCITY),
+                x = getForce(scene:getBodyLinearVelocity(player_id).x, WALK_VELOCITY),
                 y = 0
             }
         )
-        state:set(Direction.RIGHT, Action.WALK)
+        state:setAction(Direction.RIGHT, Action.WALK)
     elseif left_key then
         scene:applyForceToBodyCenter(
             player_id,
             {
-                x = getForce(scene:getBodyLinearVelocity(player_id).x, -PLAYER_WALK_VELOCITY),
+                x = getForce(scene:getBodyLinearVelocity(player_id).x, -WALK_VELOCITY),
                 y = 0
             }
         )
-        state:set(Direction.LEFT, Action.WALK)
+        state:setAction(Direction.LEFT, Action.WALK)
     else
-        state:set(state.direction, Action.IDLE)
+        state:setAction(state.direction, Action.IDLE)
+    end
+end)
+
+contact_observer.setSensorBeginContactListener(player_id, function (sensor, visitor)
+    if sensor.bodyId == player_id and sensor.shapeKey == keys.shapes.player.bottomSensor then
+        state.inAir = false
+    end
+end)
+
+contact_observer.setSensorEndContactListener(player_id, function(sensor, visitor)
+    if sensor.bodyId == player_id and sensor.shapeKey == keys.shapes.player.bottomSensor then
+        state.inAir = true
     end
 end)

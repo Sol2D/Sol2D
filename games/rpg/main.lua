@@ -372,7 +372,7 @@ scene:subscribeToEndContact(function(contact)
     print('    Object B', contact.sideB.tileMapObjectId)
 end)
 
-scene:subscribeToBeginSensorContact(function(contact)
+scene:subscribeToSensorBeginContact(function(contact)
     if player_body_id == contact.visitor.bodyId and contact.sensor.shapeKey == 'Sensor' then
         teleport_sound_effect:play()
         scene:setBodyPosition(player_body_id, getStartPosition())

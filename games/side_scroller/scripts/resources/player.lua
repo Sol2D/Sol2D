@@ -94,7 +94,7 @@ local function createPlayerPrototype(store)
             fixedRotation = true
         },
         shapes = {
-            [keys.shapes.player] = {
+            [keys.shapes.player.main] = {
                 type = sol.BodyShapeType.POLYGON,
                 physics = {
                     friction = 1.1,
@@ -102,11 +102,23 @@ local function createPlayerPrototype(store)
                 },
                 rect = hit_box,
                 graphics = {}
+            },
+            [keys.shapes.player.bottomSensor] = {
+                type = sol.BodyShapeType.POLYGON,
+                physics = {
+                    isSensor = true
+                },
+                rect = {
+                    x = hit_box.x + 2,
+                    y = hit_box.y + hit_box.h,
+                    w = hit_box.w - 4,
+                    h = 5
+                }
             }
         }
     }
-    addIdleAnimation(body_definition.shapes[keys.shapes.player].graphics, store)
-    addWalkAnimations(body_definition.shapes[keys.shapes.player].graphics, store)
+    addIdleAnimation(body_definition.shapes[keys.shapes.player.main].graphics, store)
+    addWalkAnimations(body_definition.shapes[keys.shapes.player.main].graphics, store)
     store:createBodyPrototype(keys.bodies.player, body_definition)
 end
 

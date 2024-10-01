@@ -298,10 +298,10 @@ function __scene:unsubscribeFromEndContact(subscription_id) end
 
 ---@param callback SensorContactCallback
 ---@return integer subscription ID
-function __scene:subscribeToBeginSensorContact(callback) end
+function __scene:subscribeToSensorBeginContact(callback) end
 
 ---@param subscription_id integer
-function __scene:unsubscribeFromBeginSensorContact(subscription_id) end
+function __scene:unsubscribeFromSensorBeginContact(subscription_id) end
 
 ---@param callback SensorContactCallback
 ---@return integer subscription ID

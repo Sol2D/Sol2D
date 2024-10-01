@@ -1,4 +1,5 @@
 local keys = require 'resources.keys'
+local BodyContactObserver = require 'body-contact-observer'
 
 local METERS_PER_PIXEL = 0.01
 
@@ -13,7 +14,8 @@ end
 
 ---@param global_store sol.Store
 ---@param scene sol.Scene
-local function createPlayer(global_store, scene)
+---@param args any
+local function createPlayer(global_store, scene, args)
     local proto = global_store:getBodyPrototype(keys.bodies.player)
     if proto == nil then
         error('Unable to load player prototype')
@@ -25,11 +27,12 @@ local function createPlayer(global_store, scene)
     end
     local player_id = scene:createBody(
         pixelPointToPhisical(start_postion),
-        proto
+        proto,
+        args
     )
     scene:setBodyShapeCurrentGraphic( -- TODO: delete
         player_id,
-        keys.shapes.player,
+        keys.shapes.player.main,
         keys.shapeGraphics.player.idleRight
     )
     scene:setFollowedBody(player_id)
@@ -57,7 +60,7 @@ local function createFlyingPlatforms(global_store, scene)
         local body = scene:createBody(points[1], proto, { points = points })
         scene:setBodyShapeCurrentGraphic(
             body,
-            keys.shapes.oneWayPlatfrom,
+            keys.shapes.oneWayPlatfrom.main,
             keys.shapeGraphics.flyingPlatform3.main
         )
     end
@@ -69,16 +72,16 @@ local function preSolveContact(contact)
     local player_side = nil
     local platform_side = nil
     local sign = 0
-    if contact.sideA.shapeKey == keys.shapes.player then
+    if contact.sideA.shapeKey == keys.shapes.player.main then
         player_side = contact.sideA
         platform_side = contact.sideB
         sign = 1
-    elseif contact.sideB.shapeKey == keys.shapes.player then
+    elseif contact.sideB.shapeKey == keys.shapes.player.main then
         player_side = contact.sideB
         platform_side = contact.sideA
         sign = -1
     end
-    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= keys.shapes.oneWayPlatfrom then
+    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= keys.shapes.oneWayPlatfrom.main then
         return true
     end
 
@@ -93,6 +96,31 @@ local function preSolveContact(contact)
     end
 
     return false
+end
+
+---@param scene sol.Scene
+---@param body_contact_observer BodyContactObserver
+local function createContactSubscriptions(scene, body_contact_observer)
+    local begin_contact_subscription = scene:subscribeToBeginContact(function (contact)
+        body_contact_observer.callBeginContact(contact)
+    end)
+    local end_contact_subscription = scene:subscribeToEndContact(function(contact)
+        body_contact_observer.callEndContact(contact)
+    end)
+    local begin_sensor_constact_subscription = scene:subscribeToSensorBeginContact(function(contact)
+        body_contact_observer.callSensorBeginContact(contact)
+    end)
+    local end_sensor_constact_subscription = scene:subscribeToSensorEndContact(function(contact)
+        body_contact_observer.callSensorEndContact(contact)
+    end)
+    return {
+        destroy = function ()
+            scene:unsubscribeFromBeginContact(begin_contact_subscription)
+            scene:unsubscribeFromEndContact(end_contact_subscription)
+            scene:unsubscribeFromSensorBeginContact(begin_sensor_constact_subscription)
+            scene:unsubscribeFromSesnsorEndContact(end_sensor_constact_subscription)
+        end
+    }
 end
 
 ---@param global_store sol.Store
@@ -110,18 +138,21 @@ local function createScene(global_store, local_store)
     scene:createBodiesFromMapObjects(
         'one-way-platfrom',
         {
-            shapeKey = keys.shapes.oneWayPlatfrom,
+            shapeKey = keys.shapes.oneWayPlatfrom.main,
             shapePhysics = {
                 isPreSolveEnabled = true
             }
         }
     )
-    createPlayer(global_store, scene)
+    local observer = BodyContactObserver.new()
+    createPlayer(global_store, scene, { contactObserver = observer })
     createFlyingPlatforms(global_store, scene)
     local pre_solve_subscription = scene:subscribeToPreSolveContact(preSolveContact)
+    local contact_subsciptions = createContactSubscriptions(scene, observer)
     return {
         scene = scene,
         destroy = function ()
+            contact_subsciptions.destroy()
             scene:unsubscribePreSolveContact(pre_solve_subscription)
         end
     }

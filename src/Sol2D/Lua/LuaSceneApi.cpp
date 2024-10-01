@@ -508,7 +508,7 @@ int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
 
 // 1 self
 // 2 callback
-int luaApi_SubscribeToBeginSensorContact(lua_State * _lua)
+int luaApi_SubscribeToSensorBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
@@ -519,7 +519,7 @@ int luaApi_SubscribeToBeginSensorContact(lua_State * _lua)
 
 // 1 self
 // 2 subscription ID
-int luaApi_UnsubscribeFromBeginSensorContact(lua_State * _lua)
+int luaApi_UnsubscribeFromSensorBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
@@ -633,8 +633,8 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "unsubscribeFromBeginContact", luaApi_UnsubscribeFromBeginContact },
             { "subscribeToEndContact", luaApi_SubscribeToEndContact },
             { "unsubscribeFromEndContact", luaApi_UnsubscribeFromEndContact },
-            { "subscribeToBeginSensorContact", luaApi_SubscribeToBeginSensorContact },
-            { "unsubscribeFromBeginSensorContact", luaApi_UnsubscribeFromBeginSensorContact },
+            { "subscribeToSensorBeginContact", luaApi_SubscribeToSensorBeginContact },
+            { "unsubscribeFromSensorBeginContact", luaApi_UnsubscribeFromSensorBeginContact },
             { "subscribeToSensorEndContact", luaApi_SubscribeToSensorEndContact },
             { "unsubscribeFromSesnsorEndContact", luaApi_UnsubscribeFromSesnsorEndContact },
             { "subscribeToPreSolveContact", luaApi_SubscribeToPreSolveContact },

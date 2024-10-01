@@ -20,7 +20,7 @@ local function createPlatformPrototype3(store)
             type = sol.BodyType.KINEMATIC,
             script = 'bodies/flying-platform.lua',
             shapes = {
-                [keys.shapes.oneWayPlatfrom] = {
+                [keys.shapes.oneWayPlatfrom.main] = {
                     type = sol.BodyShapeType.POLYGON,
                     physics = {
                         isPreSolveEnabled = true,
