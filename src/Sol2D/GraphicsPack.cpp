@@ -20,8 +20,10 @@
 using namespace Sol2D;
 using namespace Sol2D::Utils;
 
-GraphicsPack::GraphicsPack(SDL_Renderer & _renderer) :
+GraphicsPack::GraphicsPack(SDL_Renderer & _renderer, const GraphicsPackOptions & _options /*= GraphicsPackOptions()*/) :
     mp_renderer(&_renderer),
+    m_max_iterations(_options.animation_iterations),
+    m_current_iteration(0),
     m_current_frame_index(0),
     m_current_frame_duration(std::chrono::milliseconds::zero()),
     m_total_duration(std::chrono::milliseconds::zero())
@@ -30,6 +32,8 @@ GraphicsPack::GraphicsPack(SDL_Renderer & _renderer) :
 
 GraphicsPack::GraphicsPack(const GraphicsPack & _graphics_pack) :
     mp_renderer(_graphics_pack.mp_renderer),
+    m_max_iterations(_graphics_pack.m_max_iterations),
+    m_current_iteration(0),
     m_current_frame_index(_graphics_pack.m_current_frame_index),
     m_current_frame_duration(_graphics_pack.m_current_frame_duration),
     m_total_duration(_graphics_pack.m_total_duration)
@@ -42,6 +46,8 @@ GraphicsPack::GraphicsPack(const GraphicsPack & _graphics_pack) :
 GraphicsPack::GraphicsPack(GraphicsPack && _graphics_pack) :
     mp_renderer(_graphics_pack.mp_renderer),
     m_frames(std::move(_graphics_pack.m_frames)),
+    m_max_iterations(_graphics_pack.m_max_iterations),
+    m_current_iteration(0),
     m_current_frame_index(_graphics_pack.m_current_frame_index),
     m_current_frame_duration(_graphics_pack.m_current_frame_duration),
     m_total_duration(_graphics_pack.m_total_duration)
@@ -66,6 +72,8 @@ GraphicsPack & GraphicsPack::operator = (const GraphicsPack & _graphics_pack)
         for(auto * frame : _graphics_pack.m_frames)
             m_frames.push_back(new Frame(*frame));
         mp_renderer = _graphics_pack.mp_renderer;
+        m_max_iterations = _graphics_pack.m_max_iterations;
+        m_current_iteration = 0;
         m_current_frame_index = _graphics_pack.m_current_frame_index;
         m_current_frame_duration = _graphics_pack.m_current_frame_duration;
         m_total_duration = _graphics_pack.m_total_duration;
@@ -84,6 +92,8 @@ GraphicsPack & GraphicsPack::operator = (GraphicsPack && _graphics_pack)
         _graphics_pack.m_frames.clear();
         mp_renderer = _graphics_pack.mp_renderer;
         _graphics_pack.mp_renderer = nullptr;
+        m_max_iterations = _graphics_pack.m_max_iterations;
+        m_current_iteration = 0;
         m_current_frame_index = _graphics_pack.m_current_frame_index;
         _graphics_pack.m_current_frame_index = 0;
         m_current_frame_duration = _graphics_pack.m_current_frame_duration;
@@ -167,9 +177,7 @@ bool GraphicsPack::setFrameVisibility(size_t _index, bool _is_visible)
 std::optional<bool> GraphicsPack::isFrameVisible(size_t _index) const
 {
     if(_index < m_frames.size())
-    {
         return m_frames[_index]->is_visible;
-    }
     return std::nullopt;
 }
 
@@ -193,6 +201,15 @@ std::optional<std::chrono::milliseconds> GraphicsPack::getFrameDuration(size_t _
         return m_frames[_index]->duration;
     }
     return std::nullopt;
+}
+
+bool GraphicsPack::setCurrentFrameIndex(size_t _index)
+{
+    if(_index >= m_frames.size() || !m_frames[_index]->is_visible)
+        return false;
+    m_current_frame_index = _index;
+    m_current_frame_duration = std::chrono::milliseconds::zero();
+    return true;
 }
 
 std::pair<bool, size_t> GraphicsPack::addSprite(
@@ -262,17 +279,17 @@ void GraphicsPack::render(
     std::chrono::milliseconds _time_passed,
     const GraphicsRenderOptions & _options /*= SpriteRenderOptions()*/)
 {
-    if(m_total_duration == std::chrono::milliseconds::zero())
+    if(m_max_iterations == 0 || m_total_duration == std::chrono::milliseconds::zero())
     {
         performRender(_position, _options);
         return;
     }
     m_current_frame_duration += _time_passed;
     Frame * frame = m_frames[m_current_frame_index];
+    bool respect_iterations = m_max_iterations > 0;
     if(!frame->is_visible)
     {
-        frame = switchToNextVisibleFrame();
-        if(frame)
+        if(switchToNextVisibleFrame(respect_iterations))
         {
             m_current_frame_duration = _time_passed;
         }
@@ -287,7 +304,9 @@ void GraphicsPack::render(
         if(frame->duration < m_current_frame_duration)
         {
             m_current_frame_duration -= frame->duration;
-            frame = switchToNextVisibleFrame();
+            if(!switchToNextVisibleFrame(respect_iterations))
+                break;
+            frame = m_frames[m_current_frame_index];
         }
         else
         {
@@ -297,28 +316,41 @@ void GraphicsPack::render(
     performRender(_position, _options);
 }
 
-GraphicsPack::Frame * GraphicsPack::switchToNextVisibleFrame()
+bool GraphicsPack::switchToNextVisibleFrame()
 {
+    return switchToNextVisibleFrame(false);
+}
+
+bool GraphicsPack::switchToNextVisibleFrame(bool _respect_iteration)
+{
+    if(_respect_iteration && m_current_iteration > m_max_iterations)
+        return false;
+
     for(size_t i = m_current_frame_index + 1; i < m_frames.size(); ++i)
     {
         if(m_frames[i]->is_visible)
         {
             m_current_frame_index = i;
-            return m_frames[i];
+            return true;
         }
     }
+
     if(m_current_frame_index > 0)
     {
+        if(_respect_iteration && ++m_current_iteration > m_max_iterations)
+            return false;
+
         for(size_t i = 0; i < m_current_frame_index; ++i)
         {
             if(m_frames[i]->is_visible)
             {
                 m_current_frame_index = i;
-                return m_frames[i];
+                return true;
             }
         }
     }
-    return m_frames[m_current_frame_index]->is_visible ? m_frames[m_current_frame_index] : nullptr;
+
+    return m_frames[m_current_frame_index]->is_visible;
 }
 
 void GraphicsPack::performRender(const Point & _position, const GraphicsRenderOptions & _options)

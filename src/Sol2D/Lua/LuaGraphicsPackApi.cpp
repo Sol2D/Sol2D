@@ -204,6 +204,33 @@ int luaApi_GetFrameDuration(lua_State * _lua)
 }
 
 // 1 self
+int luaApi_GetCurrentFrameIndex(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    lua_pushinteger(_lua, self->getGraphicsPack(_lua)->getCurrentFrameIndex());
+    return 1;
+}
+
+// 1 self
+// 2 index
+int luaApi_SetCurrentFrameIndex(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
+    size_t index = static_cast<size_t>(lua_tointeger(_lua, 2));
+    lua_pushboolean(_lua, self->getGraphicsPack(_lua)->setCurrentFrameIndex(index));
+    return 1;
+}
+
+// 1 self
+int luaApi_SwitchToNextVisibleFrame(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    lua_pushboolean(_lua, self->getGraphicsPack(_lua)->switchToNextVisibleFrame());
+    return 1;
+}
+
+// 1 self
 // 2 frame
 // 3 sprite                     or   sprite sheet
 // 4 sprite options (optional)  or   sprite inedx
@@ -310,6 +337,9 @@ void Sol2D::Lua::pushGraphicsPackApi(lua_State * _lua, std::shared_ptr<GraphicsP
             { "isFrameVisible", luaApi_IsFrameVisible },
             { "setFrameDuration", luaApi_SetFrameDuration },
             { "getFrameDuration", luaApi_GetFrameDuration },
+            { "getCurrentFrameIndex", luaApi_GetCurrentFrameIndex },
+            { "setCurrentFrameIndex", luaApi_SetCurrentFrameIndex },
+            { "switchToNextVisibleFrame", luaApi_SwitchToNextVisibleFrame },
             { "addSprite", luaApi_AddSprite },
             { "addSprites", luaApi_AddSprites },
             { "removeSprite", luaApi_RemoveSprite },

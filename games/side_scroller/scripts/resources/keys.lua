@@ -10,25 +10,28 @@ local keys_meta = {
             main = ONE_WAY_PLATFORM_SHAPE_KEY
         },
         player = {
-            main = 'player-main',
-            bottomSensor = 'player-sensor-bottom'
+            main = 'main:player',
+            bottomSensor = 'sensor-bottom:player'
         }
     },
     shapeGraphics = {
         player = {
-            idleLeft = 'player-idle-left',
-            idleRight = 'player-idle-right',
-            walkLeft = 'player-left',
-            walkRight = 'player-right',
+            idleLeft = 'idle-left:player',
+            idleRight = 'idle-right:player',
+            walkLeft = 'walk-left:player',
+            walkRight = 'walk-right:player',
+            jumpLeft = 'jump-left:player',
+            jumpRight = 'jump-right:player'
         },
         flyingPlatform3 = {
-            main = 'flying-platform3-main'
+            main = 'main:flying-platform3'
         }
     },
     graphicPacks = {
         player = {
-            idle = 'player-idle',
-            walk = 'player-walk'
+            idle = 'idle:player',
+            walk = 'walk:player',
+            jump = 'jump:player'
         },
         flyingPlatform3 = {
             main = 'flying-platform-3'

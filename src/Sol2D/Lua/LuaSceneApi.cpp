@@ -16,6 +16,7 @@
 
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
+#include <Sol2D/Lua/LuaGraphicsPackApi.h>
 #include <Sol2D/Lua/LuaBodyPrototypeApi.h>
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyOptionsApi.h>
@@ -422,7 +423,7 @@ int luaApi_SetBodyLayer(lua_State * _lua)
 // 2 body id
 // 3 shape key
 // 4 graphic key
-int luaApi_SetBodyShapeCurrentGraphic(lua_State * _lua)
+int luaApi_GetBodyShapeGraphicsPack(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
@@ -431,7 +432,28 @@ int luaApi_SetBodyShapeCurrentGraphic(lua_State * _lua)
     luaL_argcheck(_lua, shape_id != nullptr, 3, gc_message_shape_key_expected);
     const char * graphic_id = lua_tostring(_lua, 4);
     luaL_argcheck(_lua, graphic_id != nullptr, 4, gc_message_graphic_key_expected);
-    lua_pushboolean(_lua, self->getScene(_lua)->setBodyShapeCurrentGraphic(body_id, shape_id, graphic_id));
+    std::shared_ptr<GraphicsPack> pack = self->getScene(_lua)->getBodyShapeGraphicsPack(body_id, shape_id, graphic_id);
+    if(pack)
+        pushGraphicsPackApi(_lua, pack);
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 body id
+// 3 shape key
+// 4 graphic key
+int luaApi_SetBodyShapeCurrentGraphics(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
+    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    const char * shape_id = lua_tostring(_lua, 3);
+    luaL_argcheck(_lua, shape_id != nullptr, 3, gc_message_shape_key_expected);
+    const char * graphic_id = lua_tostring(_lua, 4);
+    luaL_argcheck(_lua, graphic_id != nullptr, 4, gc_message_graphic_key_expected);
+    lua_pushboolean(_lua, self->getScene(_lua)->setBodyShapeCurrentGraphics(body_id, shape_id, graphic_id));
     return 1;
 }
 
@@ -441,7 +463,7 @@ int luaApi_SetBodyShapeCurrentGraphic(lua_State * _lua)
 // 4 graphic key
 // 5 flip horizontally
 // 6 flip vertically
-int luaApi_FlipBodyShapeGraphic(lua_State * _lua)
+int luaApi_FlipBodyShapeGraphics(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
@@ -452,7 +474,7 @@ int luaApi_FlipBodyShapeGraphic(lua_State * _lua)
     luaL_argcheck(_lua, graphic_id != nullptr, 4, gc_message_graphic_key_expected);
     luaL_argexpected(_lua, lua_isboolean(_lua, 5), 5, "boolean");
     luaL_argexpected(_lua, lua_isboolean(_lua, 6), 6, "boolean");
-    bool result = self->getScene(_lua)->flipBodyShapeGraphic(
+    bool result = self->getScene(_lua)->flipBodyShapeGraphics(
         body_id,
         shape_id,
         graphic_id,
@@ -627,8 +649,9 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "setFollowedBody", luaApi_SetFollowedBody },
             { "resetFollowedBody", luaApi_ResetFollowedBody },
             { "setBodyLayer", luaApi_SetBodyLayer },
-            { "setBodyShapeCurrentGraphic", luaApi_SetBodyShapeCurrentGraphic },
-            { "flipBodyShapeGraphic", luaApi_FlipBodyShapeGraphic },
+            { "getBodyShapeGraphicsPack", luaApi_GetBodyShapeGraphicsPack },
+            { "setBodyShapeCurrentGraphics", luaApi_SetBodyShapeCurrentGraphics },
+            { "flipBodyShapeGraphics", luaApi_FlipBodyShapeGraphics },
             { "subscribeToBeginContact", luaApi_SubscribeToBeginContact },
             { "unsubscribeFromBeginContact", luaApi_UnsubscribeFromBeginContact },
             { "subscribeToEndContact", luaApi_SubscribeToEndContact },

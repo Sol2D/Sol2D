@@ -58,10 +58,11 @@ public:
     ~BodyShape();
     const std::string & getKey() const;
     const std::optional<uint32_t> getTileMapObjectId() const;
-    void addGraphic(const std::string & _key, const BodyShapeGraphics & _graphic);
-    bool setCurrentGraphic(const std::string & _key);
+    void addGraphics(const std::string & _key, const BodyShapeGraphics & _graphic);
+    bool setCurrentGraphics(const std::string & _key);
     BodyShapeGraphics * getCurrentGraphics();
-    bool flipGraphic(const std::string & _key, bool _flip_horizontally, bool _flip_vertically);
+    BodyShapeGraphics * getGraphics(const std::string & _key);
+    bool flipGraphics(const std::string & _key, bool _flip_horizontally, bool _flip_vertically);
 
 private:
     const std::string m_key;
@@ -93,7 +94,7 @@ inline const std::optional<uint32_t> BodyShape::getTileMapObjectId() const
     return m_tile_map_object_id;
 }
 
-inline void BodyShape::addGraphic(const std::string & _key, const BodyShapeGraphics & _graphic)
+inline void BodyShape::addGraphics(const std::string & _key, const BodyShapeGraphics & _graphic)
 {
     auto it = m_graphics.find(_key);
     if(it != m_graphics.end())
@@ -101,13 +102,21 @@ inline void BodyShape::addGraphic(const std::string & _key, const BodyShapeGraph
     m_graphics[_key] = new BodyShapeGraphics(_graphic);
 }
 
-inline bool BodyShape::setCurrentGraphic(const std::string & _key)
+inline bool BodyShape::setCurrentGraphics(const std::string & _key)
+{
+    BodyShapeGraphics * graphics = getGraphics(_key);
+    if(graphics)
+    {
+        mp_current_graphic = graphics;
+        return true;
+    }
+    return false;
+}
+
+inline BodyShapeGraphics * BodyShape::getGraphics(const std::string & _key)
 {
     auto it = m_graphics.find(_key);
-    if(it == m_graphics.end())
-        return false;
-    mp_current_graphic = it->second;
-    return true;
+    return it == m_graphics.end() ? nullptr : it->second;
 }
 
 inline BodyShapeGraphics * BodyShape::getCurrentGraphics()
@@ -115,7 +124,7 @@ inline BodyShapeGraphics * BodyShape::getCurrentGraphics()
     return mp_current_graphic;
 }
 
-inline bool BodyShape::flipGraphic(const std::string & _key, bool _flip_horizontally, bool _flip_vertically)
+inline bool BodyShape::flipGraphics(const std::string & _key, bool _flip_horizontally, bool _flip_vertically)
 {
     auto it = m_graphics.find(_key);
     if(it == m_graphics.end())
@@ -267,7 +276,7 @@ BodyShape & Scene::BodyShapeCreator::createShape(const BodyBasicShapeDefinition<
 {
     BodyShape & body_shape = mr_body.createShape(mr_key);
     for(const auto & graphics_kv : _def.graphics)
-        body_shape.addGraphic(graphics_kv.first, graphics_kv.second);
+        body_shape.addGraphics(graphics_kv.first, graphics_kv.second);
     return body_shape;
 }
 
@@ -501,7 +510,22 @@ bool Scene::setBodyLayer(uint64_t _body_id, const std::string & _layer)
     return true;
 }
 
-bool Scene::setBodyShapeCurrentGraphic(
+std::shared_ptr<GraphicsPack> Scene::getBodyShapeGraphicsPack(
+    uint64_t _body_id,
+    const std::string & _shape_key,
+    const std::string & _graphics_key)
+{
+    b2BodyId b2_body_id = findBody(_body_id);
+    if(B2_IS_NULL(b2_body_id))
+        return nullptr;
+    BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
+    if(shape == nullptr)
+        return nullptr;
+    BodyShapeGraphics * graphics = shape->getGraphics(_graphics_key);
+    return graphics ? graphics->graphics : nullptr;
+}
+
+bool Scene::setBodyShapeCurrentGraphics(
     uint64_t _body_id,
     const std::string & _shape_key,
     const std::string & _graphic_key)
@@ -512,10 +536,10 @@ bool Scene::setBodyShapeCurrentGraphic(
     BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
     if(shape == nullptr)
         return false;
-    return shape->setCurrentGraphic(_graphic_key);
+    return shape->setCurrentGraphics(_graphic_key);
 }
 
-bool Scene::flipBodyShapeGraphic(
+bool Scene::flipBodyShapeGraphics(
     uint64_t _body_id,
     const std::string & _shape_key,
     const std::string & _graphic_key,
@@ -528,7 +552,7 @@ bool Scene::flipBodyShapeGraphic(
     BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
     if(shape == nullptr)
         return false;
-    return shape->flipGraphic(_graphic_key, _flip_horizontally, _flip_vertically);
+    return shape->flipGraphics(_graphic_key, _flip_horizontally, _flip_vertically);
 }
 
 bool Scene::loadTileMap(const std::filesystem::path & _file_path)

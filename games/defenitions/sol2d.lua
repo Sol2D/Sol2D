@@ -267,8 +267,14 @@ function __scene:setBodyLayer(body_id, layer) end
 ---@param body_id integer
 ---@param shape_key string
 ---@param graphic_key string
+---@return sol.GraphicsPack | nil
+function __scene:getBodyShapeGraphicsPack(body_id, shape_key, graphic_key) end
+
+---@param body_id integer
+---@param shape_key string
+---@param graphic_key string
 ---@return boolean
-function __scene:setBodyShapeCurrentGraphic(body_id, shape_key, graphic_key) end
+function __scene:setBodyShapeCurrentGraphics(body_id, shape_key, graphic_key) end
 
 ---@param body_id integer
 ---@param shape_key string
@@ -276,7 +282,7 @@ function __scene:setBodyShapeCurrentGraphic(body_id, shape_key, graphic_key) end
 ---@param flip_horizontally boolean
 ---@param flip_vertically boolean
 ---@return boolean
-function __scene:flipBodyShapeGraphic(body_id, shape_key, graphic_key, flip_horizontally, flip_vertically) end
+function __scene:flipBodyShapeGraphics(body_id, shape_key, graphic_key, flip_horizontally, flip_vertically) end
 
 ---@alias ContactCallback fun(contact: Contact)
 ---@alias SensorContactCallback fun(contact: SensorContact)
@@ -669,6 +675,16 @@ function __graphics_pack:setFrameDuration(frame_index, duration) end
 ---@param frame_index integer
 ---@return integer | nil # milliseconds
 function __graphics_pack:getFrameDuration(frame_index) end
+
+---@return integer
+function __graphics_pack:getCurrentFrameIndex() end
+
+---@return boolean
+---@param frame_index integer
+function __graphics_pack:setCurrentFrameIndex(frame_index) end
+
+---@return integer
+function __graphics_pack:switchToNextVisibleFrame() end
 
 ---@param frame_index integer
 ---@param sprite sol.Sprite

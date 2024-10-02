@@ -26,6 +26,16 @@
 
 namespace Sol2D {
 
+struct GraphicsPackOptions
+{
+    GraphicsPackOptions() :
+        animation_iterations(-1)
+    {
+    }
+
+    int16_t animation_iterations;
+};
+
 struct GraphicsPackFrameOptions
 {
     GraphicsPackFrameOptions() :
@@ -91,7 +101,7 @@ class GraphicsPack final
     };
 
 public:
-    explicit GraphicsPack(SDL_Renderer & _renderer);
+    explicit GraphicsPack(SDL_Renderer & _renderer, const GraphicsPackOptions & _options = GraphicsPackOptions());
     GraphicsPack(const GraphicsPack & _graphics_pack);
     GraphicsPack(GraphicsPack && _graphics_pack);
     ~GraphicsPack();
@@ -106,6 +116,9 @@ public:
     std::optional<bool> isFrameVisible(size_t _index) const;
     bool setFrameDuration(size_t _index, std::chrono::milliseconds _duration);
     std::optional<std::chrono::milliseconds> getFrameDuration(size_t _index) const;
+    bool setCurrentFrameIndex(size_t _index);
+    size_t getCurrentFrameIndex() const;
+    bool switchToNextVisibleFrame();
     std::pair<bool, size_t> addSprite(
         size_t _frame,
         const Sprite & _sprite,
@@ -127,16 +140,23 @@ public:
         const GraphicsRenderOptions & _options = GraphicsRenderOptions());
 
 private:
+    bool switchToNextVisibleFrame(bool _respect_iteration);
     void destroy();
     void performRender(const Point & _position, const GraphicsRenderOptions & _options);
-    Frame * switchToNextVisibleFrame();
 
 private:
     SDL_Renderer * mp_renderer;
     std::vector<Frame *> m_frames;
+    int16_t m_max_iterations;
+    uint16_t m_current_iteration;
     size_t m_current_frame_index;
     std::chrono::milliseconds m_current_frame_duration;
     std::chrono::milliseconds m_total_duration;
 };
+
+inline size_t GraphicsPack::getCurrentFrameIndex() const
+{
+    return m_current_frame_index;
+}
 
 } // namespace Sol2D

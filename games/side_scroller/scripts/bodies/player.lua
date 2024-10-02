@@ -18,7 +18,8 @@ local Direction = {
 
 local Action = {
     IDLE = 0,
-    WALK = 1
+    WALK = 1,
+    JUMP = 2
 }
 
 local state = {
@@ -44,10 +45,16 @@ function state:setAction(direction, action)
             else
                 graphic = keys.shapeGraphics.player.walkRight
             end
+        elseif action == Action.JUMP then
+            if direction == Direction.LEFT then
+                graphic = keys.shapeGraphics.player.jumpLeft
+            else
+                graphic = keys.shapeGraphics.player.jumpRight
+            end
         end
         self.action = action
         self.direction = direction
-        scene:setBodyShapeCurrentGraphic(player_id, keys.shapes.player.main, graphic)
+        scene:setBodyShapeCurrentGraphics(player_id, keys.shapes.player.main, graphic)
     end
 end
 
@@ -70,12 +77,18 @@ sol.heartbeat:subscribe(function()
         sol.Scancode.SPACE
     )
 
-    if not state.inAir then
+    local action = Action.IDLE
+    local direction = state.direction
+
+    if state.inAir then
+        action = Action.JUMP
+    else
         if state.jumpTimeout > 0 then
             state.jumpTimeout = state.jumpTimeout - 1
         elseif space_key then
             state.jumpTimeout = JUMP_DELAY
             scene:applyImpulseToBodyCenter(player_id, { x = 0, y = -1300 })
+            action = Action.JUMP
         end
     end
 
@@ -91,7 +104,10 @@ sol.heartbeat:subscribe(function()
                 y = 0
             }
         )
-        state:setAction(Direction.RIGHT, Action.WALK)
+        direction = Direction.RIGHT
+        if not state.inAir then
+            action = Action.WALK
+        end
     elseif left_key then
         scene:applyForceToBodyCenter(
             player_id,
@@ -104,10 +120,13 @@ sol.heartbeat:subscribe(function()
                 y = 0
             }
         )
-        state:setAction(Direction.LEFT, Action.WALK)
-    else
-        state:setAction(state.direction, Action.IDLE)
+        direction = Direction.LEFT
+        if not state.inAir then
+            action = Action.WALK
+        end
     end
+
+    state:setAction(direction, action)
 end)
 
 contact_observer.setSensorBeginContactListener(player_id, function (sensor, visitor)

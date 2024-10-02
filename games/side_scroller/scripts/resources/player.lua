@@ -15,9 +15,9 @@ local function addIdleAnimation(definitions, store)
     local frames_count = 10
     animaion:addFrames(frames_count, frame_options)
     for i = 1, frames_count, 1 do
-        local sprite = store:createSprite('player-idle-' .. i)
+        local sprite = store:createSprite('idle-player-' .. i)
         if not sprite:loadFromFile('sprites/knight/idle (' .. i .. ').png', sprite_loading_options) then
-            error('Cannot load player-idle-' .. i)
+            error('Cannot load idle-player-' .. i)
         end
         sprite:scale(SCALE_FACTOR) -- TODO: scale to options in loadFromFile
         -- TODO: add the scaleSource function to scale the source once
@@ -55,9 +55,9 @@ local function addWalkAnimations(graphics_defs, store)
     local frames_count = 10
     animaion:addFrames(frames_count, frame_options)
     for i = 1, frames_count, 1 do
-        local sprite = store:createSprite('player-walk-' .. i)
+        local sprite = store:createSprite('walk-player-' .. i)
         if not sprite:loadFromFile('sprites/knight/walk (' .. i .. ').png', sprite_loading_options) then
-            error('Cannot load player-walk-' .. i)
+            error('Cannot load walk-player-' .. i)
         end
         sprite:scale(SCALE_FACTOR) -- TODO: scale to options in loadFromFile
         -- TODO: add the scaleSource function to scale the source once
@@ -72,6 +72,46 @@ local function addWalkAnimations(graphics_defs, store)
         position = animation_position
     }
     graphics_defs[keys.shapeGraphics.player.walkLeft] = {
+        graphics = animaion,
+        position = animation_position,
+        isFlippedHorizontally = true
+    }
+end
+
+---@param graphics_defs table<string, BodyShapeGraphicsDefinition>
+---@param store sol.Store
+local function addJumpAnimations(graphics_defs, store)
+    local sprite_loading_options = {
+        rect = { x = 23, y = 27, w = 480, h = 668 }
+    }
+    local frame_options = {
+        duration = 52,
+        position = {
+            x = 0,
+            y = -34 * SCALE_FACTOR
+        }
+    }
+    local animaion = store:createGraphicsPack(keys.graphicPacks.player.jump)
+    local frames_count = 10
+    animaion:addFrames(frames_count, frame_options)
+    for i = 1, frames_count, 1 do
+        local sprite = store:createSprite('jump-player-' .. i)
+        if not sprite:loadFromFile('sprites/knight/jump (' .. i .. ').png', sprite_loading_options) then
+            error('Cannot load jump-player-' .. i)
+        end
+        sprite:scale(SCALE_FACTOR) -- TODO: scale to options in loadFromFile
+        -- TODO: add the scaleSource function to scale the source once
+        animaion:addSprite(i - 1, sprite, { position = { x = 0, y = 9 } })
+    end
+    local animation_position = {
+        x = -(sprite_loading_options.rect.w * SCALE_FACTOR) / 2,
+        y = -sprite_loading_options.rect.h * SCALE_FACTOR
+    }
+    graphics_defs[keys.shapeGraphics.player.jumpRight] = {
+        graphics = animaion,
+        position = animation_position
+    }
+    graphics_defs[keys.shapeGraphics.player.jumpLeft] = {
         graphics = animaion,
         position = animation_position,
         isFlippedHorizontally = true
@@ -119,6 +159,7 @@ local function createPlayerPrototype(store)
     }
     addIdleAnimation(body_definition.shapes[keys.shapes.player.main].graphics, store)
     addWalkAnimations(body_definition.shapes[keys.shapes.player.main].graphics, store)
+    addJumpAnimations(body_definition.shapes[keys.shapes.player.main].graphics, store)
     store:createBodyPrototype(keys.bodies.player, body_definition)
 end
 

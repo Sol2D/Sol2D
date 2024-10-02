@@ -30,7 +30,7 @@ local function createPlayer(global_store, scene, args)
         proto,
         args
     )
-    scene:setBodyShapeCurrentGraphic( -- TODO: delete
+    scene:setBodyShapeCurrentGraphics( -- TODO: delete
         player_id,
         keys.shapes.player.main,
         keys.shapeGraphics.player.idleRight
@@ -58,7 +58,7 @@ local function createFlyingPlatforms(global_store, scene)
             )
         end
         local body = scene:createBody(points[1], proto, { points = points })
-        scene:setBodyShapeCurrentGraphic(
+        scene:setBodyShapeCurrentGraphics(
             body,
             keys.shapes.oneWayPlatfrom.main,
             keys.shapeGraphics.flyingPlatform3.main

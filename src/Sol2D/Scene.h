@@ -62,11 +62,15 @@ public:
     bool setFollowedBody(uint64_t _body_id);
     void resetFollowedBody();
     bool setBodyLayer(uint64_t _body_id, const std::string & _layer);
-    bool setBodyShapeCurrentGraphic(
+    std::shared_ptr<GraphicsPack> getBodyShapeGraphicsPack(
+        uint64_t _body_id,
+        const std::string & _shape_key,
+        const std::string & _graphics_key);
+    bool setBodyShapeCurrentGraphics(
         uint64_t _body_id,
         const std::string & _shape_key,
         const std::string & _graphic_key);
-    bool flipBodyShapeGraphic(
+    bool flipBodyShapeGraphics(
         uint64_t _body_id,
         const std::string & _shape_key,
         const std::string & _graphic_key,

@@ -347,8 +347,8 @@ local followed_body_id = player_body_id;
 scene:setFollowedBody(followed_body_id)
 
 local graphic = 'idle'
-scene:setBodyShapeCurrentGraphic(player_body_id, 'main', graphic)
-scene:setBodyShapeCurrentGraphic(skeleton_body_id, 'main', graphic)
+scene:setBodyShapeCurrentGraphics(player_body_id, 'main', graphic)
+scene:setBodyShapeCurrentGraphics(skeleton_body_id, 'main', graphic)
 
 scene:subscribeToBeginContact(function(contact)
     print('Begin Contact')
@@ -413,7 +413,7 @@ sol.heartbeat:subscribe(function()
         new_graphic = 'idle'
     end
     if new_graphic ~= graphic then
-        scene:setBodyShapeCurrentGraphic(player_body_id, 'main', new_graphic)
+        scene:setBodyShapeCurrentGraphics(player_body_id, 'main', new_graphic)
         graphic = new_graphic
     end
 
