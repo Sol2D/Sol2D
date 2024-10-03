@@ -1,31 +1,31 @@
-if #self.arg.points < 2 then
-    print('Point count < 2, platform is static. Count:', #self.arg.points)
+if #script.arg.points < 2 then
+    print('Point count < 2, platform is static. Count:', #sol.script.arg.points)
     return
 end
 
-local platform_id = self.bodyId
-local scene = self.scene
+local platform = script.body
 
 local DELTA = 0.05
 local VELOCITY = 2
 
 local function makePlaces()
+    local points = script.arg.points
     local places = {}
-    local prev_point = self.arg.points[1]
-    for i = 2, #self.arg.points do
-        local delta_x = self.arg.points[i].x - prev_point.x
-        local delta_y = self.arg.points[i].y - prev_point.y
+    local prev_point = points[1]
+    for i = 2, #points do
+        local delta_x = points[i].x - prev_point.x
+        local delta_y = points[i].y - prev_point.y
         local length = math.sqrt(delta_x ^ 2 + delta_y ^ 2)
         local d = math.abs(length) / VELOCITY
         table.insert(places, {
             source = prev_point,
-            destination = self.arg.points[i],
+            destination = points[i],
             velocity = {
                 x = delta_x / d,
                 y = delta_y / d
             }
         })
-        prev_point = self.arg.points[i]
+        prev_point = points[i]
     end
     local count = #places
     for i = count, 1, -1 do
@@ -53,7 +53,7 @@ end
 
 sol.heartbeat:subscribe( -- FIXME: this subscription must die with the object
     function()
-        local position = scene:getBodyPosition(platform_id)
+        local position = platform:getPosition()
         if not position then
             print('Platform position is nil')
             return
@@ -63,8 +63,7 @@ sol.heartbeat:subscribe( -- FIXME: this subscription must die with the object
             if target_index > #places or target_index < 1 then
                 target_index = 1
             end
-            scene:setBodyLinearVelocity(
-                platform_id,
+            platform:setLinearVelocity(
                 places[target_index].velocity
             )
         end

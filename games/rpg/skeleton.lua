@@ -1,16 +1,22 @@
 require 'def'
 
-local body_id = self.bodyId
-local scene = self.scene
+local skeleton = script.body
+local scene = script.scene
+
+local skeleton_main_shape = skeleton:getShape('main')
+if not skeleton_main_shape then
+    print("Skeleton's main shape not found")
+    return
+end
 
 local DELTA = 5
 
-local skeleton_track = scene:getTileMapObjectByName(self.arg.trackName)
+local skeleton_track = scene:getTileMapObjectByName(script.arg.trackName)
 if skeleton_track == nil then
     print('The skeleton track not found')
     return
 else
-    print('Using the skeleton track:', self.arg.trackName)
+    print('Using the skeleton track:', script.arg.trackName)
 end
 
 local points = skeleton_track.points
@@ -25,9 +31,9 @@ for i = 1, #points, 1 do
     points[i].y = points[i].y + skeleton_track.position.y
 end
 
-scene:setBodyPosition(body_id, Def.pixelPointToPhisical(points[self.arg.startPoint]))
+skeleton:setPosition(Def.pixelPointToPhisical(points[script.arg.startPoint]))
 
-local path = scene:findPath(body_id, points[3])
+local path = scene:findPath(skeleton, points[3])
 if path == nil then
     print('Path not found');
     return
@@ -105,12 +111,12 @@ end
 -- TODO: how to unsubscribe when the body is dead?
 sol.heartbeat:subscribe(function ()
     local next_point = getNextPoint()
-    local position = scene:getBodyPosition(body_id)
+    local position = skeleton:getPosition()
     if areSamePoints(position, next_point) then
         incrementPoint()
         next_point = getNextPoint()
     end
     local force = getForce(position, next_point)
-    scene:setBodyShapeCurrentGraphics(body_id, 'main', getGraphics(force))
-    scene:applyForceToBodyCenter(body_id, force)
+    skeleton_main_shape:setCurrentGraphics(getGraphics(force))
+    skeleton:applyForceToCenter(force)
 end)

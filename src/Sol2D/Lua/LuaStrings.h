@@ -26,6 +26,8 @@ struct LuaTypeName
     static const char window[];
     static const char view[];
     static const char scene[];
+    static const char body[];
+    static const char body_shape[];
     static const char tile_map_object_type[];
     static const char keyboard[];
     static const char scancode[];

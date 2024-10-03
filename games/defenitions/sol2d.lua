@@ -15,11 +15,11 @@
 ---@field VerticalTextAlignment sol.VerticalTextAlignment
 sol = nil
 
----@type BodyContext
-self = nil
+---@type ScriptContext
+script = nil
 
----@class BodyContext
----@field bodyId integer
+---@class ScriptContext
+---@field body sol.Body
 ---@field scene sol.Scene
 ---@field arg any?
 
@@ -217,72 +217,22 @@ function __scene:getTileMapObjectsByClass(class) end
 ---@param position Point | nil
 ---@param proto_or_definition sol.BodyPrototype | BodyDefinition
 ---@param script_argument? any
----@return integer
+---@return sol.Body
 function __scene:createBody(position, proto_or_definition, script_argument) end
+
+---@param body_id integer
+---@return sol.Body | nil
+function __scene:getBody(body_id) end
 
 ---@param class string
 ---@param body_options BodyOptions?
 function __scene:createBodiesFromMapObjects(class, body_options) end
 
----@param body_id integer
----@param force_vector Point
-function __scene:applyForceToBodyCenter(body_id, force_vector) end
-
----@param body_id integer
----@param impulse_vector Point
-function __scene:applyImpulseToBodyCenter(body_id, impulse_vector) end
-
----@param body_id integer
----@return Point
-function __scene:getBodyLinearVelocity(body_id) end
-
----@param body_id integer
----@param velocity Point
+---@param body integer | sol.Body
 ---@return boolean
-function __scene:setBodyLinearVelocity(body_id, velocity) end
-
----@param body_id integer
----@return number
-function __scene:getBodyMass(body_id) end
-
----@param body_id integer
----@param position Point
-function __scene:setBodyPosition(body_id, position) end
-
----@param body_id integer
----@returns Point | nil
-function __scene:getBodyPosition(body_id) end
-
----@param body_id integer
----@return boolean
-function __scene:setFollowedBody(body_id) end
+function __scene:setFollowedBody(body) end
 
 function __scene:resetFollowedBody() end
-
----@param body_id integer
----@param layer string
----@return boolean
-function __scene:setBodyLayer(body_id, layer) end
-
----@param body_id integer
----@param shape_key string
----@param graphic_key string
----@return sol.GraphicsPack | nil
-function __scene:getBodyShapeGraphicsPack(body_id, shape_key, graphic_key) end
-
----@param body_id integer
----@param shape_key string
----@param graphic_key string
----@return boolean
-function __scene:setBodyShapeCurrentGraphics(body_id, shape_key, graphic_key) end
-
----@param body_id integer
----@param shape_key string
----@param graphic_key string
----@param flip_horizontally boolean
----@param flip_vertically boolean
----@return boolean
-function __scene:flipBodyShapeGraphics(body_id, shape_key, graphic_key, flip_horizontally, flip_vertically) end
 
 ---@alias ContactCallback fun(contact: Contact)
 ---@alias SensorContactCallback fun(contact: SensorContact)
@@ -323,10 +273,76 @@ function __scene:subscribeToPreSolveContact(callback) end
 ---@param subscription_id integer
 function __scene:unsubscribePreSolveContact(subscription_id) end
 
----@param body_id integer
+---@param body_id integer | sol.Body
 ---@param destination Point
 ---@return Point[] | nil
 function __scene:findPath(body_id, destination) end
+
+---@class sol.Body
+local __body
+
+---@return boolean
+function __body:isValid() end
+
+---@return integer
+function __body:getId() end
+
+---@param shpe_key string
+---@return sol.BodyShape | nil
+function __body:getShape(shpe_key) end
+
+---@param layer string
+function __body:setLayer(layer) end
+
+--- Throws an error if the body is invalid or has been destroyed
+---@return Point
+function __body:getPosition() end
+
+---@pram position Point
+function __body:setPosition(position) end
+
+---@pram vector Point
+function __body:applyForceToCenter(vector) end
+
+---@pram vector Point
+function __body:applyImpulseToCenter(vector) end
+
+--- Throws an error if the body is invalid or has been destroyed
+---@return Point
+function __body:getLinearVelocity() end
+
+---@pram velocity Point
+function __body:setLinearVelocity(velocity) end
+
+--- Throws an error if the body is invalid or has been destroyed
+---@return number
+function __body:getMass() end
+
+---@class sol.BodyShape
+local __body_shape
+
+---@return boolean
+function __body_shape:isValid() end
+
+---@return string
+function __body_shape:getKey() end
+
+---@return sol.Body
+function __body_shape:getBody() end
+
+---@param graphic_key string
+---@return sol.GraphicsPack | nil
+function __body_shape:getGraphicsPack(graphic_key) end
+
+---@param graphic_key string
+---@return boolean
+function __body_shape:setCurrentGraphics(graphic_key) end
+
+---@param graphic_key string
+---@param flip_horizontally boolean
+---@param flip_vertically boolean
+---@return boolean
+function __body_shape:flipGraphics(graphic_key, flip_horizontally, flip_vertically) end
 
 ---@class sol.Form
 local __form

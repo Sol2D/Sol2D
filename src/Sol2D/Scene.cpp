@@ -58,16 +58,16 @@ public:
     ~BodyShape();
     const std::string & getKey() const;
     const std::optional<uint32_t> getTileMapObjectId() const;
-    void addGraphics(const std::string & _key, const BodyShapeGraphics & _graphic);
-    bool setCurrentGraphics(const std::string & _key);
+    void addGraphics(const PreHashedKey<std::string> & _key, const BodyShapeGraphics & _graphic);
+    bool setCurrentGraphics(const PreHashedKey<std::string> & _key);
     BodyShapeGraphics * getCurrentGraphics();
-    BodyShapeGraphics * getGraphics(const std::string & _key);
-    bool flipGraphics(const std::string & _key, bool _flip_horizontally, bool _flip_vertically);
+    BodyShapeGraphics * getGraphics(const PreHashedKey<std::string> & _key);
+    bool flipGraphics(const PreHashedKey<std::string> & _key, bool _flip_horizontally, bool _flip_vertically);
 
 private:
     const std::string m_key;
     const std::optional<uint32_t> m_tile_map_object_id;
-    std::unordered_map<std::string, BodyShapeGraphics *> m_graphics;
+    PreHashedMap<std::string, BodyShapeGraphics *> m_graphics;
     BodyShapeGraphics * mp_current_graphic;
 };
 
@@ -94,7 +94,7 @@ inline const std::optional<uint32_t> BodyShape::getTileMapObjectId() const
     return m_tile_map_object_id;
 }
 
-inline void BodyShape::addGraphics(const std::string & _key, const BodyShapeGraphics & _graphic)
+inline void BodyShape::addGraphics(const PreHashedKey<std::string> & _key, const BodyShapeGraphics & _graphic)
 {
     auto it = m_graphics.find(_key);
     if(it != m_graphics.end())
@@ -102,7 +102,7 @@ inline void BodyShape::addGraphics(const std::string & _key, const BodyShapeGrap
     m_graphics[_key] = new BodyShapeGraphics(_graphic);
 }
 
-inline bool BodyShape::setCurrentGraphics(const std::string & _key)
+inline bool BodyShape::setCurrentGraphics(const PreHashedKey<std::string> & _key)
 {
     BodyShapeGraphics * graphics = getGraphics(_key);
     if(graphics)
@@ -113,7 +113,7 @@ inline bool BodyShape::setCurrentGraphics(const std::string & _key)
     return false;
 }
 
-inline BodyShapeGraphics * BodyShape::getGraphics(const std::string & _key)
+inline BodyShapeGraphics * BodyShape::getGraphics(const PreHashedKey<std::string> & _key)
 {
     auto it = m_graphics.find(_key);
     return it == m_graphics.end() ? nullptr : it->second;
@@ -124,7 +124,10 @@ inline BodyShapeGraphics * BodyShape::getCurrentGraphics()
     return mp_current_graphic;
 }
 
-inline bool BodyShape::flipGraphics(const std::string & _key, bool _flip_horizontally, bool _flip_vertically)
+inline bool BodyShape::flipGraphics(
+    const PreHashedKey<std::string> & _key,
+    bool _flip_horizontally,
+    bool _flip_vertically)
 {
     auto it = m_graphics.find(_key);
     if(it == m_graphics.end())
@@ -147,13 +150,13 @@ public:
     BodyShape & createShape(
         const std::string & _key,
         std::optional<uint32_t> _tile_map_object_id = std::nullopt);
-    BodyShape * findShape(const std::string & _key);
+    BodyShape * findShape(const PreHashedKey<std::string> & _key);
 
 private:
     static uint64_t s_next_id;
     uint64_t m_id;
     std::optional<std::string> m_layer;
-    std::unordered_multimap<std::string, BodyShape *> m_shapes;
+    PreHashedMap<std::string, BodyShape *> m_shapes;
 };
 
 uint64_t Body::s_next_id = 1;
@@ -193,7 +196,7 @@ inline BodyShape & Body::createShape(
     return *shape;
 }
 
-inline BodyShape * Body::findShape(const std::string & _key)
+inline BodyShape * Body::findShape(const PreHashedKey<std::string> & _key)
 {
     auto it = m_shapes.find(_key);
     return it == m_shapes.end() ? nullptr : it->second;
@@ -276,7 +279,7 @@ BodyShape & Scene::BodyShapeCreator::createShape(const BodyBasicShapeDefinition<
 {
     BodyShape & body_shape = mr_body.createShape(mr_key);
     for(const auto & graphics_kv : _def.graphics)
-        body_shape.addGraphics(graphics_kv.first, graphics_kv.second);
+        body_shape.addGraphics(makePreHashedKey(graphics_kv.first), graphics_kv.second);
     return body_shape;
 }
 
@@ -512,8 +515,8 @@ bool Scene::setBodyLayer(uint64_t _body_id, const std::string & _layer)
 
 std::shared_ptr<GraphicsPack> Scene::getBodyShapeGraphicsPack(
     uint64_t _body_id,
-    const std::string & _shape_key,
-    const std::string & _graphics_key)
+    const PreHashedKey<std::string> & _shape_key,
+    const PreHashedKey<std::string> & _graphics_key)
 {
     b2BodyId b2_body_id = findBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
@@ -527,8 +530,8 @@ std::shared_ptr<GraphicsPack> Scene::getBodyShapeGraphicsPack(
 
 bool Scene::setBodyShapeCurrentGraphics(
     uint64_t _body_id,
-    const std::string & _shape_key,
-    const std::string & _graphic_key)
+    const PreHashedKey<std::string> & _shape_key,
+    const PreHashedKey<std::string> & _graphic_key)
 {
     b2BodyId b2_body_id = findBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
@@ -541,8 +544,8 @@ bool Scene::setBodyShapeCurrentGraphics(
 
 bool Scene::flipBodyShapeGraphics(
     uint64_t _body_id,
-    const std::string & _shape_key,
-    const std::string & _graphic_key,
+    const PreHashedKey<std::string> & _shape_key,
+    const PreHashedKey<std::string> & _graphic_key,
     bool _flip_horizontally,
     bool _flip_vertically)
 {
@@ -879,6 +882,23 @@ void Scene::drawImageLayer(const TileMapImageLayer & _layer)
     SDL_RenderTexture(&mr_renderer, image.get(), nullptr, &dim);
 }
 
+bool Scene::doesBodyExist(uint64_t _body_id) const
+{
+    b2BodyId b2_body_id = findBody(_body_id);
+    return B2_IS_NON_NULL(b2_body_id);
+}
+
+bool Scene::doesBodyShapeExist(uint64_t _body_id, const PreHashedKey<std::string> & _shape_key) const
+{
+    b2BodyId b2_body_id = findBody(_body_id);
+    if(B2_IS_NON_NULL(b2_body_id))
+    {
+        Body * body = getUserData(b2_body_id);
+        return body->findShape(_shape_key) != nullptr;
+    }
+    return false;
+}
+
 void Scene::applyForceToBodyCenter(uint64_t _body_id, const Point & _force)
 {
     m_defers.push_front([this, _body_id, _force]() {
@@ -897,11 +917,11 @@ void Scene::applyImpulseToBodyCenter(uint64_t _body_id, const Point & _impulse)
     });
 }
 
-Point Scene::getBodyLinearVelocity(uint64_t _body_id) const
+std::optional<Point> Scene::getBodyLinearVelocity(uint64_t _body_id) const
 {
     b2BodyId b2_body = findBody(_body_id);
     if(B2_IS_NULL(b2_body))
-        return makePoint(.0f, .0f);
+        return std::nullopt;
     return asPoint(b2Body_GetLinearVelocity(b2_body));
 }
 
@@ -914,11 +934,11 @@ bool Scene::setBodyLinearVelocity(uint64_t _body_id, const Point & _velocity) co
     return true;
 }
 
-float Scene::getBodyMass(uint64_t _body_id) const
+std::optional<float> Scene::getBodyMass(uint64_t _body_id) const
 {
     b2BodyId b2_body = findBody(_body_id);
     if(B2_IS_NULL(b2_body))
-        return .0f;
+        return std::nullopt;
     return b2Body_GetMass(b2_body);
 }
 

@@ -41,7 +41,7 @@ void Sol2D::Lua::Aux::executeScriptWithContext(
     const Workspace & _workspace,
     const std::filesystem::path & _path)
 {
-    const char global_name[] = "self";
+    const char global_name[] = "script";
     lua_setglobal(_lua, global_name);
     executeScript(_lua, _workspace, _path);
     lua_pushnil(_lua);

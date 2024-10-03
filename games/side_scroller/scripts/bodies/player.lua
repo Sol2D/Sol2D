@@ -1,12 +1,17 @@
 local keys = require 'resources.keys'
 
-local player_id = self.bodyId
-local scene = self.scene
+local player = script.body
+local scene = script.scene
 
 ---@type BodyContactObserver
-local contact_observer = self.arg.contactObserver
+local contact_observer = script.arg.contactObserver
 
-local player_mass = scene:getBodyMass(player_id)
+local player_id = player:getId()
+local player_mass = player:getMass()
+local player_main_shape = player:getShape(keys.shapes.player.main)
+if not player_main_shape then
+    error("Player's main shape not found")
+end
 
 local WALK_VELOCITY = 5
 local JUMP_DELAY = 15
@@ -54,13 +59,13 @@ function state:setAction(direction, action)
         end
         self.action = action
         self.direction = direction
-        scene:setBodyShapeCurrentGraphics(player_id, keys.shapes.player.main, graphic)
+        player_main_shape:setCurrentGraphics(graphic)
     end
 end
 
 local function getFootingVelocity()
     if #state.footings > 0 then
-        return scene:getBodyLinearVelocity(state.footings[1].bodyId)
+        return state.footings[1].body:getLinearVelocity()
     end
     return { x = 0, y = 0 }
 end
@@ -87,17 +92,16 @@ sol.heartbeat:subscribe(function()
             state.jumpTimeout = state.jumpTimeout - 1
         elseif space_key then
             state.jumpTimeout = JUMP_DELAY
-            scene:applyImpulseToBodyCenter(player_id, { x = 0, y = -1300 })
+            player:applyImpulseToCenter({ x = 0, y = -1300 })
             action = Action.JUMP
         end
     end
 
     if right_key then
-        scene:applyForceToBodyCenter(
-            player_id,
+        player:applyForceToCenter(
             {
                 x = getHorizontalForce(
-                    scene:getBodyLinearVelocity(player_id).x,
+                    player:getLinearVelocity().x,
                     getFootingVelocity().x,
                     WALK_VELOCITY
                 ),
@@ -109,11 +113,10 @@ sol.heartbeat:subscribe(function()
             action = Action.WALK
         end
     elseif left_key then
-        scene:applyForceToBodyCenter(
-            player_id,
+        player:applyForceToCenter(
             {
                 x = getHorizontalForce(
-                    scene:getBodyLinearVelocity(player_id).x,
+                    player:getLinearVelocity().x,
                     getFootingVelocity().x,
                     -WALK_VELOCITY
                 ),
@@ -131,8 +134,16 @@ end)
 
 contact_observer.setSensorBeginContactListener(player_id, function (sensor, visitor)
     if sensor.bodyId == player_id and sensor.shapeKey == keys.shapes.player.bottomSensor then
-        table.insert(state.footings, visitor)
-        state.inAir = false
+        local visitor_body = scene:getBody(visitor.bodyId)
+        if visitor_body then
+            table.insert(
+            state.footings, {
+                bodyId = visitor.bodyId,
+                body = visitor_body,
+                shapeKey = visitor.shapeKey
+            })
+            state.inAir = false
+        end
     end
 end)
 

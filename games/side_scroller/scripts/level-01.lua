@@ -25,17 +25,18 @@ local function createPlayer(global_store, scene, args)
     if start_point then
         start_postion = start_point.position
     end
-    local player_id = scene:createBody(
+    local player = scene:createBody(
         pixelPointToPhisical(start_postion),
         proto,
         args
     )
-    scene:setBodyShapeCurrentGraphics( -- TODO: delete
-        player_id,
-        keys.shapes.player.main,
-        keys.shapeGraphics.player.idleRight
-    )
-    scene:setFollowedBody(player_id)
+    local main_shape = player:getShape(keys.shapes.player.main)
+    if main_shape then
+        main_shape:setCurrentGraphics(keys.shapeGraphics.player.idleRight)
+    else
+        error('There is no shape ' .. keys.shapes.player.main .. ' in ' .. keys.bodies.player)
+    end
+    scene:setFollowedBody(player)
 end
 
 ---@param global_store sol.Store
@@ -57,12 +58,16 @@ local function createFlyingPlatforms(global_store, scene)
                 })
             )
         end
-        local body = scene:createBody(points[1], proto, { points = points })
-        scene:setBodyShapeCurrentGraphics(
-            body,
-            keys.shapes.oneWayPlatfrom.main,
-            keys.shapeGraphics.flyingPlatform3.main
-        )
+        local platform = scene:createBody(points[1], proto, { points = points })
+        local platform_shape = platform:getShape(keys.shapes.oneWayPlatfrom.main)
+        if platform_shape then
+            platform_shape:setCurrentGraphics(keys.shapeGraphics.flyingPlatform3.main)
+        else
+            error(
+                'There is not shape ' .. keys.shapeGraphics.flyingPlatform3.main ..
+                ' in ' .. keys.bodies.flyingPlatform3
+            )
+        end
     end
 end
 

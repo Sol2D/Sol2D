@@ -178,7 +178,6 @@ local function createPlayer()
         getStartPosition(),
         {
             type = sol.BodyType.DYNAMIC,
-            script = 'player.lua',
             physics = {
                 linearDamping = 100,
                 fixedRotation = true
@@ -336,19 +335,27 @@ end
     end
 end)()
 
-local player_body_id = createPlayer()
-local skeleton_body_id = createSkeleton()
-if player_body_id == nil or skeleton_body_id == nil then
+local player = createPlayer()
+local skeleton = createSkeleton()
+if not player or not skeleton then
     return;
 end
-scene:setBodyLayer(player_body_id, 'Ground')
-scene:setBodyLayer(skeleton_body_id, 'Ground')
-local followed_body_id = player_body_id;
-scene:setFollowedBody(followed_body_id)
+local player_main_shape = player:getShape('main')
+local skeleton_main_shape = skeleton:getShape('main')
+if not player_main_shape or not skeleton_main_shape then
+    return;
+end
+local player_body_id = player:getId()
+player:setLayer('Ground')
+skeleton:setLayer('Ground')
+
+local followed_body = player;
+scene:setFollowedBody(followed_body)
 
 local graphic = 'idle'
-scene:setBodyShapeCurrentGraphics(player_body_id, 'main', graphic)
-scene:setBodyShapeCurrentGraphics(skeleton_body_id, 'main', graphic)
+
+player_main_shape:setCurrentGraphics(graphic)
+skeleton_main_shape:setCurrentGraphics(graphic)
 
 scene:subscribeToBeginContact(function(contact)
     print('Begin Contact')
@@ -375,17 +382,17 @@ end)
 scene:subscribeToSensorBeginContact(function(contact)
     if player_body_id == contact.visitor.bodyId and contact.sensor.shapeKey == 'Sensor' then
         teleport_sound_effect:play()
-        scene:setBodyPosition(player_body_id, getStartPosition())
+        player:setPosition(getStartPosition())
     end
 end)
 
 switch_view_button:subscribeOnClick(function()
-    if followed_body_id == player_body_id then
-        followed_body_id = skeleton_body_id
+    if followed_body == player_body_id then
+        followed_body = skeleton
     else
-        followed_body_id = player_body_id
+        followed_body = player
     end
-    scene:setFollowedBody(followed_body_id)
+    scene:setFollowedBody(followed_body)
     click_sound_effect:play()
 end)
 
@@ -413,7 +420,7 @@ sol.heartbeat:subscribe(function()
         new_graphic = 'idle'
     end
     if new_graphic ~= graphic then
-        scene:setBodyShapeCurrentGraphics(player_body_id, 'main', new_graphic)
+        player_main_shape:setCurrentGraphics(new_graphic)
         graphic = new_graphic
     end
 
@@ -429,5 +436,5 @@ sol.heartbeat:subscribe(function()
         force.y = force.y * 3
     end
 
-    scene:applyForceToBodyCenter(player_body_id, force)
+    player:applyForceToCenter(force)
 end)

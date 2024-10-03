@@ -20,6 +20,7 @@
 #include <Sol2D/Lua/LuaBodyPrototypeApi.h>
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyOptionsApi.h>
+#include <Sol2D/Lua/LuaBodyApi.h>
 #include <Sol2D/Lua/LuaContactApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaStrings.h>
@@ -31,12 +32,12 @@
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
+using namespace Sol2D::Utils;
 
 namespace {
 
 const char gc_message_body_id_expected[] = "a body ID expected";
-const char gc_message_shape_key_expected[] = "a shape key expected";
-const char gc_message_graphic_key_expected[] = "a graphic key expected";
+const char gc_message_body_or_body_id_expected[] = "a body or body ID expected";
 const char gc_message_subscription_id_expected[] = "a subscriptin ID expected";
 const char gc_message_callback_expected[] = "callback expected";
 
@@ -238,6 +239,7 @@ int luaApi_CreateBody(lua_State * _lua)
 {
     bool has_script_argument = lua_gettop(_lua) >= 4;
     Self * self = UserData::getUserData(_lua, 1);
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
     Point position = { .0f, .0f };
     if(!lua_isnil(_lua, 2))
         luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "body position expected");
@@ -247,12 +249,12 @@ int luaApi_CreateBody(lua_State * _lua)
     std::optional<std::filesystem::path> script_path;
     if(tryGetBodyPrototype(_lua, 3, proto))
     {
-        body_id = self->getScene(_lua)->createBody(position, *proto.definition);
+        body_id = scene->createBody(position, *proto.definition);
         script_path = proto.definition->script;
     }
     else if(std::unique_ptr<BodyDefinition> definition = tryGetBodyDefinition(_lua, 3))
     {
-        body_id = self->getScene(_lua)->createBody(position, *definition);
+        body_id = scene->createBody(position, *definition);
         script_path = definition->script;
     }
     else
@@ -263,7 +265,8 @@ int luaApi_CreateBody(lua_State * _lua)
     if(script_path.has_value())
     {
         LuaTable table = LuaTable::pushNew(_lua);
-        table.setIntegerValue("bodyId", body_id);
+        pushBodyApi(_lua, scene, body_id);
+        table.setValueFromTop("body");
         lua_pushvalue(_lua, 1);
         table.setValueFromTop("scene");
         if(has_script_argument) {
@@ -273,7 +276,22 @@ int luaApi_CreateBody(lua_State * _lua)
         executeScriptWithContext(_lua, self->workspace, script_path.value());
     }
 
-    lua_pushinteger(_lua, body_id);
+    pushBodyApi(_lua, scene, body_id);
+    return 1;
+}
+
+// 1 self
+// 2 body id
+int luaApi_GetBody(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
+    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    if(scene->doesBodyExist(body_id))
+        pushBodyApi(_lua, scene, body_id);
+    else
+        lua_pushnil(_lua);
     return 1;
 }
 
@@ -293,106 +311,16 @@ int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
 }
 
 // 1 self
-// 2 body id
-// 3 force vector (point)
-int luaApi_ApplyForceToBodyCenter(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    Point force;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 3, force), 3, "a force vector expected");
-    self->getScene(_lua)->applyForceToBodyCenter(body_id, force);
-    return 0;
-}
-
-// 1 self
-// 2 body id
-// 3 force vector (point)
-int luaApi_ApplyImpulseToBodyCenter(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    Point impulse;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 3, impulse), 3, "an impulse vector expected");
-    self->getScene(_lua)->applyImpulseToBodyCenter(body_id, impulse);
-    return 0;
-}
-
-// 1 self
-// 2 body id
-int luaApi_GetBodyLinearVelocity(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    Point velocity = self->getScene(_lua)->getBodyLinearVelocity(body_id);
-    pushPoint(_lua, velocity.x, velocity.y);
-    return 1;
-}
-
-// 1 self
-// 2 body id
-// 3 velocity vector
-int luaApi_SetBodyLinearVelocity(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    Point velocity;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 3, velocity), 3, "a velocity vector expected");
-    lua_pushboolean(_lua, self->getScene(_lua)->setBodyLinearVelocity(body_id, velocity));
-    return 1;
-}
-
-// 1 self
-// 2 body id
-int luaApi_GetBodyMass(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    lua_pushnumber(_lua, self->getScene(_lua)->getBodyMass(body_id));
-    return 1;
-}
-
-// 1 self
-// 2 body id
-// 3 position
-int luaApi_SetBodyPosition(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    Point position;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 3, position), 3, "a position expected");
-    self->getScene(_lua)->setBodyPosition(body_id, position);
-    return 0;
-}
-
-// 1 self
-// 2 body id
-int luaApi_GetBodyPosition(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    std::optional<Point> position = self->getScene(_lua)->getBodyPosition(body_id);
-    if(position.has_value())
-        pushPoint(_lua, position.value().x, position.value().y);
-    else
-        lua_pushnil(_lua);
-    return 1;
-}
-
-// 1 self
-// 2 body id
+// 2 body id or body
 int luaApi_SetFollowedBody(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+
+    uint64_t body_id;
+    if(lua_isinteger(_lua, 2))
+        body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    else if(!tryGetBodyId(_lua, 2, &body_id))
+        luaL_argerror(_lua, 2, gc_message_body_or_body_id_expected);
     lua_pushboolean(_lua, self->getScene(_lua)->setFollowedBody(body_id));
     return 1;
 }
@@ -403,85 +331,6 @@ int luaApi_ResetFollowedBody(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     self->getScene(_lua)->resetFollowedBody();
     return 0;
-}
-
-// 1 self
-// 2 body id
-// 3 layer
-int luaApi_SetBodyLayer(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    const char * layer = lua_tostring(_lua, 3);
-    luaL_argcheck(_lua, layer != nullptr, 3, "a layer name expected");
-    lua_pushboolean(_lua, self->getScene(_lua)->setBodyLayer(body_id, layer));
-    return 1;
-}
-
-// 1 self
-// 2 body id
-// 3 shape key
-// 4 graphic key
-int luaApi_GetBodyShapeGraphicsPack(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    const char * shape_id = lua_tostring(_lua, 3);
-    luaL_argcheck(_lua, shape_id != nullptr, 3, gc_message_shape_key_expected);
-    const char * graphic_id = lua_tostring(_lua, 4);
-    luaL_argcheck(_lua, graphic_id != nullptr, 4, gc_message_graphic_key_expected);
-    std::shared_ptr<GraphicsPack> pack = self->getScene(_lua)->getBodyShapeGraphicsPack(body_id, shape_id, graphic_id);
-    if(pack)
-        pushGraphicsPackApi(_lua, pack);
-    else
-        lua_pushnil(_lua);
-    return 1;
-}
-
-// 1 self
-// 2 body id
-// 3 shape key
-// 4 graphic key
-int luaApi_SetBodyShapeCurrentGraphics(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    const char * shape_id = lua_tostring(_lua, 3);
-    luaL_argcheck(_lua, shape_id != nullptr, 3, gc_message_shape_key_expected);
-    const char * graphic_id = lua_tostring(_lua, 4);
-    luaL_argcheck(_lua, graphic_id != nullptr, 4, gc_message_graphic_key_expected);
-    lua_pushboolean(_lua, self->getScene(_lua)->setBodyShapeCurrentGraphics(body_id, shape_id, graphic_id));
-    return 1;
-}
-
-// 1 self
-// 2 body id
-// 3 shape key
-// 4 graphic key
-// 5 flip horizontally
-// 6 flip vertically
-int luaApi_FlipBodyShapeGraphics(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    const char * shape_id = lua_tostring(_lua, 3);
-    luaL_argcheck(_lua, shape_id != nullptr, 3, gc_message_shape_key_expected);
-    const char * graphic_id = lua_tostring(_lua, 4);
-    luaL_argcheck(_lua, graphic_id != nullptr, 4, gc_message_graphic_key_expected);
-    luaL_argexpected(_lua, lua_isboolean(_lua, 5), 5, "boolean");
-    luaL_argexpected(_lua, lua_isboolean(_lua, 6), 6, "boolean");
-    bool result = self->getScene(_lua)->flipBodyShapeGraphics(
-        body_id,
-        shape_id,
-        graphic_id,
-        lua_toboolean(_lua, 5),
-        lua_toboolean(_lua, 6));
-    lua_pushboolean(_lua, result);
-    return 1;
 }
 
 // 1 self
@@ -595,14 +444,17 @@ int luaApi_UnsubscribePreSolveContact(lua_State * _lua)
 }
 
 // 1 self
-// 2 body id
+// 2 body id | body
 // 3 destination
 // TODO: options
 int luaApi_FindPath(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
-    uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    uint64_t body_id;
+    if(lua_isinteger(_lua, 2))
+        body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    else if(!tryGetBodyId(_lua, 2, &body_id))
+        luaL_argerror(_lua, 2, gc_message_body_or_body_id_expected);
     Point destination;
     luaL_argcheck(_lua, tryGetPoint(_lua, 3, destination), 3, "a destination point expected");
     auto result = self->getScene(_lua)->findPath(body_id, destination, false, false);
@@ -638,20 +490,10 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "getTileMapObjectByName", luaApi_GetTileMapObjectByName },
             { "getTileMapObjectsByClass", luaApi_GetTileMapObjectsByClass },
             { "createBody", luaApi_CreateBody },
+            { "getBody", luaApi_GetBody },
             { "createBodiesFromMapObjects", luaApi_CreateBodiesFromMapObjects },
-            { "applyForceToBodyCenter", luaApi_ApplyForceToBodyCenter },
-            { "applyImpulseToBodyCenter", luaApi_ApplyImpulseToBodyCenter },
-            { "getBodyLinearVelocity", luaApi_GetBodyLinearVelocity },
-            { "setBodyLinearVelocity", luaApi_SetBodyLinearVelocity },
-            { "getBodyMass", luaApi_GetBodyMass },
-            { "setBodyPosition", luaApi_SetBodyPosition },
-            { "getBodyPosition", luaApi_GetBodyPosition },
             { "setFollowedBody", luaApi_SetFollowedBody },
             { "resetFollowedBody", luaApi_ResetFollowedBody },
-            { "setBodyLayer", luaApi_SetBodyLayer },
-            { "getBodyShapeGraphicsPack", luaApi_GetBodyShapeGraphicsPack },
-            { "setBodyShapeCurrentGraphics", luaApi_SetBodyShapeCurrentGraphics },
-            { "flipBodyShapeGraphics", luaApi_FlipBodyShapeGraphics },
             { "subscribeToBeginContact", luaApi_SubscribeToBeginContact },
             { "unsubscribeFromBeginContact", luaApi_UnsubscribeFromBeginContact },
             { "subscribeToEndContact", luaApi_SubscribeToEndContact },

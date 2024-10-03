@@ -16,15 +16,15 @@
 
 #pragma once
 
-#include <Sol2D/Box2dDebugDraw.h>
-#include <Sol2D/Utils/Observable.h>
 #include <Sol2D/BodyDefinition.h>
 #include <Sol2D/BodyOptions.h>
 #include <Sol2D/Contact.h>
 #include <Sol2D/Canvas.h>
 #include <Sol2D/Workspace.h>
+#include <Sol2D/Box2dDebugDraw.h>
 #include <Sol2D/Tiles/TileMap.h>
-#include <box2d/types.h>
+#include <Sol2D/Utils/Observable.h>
+#include <Sol2D/Utils/PreHashedMap.h>
 #include <boost/container/slist.hpp>
 #include <filesystem>
 #include <unordered_set>
@@ -64,28 +64,28 @@ public:
     bool setBodyLayer(uint64_t _body_id, const std::string & _layer);
     std::shared_ptr<GraphicsPack> getBodyShapeGraphicsPack(
         uint64_t _body_id,
-        const std::string & _shape_key,
-        const std::string & _graphics_key);
-    bool setBodyShapeCurrentGraphics(
-        uint64_t _body_id,
-        const std::string & _shape_key,
-        const std::string & _graphic_key);
-    bool flipBodyShapeGraphics(
-        uint64_t _body_id,
-        const std::string & _shape_key,
-        const std::string & _graphic_key,
-        bool _flip_horizontally,
-        bool _flip_vertically);
+        const Utils::PreHashedKey<std::string> & _shape_key,
+        const Utils::PreHashedKey<std::string> & _graphics_key);
+    bool setBodyShapeCurrentGraphics(uint64_t _body_id,
+         const Utils::PreHashedKey<std::string> & _shape_key,
+         const Utils::PreHashedKey<std::string> & _graphic_key);
+    bool flipBodyShapeGraphics(uint64_t _body_id,
+           const Utils::PreHashedKey<std::string> & _shape_key,
+           const Utils::PreHashedKey<std::string> & _graphic_key,
+           bool _flip_horizontally,
+           bool _flip_vertically);
     bool loadTileMap(const std::filesystem::path & _file_path);
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(const std::string & _name) const;
     boost::container::slist<const Tiles::TileMapObject *> getTileMapObjectsByClass(const std::string & _class) const;
     void render(const RenderState & _state) override;
+    bool doesBodyExist(uint64_t _body_id) const;
+    bool doesBodyShapeExist(uint64_t _body_id, const Utils::PreHashedKey<std::string> & _shape_key) const;
     void applyForceToBodyCenter(uint64_t _body_id, const Point & _force);
     void applyImpulseToBodyCenter(uint64_t _body_id, const Point & _impulse);
-    Point getBodyLinearVelocity(uint64_t _body_id) const;
+    std::optional<Point> getBodyLinearVelocity(uint64_t _body_id) const;
     bool setBodyLinearVelocity(uint64_t _body_id, const Point & _velocity) const;
-    float getBodyMass(uint64_t _body_id) const;
+    std::optional<float> getBodyMass(uint64_t _body_id) const;
     void setBodyPosition(uint64_t _body_id, const Point & _position);
     std::optional<Point> getBodyPosition(uint64_t _body_id) const;
     std::optional<std::vector<Point> > findPath(
