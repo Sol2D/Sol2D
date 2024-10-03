@@ -114,7 +114,7 @@ bool Application::run(const Workspace & _workspace)
 
 bool Application::initialize()
 {
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD) != SDL_TRUE)
+    if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
     {
         mr_workspace.getMainLogger().critical("SDL initialization failed. {}", SDL_GetError());
         return false;
@@ -124,12 +124,12 @@ bool Application::initialize()
         mr_workspace.getMainLogger().critical("SDL_Image initialization failed. {}", SDL_GetError());
         return false;
     }
-    if(TTF_Init() != SDL_TRUE)
+    if(!TTF_Init())
     {
         mr_workspace.getMainLogger().critical("SDL_TTF initialization failed. {}", SDL_GetError());
         return false;
     }
-    if(Mix_OpenAudio(0, nullptr) != SDL_TRUE) // TODO: allow user to select a device
+    if(!Mix_OpenAudio(0, nullptr)) // TODO: allow user to select a device
     {
         mr_workspace.getMainLogger().critical("SDL_Mixer initialization failed. {}", SDL_GetError());
         return false;

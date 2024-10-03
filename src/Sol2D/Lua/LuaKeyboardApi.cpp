@@ -27,7 +27,7 @@ namespace {
 struct Self : LuaSelfBase
 {
     int kb_state_length;
-    const Uint8 * kb_state;
+    const bool * kb_state;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::keyboard>;

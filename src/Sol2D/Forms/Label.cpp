@@ -159,9 +159,10 @@ void Label::render(const RenderState & _state)
 
 void Label::createTexture(TTF_Font * _font)
 {
-    SDL_Surface * surface = TTF_RenderUTF8_Shaded(
+    SDL_Surface * surface = TTF_RenderText_Shaded(
         _font,
         m_text.c_str(),
+        m_text.size(),
         foreground_color[m_state],
         background_color[m_state]
     );
