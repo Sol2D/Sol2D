@@ -50,8 +50,6 @@ file(GLOB_RECURSE SOL2D_SRC
     "${SOL2D_SRC_DIR}/*.cpp"
 )
 
-set(SDLTTF_HARFBUZZ ON)
-
 add_subdirectory(third_party/SDL)
 add_subdirectory(third_party/SDL_image)
 add_subdirectory(third_party/SDL_ttf)
