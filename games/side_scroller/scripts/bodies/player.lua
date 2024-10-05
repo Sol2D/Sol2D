@@ -3,6 +3,20 @@ local keys = require 'resources.keys'
 local player = script.body
 local scene = script.scene
 
+local global_store = sol.stores:getStore(keys.stores.main)
+if not global_store then
+    error('Store ' .. keys.stores.level01 .. ' not found')
+end
+
+local sound_effect_armor = global_store:getSoundEffect(keys.soundEffects.armor)
+if not sound_effect_armor then
+    error('Sound effect ' .. keys.soundEffects.armor .. ' not found')
+end
+local sound_effect_swing = global_store:getSoundEffect(keys.soundEffects.swing)
+if not sound_effect_swing then
+    error('Sound effect ' .. keys.soundEffects.swing .. ' not found')
+end
+
 ---@type BodyContactObserver
 local contact_observer = script.arg.contactObserver
 
@@ -12,6 +26,8 @@ local player_main_shape = player:getShape(keys.shapes.player.main)
 if not player_main_shape then
     error("Player's main shape not found")
 end
+
+
 
 local WALK_VELOCITY = 5
 local JUMP_DELAY = 15
@@ -29,6 +45,7 @@ local Action = {
 
 local state = {
     inAir = false,
+    jumping = false,
     footings = {},
     jumpTimeout = 0,
     direction = Direction.RIGHT,
@@ -82,18 +99,24 @@ sol.heartbeat:subscribe(function()
         sol.Scancode.SPACE
     )
 
-    local action = Action.IDLE
-    local direction = state.direction
-
-    if state.inAir then
+    local action
+    if state.jumping then
         action = Action.JUMP
     else
+        action = Action.IDLE
+    end
+
+    local direction = state.direction
+
+    if not state.inAir then
         if state.jumpTimeout > 0 then
             state.jumpTimeout = state.jumpTimeout - 1
         elseif space_key then
+            state.jumping = true
             state.jumpTimeout = JUMP_DELAY
             player:applyImpulseToCenter({ x = 0, y = -1300 })
             action = Action.JUMP
+            sound_effect_swing:play()
         end
     end
 
@@ -109,7 +132,7 @@ sol.heartbeat:subscribe(function()
             }
         )
         direction = Direction.RIGHT
-        if not state.inAir then
+        if not state.jumping then
             action = Action.WALK
         end
     elseif left_key then
@@ -124,7 +147,7 @@ sol.heartbeat:subscribe(function()
             }
         )
         direction = Direction.LEFT
-        if not state.inAir then
+        if not state.jumping then
             action = Action.WALK
         end
     end
@@ -142,7 +165,11 @@ contact_observer.setSensorBeginContactListener(player_id, function (sensor, visi
                 body = visitor_body,
                 shapeKey = visitor.shapeKey
             })
-            state.inAir = false
+            if state.inAir then
+                sound_effect_armor:play()
+                state.inAir = false
+            end
+            state.jumping = false
         end
     end
 end)

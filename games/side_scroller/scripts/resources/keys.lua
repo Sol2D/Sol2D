@@ -1,6 +1,10 @@
 local ONE_WAY_PLATFORM_SHAPE_KEY = 'one-way-platform'
 
 local keys_meta = {
+    stores = {
+        main = 'global',
+        level01 = 'level-01'
+    },
     tilemap = {
         layers = {
             ground1 = 'ground-1',
@@ -33,6 +37,10 @@ local keys_meta = {
         flyingPlatform3 = {
             main = 'main:flying-platform3'
         }
+    },
+    soundEffects = {
+        armor = 'armor',
+        swing = 'swing'
     }
 }
 

@@ -566,9 +566,8 @@ function __store:freeBodyPrototype(key) end
 function __store:createSoundEffect(key, file_path) end
 
 ---@param key string
----@param file_path string
 ---@return sol.SoundEffect | nil
-function __store:getSoundEffect(key, file_path) end
+function __store:getSoundEffect(key) end
 
 ---@param key string
 ---@return boolean
@@ -580,9 +579,8 @@ function __store:freeSoundEffect(key) end
 function __store:createMusic(key, file_path) end
 
 ---@param key string
----@param file_path string
 ---@return sol.Music | nil
-function __store:getMusic(key, file_path) end
+function __store:getMusic(key) end
 
 ---@param key string
 ---@return boolean
@@ -595,10 +593,8 @@ function __store:freeMusic(key) end
 function __store:createFont(key, file_path, font_size) end
 
 ---@param key string
----@param file_path string
----@param font_size integer
 ---@return sol.Font | nil
-function __store:getFont(key, file_path, font_size) end
+function __store:getFont(key) end
 
 ---@param key string
 ---@return boolean

@@ -1,6 +1,7 @@
 local resources = require 'resources.all'
+local keys = require 'resources.keys'
 
-local global_store = sol.stores:createStore('global')
+local global_store = sol.stores:createStore(keys.stores.main)
 resources.init(global_store)
 
 local function runLevel01()

@@ -168,8 +168,11 @@ local store_counter = 1
 
 ---@param global_store sol.Store
 local function run(global_store)
-    local local_store_key = 'level-01_' .. store_counter
-    local local_store = sol.stores:createStore(local_store_key)
+    local local_store = sol.stores:createStore(keys.stores.level01)
+
+    local music = local_store:createMusic('level-01', 'sounds/level-01/level-01.wav')
+    music:loop(-1)
+
     store_counter = store_counter + 1
     local level_meta = {}
     level_meta.__index = level_meta
@@ -180,7 +183,7 @@ local function run(global_store)
     sol.window:setView(main_view)
     function level_meta.destroy()
         scene_data.destroy()
-        sol.stores:deleteStore(local_store_key)
+        sol.stores:deleteStore(keys.stores.level01)
     end
     return setmetatable({}, level_meta)
 end
