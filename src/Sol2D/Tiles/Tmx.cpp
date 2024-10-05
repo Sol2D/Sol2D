@@ -318,7 +318,7 @@ bool XmlLoader::tryParseColor(const char * _value, Color & _color) const
         return false;
     for(size_t i = 1; i < len; ++i)
     {
-        if(!isdigit(value[i]))
+        if(!isxdigit(value[i]))
             return false;
     }
     char num[3];
@@ -330,24 +330,24 @@ bool XmlLoader::tryParseColor(const char * _value, Color & _color) const
     {
         num[0] = value[i++];
         num[1] = value[i++];
-        _color.a = atoi(num);
+        _color.a = static_cast<uint8_t>(strtol(num, nullptr, 16));
     }
     else
     {
-        _color.a = 0;
+        _color.a = 255;
     }
 
     num[0] = value[i++];
     num[1] = value[i++];
-    _color.r = atoi(num);
+    _color.r = static_cast<uint8_t>(strtol(num, nullptr, 16));
 
     num[0] = value[i++];
     num[1] = value[i++];
-    _color.g = atoi(num);
+    _color.g = static_cast<uint8_t>(strtol(num, nullptr, 16));
 
     num[0] = value[i++];
     num[1] = value[i];
-    _color.b = atoi(num);
+    _color.b = static_cast<uint8_t>(strtol(num, nullptr, 16));
 
     return true;
 }
