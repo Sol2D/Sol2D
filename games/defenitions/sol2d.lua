@@ -68,14 +68,6 @@ script = nil
 ---@field isFlippedHorizontally boolean?
 ---@field isFlippedVertically boolean?
 
----@class GraphicsPackFrameOptions
----@field duration integer? # milliseconds
----@field isVisible boolean?
-
----@class GraphicsPackSpriteOptions
----@field isVisible boolean?
----@field position Point?
-
 ---@class BodyPhysicsDefinition
 ---@field linearDamping number?
 ---@field angularDamping number?
@@ -104,7 +96,7 @@ script = nil
 ---@class BodyShapeDefinitionBase
 ---@field type integer
 ---@field physics BodyShapePhysicsDefinition?
----@field graphics table<string, BodyShapeGraphicsDefinition>?
+---@field graphics table<string, GraphicsPackDefinition>?
 ---@see sol.BodyShapeType
 
 ---@class BodyShapeRectDefinition: BodyShapeDefinitionBase
@@ -117,11 +109,23 @@ script = nil
 ---@field center Point
 ---@field radius number
 
----@class BodyShapeGraphicsDefinition
+---@class GraphicsPackDefinition
 ---@field position Point?
 ---@field isFlippedHorizontally boolean?
 ---@field isFlippedVertically boolean?
----@field graphics sol.GraphicsPack
+---@field flipCenter Point?
+---@field animationIterations integer?
+---@field frames GraphicsPackFrameDefinition[]
+
+---@class GraphicsPackFrameDefinition
+---@field duration integer? milliseconds
+---@field isVisible boolean? default is true
+---@field sprites GraphicsPackSpriteDefinition[]
+
+---@class GraphicsPackSpriteDefinition
+---@field isVisible boolean? default is true
+---@field position Point?
+---@field sprite sol.Sprite | { spriteSheet: sol.SpriteSheet, spriteIndex: integer }
 
 ---@class Fragment
 ---@field top Dimension?
@@ -545,18 +549,6 @@ function __store:getSpriteSheet(key) end
 function __store:freeSpriteSheet(key) end
 
 ---@param key string
----@return sol.GraphicsPack
-function __store:createGraphicsPack(key) end
-
----@param key string
----@return sol.GraphicsPack | nil
-function __store:getGraphicsPack(key) end
-
----@param key string
----@return boolean
-function __store:freeGraphicsPack(key) end
-
----@param key string
 ---@param definition BodyDefinition
 ---@return sol.BodyPrototype
 function __store:createBodyPrototype(key, definition) end
@@ -656,19 +648,14 @@ function __sprite_sheet:loadFromFile(path, options) end
 ---@class sol.GraphicsPack
 local __graphics_pack
 
----@param options? GraphicsPackFrameOptions
+---@param definition GraphicsPackFrameDefinition
 ---@return integer # index of the new frame
-function __graphics_pack:addFrame(options) end
-
----@param count integer
----@param options? GraphicsPackFrameOptions
----@return integer # index of the new frame
-function __graphics_pack:addFrames(count, options) end
+function __graphics_pack:addFrame(definition) end
 
 ---@param frame_index integer # position to insert
----@param options? GraphicsPackFrameOptions
+---@param definition GraphicsPackFrameDefinition
 ---@return integer # index of the new frame
-function __graphics_pack:insertFrame(frame_index, options) end
+function __graphics_pack:insertFrame(frame_index, definition) end
 
 ---@param frame_index integer # position to insert
 ---@return boolean
@@ -703,24 +690,8 @@ function __graphics_pack:setCurrentFrameIndex(frame_index) end
 function __graphics_pack:switchToNextVisibleFrame() end
 
 ---@param frame_index integer
----@param sprite sol.Sprite
----@param options? GraphicsPackSpriteOptions
----@return boolean, integer
-function __graphics_pack:addSprite(frame_index, sprite, options) end
-
----@param frame_index integer
----@param sprite_sheet sol.SpriteSheet
----@param sprite_index integer
----@param options? GraphicsPackSpriteOptions
----@return boolean, integer
-function __graphics_pack:addSprite(frame_index, sprite_sheet, sprite_index, options) end
-
----@param frame_index integer
----@param sprite_sheet sol.SpriteSheet
----@param indices integer[]
----@param options? GraphicsPackSpriteOptions
----@return boolean, integer
-function __graphics_pack:addSprites(frame_index, sprite_sheet, indices, options) end
+---@param definition? GraphicsPackSpriteDefinition
+function __graphics_pack:addSprite(frame_index, definition) end
 
 ---@param frame_index integer
 ---@param sprite_index integer

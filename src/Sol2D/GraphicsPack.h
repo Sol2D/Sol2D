@@ -17,6 +17,7 @@
 #pragma once
 
 #include <Sol2D/SpriteSheet.h>
+#include <Sol2D/GraphicsPackDefinition.h>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
@@ -26,91 +27,27 @@
 
 namespace Sol2D {
 
-struct GraphicsPackOptions
-{
-    GraphicsPackOptions() :
-        animation_iterations(-1)
-    {
-    }
-
-    int16_t animation_iterations;
-};
-
-struct GraphicsPackFrameOptions
-{
-    GraphicsPackFrameOptions() :
-        duration(std::chrono::milliseconds::zero()),
-        is_visible(true)
-    {
-    }
-
-    std::chrono::milliseconds duration;
-    bool is_visible;
-};
-
-struct GraphicsPackSpriteOptions
-{
-    GraphicsPackSpriteOptions() :
-        is_visible(true),
-        position{.0f, .0f}
-    {
-    }
-
-    bool is_visible;
-    Point position;
-};
-
 class GraphicsPack final
 {
-    struct Graphics
-    {
-        S2_DEFAULT_COPY_AND_MOVE(Graphics)
-
-        Graphics(const Sprite & _sprite, const GraphicsPackSpriteOptions & _options) :
-            sprite(_sprite),
-            is_visible(_options.is_visible),
-            position(_options.position)
-        {
-        }
-
-        Graphics(Sprite && _sprite, const GraphicsPackSpriteOptions & _options) :
-            sprite(std::move(_sprite)),
-            is_visible(_options.is_visible),
-            position(_options.position)
-        {
-        }
-
-        Sprite sprite;
-        bool is_visible;
-        Point position;
-    };
-
-    struct Frame
-    {
-        S2_DEFAULT_COPY_AND_MOVE(Frame)
-
-        Frame(const GraphicsPackFrameOptions & _options) :
-            duration(_options.duration),
-            is_visible(_options.is_visible)
-        {
-        }
-
-        std::chrono::milliseconds duration;
-        bool is_visible;
-        std::vector<Graphics> graphics;
-    };
+private:
+    struct Graphics;
+    struct Frame;
 
 public:
-    explicit GraphicsPack(SDL_Renderer & _renderer, const GraphicsPackOptions & _options = GraphicsPackOptions());
+    explicit GraphicsPack(
+        SDL_Renderer & _renderer,
+        const GraphicsPackDefinition & _definition = GraphicsPackDefinition());
     GraphicsPack(const GraphicsPack & _graphics_pack);
     GraphicsPack(GraphicsPack && _graphics_pack);
     ~GraphicsPack();
     GraphicsPack & operator = (const GraphicsPack & _graphics_pack);
     GraphicsPack & operator = (GraphicsPack && _graphics_pack);
 
-    size_t addFrame(const GraphicsPackFrameOptions & _options);
-    size_t addFrames(size_t _count, const GraphicsPackFrameOptions & _options);
-    size_t insertFrame(size_t _index, const GraphicsPackFrameOptions & _options);
+    void setFilippedHorizontally(bool _flipped);
+    void setFilippedVertically(bool _flipped);
+    void setFlipCenter(std::optional<Point> _flip_center);
+    size_t addFrame(const GraphicsPackFrameDefinition & _definition);
+    size_t insertFrame(size_t _index, const GraphicsPackFrameDefinition & _definition);
     bool removeFrame(size_t _index);
     bool setFrameVisibility(size_t _index, bool _is_visible);
     std::optional<bool> isFrameVisible(size_t _index) const;
@@ -119,36 +56,23 @@ public:
     bool setCurrentFrameIndex(size_t _index);
     size_t getCurrentFrameIndex() const;
     bool switchToNextVisibleFrame();
-    std::pair<bool, size_t> addSprite(
-        size_t _frame,
-        const Sprite & _sprite,
-        const GraphicsPackSpriteOptions & _options);
-    std::pair<bool, size_t> addSprite(
-        size_t _frame,
-        const SpriteSheet & _sprite_sheet,
-        size_t _sprite_index,
-        const GraphicsPackSpriteOptions & _options);
-    std::pair<bool, size_t> addSprites(
-        size_t _frame,
-        const SpriteSheet & _sprite_sheet,
-        std::vector<size_t> _sprite_indices,
-        const GraphicsPackSpriteOptions & _options);
+    std::pair<bool, size_t> addSprite(size_t _frame, const GraphicsPackSpriteDefinition & _definition);
     bool removeSprite(size_t _frame, size_t _sprite);
-    void render(
-        const Point & _position,
-        std::chrono::milliseconds _time_passed,
-        const GraphicsRenderOptions & _options = GraphicsRenderOptions());
+    void render(const Point & _position, float _angle_deg, std::chrono::milliseconds _time_passed);
 
 private:
     bool switchToNextVisibleFrame(bool _respect_iteration);
     void destroy();
-    void performRender(const Point & _position, const GraphicsRenderOptions & _options);
+    void performRender(const Point & _position, float _angle_deg);
 
 private:
     SDL_Renderer * mp_renderer;
+    Point m_position;
+    SDL_FlipMode m_flip_mode;
+    std::optional<Point> m_flip_center;
     std::vector<Frame *> m_frames;
-    int16_t m_max_iterations;
-    uint16_t m_current_iteration;
+    int32_t m_max_iterations;
+    int32_t m_current_iteration;
     size_t m_current_frame_index;
     std::chrono::milliseconds m_current_frame_duration;
     std::chrono::milliseconds m_total_duration;
@@ -157,6 +81,25 @@ private:
 inline size_t GraphicsPack::getCurrentFrameIndex() const
 {
     return m_current_frame_index;
+}
+
+inline void GraphicsPack::setFilippedHorizontally(bool _flipped)
+{
+    m_flip_mode = _flipped
+        ? static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) | SDL_FLIP_HORIZONTAL)
+        : static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) & ~SDL_FLIP_HORIZONTAL);
+}
+
+inline void GraphicsPack::setFilippedVertically(bool _flipped)
+{
+    m_flip_mode = _flipped
+        ? static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) | SDL_FLIP_VERTICAL)
+        : static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) & ~SDL_FLIP_VERTICAL);
+}
+
+inline void GraphicsPack::setFlipCenter(std::optional<Point> _flip_center)
+{
+    m_flip_center = _flip_center;
 }
 
 } // namespace Sol2D

@@ -58,17 +58,20 @@ public:
     ~BodyShape();
     const std::string & getKey() const;
     const std::optional<uint32_t> getTileMapObjectId() const;
-    void addGraphics(const PreHashedKey<std::string> & _key, const BodyShapeGraphics & _graphic);
+    void addGraphics(
+        SDL_Renderer & _renderer,
+        const PreHashedKey<std::string> & _key,
+        const GraphicsPackDefinition & _definition);
     bool setCurrentGraphics(const PreHashedKey<std::string> & _key);
-    BodyShapeGraphics * getCurrentGraphics();
-    BodyShapeGraphics * getGraphics(const PreHashedKey<std::string> & _key);
+    GraphicsPack * getCurrentGraphics();
+    GraphicsPack * getGraphics(const PreHashedKey<std::string> & _key);
     bool flipGraphics(const PreHashedKey<std::string> & _key, bool _flip_horizontally, bool _flip_vertically);
 
 private:
     const std::string m_key;
     const std::optional<uint32_t> m_tile_map_object_id;
-    PreHashedMap<std::string, BodyShapeGraphics *> m_graphics;
-    BodyShapeGraphics * mp_current_graphic;
+    PreHashedMap<std::string, GraphicsPack *> m_graphics;
+    GraphicsPack * mp_current_graphic;
 };
 
 inline BodyShape::BodyShape(const std::string & _key, std::optional<uint32_t> _tile_map_object_id) :
@@ -94,17 +97,20 @@ inline const std::optional<uint32_t> BodyShape::getTileMapObjectId() const
     return m_tile_map_object_id;
 }
 
-inline void BodyShape::addGraphics(const PreHashedKey<std::string> & _key, const BodyShapeGraphics & _graphic)
+inline void BodyShape::addGraphics(
+    SDL_Renderer & _renderer,
+    const PreHashedKey<std::string> & _key,
+    const GraphicsPackDefinition & _definition)
 {
     auto it = m_graphics.find(_key);
     if(it != m_graphics.end())
         delete it->second;
-    m_graphics[_key] = new BodyShapeGraphics(_graphic);
+    m_graphics[_key] = new GraphicsPack(_renderer, _definition);
 }
 
 inline bool BodyShape::setCurrentGraphics(const PreHashedKey<std::string> & _key)
 {
-    BodyShapeGraphics * graphics = getGraphics(_key);
+    GraphicsPack * graphics = getGraphics(_key);
     if(graphics)
     {
         mp_current_graphic = graphics;
@@ -113,13 +119,13 @@ inline bool BodyShape::setCurrentGraphics(const PreHashedKey<std::string> & _key
     return false;
 }
 
-inline BodyShapeGraphics * BodyShape::getGraphics(const PreHashedKey<std::string> & _key)
+inline GraphicsPack * BodyShape::getGraphics(const PreHashedKey<std::string> & _key)
 {
     auto it = m_graphics.find(_key);
     return it == m_graphics.end() ? nullptr : it->second;
 }
 
-inline BodyShapeGraphics * BodyShape::getCurrentGraphics()
+inline GraphicsPack * BodyShape::getCurrentGraphics()
 {
     return mp_current_graphic;
 }
@@ -279,7 +285,12 @@ BodyShape & Scene::BodyShapeCreator::createShape(const BodyBasicShapeDefinition<
 {
     BodyShape & body_shape = mr_body.createShape(mr_key);
     for(const auto & graphics_kv : _def.graphics)
-        body_shape.addGraphics(makePreHashedKey(graphics_kv.first), graphics_kv.second);
+    {
+        body_shape.addGraphics(
+            mr_scene.mr_renderer,
+            makePreHashedKey(graphics_kv.first),
+            graphics_kv.second);
+    }
     return body_shape;
 }
 
@@ -304,14 +315,14 @@ void Scene::BodyShapeCreator::operator ()(const BodyRectDefinition & _rect)
 void Scene::BodyShapeCreator::operator ()(const BodyCircleDefinition & _circle)
 {
     b2Circle b2_circle
+    {
+        .center =
         {
-            .center =
-            {
-                .x = mr_scene.graphicalToPhysical(_circle.center.x),
-                .y = mr_scene.graphicalToPhysical(_circle.center.y)
-            },
-            .radius = mr_scene.graphicalToPhysical(_circle.radius)
-        };
+            .x = mr_scene.graphicalToPhysical(_circle.center.x),
+            .y = mr_scene.graphicalToPhysical(_circle.center.y)
+        },
+        .radius = mr_scene.graphicalToPhysical(_circle.radius)
+    };
     if(b2_circle.radius <= .0f)
         return; // TODO: log
     b2ShapeDef b2_shape_def = createBox2dShapeDef(_circle);
@@ -339,10 +350,12 @@ Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Re
         mp_box2d_debug_draw = new Box2dDebugDraw(
             mr_renderer,
             m_b2_world_id,
-            [this](float __x, float __y) {
+            [this](float __x, float __y)
+            {
                 return toAbsoluteCoords(physicalToGraphical(__x), physicalToGraphical(__y));
             },
-            [this](float __len) {
+            [this](float __len)
+            {
                 return physicalToGraphical(__len);
             }
         );
@@ -513,7 +526,7 @@ bool Scene::setBodyLayer(uint64_t _body_id, const std::string & _layer)
     return true;
 }
 
-std::shared_ptr<GraphicsPack> Scene::getBodyShapeGraphicsPack(
+GraphicsPack * Scene::getBodyShapeGraphicsPack(
     uint64_t _body_id,
     const PreHashedKey<std::string> & _shape_key,
     const PreHashedKey<std::string> & _graphics_key)
@@ -524,8 +537,7 @@ std::shared_ptr<GraphicsPack> Scene::getBodyShapeGraphicsPack(
     BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
     if(shape == nullptr)
         return nullptr;
-    BodyShapeGraphics * graphics = shape->getGraphics(_graphics_key);
-    return graphics ? graphics->graphics : nullptr;
+    return shape->getGraphics(_graphics_key);
 }
 
 bool Scene::setBodyShapeCurrentGraphics(
@@ -717,7 +729,6 @@ void Scene::syncWorldWithFollowedBody()
 
 void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
 {
-    GraphicsRenderOptions options; // TODO: to FixtureUserData? How to rotate multiple shapes?
     Point body_position;
     {
         b2Vec2 pos = b2Body_GetPosition(_body_id);
@@ -729,11 +740,12 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
     for(const b2ShapeId & shape_id : shapes)
     {
         BodyShape * shape = getUserData(shape_id);
-        BodyShapeGraphics * shape_graphic = shape->getCurrentGraphics();
-        if(shape_graphic)
+        GraphicsPack * graphics = shape->getCurrentGraphics();
+        if(graphics)
         {
-            options.flip = shape_graphic->flip_mode;
-            shape_graphic->graphics->render(body_position + shape_graphic->position, _time_passed, options);
+            // TODO: rotation
+            // TODO: How to rotate multiple shapes?
+            graphics->render(body_position, .0f, _time_passed);
         }
     }
 }

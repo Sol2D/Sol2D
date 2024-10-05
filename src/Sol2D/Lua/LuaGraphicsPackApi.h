@@ -16,13 +16,19 @@
 
 #pragma once
 
-#include <Sol2D/GraphicsPack.h>
+#include <Sol2D/Scene.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
 #include <memory>
 
 namespace Sol2D::Lua {
 
-void pushGraphicsPackApi(lua_State * _lua, std::shared_ptr<GraphicsPack> _graphics_pack);
-std::shared_ptr<GraphicsPack> tryGetGraphicsPack(lua_State * _lua, int _idx);
+void pushGraphicsPackApi(
+    lua_State * _lua,
+    std::shared_ptr<Scene> _scene,
+    uint64_t _body_id,
+    const Utils::PreHashedKey<std::string> & _shape_key,
+    const Utils::PreHashedKey<std::string> & _graphics_pack_key);
+
+GraphicsPack * tryGetGraphicsPack(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

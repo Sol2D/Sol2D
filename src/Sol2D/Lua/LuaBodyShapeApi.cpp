@@ -46,7 +46,7 @@ struct Self : LuaSelfBase
         return ptr;
     }
 
-    uint64_t body_id;
+    const uint64_t body_id;
     const PreHashedKey<std::string> shape_key;
 
 private:
@@ -86,14 +86,22 @@ int luaApi_GetGraphicsPack(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * graphic_key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, graphic_key != nullptr, 2, gc_message_graphic_key_expected);
-    std::shared_ptr<GraphicsPack> pack = self->getScene(_lua)->getBodyShapeGraphicsPack(
+    GraphicsPack *  pack = self->getScene(_lua)->getBodyShapeGraphicsPack(
         self->body_id,
         self->shape_key,
         makePreHashedKey(std::string(graphic_key)));
     if(pack)
-        pushGraphicsPackApi(_lua, pack);
+    {
+        pushGraphicsPackApi(
+            _lua, self->getScene(_lua),
+            self->body_id,
+            self->shape_key,
+            makePreHashedKey(std::string(graphic_key)));
+    }
     else
+    {
         lua_pushnil(_lua);
+    }
     return 1;
 }
 

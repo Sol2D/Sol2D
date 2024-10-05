@@ -193,37 +193,6 @@ int luaApi_GetSpriteSheet(lua_State * _lua)
 
 // 1 self
 // 2 key
-int luaApi_CreateGraphicsPack(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
-    std::shared_ptr<GraphicsPack> graphics_pack = self->getStore(_lua)->createObject<GraphicsPack>(
-        lua_tostring(_lua, 2),
-        self->renderer);
-    pushGraphicsPackApi(_lua, graphics_pack);
-    return 1;
-}
-
-// 1 self
-// 2 key
-int luaApi_GetGraphicsPack(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
-    if(std::shared_ptr<GraphicsPack> graphics_pack =
-        self->getStore(_lua)->getObject<GraphicsPack>(lua_tostring(_lua, 2)))
-    {
-        pushGraphicsPackApi(_lua, graphics_pack);
-    }
-    else
-    {
-        lua_pushnil(_lua);
-    }
-    return 1;
-}
-
-// 1 self
-// 2 key
 // 3 body definition
 int luaApi_CreateBodyPrototype(lua_State * _lua)
 {
@@ -328,11 +297,11 @@ int luaApi_CreateMusic(lua_State * _lua)
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     luaL_argcheck(_lua, lua_isstring(_lua, 3), 3, "a music file path expected");
     const char * path = lua_tostring(_lua, 3);
-    std::shared_ptr<Mix_Music> chunk = self->getStore(_lua)->createObject<Mix_Music>(
+    std::shared_ptr<Mix_Music> music = self->getStore(_lua)->createObject<Mix_Music>(
         lua_tostring(_lua, 2),
         self->workspace.getResourceFullPath(std::filesystem::path(path)));
-    if(chunk)
-        pushMusicApi(_lua, chunk);
+    if(music)
+        pushMusicApi(_lua, music);
     else
         lua_pushnil(_lua);
     return 1;
@@ -344,8 +313,8 @@ int luaApi_GetMusic(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
-    if(std::shared_ptr<Mix_Music> chunk = self->getStore(_lua)->getObject<Mix_Music>(lua_tostring(_lua, 2)))
-        pushMusicApi(_lua, chunk);
+    if(std::shared_ptr<Mix_Music> music = self->getStore(_lua)->getObject<Mix_Music>(lua_tostring(_lua, 2)))
+        pushMusicApi(_lua, music);
     else
         lua_pushnil(_lua);
     return 1;
@@ -392,9 +361,6 @@ void Sol2D::Lua::pushStoreApi(
             { "createSpriteSheet", luaApi_CreateSpriteSheet },
             { "getSpriteSheet", luaApi_GetSpriteSheet },
             { "freeSpriteSheet", luaApi_FreeObject<SpriteSheet> },
-            { "createGraphicsPack", luaApi_CreateGraphicsPack },
-            { "getGraphicsPack", luaApi_GetGraphicsPack },
-            { "freeGraphicsPack", luaApi_FreeObject<GraphicsPack> },
             { "createBodyPrototype", luaApi_CreateBodyPrototype },
             { "getBodyPrototype", luaApi_GetBodyPrototype },
             { "freeeBodyDefinition", luaApi_FreeObject<BodyDefinition> },

@@ -20,14 +20,89 @@
 using namespace Sol2D;
 using namespace Sol2D::Utils;
 
-GraphicsPack::GraphicsPack(SDL_Renderer & _renderer, const GraphicsPackOptions & _options /*= GraphicsPackOptions()*/) :
+struct GraphicsPack::Graphics
+{
+public:
+    S2_DEFAULT_COPY_AND_MOVE(Graphics)
+    explicit Graphics(const GraphicsPackSpriteDefinition & _definition);
+
+public:
+    std::optional<Sprite> sprite;
+    bool is_visible;
+    Point position;
+
+private:
+    static std::optional<Sprite> getSprite(const GraphicsPackSpriteDefinition & _definition);
+};
+
+inline GraphicsPack::Graphics::Graphics(const GraphicsPackSpriteDefinition & _definition) :
+    sprite(getSprite(_definition)),
+    is_visible(_definition.is_visible),
+    position(_definition.position)
+{
+}
+
+std::optional<Sprite> GraphicsPack::Graphics::getSprite(const GraphicsPackSpriteDefinition & _definition)
+{
+    if(std::holds_alternative<std::shared_ptr<Sprite>>(_definition.sprite))
+    {
+        std::shared_ptr<Sprite> sprite = std::get<std::shared_ptr<Sprite>>(_definition.sprite);
+        return sprite ? std::make_optional(*sprite) : std::nullopt;
+    }
+    else if(std::holds_alternative<GraphicsPackSpriteSheetSpriteDefinition>(_definition.sprite))
+    {
+        const GraphicsPackSpriteSheetSpriteDefinition & sheet_def =
+            std::get<GraphicsPackSpriteSheetSpriteDefinition>(_definition.sprite);
+        return sheet_def.sprite_sheet->getSpriteCount() > sheet_def.sprite_index
+            ? std::make_optional(sheet_def.sprite_sheet->toSprite(sheet_def.sprite_index))
+            : std::nullopt;
+    }
+    else
+    {
+        throw std::runtime_error("Unknown sprite source");
+    }
+}
+
+struct GraphicsPack::Frame
+{
+    S2_DEFAULT_COPY_AND_MOVE(Frame)
+    Frame(const GraphicsPackFrameDefinition & _definition);
+    std::chrono::milliseconds duration;
+    std::vector<Graphics> graphics;
+    bool is_visible;
+};
+
+inline GraphicsPack::Frame::Frame(const GraphicsPackFrameDefinition & _definition) :
+    duration(_definition.duration),
+    is_visible(_definition.is_visible)
+{
+    graphics.reserve(_definition.sprites.size());
+    for(const auto & sprite_def : _definition.sprites)
+        graphics.emplace_back(sprite_def);
+}
+
+GraphicsPack::GraphicsPack(
+    SDL_Renderer & _renderer,
+    const GraphicsPackDefinition & _definition /*= GraphicsPackDefinition()*/
+) :
     mp_renderer(&_renderer),
-    m_max_iterations(_options.animation_iterations),
+    m_position(_definition.position),
+    m_flip_mode(SDL_FLIP_NONE),
+    m_flip_center(_definition.flip_center),
+    m_max_iterations(_definition.animation_iterations),
     m_current_iteration(0),
     m_current_frame_index(0),
     m_current_frame_duration(std::chrono::milliseconds::zero()),
     m_total_duration(std::chrono::milliseconds::zero())
 {
+    if(_definition.is_flipped_horizontally)
+        m_flip_mode = static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) | SDL_FLIP_HORIZONTAL);
+    if(_definition.is_flipped_vertically)
+        m_flip_mode = static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) | SDL_FLIP_VERTICAL);
+    for(const auto & frame_def : _definition.frames)
+    {
+        addFrame(frame_def);
+    }
 }
 
 GraphicsPack::GraphicsPack(const GraphicsPack & _graphics_pack) :
@@ -111,26 +186,18 @@ void GraphicsPack::destroy()
     m_frames.clear();
 }
 
-size_t GraphicsPack::addFrame(const GraphicsPackFrameOptions & _options)
+size_t GraphicsPack::addFrame(const GraphicsPackFrameDefinition & _definition)
 {
-    Frame * frame = new Frame(_options);
+    Frame * frame = new Frame(_definition);
     m_frames.push_back(frame);
     if(frame->is_visible)
         m_total_duration += frame->duration;
     return m_frames.size() - 1;
 }
 
-size_t GraphicsPack::addFrames(size_t _count, const GraphicsPackFrameOptions & _options)
+size_t GraphicsPack::insertFrame(size_t _index, const GraphicsPackFrameDefinition & _definition)
 {
-    m_frames.reserve(m_frames.size() + _count);
-    for(size_t i = 0; i < _count; ++i)
-        addFrame(_options);
-    return m_frames.size() - 1;
-}
-
-size_t GraphicsPack::insertFrame(size_t _index, const GraphicsPackFrameOptions & _options)
-{
-    Frame * frame = new Frame(_options);
+    Frame * frame = new Frame(_definition);
     m_frames.insert(m_frames.begin() + _index, frame);
     if(frame->is_visible)
         m_total_duration += frame->duration;
@@ -212,54 +279,12 @@ bool GraphicsPack::setCurrentFrameIndex(size_t _index)
     return true;
 }
 
-std::pair<bool, size_t> GraphicsPack::addSprite(
-    size_t _frame,
-    const Sprite & _sprite,
-    const GraphicsPackSpriteOptions & _options)
+std::pair<bool, size_t> GraphicsPack::addSprite(size_t _frame, const GraphicsPackSpriteDefinition & _definition)
 {
     if(_frame >= m_frames.size())
         return std::make_pair(false, 0);
     std::vector<Graphics> & graphics = m_frames[_frame]->graphics;
-    graphics.push_back(Graphics(_sprite, _options));
-    return std::make_pair(true, graphics.size() - 1);
-}
-
-std::pair<bool, size_t> GraphicsPack::addSprite(
-    size_t _frame,
-    const SpriteSheet & _sprite_sheet,
-    size_t _sprite_index,
-    const GraphicsPackSpriteOptions & _options)
-{
-    if(_frame >= m_frames.size() || !_sprite_sheet.isValid())
-        return std::make_pair(false, 0);
-    const std::vector<Rect> & sheet_rects = _sprite_sheet.getRects();
-    if(_sprite_index >= sheet_rects.size())
-        return std::make_pair(false, 0);
-    std::vector<Graphics> & graphics = m_frames[_frame]->graphics;
-    graphics.push_back(Graphics(_sprite_sheet.toSprite(_sprite_index), _options));
-    return std::make_pair(true, graphics.size() - 1);
-}
-
-std::pair<bool, size_t> GraphicsPack::addSprites(
-    size_t _frame,
-    const SpriteSheet & _sprite_sheet,
-    std::vector<size_t> _sprite_indices,
-    const GraphicsPackSpriteOptions & _options)
-{
-    if(_frame >= m_frames.size() || !_sprite_sheet.isValid())
-        return std::make_pair(false, 0);
-    const std::vector<Rect> & sheet_rects = _sprite_sheet.getRects();
-    for(size_t idx : _sprite_indices)
-    {
-        if(idx >= sheet_rects.size())
-            return std::make_pair(false, 0);
-    }
-    std::vector<Graphics> & graphics = m_frames[_frame]->graphics;
-    graphics.reserve(graphics.size() + _sprite_indices.size());
-    for(size_t i = 0; i < _sprite_indices.size(); ++i)
-    {
-        graphics.push_back(Graphics(_sprite_sheet.toSprite(i), _options));
-    }
+    graphics.emplace_back(_definition);
     return std::make_pair(true, graphics.size() - 1);
 }
 
@@ -274,14 +299,11 @@ bool GraphicsPack::removeSprite(size_t _frame, size_t _sprite)
     return true;
 }
 
-void GraphicsPack::render(
-    const Point & _position,
-    std::chrono::milliseconds _time_passed,
-    const GraphicsRenderOptions & _options /*= SpriteRenderOptions()*/)
+void GraphicsPack::render(const Point & _position, float _angle_deg, std::chrono::milliseconds _time_passed)
 {
     if(m_max_iterations == 0 || m_total_duration == std::chrono::milliseconds::zero())
     {
-        performRender(_position, _options);
+        performRender(_position, _angle_deg);
         return;
     }
     m_current_frame_duration += _time_passed;
@@ -313,7 +335,7 @@ void GraphicsPack::render(
             break;
         }
     }
-    performRender(_position, _options);
+    performRender(_position, _angle_deg);
 }
 
 bool GraphicsPack::switchToNextVisibleFrame()
@@ -353,16 +375,23 @@ bool GraphicsPack::switchToNextVisibleFrame(bool _respect_iteration)
     return m_frames[m_current_frame_index]->is_visible;
 }
 
-void GraphicsPack::performRender(const Point & _position, const GraphicsRenderOptions & _options)
+void GraphicsPack::performRender(const Point & _position, float _angle_deg)
 {
     if(m_frames.empty())
         return;
     Frame * frame = m_frames[m_current_frame_index];
     if(!frame->is_visible)
         return;
+    Point position = _position + m_position;
     for(Graphics & graphics : frame->graphics)
     {
-        if(graphics.is_visible)
-            graphics.sprite.render(_position + graphics.position, _options);
+        if(graphics.sprite.has_value() && graphics.is_visible)
+        {
+            graphics.sprite->render(
+                position + graphics.position,
+                _angle_deg,
+                m_flip_mode,
+                m_flip_center.has_value() ? &m_flip_center.value() : nullptr);
+        }
     }
 }

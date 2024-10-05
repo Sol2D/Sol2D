@@ -19,6 +19,7 @@
 #include <Sol2D/GraphicsPack.h>
 #include <Sol2D/BodyType.h>
 #include <Sol2D/BodyShapeType.h>
+#include <Sol2D/GraphicsPackDefinition.h>
 #include <Sol2D/BodyShapePhysicsDefinition.h>
 #include <Sol2D/BodyPhysicsDefinition.h>
 #include <Sol2D/Rect.h>
@@ -26,7 +27,6 @@
 #include <filesystem>
 #include <variant>
 #include <vector>
-#include <unordered_map>
 
 namespace Sol2D {
 
@@ -49,38 +49,11 @@ struct CircleShapeDefinition
     float radius;
 };
 
-struct BodyShapeGraphics
-{
-    BodyShapeGraphics() :
-        position{ .x = .0f, .y = .0f },
-        flip_mode(SDL_FLIP_NONE)
-    {
-    }
-
-    void setFilippedHorizontally(bool _flipped)
-    {
-        flip_mode = _flipped
-            ? static_cast<SDL_FlipMode>(static_cast<int>(flip_mode) | SDL_FLIP_HORIZONTAL)
-            : static_cast<SDL_FlipMode>(static_cast<int>(flip_mode) & ~SDL_FLIP_HORIZONTAL);
-    }
-
-    void setFilippedVertically(bool _flipped)
-    {
-        flip_mode = _flipped
-            ? static_cast<SDL_FlipMode>(static_cast<int>(flip_mode) | SDL_FLIP_VERTICAL)
-            : static_cast<SDL_FlipMode>(static_cast<int>(flip_mode) & ~SDL_FLIP_VERTICAL);
-    }
-
-    std::shared_ptr<GraphicsPack> graphics;
-    Point position;
-    SDL_FlipMode flip_mode;
-};
-
 template<BodyShapeType shape_type>
 struct BodyBasicShapeDefinition
 {
     BodyShapePhysicsDefinition physics;
-    std::unordered_map<std::string, BodyShapeGraphics> graphics;
+    std::vector<std::pair<std::string, GraphicsPackDefinition>> graphics;
     const BodyShapeType type = shape_type;
 
 };
@@ -103,7 +76,7 @@ struct BodyDefinition
     BodyType type;
     std::optional<std::filesystem::path> script;
     BodyPhysicsDefinition physics;
-    std::unordered_map<std::string, BodyVariantShapeDefinition> shapes;
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> shapes;
 };
 
 } // namespace Sol2D

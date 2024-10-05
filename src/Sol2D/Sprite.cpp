@@ -69,7 +69,11 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     return true;
 }
 
-void Sprite::render(const Point & _point, const GraphicsRenderOptions & _options /*= SpriteRenderOptions()*/)
+void Sprite::render(
+    const Point & _point,
+    float _angle_deg,
+    SDL_FlipMode _flip_mode,
+    const Point * _flip_center /*= nullptr*/)
 {
     if(!isValid())
         return;
@@ -85,8 +89,8 @@ void Sprite::render(const Point & _point, const GraphicsRenderOptions & _options
         m_texture_ptr.get(),
         m_source_rect.toSdlPtr(),
         &dest_rect,
-        radiansToDegrees(_options.angle_rad),
-        _options.flip_center.has_value() ? _options.flip_center->toSdlPtr() : nullptr,
-        _options.flip
+        _angle_deg,
+        _flip_center ? _flip_center->toSdlPtr() : nullptr,
+        _flip_mode
     );
 }

@@ -9,11 +9,6 @@ local function createPlatformPrototype3(store)
         )) then
         error('Unable to load sprites/platform/platform.png')
     end
-    local platformGraphics = store:createGraphicsPack(keys.graphicPacks.flyingPlatform3.main)
-    local frame = platformGraphics:addFrame()
-    platformGraphics:addSprite(frame, sprite_sheet, 0, { position = { x = 0, y = 0 } })
-    platformGraphics:addSprite(frame, sprite_sheet, 1, { position = { x = 128, y = 0 } })
-    platformGraphics:addSprite(frame, sprite_sheet, 2, { position = { x = 256, y = 0 } })
     store:createBodyPrototype(
         keys.bodies.flyingPlatform3,
         {
@@ -29,7 +24,25 @@ local function createPlatformPrototype3(store)
                     rect = { x = 0, y = 0, w = 384, h = 64 },
                     graphics = {
                         [keys.shapeGraphics.flyingPlatform3.main] = {
-                            graphics = platformGraphics
+                            animationIterations = 0,
+                            frames = {
+                                {
+                                    sprites = {
+                                        {
+                                            sprite = { spriteSheet = sprite_sheet, spriteIndex = 0 },
+                                            position = { x = 0, y = 0 }
+                                        },
+                                        {
+                                            sprite = { spriteSheet = sprite_sheet, spriteIndex = 1 },
+                                            position = { x = 128, y = 0 }
+                                        },
+                                        {
+                                            sprite = { spriteSheet = sprite_sheet, spriteIndex = 2 },
+                                            position = { x = 256, y = 0 }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

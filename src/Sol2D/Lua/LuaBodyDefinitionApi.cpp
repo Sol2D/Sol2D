@@ -17,7 +17,7 @@
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
 #include <Sol2D/Lua/LuaRectApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
-#include <Sol2D/Lua/LuaGraphicsPackApi.h>
+#include <Sol2D/Lua/LuaGraphicsPackDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyPhysicsDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyShapePhysicsDefinitionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
@@ -37,29 +37,23 @@ bool tryGetPoints(lua_State * _lua, int _idx, std::vector<Point> & _points);
 void addPolygon(
     LuaTable & _table,
     const std::string & _key,
-    std::unordered_map<std::string, BodyVariantShapeDefinition> & _shapes);
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
 
 void addCircle(
     LuaTable & _table,
     const std::string & _key,
-    std::unordered_map<std::string, BodyVariantShapeDefinition> & _shapes);
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
 
 void addShape(
     lua_State * _lua,
     int _idx,
     const std::string & _key,
-    std::unordered_map<std::string, BodyVariantShapeDefinition> & _shapes);
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
 
-void getShapes(lua_State * _lua, int _idx, std::unordered_map<std::string, BodyVariantShapeDefinition> & _shapes);
-
-void addGraphics(
-    lua_State * _lua,
-    int _idx,
-    const std::string & _key,
-    std::unordered_map<std::string, BodyShapeGraphics> & _graphics);
+void getShapes(lua_State * _lua, int _idx, std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
 
 
-void getShapes(lua_State * _lua, int _idx, std::unordered_map<std::string, BodyVariantShapeDefinition> & _shapes)
+void getShapes(lua_State * _lua, int _idx, std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
 {
     int dictionary_index = lua_absindex(_lua, _idx);
     if(!lua_istable(_lua, dictionary_index))
@@ -77,7 +71,7 @@ void addShape(
     lua_State * _lua,
     int _idx,
     const std::string & _key,
-    std::unordered_map<std::string, BodyVariantShapeDefinition> & _shapes)
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
 {
     if(!lua_istable(_lua, _idx))
         return;
@@ -101,7 +95,7 @@ void addShape(
 void addPolygon(
     LuaTable & _table,
     const std::string & _key,
-    std::unordered_map<std::string, BodyVariantShapeDefinition> & _shapes)
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
 {
     if(_table.tryGetValue("rect"))
     {
@@ -109,7 +103,7 @@ void addPolygon(
         if(tryGetRect(_table.getLua(), -1, def))
         {
             readBasicShape(_table, def);
-            _shapes.insert(std::make_pair(_key, def));
+            _shapes.emplace_back(_key, def);
         }
         lua_pop(_table.getLua(), 1);
     }
@@ -119,7 +113,7 @@ void addPolygon(
         if(tryGetPoints(_table.getLua(), -1, def.points))
         {
             readBasicShape(_table, def);
-            _shapes.insert(std::make_pair(_key, def));
+            _shapes.emplace_back(_key, def);
         }
         lua_pop(_table.getLua(), 1);
     }
@@ -140,45 +134,14 @@ void readBasicShape(LuaTable & _table, BodyBasicShapeDefinition<shape_type> & _s
         while(lua_next(_table.getLua(), graphics_table_idx))
         {
             if(lua_isstring(_table.getLua(), -2))
-                addGraphics(_table.getLua(), -1, lua_tostring(_table.getLua(), -2), _shape.graphics);
+            {
+                GraphicsPackDefinition graphics;
+                if(tryGetGraphicsPackDefinition(_table.getLua(), -1, graphics))
+                    _shape.graphics.emplace_back(lua_tostring(_table.getLua(), -2), std::move(graphics));
+            }
             lua_pop(_table.getLua(), 1);
         }
         lua_pop(_table.getLua(), 1);
-    }
-}
-
-void addGraphics(
-    lua_State * _lua,
-    int _idx,
-    const std::string & _key,
-    std::unordered_map<std::string, BodyShapeGraphics> & _graphics)
-{
-    if(!lua_istable(_lua, _idx))
-        return;
-    LuaTable table(_lua, _idx);
-    BodyShapeGraphics graphics;
-    if(table.tryGetValue("graphics"))
-    {
-        graphics.graphics = tryGetGraphicsPack(_lua, -1);
-        if(!graphics.graphics)
-        {
-            lua_pop(_lua, 1);
-            return;
-        }
-        if(table.tryGetValue("position"))
-        {
-            tryGetPoint(_lua, -1, graphics.position);
-            lua_pop(_lua, 1);
-        }
-        {
-            bool flipped;
-            if(table.tryGetBoolean("isFlippedHorizontally", &flipped))
-                graphics.setFilippedHorizontally(flipped);
-            if(table.tryGetBoolean("isFlippedVertically", &flipped))
-                graphics.setFilippedVertically(flipped);
-        }
-        lua_pop(_lua, 1);
-        _graphics.insert(std::make_pair(_key, graphics));
     }
 }
 
@@ -203,7 +166,7 @@ bool tryGetPoints(lua_State * _lua, int _idx, std::vector<Point> & _points)
 void addCircle(
     LuaTable & _table,
     const std::string & _key,
-    std::unordered_map<std::string, BodyVariantShapeDefinition> & _shapes)
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
 {
     BodyCircleDefinition def;
     {
@@ -221,7 +184,7 @@ void addCircle(
             return;
     }
     readBasicShape(_table, def);
-    _shapes.insert(std::make_pair(_key, def));
+    _shapes.emplace_back(_key, def);
 }
 
 

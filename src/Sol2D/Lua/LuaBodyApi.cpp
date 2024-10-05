@@ -43,7 +43,7 @@ struct Self : LuaSelfBase
         return ptr;
     }
 
-    uint64_t body_id;
+    const uint64_t body_id;
 
 private:
     std::weak_ptr<Scene> m_scene;

@@ -315,7 +315,6 @@ int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
 int luaApi_SetFollowedBody(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-
     uint64_t body_id;
     if(lua_isinteger(_lua, 2))
         body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));

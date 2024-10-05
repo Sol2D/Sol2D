@@ -16,24 +16,13 @@
 
 #pragma once
 
-#include <Sol2D/Rect.h>
-#include <SDL3/SDL_surface.h>
-#include <optional>
+#include <Sol2D/GraphicsPackDefinition.h>
+#include <Sol2D/Lua/Aux/LuaForward.h>
 
-namespace Sol2D {
+namespace Sol2D::Lua {
 
-struct GraphicsRenderOptions
-{
-    GraphicsRenderOptions() :
-        angle_rad(0.0),
-        flip(SDL_FLIP_NONE),
-        flip_center()
-    {
-    }
+bool tryGetGraphicsPackDefinition(lua_State * _lua, int _idx, GraphicsPackDefinition & _result);
+bool tryGetGraphicsPackFrameDefinition(lua_State * _lua, int _idx, GraphicsPackFrameDefinition & _result);
+bool tryGetGraphicsPackSpriteDefinition(lua_State * _lua, int _idx, GraphicsPackSpriteDefinition & _result);
 
-    double angle_rad;
-    SDL_FlipMode flip;
-    std::optional<Point> flip_center;
-};
-
-} // namespace Sol2D
+} // namespace Sol2D::Lua

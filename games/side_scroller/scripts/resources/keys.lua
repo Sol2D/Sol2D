@@ -26,16 +26,6 @@ local keys_meta = {
         flyingPlatform3 = {
             main = 'main:flying-platform3'
         }
-    },
-    graphicPacks = {
-        player = {
-            idle = 'idle:player',
-            walk = 'walk:player',
-            jump = 'jump:player'
-        },
-        flyingPlatform3 = {
-            main = 'flying-platform-3'
-        }
     }
 }
 

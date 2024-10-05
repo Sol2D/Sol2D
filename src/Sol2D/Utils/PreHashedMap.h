@@ -36,7 +36,7 @@ public:
 
     explicit PreHashedKey(const InnerKey & _key) :
         key(_key),
-        hash(s_hash(_key))
+        hash(s_hash(key))
     {
     }
 

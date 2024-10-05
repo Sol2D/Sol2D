@@ -1,5 +1,5 @@
 if #script.arg.points < 2 then
-    print('Point count < 2, platform is static. Count:', #sol.script.arg.points)
+    print('Point count < 2, platform is static. Count:', #script.arg.points)
     return
 end
 

@@ -62,7 +62,7 @@ public:
     bool setFollowedBody(uint64_t _body_id);
     void resetFollowedBody();
     bool setBodyLayer(uint64_t _body_id, const std::string & _layer);
-    std::shared_ptr<GraphicsPack> getBodyShapeGraphicsPack(
+    GraphicsPack * getBodyShapeGraphicsPack(
         uint64_t _body_id,
         const Utils::PreHashedKey<std::string> & _shape_key,
         const Utils::PreHashedKey<std::string> & _graphics_key);

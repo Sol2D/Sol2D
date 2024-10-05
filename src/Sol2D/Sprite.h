@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include <Sol2D/GraphicsRenderOptions.h>
 #include <Sol2D/Def.h>
 #include <Sol2D/Color.h>
+#include <Sol2D/Rect.h>
 #include <SDL3/SDL.h>
 #include <filesystem>
 #include <optional>
@@ -52,7 +52,7 @@ public:
     void setDesinationSize(const Size & _size);
     void scale(float _scale_factor);
     void scale(float _scale_factor_x, float _scale_factor_y);
-    void render(const Point & _point, const GraphicsRenderOptions & _options = GraphicsRenderOptions());
+    void render(const Point & _point, float _angle_deg, SDL_FlipMode _flip_mode, const Point * _flip_center = nullptr);
 
 private:
     SDL_Renderer * mp_renderer;

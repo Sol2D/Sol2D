@@ -140,39 +140,6 @@ local function createPlayer()
         return
     end
     local frame_duration = 200
-
-    local graphics_idle = store:createGraphicsPack('player_idle')
-    graphics_idle:addFrame()
-    graphics_idle:addSprite(0, sprite_sheet, 0)
-
-    local graphics_right = store:createGraphicsPack('player_right')
-    graphics_right:addFrames(4, { duration = frame_duration })
-    graphics_right:addSprite(0, sprite_sheet, 3)
-    graphics_right:addSprite(1, sprite_sheet, 7)
-    graphics_right:addSprite(2, sprite_sheet, 11)
-    graphics_right:addSprite(3, sprite_sheet, 15)
-
-    local graphics_left = store:createGraphicsPack('player_left')
-    graphics_left:addFrames(4, { duration = frame_duration })
-    graphics_left:addSprite(0, sprite_sheet, 1)
-    graphics_left:addSprite(1, sprite_sheet, 5)
-    graphics_left:addSprite(2, sprite_sheet, 9)
-    graphics_left:addSprite(3, sprite_sheet, 13)
-
-    local graphics_up = store:createGraphicsPack('player_up')
-    graphics_up:addFrames(4, { duration = frame_duration })
-    graphics_up:addSprite(0, sprite_sheet, 2)
-    graphics_up:addSprite(1, sprite_sheet, 6)
-    graphics_up:addSprite(2, sprite_sheet, 10)
-    graphics_up:addSprite(3, sprite_sheet, 14)
-
-    local graphics_down = store:createGraphicsPack('player_down')
-    graphics_down:addFrames(4, { duration = frame_duration })
-    graphics_down:addSprite(0, sprite_sheet, 0)
-    graphics_down:addSprite(1, sprite_sheet, 4)
-    graphics_down:addSprite(2, sprite_sheet, 8)
-    graphics_down:addSprite(3, sprite_sheet, 12)
-
     local position = { x = -(size.w / 2), y = -(size.h / 2) }
     return scene:createBody(
         getStartPosition(),
@@ -189,23 +156,96 @@ local function createPlayer()
                     graphics = {
                         idle = {
                             position = position,
-                            graphics = graphics_idle
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 0 } } }
+                                }
+                            }
                         },
                         right = {
                             position = position,
-                            graphics = graphics_right
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 3 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 7 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 11 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 15 } } }
+                                }
+                            }
                         },
                         left = {
                             position = position,
-                            graphics = graphics_left
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 1 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 5 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 9 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 13 } } }
+                                }
+                            }
                         },
                         down = {
                             position = position,
-                            graphics = graphics_down
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 0 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 4 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 8 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 12 } } }
+                                }
+                            }
                         },
                         up = {
                             position = position,
-                            graphics = graphics_up
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 2 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 6 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 10 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 14 } } }
+                                },
+                            }
                         }
                     }
                 }
@@ -233,55 +273,6 @@ local function createSkeleton()
         return
     end
     local frame_duration = 80;
-
-    local graphics_idle = store:createGraphicsPack('skeleton_idle')
-    graphics_idle:addFrame()
-    graphics_idle:addSprite(0, sprite_sheet, 18)
-
-    local graphics_up = store:createGraphicsPack('skeleton_up')
-    graphics_up:addFrames(8, { duration = frame_duration })
-    graphics_up:addSprite(0, sprite_sheet, 1)
-    graphics_up:addSprite(1, sprite_sheet, 2)
-    graphics_up:addSprite(2, sprite_sheet, 3)
-    graphics_up:addSprite(3, sprite_sheet, 4)
-    graphics_up:addSprite(4, sprite_sheet, 5)
-    graphics_up:addSprite(5, sprite_sheet, 6)
-    graphics_up:addSprite(6, sprite_sheet, 7)
-    graphics_up:addSprite(7, sprite_sheet, 8)
-
-    local graphics_left = store:createGraphicsPack('skeleton_left')
-    graphics_left:addFrames(8, { duration = frame_duration })
-    graphics_left:addSprite(0, sprite_sheet, 10)
-    graphics_left:addSprite(1, sprite_sheet, 11)
-    graphics_left:addSprite(2, sprite_sheet, 12)
-    graphics_left:addSprite(3, sprite_sheet, 13)
-    graphics_left:addSprite(4, sprite_sheet, 14)
-    graphics_left:addSprite(5, sprite_sheet, 15)
-    graphics_left:addSprite(6, sprite_sheet, 16)
-    graphics_left:addSprite(7, sprite_sheet, 17)
-
-    local graphics_down = store:createGraphicsPack('skeleton_down')
-    graphics_down:addFrames(8, { duration = frame_duration })
-    graphics_down:addSprite(0, sprite_sheet, 19)
-    graphics_down:addSprite(1, sprite_sheet, 20)
-    graphics_down:addSprite(2, sprite_sheet, 21)
-    graphics_down:addSprite(3, sprite_sheet, 22)
-    graphics_down:addSprite(4, sprite_sheet, 23)
-    graphics_down:addSprite(5, sprite_sheet, 24)
-    graphics_down:addSprite(6, sprite_sheet, 25)
-    graphics_down:addSprite(7, sprite_sheet, 26)
-
-    local graphics_right = store:createGraphicsPack('skeleton_right')
-    graphics_right:addFrames(8, { duration = frame_duration })
-    graphics_right:addSprite(0, sprite_sheet, 28)
-    graphics_right:addSprite(1, sprite_sheet, 29)
-    graphics_right:addSprite(2, sprite_sheet, 30)
-    graphics_right:addSprite(3, sprite_sheet, 31)
-    graphics_right:addSprite(4, sprite_sheet, 32)
-    graphics_right:addSprite(5, sprite_sheet, 33)
-    graphics_right:addSprite(6, sprite_sheet, 34)
-    graphics_right:addSprite(7, sprite_sheet, 35)
-
     local position = { x = -(size.w / 2), y = -(size.h / 2) }
     local body_proto = store:createBodyPrototype(
         'skeleton',
@@ -299,23 +290,162 @@ local function createSkeleton()
                     graphics = {
                         idle = {
                             position = position,
-                            graphics = graphics_idle
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = {
+                                        { sprite = { spriteSheet = sprite_sheet, spriteIndex = 18 } },
+                                    }
+                                }
+                            }
                         },
                         right = {
                             position = position,
-                            graphics = graphics_right
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 28 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 29 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 30 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 31 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 32 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 33 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 34 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 35 } } }
+                                }
+                            }
                         },
                         left = {
                             position = position,
-                            graphics = graphics_left
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 10 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 11 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 12 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 13 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 14 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 15 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 16 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 17 } } }
+                                }
+                            }
                         },
                         up = {
                             position = position,
-                            graphics = graphics_up
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 1 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 2 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 3 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 4 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 5 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 6 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 7 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 8 } } }
+                                }
+                            }
                         },
                         down = {
                             position = position,
-                            graphics = graphics_down
+                            frames = {
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 19 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 20 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 21 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 22 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 23 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 24 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 25 } } }
+                                },
+                                {
+                                    duration = frame_duration,
+                                    sprites = { { sprite = { spriteSheet = sprite_sheet, spriteIndex = 26 } } }
+                                }
+                            }
                         }
                     }
                 }
@@ -337,6 +467,7 @@ end)()
 
 local player = createPlayer()
 local skeleton = createSkeleton()
+
 if not player or not skeleton then
     return;
 end
@@ -387,7 +518,7 @@ scene:subscribeToSensorBeginContact(function(contact)
 end)
 
 switch_view_button:subscribeOnClick(function()
-    if followed_body == player_body_id then
+    if followed_body == player then
         followed_body = skeleton
     else
         followed_body = player
