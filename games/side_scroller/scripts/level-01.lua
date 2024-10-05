@@ -59,6 +59,7 @@ local function createFlyingPlatforms(global_store, scene)
             )
         end
         local platform = scene:createBody(points[1], proto, { points = points })
+        platform:setLayer(keys.tilemap.layers.ground2)
         local platform_shape = platform:getShape(keys.shapes.oneWayPlatfrom.main)
         if platform_shape then
             platform_shape:setCurrentGraphics(keys.shapeGraphics.flyingPlatform3.main)

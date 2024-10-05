@@ -1,6 +1,13 @@
 local ONE_WAY_PLATFORM_SHAPE_KEY = 'one-way-platform'
 
 local keys_meta = {
+    tilemap = {
+        layers = {
+            ground1 = 'ground-1',
+            ground2 = 'ground-2',
+            places = 'places'
+        }
+    },
     bodies = {
         player = 'player',
         flyingPlatform3 = 'flying-platform3'
