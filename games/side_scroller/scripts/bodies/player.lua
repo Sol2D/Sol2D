@@ -31,7 +31,7 @@ local state = {
     inAir = false,
     footings = {},
     jumpTimeout = 0,
-    direction = Direction.LEFT,
+    direction = Direction.RIGHT,
     action = Action.IDLE
 }
 

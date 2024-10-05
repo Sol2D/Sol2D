@@ -268,8 +268,6 @@ struct GraphicsPackApiPusher
     }
 };
 
-
-
 } // namespace
 
 void Sol2D::Lua::pushGraphicsPackApi(
