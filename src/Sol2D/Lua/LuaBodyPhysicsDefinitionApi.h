@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include <Sol2D/BodyPhysicsDefinition.h>
+#include <Sol2D/World/BodyPhysicsDefinition.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
 
 namespace Sol2D::Lua {
 
-bool tryGetBodyPhysicsDefinition(lua_State * _lua, int _idx, BodyPhysicsDefinition & _physics);
+bool tryGetBodyPhysicsDefinition(lua_State * _lua, int _idx, World::BodyPhysicsDefinition & _physics);
 
 } // namespace Sol2D::Lua

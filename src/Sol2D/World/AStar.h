@@ -16,29 +16,28 @@
 
 #pragma once
 
+#include <box2d/box2d.h>
+#include <vector>
 #include <optional>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
-enum class BodyType
+struct AStarOptions
 {
-    Static = 0,
-    Dynamic = 1,
-    Kinematic = 2
+    AStarOptions() :
+        allow_diagonal_steps(false),
+        avoid_sensors(false)
+    {
+    }
+
+    bool allow_diagonal_steps;
+    bool avoid_sensors;
 };
 
-std::optional<BodyType> castToBodyType(std::integral auto _integer)
-{
-    switch(_integer) {
-    case static_cast<decltype(_integer)>(BodyType::Static):
-        return BodyType::Static;
-    case static_cast<decltype(_integer)>(BodyType::Dynamic):
-        return BodyType::Dynamic;
-    case static_cast<decltype(_integer)>(BodyType::Kinematic):
-        return BodyType::Kinematic;
-    default:
-        return std::nullopt;
-    }
-}
+std::optional<std::vector<b2Vec2>> aStarFindPath(
+    b2WorldId _world_id,
+    b2BodyId _body_id,
+    const b2Vec2 & _destination,
+    const AStarOptions & _options);
 
-} // namespace Sol2D
+} // namespace Sol2D::World

@@ -18,18 +18,21 @@
 
 #include <optional>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
-struct BodyPhysicsDefinition
+struct BodyShapePhysicsDefinition
 {
-    BodyPhysicsDefinition() :
-        fixed_rotation(false)
+    BodyShapePhysicsDefinition() :
+        is_sensor(false),
+        is_pre_solve_enabled(false)
     {
     }
 
-    std::optional<float> linear_damping;
-    std::optional<float> angular_damping;
-    bool fixed_rotation;
+    std::optional<float> density;
+    std::optional<float> restitution;
+    std::optional<float> friction;
+    bool is_sensor;
+    bool is_pre_solve_enabled;
 };
 
-} // namespace Sol2D
+} // namespace Sol2D::World

@@ -16,23 +16,24 @@
 
 #pragma once
 
-#include <optional>
+#include <Sol2D/World/BodyType.h>
+#include <Sol2D/World/BodyPhysicsDefinition.h>
+#include <Sol2D/World/BodyShapePhysicsDefinition.h>
+#include <string>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
-struct BodyShapePhysicsDefinition
+struct BodyOptions
 {
-    BodyShapePhysicsDefinition() :
-        is_sensor(false),
-        is_pre_solve_enabled(false)
+    BodyOptions() :
+        type(BodyType::Static)
     {
     }
 
-    std::optional<float> density;
-    std::optional<float> restitution;
-    std::optional<float> friction;
-    bool is_sensor;
-    bool is_pre_solve_enabled;
+    BodyType type;
+    std::optional<std::string> shape_key;
+    BodyPhysicsDefinition body_physics;
+    BodyShapePhysicsDefinition shape_physics;
 };
 
-} // namespace Sol2D
+} // namespace Sol2D::World

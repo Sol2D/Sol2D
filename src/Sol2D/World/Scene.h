@@ -16,21 +16,21 @@
 
 #pragma once
 
-#include <Sol2D/BodyDefinition.h>
-#include <Sol2D/BodyOptions.h>
-#include <Sol2D/Contact.h>
-#include <Sol2D/Canvas.h>
-#include <Sol2D/Workspace.h>
-#include <Sol2D/Box2dDebugDraw.h>
+#include <Sol2D/World/BodyDefinition.h>
+#include <Sol2D/World/BodyOptions.h>
+#include <Sol2D/World/Contact.h>
+#include <Sol2D/World/Box2dDebugDraw.h>
 #include <Sol2D/Tiles/TileMap.h>
 #include <Sol2D/Utils/Observable.h>
 #include <Sol2D/Utils/PreHashedMap.h>
+#include <Sol2D/Canvas.h>
+#include <Sol2D/Workspace.h>
 #include <boost/container/slist.hpp>
 #include <filesystem>
 #include <unordered_set>
 #include <functional>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
 struct SceneOptions
 {
@@ -168,4 +168,4 @@ inline boost::container::slist<const Tiles::TileMapObject *>
     return m_object_heap_ptr->findBasicObjects(_class);
 }
 
-} // namespace Sol2D
+} // namespace Sol2D::World

@@ -22,7 +22,7 @@
 #include <box2d/types.h>
 #include <functional>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
 class Box2dDebugDraw
 {
@@ -59,4 +59,4 @@ private:
     std::function<float(float)> m_translate_length;
 };
 
-} // namespace Sol2D
+} // namespace Sol2D::World

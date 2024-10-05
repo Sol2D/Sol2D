@@ -16,24 +16,29 @@
 
 #pragma once
 
-#include <Sol2D/BodyType.h>
-#include <Sol2D/BodyPhysicsDefinition.h>
-#include <Sol2D/BodyShapePhysicsDefinition.h>
-#include <string>
+#include <optional>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
-struct BodyOptions
+enum class BodyType
 {
-    BodyOptions() :
-        type(BodyType::Static)
-    {
-    }
-
-    BodyType type;
-    std::optional<std::string> shape_key;
-    BodyPhysicsDefinition body_physics;
-    BodyShapePhysicsDefinition shape_physics;
+    Static = 0,
+    Dynamic = 1,
+    Kinematic = 2
 };
 
-} // namespace Sol2D
+std::optional<BodyType> castToBodyType(std::integral auto _integer)
+{
+    switch(_integer) {
+    case static_cast<decltype(_integer)>(BodyType::Static):
+        return BodyType::Static;
+    case static_cast<decltype(_integer)>(BodyType::Dynamic):
+        return BodyType::Dynamic;
+    case static_cast<decltype(_integer)>(BodyType::Kinematic):
+        return BodyType::Kinematic;
+    default:
+        return std::nullopt;
+    }
+}
+
+} // namespace Sol2D::World

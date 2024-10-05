@@ -18,7 +18,7 @@
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/LuaStrings.h>
 
-using namespace Sol2D;
+using namespace Sol2D::World;
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
 

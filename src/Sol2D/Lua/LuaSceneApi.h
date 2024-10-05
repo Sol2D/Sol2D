@@ -18,12 +18,12 @@
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
 #include <Sol2D/Workspace.h>
-#include <Sol2D/Scene.h>
+#include <Sol2D/World/Scene.h>
 
 namespace Sol2D::Lua {
 
-void pushSceneApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Scene> _scene);
+void pushSceneApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<World::Scene> _scene);
 
-std::shared_ptr<Scene> tryGetScene(lua_State * _lua, int _idx);
+std::shared_ptr<World::Scene> tryGetScene(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

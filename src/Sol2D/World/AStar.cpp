@@ -14,12 +14,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/AStar.h>
+#include <Sol2D/World/AStar.h>
 #include <cmath>
 #include <map>
 #include <stack>
 
 using namespace Sol2D;
+using namespace Sol2D::World;
 
 namespace {
 
@@ -269,7 +270,7 @@ inline bool AStar::arePointsInRow(int32_t x1, int32_t y1, int32_t x2, int32_t y2
     return (x1 == x2 && x1 == x3) || (y1 == y2 && y1 == y3); // TODO: diagonal
 }
 
-std::optional<std::vector<b2Vec2>> Sol2D::aStarFindPath(
+std::optional<std::vector<b2Vec2>> Sol2D::World::aStarFindPath(
     b2WorldId _world,
     b2BodyId _body_id,
     const b2Vec2 & _destination,

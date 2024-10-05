@@ -18,24 +18,18 @@
 
 #include <optional>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
-enum class BodyShapeType
+struct BodyPhysicsDefinition
 {
-    Polygon,
-    Circle
+    BodyPhysicsDefinition() :
+        fixed_rotation(false)
+    {
+    }
+
+    std::optional<float> linear_damping;
+    std::optional<float> angular_damping;
+    bool fixed_rotation;
 };
 
-std::optional<BodyShapeType> castToBodyShapeType(std::integral auto _integer)
-{
-    switch(_integer) {
-    case static_cast<decltype(_integer)>(BodyShapeType::Polygon):
-        return BodyShapeType::Polygon;
-    case static_cast<decltype(_integer)>(BodyShapeType::Circle):
-        return BodyShapeType::Circle;
-    default:
-        return std::nullopt;
-    }
-}
-
-} // namespace Sol2D
+} // namespace Sol2D::World

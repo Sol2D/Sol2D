@@ -24,6 +24,7 @@
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D;
+using namespace Sol2D::World;
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
 

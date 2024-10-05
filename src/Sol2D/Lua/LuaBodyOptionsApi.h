@@ -17,10 +17,10 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/BodyOptions.h>
+#include <Sol2D/World/BodyOptions.h>
 
 namespace Sol2D::Lua {
 
-bool tryGetBodyOptions(lua_State * _lua, int _idx, BodyOptions & _body_options);
+bool tryGetBodyOptions(lua_State * _lua, int _idx, World::BodyOptions & _body_options);
 
 } // namespace Sol2D::Lua

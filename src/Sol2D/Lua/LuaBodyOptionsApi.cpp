@@ -19,7 +19,7 @@
 #include <Sol2D/Lua/LuaBodyShapePhysicsDefinitionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
-using namespace Sol2D;
+using namespace Sol2D::World;
 using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetBodyOptions(lua_State * _lua, int _idx, BodyOptions & _body_options)

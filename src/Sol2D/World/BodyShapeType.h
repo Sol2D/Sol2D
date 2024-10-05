@@ -16,37 +16,26 @@
 
 #pragma once
 
-#include <Sol2D/GraphicsPack.h>
-#include <SDL3/SDL_rect.h>
+#include <optional>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
-struct BodyShapeGraphicsOptions
+enum class BodyShapeType
 {
-    BodyShapeGraphicsOptions() :
-        position{.0f, .0f},
-        is_flipped_horizontally(false),
-        is_flipped_vertically(false)
-    {
-    }
-
-    Point position;
-    bool is_flipped_horizontally;
-    bool is_flipped_vertically;
-
-    SDL_FlipMode getFlip() const
-    {
-        union { int as_int; SDL_FlipMode as_flip_mode; } flip { .as_int = SDL_FLIP_NONE };
-        if(is_flipped_horizontally) flip.as_int |= SDL_FLIP_HORIZONTAL;
-        if(is_flipped_vertically) flip.as_int |= SDL_FLIP_VERTICAL;
-        return flip.as_flip_mode;
-    }
+    Polygon,
+    Circle
 };
 
-struct BodyShapeGraphics
+std::optional<BodyShapeType> castToBodyShapeType(std::integral auto _integer)
 {
-    GraphicsPack graphics;
-    BodyShapeGraphicsOptions options;
-};
+    switch(_integer) {
+    case static_cast<decltype(_integer)>(BodyShapeType::Polygon):
+        return BodyShapeType::Polygon;
+    case static_cast<decltype(_integer)>(BodyShapeType::Circle):
+        return BodyShapeType::Circle;
+    default:
+        return std::nullopt;
+    }
+}
 
-} // namespace Sol2D
+} // namespace Sol2D::World

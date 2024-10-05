@@ -23,7 +23,7 @@
 #include <string>
 #include <optional>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
 struct ContactSide
 {
@@ -62,4 +62,4 @@ public:
     virtual bool preSolveContact(const PreSolveContact & _contact) = 0;
 };
 
-} // namespace Sol2D
+} // namespace Sol2D::World

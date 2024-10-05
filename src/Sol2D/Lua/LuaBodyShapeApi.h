@@ -17,13 +17,13 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Scene.h>
+#include <Sol2D/World/Scene.h>
 
 namespace Sol2D::Lua {
 
 void pushBodyShapeApi(
     lua_State * _lua,
-    std::shared_ptr<Scene> _scene,
+    std::shared_ptr<World::Scene> _scene,
     uint64_t _body_id,
     const Utils::PreHashedKey<std::string> & _shape_key);
 

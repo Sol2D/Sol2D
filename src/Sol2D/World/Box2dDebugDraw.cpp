@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Box2dDebugDraw.h>
+#include <Sol2D/World/Box2dDebugDraw.h>
 #include <Sol2D/SDL/SDL.h>
 #include <box2d/box2d.h>
 
-using namespace Sol2D;
+using namespace Sol2D::World;
 
 Box2dDebugDraw::Box2dDebugDraw(
     SDL_Renderer & _renderer,

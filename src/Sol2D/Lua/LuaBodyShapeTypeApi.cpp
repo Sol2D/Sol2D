@@ -18,8 +18,9 @@
 #include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
-#include <Sol2D/BodyShapeType.h>
+#include <Sol2D/World/BodyShapeType.h>
 
+using namespace Sol2D::World;
 using namespace Sol2D::Lua::Aux;
 
 void Sol2D::Lua::pushBodyShapeTypeEnum(lua_State * _lua)

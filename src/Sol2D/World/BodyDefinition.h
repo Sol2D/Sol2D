@@ -16,19 +16,17 @@
 
 #pragma once
 
+#include <Sol2D/World/BodyType.h>
+#include <Sol2D/World/BodyShapeType.h>
+#include <Sol2D/World/BodyShapePhysicsDefinition.h>
+#include <Sol2D/World/BodyPhysicsDefinition.h>
 #include <Sol2D/GraphicsPack.h>
-#include <Sol2D/BodyType.h>
-#include <Sol2D/BodyShapeType.h>
-#include <Sol2D/GraphicsPackDefinition.h>
-#include <Sol2D/BodyShapePhysicsDefinition.h>
-#include <Sol2D/BodyPhysicsDefinition.h>
-#include <Sol2D/Rect.h>
 #include <SDL3/SDL_surface.h>
 #include <filesystem>
 #include <variant>
 #include <vector>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
 struct PolygonShapeDefinition
 {
@@ -79,4 +77,4 @@ struct BodyDefinition
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> shapes;
 };
 
-} // namespace Sol2D
+} // namespace Sol2D::World

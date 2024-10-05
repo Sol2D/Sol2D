@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <Sol2D/Contact.h>
+#include <Sol2D/World/Contact.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
 
 namespace Sol2D::Lua {
 
-void pushContact(lua_State * _lua, const Contact & _contact);
-void pushContact(lua_State * _lua, const SensorContact & _contact);
-void pushContact(lua_State * _lua, const PreSolveContact & _contact);
+void pushContact(lua_State * _lua, const World::Contact & _contact);
+void pushContact(lua_State * _lua, const World::SensorContact & _contact);
+void pushContact(lua_State * _lua, const World::PreSolveContact & _contact);
 
 } // namespace Sol2D::Lua

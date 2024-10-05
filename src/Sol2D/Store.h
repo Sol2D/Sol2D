@@ -17,7 +17,7 @@
 #pragma once
 
 #include <Sol2D/View.h>
-#include <Sol2D/Scene.h>
+#include <Sol2D/World/Scene.h>
 #include <Sol2D/Forms/Form.h>
 #include <Sol2D/SDL/TTF.h>
 #include <Sol2D/SDL/Mixer.h>
@@ -54,23 +54,23 @@ struct Utils::ObjectFactory<SpriteSheet>
 };
 
 template<>
-struct Utils::ObjectFactory<BodyDefinition>
+struct Utils::ObjectFactory<World::BodyDefinition>
 {
-    std::shared_ptr<BodyDefinition> produce(std::shared_ptr<BodyDefinition> _definition) const
+    std::shared_ptr<World::BodyDefinition> produce(std::shared_ptr<World::BodyDefinition> _definition) const
     {
         return _definition;
     }
 };
 
 template<>
-struct Utils::ObjectFactory<Scene>
+struct Utils::ObjectFactory<World::Scene>
 {
-    std::shared_ptr<Scene> produce(
-        const SceneOptions & _options,
+    std::shared_ptr<World::Scene> produce(
+        const World::SceneOptions & _options,
         const Workspace & _workspace,
         SDL_Renderer & _renderer) const
     {
-        return std::make_shared<Scene>(_options, _workspace, _renderer);
+        return std::make_shared<World::Scene>(_options, _workspace, _renderer);
     }
 };
 
@@ -114,8 +114,8 @@ using Store = Utils::ObjectStore<
     View,
     Sprite,
     SpriteSheet,
-    BodyDefinition,
-    Scene,
+    World::BodyDefinition,
+    World::Scene,
     Forms::Form,
     TTF_Font,
     Mix_Chunk,

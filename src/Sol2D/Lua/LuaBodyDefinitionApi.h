@@ -16,12 +16,12 @@
 
 #pragma once
 
-#include <Sol2D/BodyDefinition.h>
+#include <Sol2D/World/BodyDefinition.h>
 #include <Sol2D/Lua/Aux/LuaForward.h>
 #include <memory>
 
 namespace Sol2D::Lua {
 
-std::unique_ptr<BodyDefinition> tryGetBodyDefinition(lua_State * _lua, int _idx);
+std::unique_ptr<World::BodyDefinition> tryGetBodyDefinition(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

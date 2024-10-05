@@ -17,10 +17,10 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Scene.h>
+#include <Sol2D/World/Scene.h>
 
 namespace Sol2D::Lua {
 
-bool tryGetSceneOptions(lua_State * _lua, int _idx, SceneOptions & _options);
+bool tryGetSceneOptions(lua_State * _lua, int _idx, World::SceneOptions & _options);
 
 } // namespace Sol2D::Lua

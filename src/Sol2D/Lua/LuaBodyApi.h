@@ -17,11 +17,11 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Scene.h>
+#include <Sol2D/World/Scene.h>
 
 namespace Sol2D::Lua {
 
-void pushBodyApi(lua_State * _lua, std::shared_ptr<Scene> _scene, uint64_t _body_id);
+void pushBodyApi(lua_State * _lua, std::shared_ptr<World::Scene> _scene, uint64_t _body_id);
 
 bool tryGetBodyId(lua_State * _lua, int _idx, uint64_t * _id);
 

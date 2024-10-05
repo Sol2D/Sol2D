@@ -16,28 +16,37 @@
 
 #pragma once
 
-#include <box2d/box2d.h>
-#include <vector>
-#include <optional>
+#include <Sol2D/GraphicsPack.h>
+#include <SDL3/SDL_rect.h>
 
-namespace Sol2D {
+namespace Sol2D::World {
 
-struct AStarOptions
+struct BodyShapeGraphicsOptions
 {
-    AStarOptions() :
-        allow_diagonal_steps(false),
-        avoid_sensors(false)
+    BodyShapeGraphicsOptions() :
+        position{.0f, .0f},
+        is_flipped_horizontally(false),
+        is_flipped_vertically(false)
     {
     }
 
-    bool allow_diagonal_steps;
-    bool avoid_sensors;
+    Point position;
+    bool is_flipped_horizontally;
+    bool is_flipped_vertically;
+
+    SDL_FlipMode getFlip() const
+    {
+        union { int as_int; SDL_FlipMode as_flip_mode; } flip { .as_int = SDL_FLIP_NONE };
+        if(is_flipped_horizontally) flip.as_int |= SDL_FLIP_HORIZONTAL;
+        if(is_flipped_vertically) flip.as_int |= SDL_FLIP_VERTICAL;
+        return flip.as_flip_mode;
+    }
 };
 
-std::optional<std::vector<b2Vec2>> aStarFindPath(
-    b2WorldId _world_id,
-    b2BodyId _body_id,
-    const b2Vec2 & _destination,
-    const AStarOptions & _options);
+struct BodyShapeGraphics
+{
+    GraphicsPack graphics;
+    BodyShapeGraphicsOptions options;
+};
 
-} // namespace Sol2D
+} // namespace Sol2D::World

@@ -14,14 +14,15 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Scene.h>
+#include <Sol2D/World/Scene.h>
+#include <Sol2D/World/AStar.h>
 #include <Sol2D/Tiles/Tmx.h>
 #include <Sol2D/Utils/Observable.h>
 #include <Sol2D/SDL/SDL.h>
-#include <Sol2D/AStar.h>
 #include <box2d/box2d.h>
 
 using namespace Sol2D;
+using namespace Sol2D::World;
 using namespace Sol2D::SDL;
 using namespace Sol2D::Tiles;
 using namespace Sol2D::Utils;

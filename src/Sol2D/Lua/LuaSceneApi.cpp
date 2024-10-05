@@ -30,6 +30,7 @@
 #include <Sol2D/Lua/Aux/LuaScript.h>
 
 using namespace Sol2D;
+using namespace Sol2D::World;
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
 using namespace Sol2D::Utils;

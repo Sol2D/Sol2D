@@ -19,7 +19,7 @@
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaManifoldApi.h>
 
-using namespace Sol2D;
+using namespace Sol2D::World;
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
 
