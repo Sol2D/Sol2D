@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Tiles/TileMapLayer.h>
+#include <Sol2D/Tiles/TileMapLayerContainer.h>
 #include <Sol2D/Color.h>
 #include <Sol2D/Def.h>
 

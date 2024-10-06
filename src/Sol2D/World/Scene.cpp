@@ -840,24 +840,24 @@ void Scene::drawCircle(const TileMapCircle & _circle)
 
 void Scene::drawTileLayer(const TileMapTileLayer & _layer)
 {
-    Rect camera;
-    camera.x = m_world_offset.x;
-    camera.y = m_world_offset.y;
+    Rect viewport;
+    viewport.x = m_world_offset.x;
+    viewport.y = m_world_offset.y;
     {
         int w, h;
         SDL_GetCurrentRenderOutputSize(&mr_renderer, &w, &h);
-        camera.w = static_cast<float>(w);
-        camera.h = static_cast<float>(h);
+        viewport.w = static_cast<float>(w);
+        viewport.h = static_cast<float>(h);
     }
 
-    const float first_col = std::floor(camera.x / m_tile_map_ptr->getTileWidth());
-    const float first_row = std::floor(camera.y / m_tile_map_ptr->getTileHeight());
-    const float last_col = std::ceil((camera.x + camera.w) / m_tile_map_ptr->getTileWidth());
-    const float last_row = std::ceil((camera.y + camera.h) / m_tile_map_ptr->getTileHeight());
+    const float first_col = std::floor(viewport.x / m_tile_map_ptr->getTileWidth());
+    const float first_row = std::floor(viewport.y / m_tile_map_ptr->getTileHeight());
+    const float last_col = std::ceil((viewport.x + viewport.w) / m_tile_map_ptr->getTileWidth());
+    const float last_row = std::ceil((viewport.y + viewport.h) / m_tile_map_ptr->getTileHeight());
     const Point start_position =
     {
-        .x = first_col * m_tile_map_ptr->getTileWidth() - camera.x,
-        .y = first_row * m_tile_map_ptr->getTileHeight() - camera.y
+        .x = first_col * m_tile_map_ptr->getTileWidth() - viewport.x,
+        .y = first_row * m_tile_map_ptr->getTileHeight() - viewport.y
     };
     const Size tile_map_cell_size =
     {
@@ -867,10 +867,16 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
 
     SDL_FRect tile_rect;
     SDL_FRect dest_rect;
-    for(int32_t row = static_cast<int32_t>(first_row), dest_row = 0; row <= static_cast<int32_t>(last_row); ++row, ++dest_row)
-    {
-        for(int32_t col = static_cast<int32_t>(first_col), dest_col = 0; col <= static_cast<int32_t>(last_col); ++col, ++dest_col)
-        {
+    for(
+        int32_t row = static_cast<int32_t>(first_row), dest_row = 0;
+        row <= static_cast<int32_t>(last_row);
+        ++row, ++dest_row
+    ) {
+        for(
+            int32_t col = static_cast<int32_t>(first_col), dest_col = 0;
+            col <= static_cast<int32_t>(last_col);
+            ++col, ++dest_col
+        ) {
             const Tile * tile = _layer.getTile(col, row);
             if(!tile) continue;
 

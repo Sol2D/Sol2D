@@ -28,7 +28,6 @@
 
 namespace Sol2D::Tiles {
 
-
 template<typename T>
 concept TileMapObjectConcept =
     std::same_as<T, TileMapObject> ||
