@@ -23,6 +23,9 @@ local keys_meta = {
         player = {
             main = 'main:player',
             bottomSensor = 'sensor-bottom:player'
+        },
+        water = {
+            main = 'water'
         }
     },
     shapeGraphics = {

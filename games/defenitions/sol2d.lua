@@ -85,6 +85,7 @@ script = nil
 ---@field shapeKey string?
 ---@field bodyPhysics BodyPhysicsDefinition?
 ---@field shapePhysics BodyShapePhysicsDefinition?
+---@see sol.BodyType
 
 ---@class BodyDefinition
 ---@field type integer

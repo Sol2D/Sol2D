@@ -17,6 +17,11 @@ if not sound_effect_swing then
     error('Sound effect ' .. keys.soundEffects.swing .. ' not found')
 end
 
+local start_point = scene:getTileMapObjectByName('start-position')
+if not start_point then
+    error('Start position not found')
+end
+
 ---@type BodyContactObserver
 local contact_observer = script.arg.contactObserver
 
@@ -27,8 +32,7 @@ if not player_main_shape then
     error("Player's main shape not found")
 end
 
-
-
+local METERS_PER_PIXEL = script.arg.METERS_PER_PIXEL
 local WALK_VELOCITY = 5
 local JUMP_DELAY = 15
 
@@ -171,6 +175,11 @@ contact_observer.setSensorBeginContactListener(player_id, function (sensor, visi
             end
             state.jumping = false
         end
+    elseif sensor.shapeKey == keys.shapes.water.main then
+        player:setPosition({
+            x = start_point.position.x * METERS_PER_PIXEL,
+            y = start_point.position.y * METERS_PER_PIXEL
+         })
     end
 end)
 

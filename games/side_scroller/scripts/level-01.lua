@@ -150,8 +150,24 @@ local function createScene(global_store, local_store)
             }
         }
     )
+    scene:createBodiesFromMapObjects(
+        'water',
+        {
+            shapeKey = keys.shapes.water.main,
+            shapePhysics = {
+                isSensor = true
+            }
+        }
+    )
     local observer = BodyContactObserver.new()
-    createPlayer(global_store, scene, { contactObserver = observer })
+    createPlayer(
+        global_store,
+        scene,
+        {
+            contactObserver = observer,
+            METERS_PER_PIXEL = METERS_PER_PIXEL
+        }
+    )
     createFlyingPlatforms(global_store, scene)
     local pre_solve_subscription = scene:subscribeToPreSolveContact(preSolveContact)
     local contact_subsciptions = createContactSubscriptions(scene, observer)
