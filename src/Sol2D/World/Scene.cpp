@@ -20,6 +20,7 @@
 #include <Sol2D/Utils/Observable.h>
 #include <Sol2D/SDL/SDL.h>
 #include <box2d/box2d.h>
+#include <unordered_set>
 
 using namespace Sol2D;
 using namespace Sol2D::World;
@@ -865,8 +866,10 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
         .h = static_cast<float>(m_tile_map_ptr->getTileHeight())
     };
 
+    std::unordered_set<const TileMapTileLayerCell *> extra_cells;
     SDL_FRect tile_rect;
     SDL_FRect dest_rect;
+
     for(
         int32_t row = static_cast<int32_t>(first_row), dest_row = 0;
         row <= static_cast<int32_t>(last_row);
@@ -877,13 +880,21 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
             col <= static_cast<int32_t>(last_col);
             ++col, ++dest_col
         ) {
-            const Tile * tile = _layer.getTile(col, row);
-            if(!tile) continue;
+            const TileMapTileLayerCell * cell = _layer.getCell(col, row);
+            if(!cell) continue;
 
-            tile_rect.x = tile->getSourceX();
-            tile_rect.y = tile->getSourceY();
-            tile_rect.w = tile->getWidth();
-            tile_rect.h = tile->getHeight();
+            if(!cell->master_cells.empty())
+            {
+                // The large tiles are partially visible, but their main tile is outside the viewport
+                extra_cells.insert(cell->master_cells.cbegin(), cell->master_cells.cend());
+            }
+
+            if(!cell->tile) continue;
+
+            tile_rect.x = cell->tile->getSourceX();
+            tile_rect.y = cell->tile->getSourceY();
+            tile_rect.w = cell->tile->getWidth();
+            tile_rect.h = cell->tile->getHeight();
 
             dest_rect.x = start_position.x + dest_col * tile_map_cell_size.w;
             dest_rect.y = start_position.y + dest_row * tile_map_cell_size.h;
@@ -895,8 +906,31 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
             else if(tile_rect.h > tile_map_cell_size.h)
                 dest_rect.y -= tile_rect.h - tile_map_cell_size.h;
 
-            SDL_RenderTexture(&mr_renderer, &tile->getSource(), &tile_rect, &dest_rect);
+            SDL_RenderTexture(&mr_renderer, &cell->tile->getSource(), &tile_rect, &dest_rect);
         }
+    }
+
+    for(const auto * cell : extra_cells)
+    {
+        if(cell->x >= first_col && cell->x < last_col && cell->y >= first_row && cell->y < last_row)
+        {
+            // Already drawn by loop above
+            continue;
+        }
+        tile_rect.x = cell->tile->getSourceX();
+        tile_rect.y = cell->tile->getSourceY();
+        tile_rect.w = cell->tile->getWidth();
+        tile_rect.h = cell->tile->getHeight();
+
+        dest_rect.x = (_layer.getX() + cell->x) * tile_map_cell_size.w - viewport.x;
+        dest_rect.y = (_layer.getY() + cell->y) * tile_map_cell_size.h - viewport.y;
+        dest_rect.w = tile_rect.w;
+        dest_rect.h = tile_rect.h;
+
+        if(tile_rect.h > tile_map_cell_size.h)
+            dest_rect.y -= tile_rect.h - tile_map_cell_size.h;
+
+        SDL_RenderTexture(&mr_renderer, &cell->tile->getSource(), &tile_rect, &dest_rect);
     }
 }
 

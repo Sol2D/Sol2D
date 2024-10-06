@@ -56,25 +56,7 @@ public:
     };
 
 public:
-    TileMap(const TileHeap & _tile_heap, const ObjectHeap & _object_heap) :
-        TileMapLayerContainer(_tile_heap, _object_heap),
-        m_orientation(Orientation::Orthogonal),
-        m_render_order(RenderOrder::RightDown),
-        m_x(0),
-        m_y(0),
-        m_width(0),
-        m_height(0),
-        m_tile_width(0),
-        m_tile_height(0),
-        m_hex_side_length(0),
-        m_stagger_axis(Axis::Y),
-        m_stagger_index(StaggerIndex::Odd),
-        m_parallax_origin_x(0),
-        m_parallax_origin_y(0),
-        m_background_color{ 0, 0, 0, 0 }
-    {
-    }
-
+    TileMap(const TileHeap & _tile_heap, const ObjectHeap & _object_heap);
     void setClass(const char * _class) { m_class = _class ? _class : std::string(); }
     const std::string & getClass() const { return m_class; }
     void setOrientation(Orientation _orientation) { m_orientation = _orientation; }
@@ -87,27 +69,7 @@ public:
     uint32_t getWidth() const { return m_width; }
     void setHeight(uint32_t _height) { m_height = _height; }
     uint32_t getHeight() const { return m_height; }
-
-    void expand(int _x, int _y, uint32_t _width, uint32_t _height) // TODO: not inline
-    {
-        int32_t delta_x = m_x - _x;
-        if(delta_x > 0)
-        {
-            m_x -= delta_x;
-            m_width += delta_x;
-        }
-        int32_t delta_y = m_y - _y;
-        if(delta_y > 0)
-        {
-            m_y -= delta_y;
-            m_height += delta_y;
-        }
-        if(m_width < _width)
-            m_width = _width;
-        if(m_height < _height)
-            m_height = _height;
-    }
-
+    void expand(int _x, int _y, uint32_t _width, uint32_t _height);
     void setTileWidth(uint32_t _width) { m_tile_width = _width; }
     uint32_t getTileWidth() const { return m_tile_width; }
     void setTileHeight(uint32_t _height) { m_tile_height = _height; }
