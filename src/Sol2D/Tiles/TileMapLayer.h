@@ -144,14 +144,15 @@ public:
     }
 
     virtual ~TileMapLayerContainer();
-    TileMapTileLayer & createTileLayer(uint32_t _id,
-                                      const std::string & _name,
-                                      uint32_t _tile_width,
-                                      uint32_t _tile_height,
-                                      int32_t _x,
-                                      int32_t _y,
-                                      uint32_t _width,
-                                      uint32_t _height);
+    TileMapTileLayer & createTileLayer(
+        uint32_t _id,
+        const std::string & _name,
+        uint32_t _tile_width,
+        uint32_t _tile_height,
+        int32_t _x,
+        int32_t _y,
+        uint32_t _width,
+        uint32_t _height);
     TileMapObjectLayer & createObjectLayer(uint32_t _id, const std::string & _name);
     TileMapImageLayer & createImageLayer(uint32_t _id, const std::string & _name);
     TileMapGroupLayer & createGroupLayer(uint32_t _id, const std::string & _name);

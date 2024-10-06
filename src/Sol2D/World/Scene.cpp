@@ -857,11 +857,10 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
     const float start_x = first_col * m_tile_map_ptr->getTileWidth() - camera.x;
     const float start_y = first_row * m_tile_map_ptr->getTileHeight() - camera.y;
 
-    SDL_FRect src_rect;
-    SDL_FRect dest_rect
+    SDL_FRect tile_rect;
+    SDL_FRect dest_rect = { .x = .0f, .y = .0f, .w = .0f, .h = .0f };
+    Size tile_map_cell_size =
     {
-        .x = .0f,
-        .y = .0f,
         .w = static_cast<float>(m_tile_map_ptr->getTileWidth()),
         .h = static_cast<float>(m_tile_map_ptr->getTileHeight())
     };
@@ -873,15 +872,22 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
             const Tile * tile = _layer.getTile(col, row);
             if(!tile) continue;
 
-            src_rect.x = tile->getSourceX();
-            src_rect.y = tile->getSourceY();
-            src_rect.w = tile->getWidth();
-            src_rect.h = tile->getHeight();
+            tile_rect.x = tile->getSourceX();
+            tile_rect.y = tile->getSourceY();
+            tile_rect.w = tile->getWidth();
+            tile_rect.h = tile->getHeight();
 
-            dest_rect.x = start_x + dest_col * m_tile_map_ptr->getTileWidth();
-            dest_rect.y = start_y + dest_row * m_tile_map_ptr->getTileHeight();
+            dest_rect.x = start_x + dest_col * tile_map_cell_size.w;
+            dest_rect.y = start_y + dest_row * tile_map_cell_size.h;
+            dest_rect.w = tile_rect.w;
+            dest_rect.h = tile_rect.h;
 
-            SDL_RenderTexture(&mr_renderer, &tile->getSource(), &src_rect, &dest_rect);
+            if(tile_rect.h < tile_map_cell_size.h)
+                dest_rect.y += tile_map_cell_size.h - tile_rect.h;
+            else if(tile_rect.h > tile_map_cell_size.h)
+                dest_rect.y -= tile_rect.h - tile_map_cell_size.h;
+
+            SDL_RenderTexture(&mr_renderer, &tile->getSource(), &tile_rect, &dest_rect);
         }
     }
 }

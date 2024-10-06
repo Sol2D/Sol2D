@@ -33,8 +33,14 @@ TileSet & TileHeap::createTileSet()
     return *set;
 }
 
-Tile * TileHeap::createTile(uint32_t _gid, const TileSet & _set, std::shared_ptr<SDL_Texture> _source,
-                 int32_t _src_x, int32_t _src_y, uint32_t _width, uint32_t _height)
+Tile * TileHeap::createTile(
+    uint32_t _gid,
+    const TileSet & _set,
+    std::shared_ptr<SDL_Texture> _source,
+    int32_t _src_x,
+    int32_t _src_y,
+    uint32_t _width,
+    uint32_t _height)
 {
     if(m_tiles.contains(_gid))
         return nullptr;

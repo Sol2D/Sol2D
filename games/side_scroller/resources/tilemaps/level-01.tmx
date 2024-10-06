@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#ddf8ff" nextlayerid="11" nextobjectid="37">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#ddf8ff" nextlayerid="11" nextobjectid="40">
  <tileset firstgid="1" source="freetileset/tiles.tsx"/>
  <tileset firstgid="19" source="freetileset/objects.tsx"/>
  <tileset firstgid="32" source="freetileset/background.tsx"/>
@@ -15,7 +15,7 @@
  </layer>
  <layer id="1" name="ground-1" width="100" height="20">
   <data encoding="base64" compression="zstd">
-   KLUv/WBAHoUHABQDAA0AAAAODwADAAEAAAACAgYABAAAAAUKAAAACwYADAAAAAkNAQEEAQUEBwAAAAgDBkqgcG11cIITicxRD/XJKTNKB5XqUM7H4+TpsOnxl3K5lsE92c5PiB/+TCtSA5OmulD4SaorHeXwgcmpfOlzInNRu9M8+WTRz4m8yuHppJOU+lbP8pNK9hHeN52emZbLceQEptL5+J+VOJph6EOSmnfpTJrFVOnxhTohUIIpYV1NciarCiftEqpH+iWcyeJ3N/l20xWTQ32Mnxs2uRqflPt6ifwy2cZyAdRydqJL5JfJN5aLqz1NKrcTFPw4Bg==
+   KLUv/WBAHsUHACQDAA0AAAAODwADAAEAAAACAgYABAAAAAUKAAAACwYADAAAAAkNAQEEAQUNBwAAAAgYAwZNoHBtdXCCI4GIHPX1ySkzSgeV6lDOx+Pk6bDp8ZdyuZbBPdnOTwg//CWtRA1MgmqAwi+kutNRCh+YnMqSPicyT570Mw4jqDzFk08+/ZySw1qkczqTTB7sWzzLTyHZR3jf6fTMtFyOIycwlc7H/6zE0QxDH5LUvEtn0iymSo8v1AmBEkwJ62qSM1lVOGmXUD3SL+FMFr+7ybebrpgc6kNcbtik1fi8/NY78kvJLpYLVMtZje7ILyW/WC5Ue5qq3E5Q8L8Y
   </data>
  </layer>
  <objectgroup id="6" name="places">
@@ -57,5 +57,6 @@
   </object>
   <object id="35" type="one-way-platfrom" x="9088" y="510" width="640" height="60"/>
   <object id="36" type="obstacle" x="7297" y="1715.67" width="75.6667" height="76"/>
+  <object id="37" type="one-way-platfrom" x="255" y="1793" width="383" height="44"/>
  </objectgroup>
 </map>

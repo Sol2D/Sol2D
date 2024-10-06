@@ -71,8 +71,12 @@ class XmlLoader
     S2_DISABLE_COPY_AND_MOVE(XmlLoader)
 
 protected:
-    XmlLoader(SDL_Renderer & _renderer, TileHeap & _heap,
-              ObjectHeap & _object_heap, TileMap & _map, const fs::path & _path);
+    XmlLoader(
+        SDL_Renderer & _renderer,
+        TileHeap & _heap,
+        ObjectHeap & _object_heap,
+        TileMap & _map,
+        const fs::path & _path);
     uint32_t readRequiredUintAttribute(const XMLElement & _xml_element, const char * _attr);
     uint32_t readRequiredPositiveUintAttribute(const XMLElement & _xml_element, const char * _attr);
     int32_t readRequiredIntAttribute(const XMLElement & _xml_element, const char * _attr);
@@ -109,14 +113,37 @@ private:
     void loadTileLayer(const XMLElement & _xml, TileMapLayerContainer & _container);
     TileMapLayerDefinition readLayerDefinition(const XMLElement & _xml);
     void readLayer(const XMLElement & _xml, TileMapLayer & _layer);
-    void loadTileLayerChunk(const XMLElement & _xml, const char *_encoding, const char *_compression,
-                            int32_t _x, int32_t _y, uint32_t _width, uint32_t _height, TileMapLayerData &_data);
-    void loadTileLayerDataUnencoded(const XMLElement & _xml, int32_t _x, int32_t _y,
-                                    uint32_t _width, uint32_t _height, TileMapLayerData &_data);
-    void loadTileLayerDataBase64(const XMLElement & _xml, const char *_compression, int32_t _x, int32_t _y,
-                                 uint32_t _width, uint32_t _height, TileMapLayerData &_data);
-    void loadTileLayerDataCsv(const XMLElement & _xml, int32_t _x, int32_t _y,
-                              uint32_t _width, uint32_t _height, TileMapLayerData &_data);
+    void loadTileLayerChunk(
+        const XMLElement & _xml,
+        const char *_encoding,
+        const char *_compression,
+        int32_t _x,
+        int32_t _y,
+        uint32_t _width,
+        uint32_t _height,
+        TileMapLayerData &_data);
+    void loadTileLayerDataUnencoded(
+        const XMLElement & _xml,
+        int32_t _x,
+        int32_t _y,
+        uint32_t _width,
+        uint32_t _height,
+        TileMapLayerData &_data);
+    void loadTileLayerDataBase64(
+        const XMLElement & _xml,
+        const char *_compression,
+        int32_t _x,
+        int32_t _y,
+        uint32_t _width,
+        uint32_t _height,
+        TileMapLayerData &_data);
+    void loadTileLayerDataCsv(
+        const XMLElement & _xml,
+        int32_t _x,
+        int32_t _y,
+        uint32_t _width,
+        uint32_t _height,
+        TileMapLayerData &_data);
     void loadObjectLayer(const XMLElement & _xml, TileMapLayerContainer & _container);
     void loadObject(const XMLElement & _xml, TileMapObjectLayer & _layer);
     void loadPoints(const XMLElement & _xml, TileMapPolyX & _poly);
@@ -136,17 +163,24 @@ private:
 class TileSetXmlLoader : private XmlLoader
 {
 public:
-    TileSetXmlLoader(SDL_Renderer & _renderer,
-                     TileHeap & _tile_heap,
-                     ObjectHeap & _object_heap,
-                     TileMap & _map,
-                     const fs::path & _path);
+    TileSetXmlLoader(
+        SDL_Renderer & _renderer,
+        TileHeap & _tile_heap,
+         ObjectHeap & _object_heap,
+         TileMap & _map,
+         const fs::path & _path);
     void loadFromFile(uint32_t _first_gid);
     void loadFromXml(const XMLElement & _xml, uint32_t _first_gid);
 
 private:
-    void makeTiles(std::shared_ptr<SDL_Texture> _texture, TileSet & _set, uint32_t _first_gid, uint32_t _tile_width,
-                   uint32_t _tile_height, uint32_t _spacing, uint32_t _margin);
+    void makeTiles(
+        std::shared_ptr<SDL_Texture> _texture,
+        TileSet & _set,
+        uint32_t _first_gid,
+        uint32_t _tile_width,
+        uint32_t _tile_height,
+        uint32_t _spacing,
+        uint32_t _margin);
     void makeTile(const XMLElement & _xml_tile, TileSet & _set, uint32_t _first_gid);
 
 public:
@@ -190,9 +224,10 @@ inline void TileMapLayerData::addTile(int32_t _x, int32_t _y, uint32_t _gid)
     m_tiles.push_back({ .x = _x, .y = _y, .gid = _gid });
 }
 
-TileMapTileLayer * TileMapLayerData::createLayer(TileMapLayerContainer & _container,
-                                                uint32_t _tile_width,
-                                                uint32_t _tile_height)
+TileMapTileLayer * TileMapLayerData::createLayer(
+    TileMapLayerContainer & _container,
+    uint32_t _tile_width,
+    uint32_t _tile_height)
 {
     int32_t width = m_last_x - m_x;
     int32_t height = m_last_y - m_y;
@@ -213,11 +248,13 @@ TileMapTileLayer * TileMapLayerData::createLayer(TileMapLayerContainer & _contai
     return &layer;
 }
 
-inline XmlLoader::XmlLoader(SDL_Renderer & _renderer,
-                            TileHeap & _tile_heap,
-                            ObjectHeap & _object_heap,
-                            TileMap &_map,
-                            const fs::path & _path) :
+inline XmlLoader::XmlLoader(
+    SDL_Renderer & _renderer,
+    TileHeap & _tile_heap,
+    ObjectHeap & _object_heap,
+    TileMap &_map,
+    const fs::path & _path
+) :
     mr_renderer(_renderer),
     mr_tile_heap(_tile_heap),
     mr_object_heap(_object_heap),
@@ -387,12 +424,14 @@ std::shared_ptr<SDL_Texture> XmlLoader::parseImage(const XMLElement & _xml)
     return wrapTexture(texture);
 }
 
-inline TileMapXmlLoader::TileMapXmlLoader(SDL_Renderer & _renderer,
-                                          TileHeap & _tile_heap,
-                                          ObjectHeap & _object_heap,
-                                          TileMap & _map,
-                                          const Workspace & _workspace,
-                                          const fs::path & _path) :
+inline TileMapXmlLoader::TileMapXmlLoader(
+    SDL_Renderer & _renderer,
+    TileHeap & _tile_heap,
+    ObjectHeap & _object_heap,
+    TileMap & _map,
+    const Workspace & _workspace,
+    const fs::path & _path
+) :
     XmlLoader(_renderer, _tile_heap, _object_heap, _map, _path),
     mr_workspace(_workspace),
     m_is_map_infinite(false)
@@ -563,14 +602,15 @@ void TileMapXmlLoader::readLayer(const XMLElement & _xml, TileMapLayer & _layer)
         _layer.setTintColor(tint_color);
 }
 
-void TileMapXmlLoader::loadTileLayerChunk(const XMLElement & _xml,
-                                          const char * _encoding,
-                                          const char * _compression,
-                                          int32_t _x,
-                                          int32_t _y,
-                                          uint32_t _width,
-                                          uint32_t _height,
-                                          TileMapLayerData & _data)
+void TileMapXmlLoader::loadTileLayerChunk(
+    const XMLElement & _xml,
+    const char * _encoding,
+    const char * _compression,
+    int32_t _x,
+    int32_t _y,
+    uint32_t _width,
+    uint32_t _height,
+    TileMapLayerData & _data)
 {
     if(_encoding == nullptr)
     {
@@ -592,8 +632,13 @@ void TileMapXmlLoader::loadTileLayerChunk(const XMLElement & _xml,
     }
 }
 
-void TileMapXmlLoader::loadTileLayerDataUnencoded(const XMLElement & _xml, int32_t _x, int32_t _y,
-                                                  uint32_t _width, uint32_t _height, TileMapLayerData & _data)
+void TileMapXmlLoader::loadTileLayerDataUnencoded(
+    const XMLElement & _xml,
+    int32_t _x,
+    int32_t _y,
+    uint32_t _width,
+    uint32_t _height,
+    TileMapLayerData & _data)
 {
     const int32_t last_x = _x + _width;
     const int32_t last_y = _y + _height;
@@ -615,13 +660,14 @@ void TileMapXmlLoader::loadTileLayerDataUnencoded(const XMLElement & _xml, int32
     }
 }
 
-void TileMapXmlLoader::loadTileLayerDataBase64(const XMLElement & _xml,
-                                               const char * _compression,
-                                               int32_t _x,
-                                               int32_t _y,
-                                               uint32_t _width,
-                                               uint32_t _height,
-                                               TileMapLayerData & _data)
+void TileMapXmlLoader::loadTileLayerDataBase64(
+    const XMLElement & _xml,
+    const char * _compression,
+    int32_t _x,
+    int32_t _y,
+    uint32_t _width,
+    uint32_t _height,
+    TileMapLayerData & _data)
 {
 
     std::shared_ptr<std::vector<uint8_t>> data = decodeBase64(trimString(_xml.GetText()));
@@ -670,12 +716,13 @@ void TileMapXmlLoader::loadTileLayerDataBase64(const XMLElement & _xml,
     }
 }
 
-void TileMapXmlLoader::loadTileLayerDataCsv(const XMLElement & _xml,
-                                            int32_t _x,
-                                            int32_t _y,
-                                            uint32_t _width,
-                                            uint32_t _height,
-                                            TileMapLayerData & _data)
+void TileMapXmlLoader::loadTileLayerDataCsv(
+    const XMLElement & _xml,
+    int32_t _x,
+    int32_t _y,
+    uint32_t _width,
+    uint32_t _height,
+    TileMapLayerData & _data)
 {
     std::string csv = trimString(_xml.GetText());
     char * position = csv.data();
@@ -867,11 +914,13 @@ void TileMapXmlLoader::loadGroupLayer(const XMLElement & _xml, TileMapLayerConta
 
 const char * TileSetXmlLoader::sc_root_tag_name = "tileset";
 
-inline TileSetXmlLoader::TileSetXmlLoader(SDL_Renderer & _renderer,
-                                          TileHeap & _tile_heap,
-                                          ObjectHeap & _object_heap,
-                                          TileMap & _map,
-                                          const fs::path & _path) :
+inline TileSetXmlLoader::TileSetXmlLoader(
+    SDL_Renderer & _renderer,
+    TileHeap & _tile_heap,
+    ObjectHeap & _object_heap,
+    TileMap & _map,
+    const fs::path & _path
+) :
     XmlLoader(_renderer, _tile_heap, _object_heap, _map, _path)
 {
 }
@@ -960,13 +1009,14 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
     // TODO: <transformations>
 }
 
-void TileSetXmlLoader::makeTiles(std::shared_ptr<SDL_Texture> _texture,
-                                 TileSet & _set,
-                                 uint32_t _first_gid,
-                                 uint32_t _tile_width,
-                                 uint32_t _tile_height,
-                                 uint32_t _spacing,
-                                 uint32_t _margin)
+void TileSetXmlLoader::makeTiles(
+    std::shared_ptr<SDL_Texture> _texture,
+    TileSet & _set,
+    uint32_t _first_gid,
+    uint32_t _tile_width,
+    uint32_t _tile_height,
+    uint32_t _spacing,
+    uint32_t _margin)
 {
     float width, height;
     SDL_GetTextureSize(_texture.get(), &width, &height);
@@ -985,13 +1035,13 @@ void TileSetXmlLoader::makeTiles(std::shared_ptr<SDL_Texture> _texture,
 void TileSetXmlLoader::makeTile(const XMLElement & _xml_tile, TileSet & _set, uint32_t _first_gid)
 {
     uint32_t gid = readRequiredUintAttribute(_xml_tile, "id") + _first_gid;
+    uint32_t x = _xml_tile.UnsignedAttribute("x");
+    uint32_t y = _xml_tile.UnsignedAttribute("y");
+    uint32_t width = _xml_tile.UnsignedAttribute("width");
+    uint32_t height = _xml_tile.UnsignedAttribute("height");
     if(const XMLElement * xml_image = _xml_tile.FirstChildElement("image"))
     {
         std::shared_ptr<SDL_Texture> texture = parseImage(*xml_image);
-        uint32_t x = xml_image->UnsignedAttribute("x");
-        uint32_t y = xml_image->UnsignedAttribute("y");
-        uint32_t width = xml_image->UnsignedAttribute("width");
-        uint32_t height = xml_image->UnsignedAttribute("height");
         if(!width || !height)
         {
             float w, h;

@@ -24,24 +24,26 @@ TileMapLayerContainer::~TileMapLayerContainer()
         delete layer;
 }
 
-TileMapTileLayer & TileMapLayerContainer::createTileLayer(uint32_t _id,
-                                                         const std::string & _name,
-                                                         uint32_t _tile_width,
-                                                         uint32_t _tile_height,
-                                                         int32_t _x,
-                                                         int32_t _y,
-                                                         uint32_t _width,
-                                                         uint32_t _height)
+TileMapTileLayer & TileMapLayerContainer::createTileLayer(
+    uint32_t _id,
+    const std::string & _name,
+    uint32_t _tile_width,
+    uint32_t _tile_height,
+    int32_t _x,
+    int32_t _y,
+    uint32_t _width,
+    uint32_t _height)
 {
-    TileMapTileLayer * layer = new TileMapTileLayer(mr_tile_heap,
-                                                   _id,
-                                                   _name,
-                                                   _tile_width,
-                                                   _tile_height,
-                                                   _x,
-                                                   _y,
-                                                   _width,
-                                                   _height);
+    TileMapTileLayer * layer = new TileMapTileLayer(
+        mr_tile_heap,
+        _id,
+        _name,
+        _tile_width,
+        _tile_height,
+        _x,
+        _y,
+        _width,
+        _height);
     storeLayer(_name, layer);
     return *layer;
 }
