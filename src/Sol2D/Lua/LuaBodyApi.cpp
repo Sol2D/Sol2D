@@ -206,7 +206,7 @@ void Lua::pushBodyApi(lua_State * _lua, std::shared_ptr<Scene> _scene, uint64_t 
 
 bool Lua::tryGetBodyId(lua_State * _lua, int _idx, uint64_t * _id)
 {
-    Self * self = UserData::tryGetUserData(_lua, _idx);
+    const Self * self = UserData::tryGetUserData(_lua, _idx);
     if(self)
     {
         *_id = self->body_id;

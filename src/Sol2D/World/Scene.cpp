@@ -85,7 +85,7 @@ inline BodyShape::BodyShape(const std::string & _key, std::optional<uint32_t> _t
 
 inline BodyShape::~BodyShape()
 {
-    for(auto & pair : m_graphics)
+    for(const auto & pair : m_graphics)
         delete pair.second;
 }
 
@@ -176,7 +176,7 @@ inline Body::Body() :
 
 inline Body::~Body()
 {
-    for(auto & shape : m_shapes)
+    for(const auto & shape : m_shapes)
         delete shape.second;
 }
 
@@ -614,7 +614,7 @@ void Scene::executeDefers()
 {
     if(!m_defers.empty())
     {
-        for(auto & action : m_defers)
+        for(const auto & action : m_defers)
             action();
         m_defers.clear();
     }
@@ -643,13 +643,13 @@ void Scene::handleBox2dContactEvents()
         b2ContactEvents contact_events = b2World_GetContactEvents(m_b2_world_id);
         for(int i = 0; i < contact_events.beginCount; ++i)
         {
-            b2ContactBeginTouchEvent & event = contact_events.beginEvents[i];
+            const b2ContactBeginTouchEvent & event = contact_events.beginEvents[i];
             if(tryGetContactSide(event.shapeIdA, contact.side_a) && tryGetContactSide(event.shapeIdB, contact.side_b))
                 callObservers(&ContactObserver::beginContact, contact);
         }
         for(int i = 0; i < contact_events.endCount; ++i)
         {
-            b2ContactEndTouchEvent & event = contact_events.endEvents[i];
+            const b2ContactEndTouchEvent & event = contact_events.endEvents[i];
             if(tryGetContactSide(event.shapeIdA, contact.side_a) && tryGetContactSide(event.shapeIdB, contact.side_b))
                 callObservers(&ContactObserver::endContact, contact);
         }
@@ -660,7 +660,7 @@ void Scene::handleBox2dContactEvents()
         b2SensorEvents sensor_events = b2World_GetSensorEvents(m_b2_world_id);
         for(int i = 0; i < sensor_events.beginCount; ++i)
         {
-            b2SensorBeginTouchEvent & event = sensor_events.beginEvents[i];
+            const b2SensorBeginTouchEvent & event = sensor_events.beginEvents[i];
             if(tryGetContactSide(event.sensorShapeId, contact.sensor) &&
                 tryGetContactSide(event.visitorShapeId, contact.visitor))
             {
@@ -669,7 +669,7 @@ void Scene::handleBox2dContactEvents()
         }
         for(int i = 0; i < sensor_events.endCount; ++i)
         {
-            b2SensorEndTouchEvent & event = sensor_events.endEvents[i];
+            const b2SensorEndTouchEvent & event = sensor_events.endEvents[i];
             if(tryGetContactSide(event.sensorShapeId, contact.sensor) &&
                 tryGetContactSide(event.visitorShapeId, contact.visitor))
             {
@@ -682,8 +682,8 @@ void Scene::handleBox2dContactEvents()
 bool Scene::tryGetContactSide(b2ShapeId _shape_id, ContactSide & _contact_side)
 {
     b2BodyId b2_body_id = b2Shape_GetBody(_shape_id);
-    BodyShape * shape = getUserData(_shape_id);
-    Body * body = getUserData(b2_body_id);
+    const BodyShape * shape = getUserData(_shape_id);
+    const Body * body = getUserData(b2_body_id);
     if(shape && body)
     {
         _contact_side.body_id = body->getId();
@@ -781,7 +781,7 @@ void Scene::drawLayersAndBodies(
         for(const auto & pair : m_bodies)
         {
             b2BodyId box2d_body_id = pair.second;
-            Body * body = getUserData(box2d_body_id);
+            const Body * body = getUserData(box2d_body_id);
             if(body->getLayer() == __layer.getName() && _bodies_to_render.erase(pair.first))
                 drawBody(box2d_body_id, _time_passed);
         }

@@ -35,6 +35,7 @@ struct Dimension
 {
     S2_DEFAULT_COPY_AND_MOVE(Dimension)
 
+    // cppcheck-suppress noExplicitConstructor
     Dimension(Number _pixels) :
         Dimension(_pixels, DimensionUnit::Pixel)
     {

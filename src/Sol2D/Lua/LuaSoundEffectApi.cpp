@@ -26,7 +26,7 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    Self(std::shared_ptr<Mix_Chunk> & _chunk) :
+    explicit Self(std::shared_ptr<Mix_Chunk> & _chunk) :
         chunk(_chunk)
     {
     }
@@ -48,7 +48,7 @@ using UserData = LuaUserData<Self, LuaTypeName::sound_effect>;
 // 2 channel (optional)
 int luaApi_Play(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     int channel = lua_isinteger(_lua, 2) ? lua_tointeger(_lua, 2) : -1;
     bool result = Mix_PlayChannel(channel, self->getChunk(_lua).get(), 0) >= 0;
     lua_pushboolean(_lua, result);
@@ -60,7 +60,7 @@ int luaApi_Play(lua_State * _lua)
 // 3 channel (optional)
 int luaApi_Loop(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "iteration count required");
     int iteration_count = lua_tointeger(_lua, 2);
     int channel = lua_isinteger(_lua, 3) ? lua_tointeger(_lua, 3) : -1;

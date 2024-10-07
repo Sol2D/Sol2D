@@ -105,7 +105,7 @@ AStar::AStar(
 
 AStar::~AStar()
 {
-    for(auto & pair : m_known_nodes)
+    for(const auto & pair : m_known_nodes)
         delete pair.second;
 }
 
@@ -145,11 +145,10 @@ b2Vec2 AStar::calculateCellSize(b2BodyId _body_id)
 std::optional<std::vector<b2Vec2>> AStar::exec()
 {
     b2Vec2 position;
-    const Node * node;
     while(!m_open_nodes.empty()) // TODO: a potentially endless loop, must be a limit (?)
     {
         const auto item = m_open_nodes.extract(m_open_nodes.begin());
-        node = item.mapped();
+        const Node * node = item.mapped();
         position.x = m_start_point.x + node->x * m_cell_size.x;
         position.y = m_start_point.y + node->y * m_cell_size.y;
         if(isDestination(position))

@@ -42,6 +42,7 @@ class WidgetProperty : public Utils::Observable<WidgetPropertyObserver<T>>
 public:
     S2_DEFAULT_COPY_AND_MOVE(WidgetProperty)
 
+    // cppcheck-suppress noExplicitConstructor
     WidgetProperty(const T & _value) :
         m_values(1)
     {

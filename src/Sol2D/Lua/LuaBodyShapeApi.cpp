@@ -75,7 +75,7 @@ int luaApi_GetKey(lua_State * _lua)
 // 1 self
 int luaApi_GetBody(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     pushBodyApi(_lua, self->getScene(_lua), self->body_id);
     return 1;
 }
@@ -87,7 +87,7 @@ int luaApi_GetGraphicsPack(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * graphic_key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, graphic_key != nullptr, 2, gc_message_graphic_key_expected);
-    GraphicsPack *  pack = self->getScene(_lua)->getBodyShapeGraphicsPack(
+    const GraphicsPack *  pack = self->getScene(_lua)->getBodyShapeGraphicsPack(
         self->body_id,
         self->shape_key,
         makePreHashedKey(std::string(graphic_key)));

@@ -66,7 +66,7 @@ std::optional<Sprite> GraphicsPack::Graphics::getSprite(const GraphicsPackSprite
 struct GraphicsPack::Frame
 {
     S2_DEFAULT_COPY_AND_MOVE(Frame)
-    Frame(const GraphicsPackFrameDefinition & _definition);
+    explicit Frame(const GraphicsPackFrameDefinition & _definition);
     std::chrono::milliseconds duration;
     std::vector<Graphics> graphics;
     bool is_visible;
@@ -78,7 +78,7 @@ inline GraphicsPack::Frame::Frame(const GraphicsPackFrameDefinition & _definitio
 {
     graphics.reserve(_definition.sprites.size());
     for(const auto & sprite_def : _definition.sprites)
-        graphics.emplace_back(sprite_def);
+        graphics.emplace_back(sprite_def); // cppcheck-suppress useStlAlgorithm
 }
 
 GraphicsPack::GraphicsPack(
@@ -107,6 +107,8 @@ GraphicsPack::GraphicsPack(
 
 GraphicsPack::GraphicsPack(const GraphicsPack & _graphics_pack) :
     mp_renderer(_graphics_pack.mp_renderer),
+    m_position(_graphics_pack.m_position),
+    m_flip_mode(_graphics_pack.m_flip_mode),
     m_max_iterations(_graphics_pack.m_max_iterations),
     m_current_iteration(0),
     m_current_frame_index(_graphics_pack.m_current_frame_index),
@@ -115,11 +117,13 @@ GraphicsPack::GraphicsPack(const GraphicsPack & _graphics_pack) :
 {
     m_frames.reserve(_graphics_pack.m_frames.size());
     for(auto * frame : _graphics_pack.m_frames)
-        m_frames.push_back(new Frame(*frame));
+        m_frames.push_back(new Frame(*frame)); // cppcheck-suppress useStlAlgorithm
 }
 
 GraphicsPack::GraphicsPack(GraphicsPack && _graphics_pack) :
     mp_renderer(_graphics_pack.mp_renderer),
+    m_position(_graphics_pack.m_position),
+    m_flip_mode(_graphics_pack.m_flip_mode),
     m_frames(std::move(_graphics_pack.m_frames)),
     m_max_iterations(_graphics_pack.m_max_iterations),
     m_current_iteration(0),
@@ -145,8 +149,10 @@ GraphicsPack & GraphicsPack::operator = (const GraphicsPack & _graphics_pack)
         destroy();
         m_frames.reserve(_graphics_pack.m_frames.size());
         for(auto * frame : _graphics_pack.m_frames)
-            m_frames.push_back(new Frame(*frame));
+            m_frames.push_back(new Frame(*frame)); // cppcheck-suppress useStlAlgorithm
         mp_renderer = _graphics_pack.mp_renderer;
+        m_flip_mode = _graphics_pack.m_flip_mode;
+        m_position = _graphics_pack.m_position;
         m_max_iterations = _graphics_pack.m_max_iterations;
         m_current_iteration = 0;
         m_current_frame_index = _graphics_pack.m_current_frame_index;
@@ -162,11 +168,12 @@ GraphicsPack & GraphicsPack::operator = (GraphicsPack && _graphics_pack)
     {
         destroy();
         m_frames.reserve(_graphics_pack.m_frames.size());
-        for(auto * frame : _graphics_pack.m_frames)
-            m_frames.push_back(frame);
+        std::copy(_graphics_pack.m_frames.cbegin(), _graphics_pack.m_frames.cend(), m_frames.end());
         _graphics_pack.m_frames.clear();
         mp_renderer = _graphics_pack.mp_renderer;
         _graphics_pack.mp_renderer = nullptr;
+        m_position = _graphics_pack.m_position;
+        m_flip_mode = _graphics_pack.m_flip_mode;
         m_max_iterations = _graphics_pack.m_max_iterations;
         m_current_iteration = 0;
         m_current_frame_index = _graphics_pack.m_current_frame_index;
@@ -209,7 +216,7 @@ bool GraphicsPack::removeFrame(size_t _index)
     auto it = m_frames.begin() + _index;
     if(it == m_frames.end())
         return false;
-    Frame * frame = *it;
+    const Frame * frame = *it;
     if(frame->is_visible)
         m_total_duration -= frame->duration;
     m_frames.erase(it);
@@ -307,7 +314,7 @@ void GraphicsPack::render(const Point & _position, float _angle_deg, std::chrono
         return;
     }
     m_current_frame_duration += _time_passed;
-    Frame * frame = m_frames[m_current_frame_index];
+    const Frame * frame = m_frames[m_current_frame_index];
     bool respect_iterations = m_max_iterations > 0;
     if(!frame->is_visible)
     {

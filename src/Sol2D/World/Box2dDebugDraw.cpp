@@ -139,7 +139,7 @@ void Box2dDebugDraw::drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
     self->setRendererDrawColor(_color);
-    Point points[] =
+    const Point points[] =
     {
         self->m_translate_point(_p1.x, _p1.y),
         self->m_translate_point(_p2.x, _p2.y),

@@ -31,6 +31,11 @@ set(SOL2D_USE_ASAN
     CACHE BOOL "Enables address sanitizer (ASAN)"
 )
 
+set(SOL2D_USE_CPPCHECK
+    OFF
+    CACHE BOOL "Enables static code analyzer (cppcheck)"
+)
+
 if(LINUX)
     list(APPEND CMAKE_MODULE_PATH "/usr/lib/x86_64-linux-gnu/cmake/")
 endif()
@@ -63,6 +68,17 @@ find_package(Boost REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LUA REQUIRED lua)
 pkg_check_modules(ZSTD REQUIRED libzstd)
+
+if(SOL2D_USE_CPPCHECK)
+    find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
+    list(APPEND CMAKE_CXX_CPPCHECK
+        "--suppress=*:/third-party/*"
+        "--suppress=unusedFunction"
+        "--suppress=missingIncludeSystem"
+        "--enable=all"
+        "--inline-suppr"
+    )
+endif()
 
 add_executable(${PROJECT_NAME} ${SOL2D_SRC})
 

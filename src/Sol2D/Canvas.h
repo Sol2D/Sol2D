@@ -27,7 +27,10 @@ class Canvas : public Object
     S2_DISABLE_COPY_AND_MOVE(Canvas)
 
 public:
-    Canvas() { }
+    Canvas() :
+        m_rect{.0f, .0f, .0f, .0f}
+    {
+    }
     void reconfigure(const Rect & _rect);
     float getWidth() const;
     float getHeight() const;

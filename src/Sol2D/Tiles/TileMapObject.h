@@ -56,7 +56,8 @@ protected:
         m_type(_type),
         m_id(_def.id),
         m_x(0),
-        m_y(0)
+        m_y(0),
+        m_is_visible(true)
     {
     }
 

@@ -23,6 +23,8 @@ Label::Label(const Canvas & _parent, const std::string & _text, SDL_Renderer & _
     Widget(_parent, _renderer),
     m_text(_text),
     mp_texture(nullptr),
+    m_texture_width(.0f),
+    m_texture_height(.0f),
     horizontal_text_alignment(HorizontalTextAlignment::None),
     vertical_text_alignment(VerticalTextAlignment::None)
 {
@@ -95,8 +97,8 @@ void Label::render(const RenderState & _state)
     const float draw_area_y = control_rect.y + padding_top + border_width;
     const float draw_area_width = control_rect.w - border_width_x_2 - padding_left - padding_right;
     const float draw_area_height = control_rect.h - border_width_x_2 - padding_top - padding_bottom;
-    const HorizontalTextAlignment horizontal_text_alignment = this->horizontal_text_alignment[m_state];
-    const VerticalTextAlignment vertical_text_alignment = this->vertical_text_alignment[m_state];
+    const HorizontalTextAlignment htext_alignment = this->horizontal_text_alignment[m_state];
+    const VerticalTextAlignment vtext_alignment = this->vertical_text_alignment[m_state];
 
     SDL_FRect dest_rect;
     dest_rect.w = draw_area_width > m_texture_width ? m_texture_width : draw_area_width;
@@ -104,7 +106,7 @@ void Label::render(const RenderState & _state)
     SDL_FRect src_rect = { .x = .0f, .y = .0f, .w = dest_rect.w, .h = dest_rect.h };
 
     // TODO: RTL
-    switch(horizontal_text_alignment)
+    switch(htext_alignment)
     {
     case HorizontalTextAlignment::None:
     case HorizontalTextAlignment::Begin:
@@ -122,7 +124,7 @@ void Label::render(const RenderState & _state)
         break;
     }
 
-    switch(vertical_text_alignment)
+    switch(vtext_alignment)
     {
     case VerticalTextAlignment::None:
     case VerticalTextAlignment::Top:

@@ -126,12 +126,12 @@ public:
     T & createObject(uint32_t _layer_id, uint32_t _gid, const char * _class, const char * _name);
 
     template<TileMapObjectConcept T>
-    const T * findObject(const std::string _name) const;
+    const T * findObject(const std::string & _name) const;
 
     template<TileMapObjectConcept T>
     const T * findObject(uint32_t _gid) const;
 
-    const TileMapObject * findBasicObject(const std::string _name) const;
+    const TileMapObject * findBasicObject(const std::string & _name) const;
     const TileMapObject * findBasicObject(uint32_t _gid) const;
     boost::container::slist<const TileMapObject *> findBasicObjects(const std::string & _class) const;
     void forEachObject(uint32_t _layer_id, std::function<void(const TileMapObject &)> _cb) const;
@@ -181,7 +181,7 @@ T & ObjectHeap::createObject(uint32_t _layer_id, uint32_t _gid, const char * _cl
 }
 
 template<TileMapObjectConcept T>
-inline const T * ObjectHeap::findObject(const std::string _name) const
+inline const T * ObjectHeap::findObject(const std::string & _name) const
 {
     const TileMapObject * object = findBasicObject(_name);
     return object ? dynamic_cast<const T *>(object) : nullptr;

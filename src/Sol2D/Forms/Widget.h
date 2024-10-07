@@ -31,7 +31,7 @@ class Widget : public Object
     S2_DISABLE_COPY_AND_MOVE(Widget)
 
 public:
-    virtual ~Widget();
+    ~Widget() override;
     void setX(const Dimension<float> & _x);
     const Dimension<float> & getX() const;
     void setY(const Dimension<float> & _y);

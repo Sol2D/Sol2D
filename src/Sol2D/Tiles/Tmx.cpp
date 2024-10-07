@@ -173,15 +173,14 @@ public:
     void loadFromXml(const XMLElement & _xml, uint32_t _first_gid);
 
 private:
-    void makeTiles(
-        std::shared_ptr<SDL_Texture> _texture,
-        TileSet & _set,
-        uint32_t _first_gid,
-        uint32_t _tile_width,
-        uint32_t _tile_height,
-        uint32_t _spacing,
-        uint32_t _margin);
-    void makeTile(const XMLElement & _xml_tile, TileSet & _set, uint32_t _first_gid);
+    void makeTiles(std::shared_ptr<SDL_Texture> _texture,
+                   const TileSet & _set,
+                   uint32_t _first_gid,
+                   uint32_t _tile_width,
+                   uint32_t _tile_height,
+                   uint32_t _spacing,
+                   uint32_t _margin);
+    void makeTile(const XMLElement & _xml_tile, const TileSet & _set, uint32_t _first_gid);
 
 public:
     static const char * sc_root_tag_name;
@@ -587,12 +586,14 @@ void TileMapXmlLoader::readLayer(const XMLElement & _xml, TileMapLayer & _layer)
 {
     _layer.setVisibility(_xml.BoolAttribute("visible", true));
     _layer.setClass(_xml.Attribute("class"));
-    if(float opacity = _xml.FloatAttribute("opacity", 1.0f) != 1.0f)
-        _layer.setOpacity(opacity);
-    if(float parallax_x = _xml.FloatAttribute("parallaxx", 1.0f) != 1.0f)
-        _layer.setParallaxX(parallax_x);
-    if(float parallax_y = _xml.FloatAttribute("parallaxy", 1.0f) != 1.0f)
-        _layer.setParallaxY(parallax_y);
+    {
+        float value = _xml.FloatAttribute("opacity", 1.0f);
+        if(value != 1.0f) _layer.setOpacity(value);
+        value = _xml.FloatAttribute("parallaxx", 1.0f);
+        if(value != 1.0f) _layer.setParallaxX(value );
+        value = _xml.FloatAttribute("parallaxy", 1.0f);
+        if(value  != 1.0f) _layer.setParallaxY(value);
+    }
     if(int32_t offset_x = _xml.IntAttribute("offsetx", 0))
         _layer.setOffsetX(offset_x);
     if(int32_t offset_y = _xml.IntAttribute("offsety", 0))
@@ -842,10 +843,9 @@ void TileMapXmlLoader::loadPoints(const XMLElement & _xml, TileMapPolyX & _poly)
     if(!points) return;
     std::stringstream ss(points);
     std::string point_str;
-    size_t del_pos;
     while(ss >> point_str)
     {
-        del_pos = point_str.find(',', 0); // TODO: remove "find", use the 2nd arg of "strtol" (see loadTileLayerDataCsv)
+        size_t del_pos = point_str.find(',', 0); // TODO: remove "find", use the 2nd arg of "strtol" (see loadTileLayerDataCsv)
         if(del_pos != std::string::npos)
         {
             _poly.addPoint(makePoint(
@@ -1011,7 +1011,7 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
 
 void TileSetXmlLoader::makeTiles(
     std::shared_ptr<SDL_Texture> _texture,
-    TileSet & _set,
+    const TileSet & _set,
     uint32_t _first_gid,
     uint32_t _tile_width,
     uint32_t _tile_height,
@@ -1032,7 +1032,7 @@ void TileSetXmlLoader::makeTiles(
     }
 }
 
-void TileSetXmlLoader::makeTile(const XMLElement & _xml_tile, TileSet & _set, uint32_t _first_gid)
+void TileSetXmlLoader::makeTile(const XMLElement & _xml_tile, const TileSet & _set, uint32_t _first_gid)
 {
     uint32_t gid = readRequiredUintAttribute(_xml_tile, "id") + _first_gid;
     uint32_t x = _xml_tile.UnsignedAttribute("x");

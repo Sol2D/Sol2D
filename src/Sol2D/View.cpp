@@ -55,7 +55,7 @@ void View::emplaceOrderedOutlet(Outlet * _outlet)
     auto it = std::find_if(
         m_ordered_outlets.begin(),
         m_ordered_outlets.end(),
-        [z_index](Outlet * __outlet) { return z_index < __outlet->getFragment().z_index; });
+        [z_index](const Outlet * __outlet) { return z_index < __outlet->getFragment().z_index; });
     m_ordered_outlets.insert(it, _outlet);
 }
 

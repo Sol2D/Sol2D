@@ -168,16 +168,14 @@ bool Application::initialize()
 void Application::runMainLoop()
 {
     const Uint32 render_frame_delay = floor(1000 / mr_workspace.getFrameRate());
-    Uint32 now_ticks;
     Uint32 last_rendering_ticks = SDL_GetTicks();
-    Uint32 passed_ticks;
     SDL_Event event;
     for(;;)
     {
         while(SDL_PollEvent(&event))
             if(handleEvent(event)) return;
-        now_ticks = SDL_GetTicks();
-        passed_ticks = now_ticks - last_rendering_ticks;
+        const Uint32 now_ticks = SDL_GetTicks();
+        const Uint32 passed_ticks = now_ticks - last_rendering_ticks;
         if(passed_ticks >= render_frame_delay)
         {
             last_rendering_ticks = now_ticks;

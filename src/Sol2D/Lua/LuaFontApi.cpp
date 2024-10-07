@@ -27,7 +27,7 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    Self(std::shared_ptr<TTF_Font> & _font) :
+    explicit Self(std::shared_ptr<TTF_Font> & _font) :
         font(_font)
     {
     }

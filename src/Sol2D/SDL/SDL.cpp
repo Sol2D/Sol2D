@@ -82,7 +82,7 @@ bool operator == (const SDL_Color & _color1, const SDL_Color & _color2)
 }
 
 
-void Sol2D::SDL::sdlDetectContentRect(SDL_Surface & _surface, SDL_Rect & _rect)
+void Sol2D::SDL::sdlDetectContentRect(const SDL_Surface & _surface, SDL_Rect & _rect)
 {
     std::vector<bool> rows(_surface.h);
     std::vector<bool> columns(_surface.w);

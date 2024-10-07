@@ -41,6 +41,8 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
+const char gc_key_path[] = "path";
+
 void addSublibrary(lua_State * _lua, const char * _sublib_name, std::function<void()> _push_sublib)
 {
     int library_table_idx = lua_gettop(_lua);
@@ -55,19 +57,19 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
     {
         return true;
     }
-    static const char * path_key = "path";
+
     bool result = false;
     if(lua_getglobal(_lua, "package") == LUA_TTABLE)
     {
         LuaTable table(_lua, -1);
         std::string search_paths;
-        if(table.tryGetString(path_key, search_paths))
+        if(table.tryGetString(gc_key_path, search_paths))
         {
             std::stringstream search_paths_stream(search_paths);
             search_paths_stream << search_paths <<
                 LUA_PATH_SEP << (_path / LUA_PATH_MARK ".lua").string() <<
                 LUA_PATH_SEP << (_path / LUA_PATH_MARK / "init.lua").string();
-            table.setStringValue(path_key, search_paths_stream.str().c_str());
+            table.setStringValue(gc_key_path, search_paths_stream.str().c_str());
             result = true;
         }
     }

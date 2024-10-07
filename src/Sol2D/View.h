@@ -28,7 +28,7 @@ class View final
     S2_DISABLE_COPY_AND_MOVE(View)
 
 public:
-    View(SDL_Renderer & _renderer);
+    explicit View(SDL_Renderer & _renderer);
     uint16_t createFragment(const Fragment & _fragment);
     const Fragment * getFragment(uint16_t _id) const;
     bool updateFragment(uint16_t _id, const Fragment & _fragment);

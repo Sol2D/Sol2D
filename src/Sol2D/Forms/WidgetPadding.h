@@ -28,11 +28,13 @@ struct WidgetPadding
     {
     }
 
+    // cppcheck-suppress noExplicitConstructor
     WidgetPadding(float _pixels) :
         WidgetPadding(_pixels, _pixels, _pixels, _pixels)
     {
     }
 
+    // cppcheck-suppress noExplicitConstructor
     WidgetPadding(const Dimension<float> & _padding) :
         WidgetPadding(_padding, _padding, _padding, _padding)
     {

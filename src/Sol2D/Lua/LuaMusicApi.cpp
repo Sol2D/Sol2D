@@ -25,7 +25,7 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    Self(std::shared_ptr<Mix_Music> & _music) :
+    explicit Self(std::shared_ptr<Mix_Music> & _music) :
         music(_music)
     {
     }
@@ -46,7 +46,7 @@ using UserData = LuaUserData<Self, LuaTypeName::music>;
 // 1 self
 int luaApi_Play(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     bool result = Mix_PlayMusic(self->getMusic(_lua).get(), 0) == 0;
     lua_pushboolean(_lua, result);
     return 1;
@@ -56,7 +56,7 @@ int luaApi_Play(lua_State * _lua)
 // 2 iteration count
 int luaApi_Loop(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "iteration count required");
     bool result = Mix_PlayMusic(self->getMusic(_lua).get(), lua_tointeger(_lua, 2)) == 0;
     lua_pushboolean(_lua, result);

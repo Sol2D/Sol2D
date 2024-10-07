@@ -37,7 +37,7 @@ struct Self : LuaSelfBase
     {
     }
 
-    std::shared_ptr<Form> getForm(lua_State * _lua)
+    std::shared_ptr<Form> getForm(lua_State * _lua) const
     {
         std::shared_ptr<Form> ptr = form.lock();
         if(!ptr)
@@ -93,7 +93,7 @@ void Sol2D::Lua::pushFormApi(lua_State * _lua, const Workspace & _workspace, std
 
 std::shared_ptr<Forms::Form> Sol2D::Lua::tryGetForm(lua_State * _lua, int _idx)
 {
-    if(Self * self = UserData::tryGetUserData(_lua, _idx))
+    if(const Self * self = UserData::tryGetUserData(_lua, _idx))
         return self->getForm(_lua);
     return nullptr;
 }

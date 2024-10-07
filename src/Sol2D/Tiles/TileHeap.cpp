@@ -20,9 +20,9 @@ using namespace Sol2D::Tiles;
 
 TileHeap::~TileHeap()
 {
-    for(auto & kvp : m_tiles)
+    for(const auto & kvp : m_tiles)
         delete kvp.second;
-    for(auto & set : m_sets)
+    for(const auto & set : m_sets)
         delete set;
 }
 

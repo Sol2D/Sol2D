@@ -131,7 +131,7 @@ public:
         return store;
     }
 
-    std::shared_ptr<Store> getStore(const std::string _key) const
+    std::shared_ptr<Store> getStore(const std::string & _key) const
     {
         auto it = m_stores.find(_key);
         return it == m_stores.end() ? nullptr : it->second;

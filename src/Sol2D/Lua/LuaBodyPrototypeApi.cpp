@@ -26,7 +26,7 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    Self(std::shared_ptr<BodyDefinition> & _definition) :
+    explicit Self(std::shared_ptr<BodyDefinition> & _definition) :
         definition(_definition)
     {
     }

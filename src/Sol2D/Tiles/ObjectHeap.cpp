@@ -18,7 +18,7 @@
 
 using namespace Sol2D::Tiles;
 
-const TileMapObject * ObjectHeap::findBasicObject(const std::string _name) const
+const TileMapObject * ObjectHeap::findBasicObject(const std::string & _name) const
 {
     auto it = mr_objects_by_name.find(_name);
     return it == mr_objects_by_name.cend() ? nullptr : it->get();

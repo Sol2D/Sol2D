@@ -49,7 +49,7 @@ public:
     {
     }
 
-    ~LuaButtonClickObserver()
+    ~LuaButtonClickObserver() override
     {
         LuaCallbackStorage storage(mp_lua);
         storage.destroyCallbacks(this);

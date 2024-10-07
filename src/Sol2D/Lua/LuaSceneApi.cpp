@@ -166,7 +166,7 @@ using UserData = LuaUserData<Self, LuaTypeName::scene>;
 // 2 gravity
 int luaApi_SetGravity(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     Point gravity;
     luaL_argcheck(_lua, tryGetPoint(_lua, 2, gravity), 2, "gravity vector expected");
     self->getScene(_lua)->setGravity(gravity);
@@ -189,7 +189,7 @@ int luaApi_LoadTileMap(lua_State * _lua)
 // 2 object id
 int luaApi_GetTileMapObjectById(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "object id expected");
     const Tiles::TileMapObject * object = self->getScene(_lua)->getTileMapObjectById(static_cast<uint32_t>(lua_tointeger(_lua, 2)));
     if(object)
@@ -203,7 +203,7 @@ int luaApi_GetTileMapObjectById(lua_State * _lua)
 // 2 object name
 int luaApi_GetTileMapObjectByName(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     const char * name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, name, 2, "object name expected");
     const Tiles::TileMapObject * object = self->getScene(_lua)->getTileMapObjectByName(name);
@@ -218,7 +218,7 @@ int luaApi_GetTileMapObjectByName(lua_State * _lua)
 // 2 class
 int luaApi_GetTileMapObjectsByClass(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     const char * class_name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, class_name, 2, "class expected");
     auto objects = self->getScene(_lua)->getTileMapObjectsByClass(class_name);
@@ -239,7 +239,7 @@ int luaApi_GetTileMapObjectsByClass(lua_State * _lua)
 int luaApi_CreateBody(lua_State * _lua)
 {
     bool has_script_argument = lua_gettop(_lua) >= 4;
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     Point position = { .0f, .0f };
     if(!lua_isnil(_lua, 2))
@@ -285,7 +285,7 @@ int luaApi_CreateBody(lua_State * _lua)
 // 2 body id
 int luaApi_GetBody(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     std::shared_ptr<Scene> scene = self->getScene(_lua);
@@ -301,7 +301,7 @@ int luaApi_GetBody(lua_State * _lua)
 // 3 options (optional)
 int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     const char * class_name = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, class_name != nullptr, 2, "a class name expected");
     BodyOptions options;
@@ -315,7 +315,7 @@ int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
 // 2 body id or body
 int luaApi_SetFollowedBody(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     uint64_t body_id;
     if(lua_isinteger(_lua, 2))
         body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
@@ -328,7 +328,7 @@ int luaApi_SetFollowedBody(lua_State * _lua)
 // 1 self
 int luaApi_ResetFollowedBody(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     self->getScene(_lua)->resetFollowedBody();
     return 0;
 }
@@ -449,7 +449,7 @@ int luaApi_UnsubscribePreSolveContact(lua_State * _lua)
 // TODO: options
 int luaApi_FindPath(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     uint64_t body_id;
     if(lua_isinteger(_lua, 2))
         body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
@@ -514,7 +514,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
 
 std::shared_ptr<Scene> Sol2D::Lua::tryGetScene(lua_State * _lua, int _idx)
 {
-    if(Self * self = UserData::tryGetUserData(_lua, _idx))
+    if(const Self * self = UserData::tryGetUserData(_lua, _idx))
         return self->getScene(_lua);
     return nullptr;
 }

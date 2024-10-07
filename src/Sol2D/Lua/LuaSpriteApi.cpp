@@ -67,7 +67,7 @@ int luaApi_LoadFromFile(lua_State * _lua)
 // 1 self
 int luaApi_IsValid(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     lua_pushboolean(_lua, self->getSprite(_lua)->isValid());
     return 1;
 }
@@ -75,7 +75,7 @@ int luaApi_IsValid(lua_State * _lua)
 // 1 self
 int luaApi_GetSourceRect(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     pushRect(_lua, self->getSprite(_lua)->getSourceRect());
     return 1;
 }
@@ -83,7 +83,7 @@ int luaApi_GetSourceRect(lua_State * _lua)
 // 1 self
 int luaApi_GetDestinationSize(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     const Size & size = self->getSprite(_lua)->getDestinationSize();
     pushSize(_lua, size);
     return 1;
@@ -93,7 +93,7 @@ int luaApi_GetDestinationSize(lua_State * _lua)
 // 2 size
 int luaApi_SetDestinationSize(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     Size size;
     luaL_argcheck(_lua, tryGetSize(_lua, 2, size), 2, "size required");
     self->getSprite(_lua)->setDesinationSize(size);
@@ -105,7 +105,7 @@ int luaApi_SetDestinationSize(lua_State * _lua)
 // 3 scale factor Y (optional)
 int luaApi_Scale(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     if(lua_isnumber(_lua, 2))
     {
         float scale_factor = static_cast<float>(lua_tonumber(_lua, 2));

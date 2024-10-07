@@ -79,7 +79,7 @@ int luaApi_CreateView(lua_State * _lua)
 // 2 key
 int luaApi_GetView(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     if(std::shared_ptr<View> view = self->getStore(_lua)->getObject<View>(lua_tostring(_lua, 2)))
         pushViewApi(_lua, view);
@@ -110,7 +110,7 @@ int luaApi_CreateScene(lua_State * _lua)
 // 2 key
 int luaApi_GetScene(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     if(std::shared_ptr<Scene> scene = self->getStore(_lua)->getObject<Scene>(lua_tostring(_lua, 2)))
         pushSceneApi(_lua, self->workspace, scene);
@@ -134,7 +134,7 @@ int luaApi_CreateForm(lua_State * _lua)
 // 2 key
 int luaApi_GetForm(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     if(std::shared_ptr<Form> form = self->getStore(_lua)->getObject<Form>(lua_tostring(_lua, 2)))
         pushFormApi(_lua, self->workspace, form);
@@ -158,7 +158,7 @@ int luaApi_CreateSprite(lua_State * _lua)
 // 2 key
 int luaApi_GetSprite(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     if(std::shared_ptr<Sprite> sprite = self->getStore(_lua)->getObject<Sprite>(lua_tostring(_lua, 2)))
         pushSpriteApi(_lua, self->workspace, sprite);
@@ -183,7 +183,7 @@ int luaApi_CreateSpriteSheet(lua_State * _lua)
 // 2 key
 int luaApi_GetSpriteSheet(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     if(std::shared_ptr<SpriteSheet> sprite_sheet = self->getStore(_lua)->getObject<SpriteSheet>(lua_tostring(_lua, 2)))
         pushSpriteSheetApi(_lua, self->workspace, sprite_sheet);
@@ -197,7 +197,7 @@ int luaApi_GetSpriteSheet(lua_State * _lua)
 // 3 body definition
 int luaApi_CreateBodyPrototype(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     std::unique_ptr<BodyDefinition> definition = tryGetBodyDefinition(_lua, 3);
     luaL_argcheck(_lua, definition, 3, "a body definition expected");
@@ -211,7 +211,7 @@ int luaApi_CreateBodyPrototype(lua_State * _lua)
 // 2 key
 int luaApi_GetBodyPrototype(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     std::shared_ptr<BodyDefinition> definition = self->getStore(_lua)->getObject<BodyDefinition>(lua_tostring(_lua, 2));
     if(definition)
@@ -247,7 +247,7 @@ int luaApi_CreateFont(lua_State * _lua)
 // 2 key
 int luaApi_GetFont(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     if(std::shared_ptr<TTF_Font> font = self->getStore(_lua)->getObject<TTF_Font>(lua_tostring(_lua, 2)))
         pushFontApi(_lua, font);
@@ -279,7 +279,7 @@ int luaApi_CreateSoundEffect(lua_State * _lua)
 // 2 key
 int luaApi_GetSoundEffect(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     if(std::shared_ptr<Mix_Chunk> chunk = self->getStore(_lua)->getObject<Mix_Chunk>(lua_tostring(_lua, 2)))
         pushSoundEffectApi(_lua, chunk);
@@ -312,7 +312,7 @@ int luaApi_CreateMusic(lua_State * _lua)
 // 2 key
 int luaApi_GetMusic(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
     if(std::shared_ptr<Mix_Music> music = self->getStore(_lua)->getObject<Mix_Music>(lua_tostring(_lua, 2)))
         pushMusicApi(_lua, music);

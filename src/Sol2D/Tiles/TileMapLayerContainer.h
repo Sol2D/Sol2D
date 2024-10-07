@@ -56,13 +56,13 @@ public:
             _cb(*layer);
     }
 
-    const TileMapLayer * getLayer(const std::string _name) const
+    const TileMapLayer * getLayer(const std::string & _name) const
     {
         auto it = m_layers_by_names.find(_name);
         return it == m_layers_by_names.cend() ? nullptr : it->second;
     }
 
-    TileMapLayer * getLayer(const std::string _name)
+    TileMapLayer * getLayer(const std::string & _name)
     {
         auto it = m_layers_by_names.find(_name);
         return it == m_layers_by_names.end() ? nullptr : it->second;

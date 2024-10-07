@@ -54,7 +54,7 @@ using UserData = LuaUserData<Self, LuaTypeName::view>;
 // 2 fragment
 int luaApi_CreateFragment(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     Fragment fragment;
     luaL_argcheck(_lua, tryGetFragment(_lua, 2, fragment), 2, "");
     lua_pushinteger(_lua, self->getView(_lua)->createFragment(fragment));
@@ -66,7 +66,7 @@ int luaApi_CreateFragment(lua_State * _lua)
 // 3 fragment
 int luaApi_UpdateFragment(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
     uint16_t fragment_id = static_cast<uint16_t>(lua_tointeger(_lua, 2));
     Fragment fragment;
@@ -79,7 +79,7 @@ int luaApi_UpdateFragment(lua_State * _lua)
 // 2 fragment ID
 int luaApi_GetFragment(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
     uint16_t fragment_id = static_cast<uint16_t>(lua_tointeger(_lua, 2));
     if(const Fragment * fragment = self->getView(_lua)->getFragment(fragment_id))
@@ -93,7 +93,7 @@ int luaApi_GetFragment(lua_State * _lua)
 // 2 fragment ID
 int luaApi_DeleteFragment(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
     uint16_t fragment_id = static_cast<uint16_t>(lua_tointeger(_lua, 2));
     lua_pushboolean(_lua, self->getView(_lua)->deleteFragment(fragment_id));
@@ -105,7 +105,7 @@ int luaApi_DeleteFragment(lua_State * _lua)
 // 3 scene | form | nil (optioanl)
 int luaApi_BindFragment(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_fragment_id_expected);
     uint16_t fragment_id = static_cast<uint16_t>(lua_tointeger(_lua, 2));
     bool result = false;
@@ -139,7 +139,7 @@ int luaApi_BindFragment(lua_State * _lua)
 
 std::shared_ptr<View> Sol2D::Lua::tryGetView(lua_State * _lua, int _idx)
 {
-    if(Self * self = UserData::tryGetUserData(_lua, _idx))
+    if(const Self * self = UserData::tryGetUserData(_lua, _idx))
         return self->getView(_lua);
     return nullptr;
 }

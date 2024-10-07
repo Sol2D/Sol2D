@@ -35,7 +35,6 @@ const char gc_message_sprite_index_expected[] = "sprite index expected";
 
 struct Self : LuaSelfBase
 {
-    virtual ~Self() { }
     virtual GraphicsPack * getGraphicsPack(lua_State * _lua) const = 0;
 };
 
@@ -84,7 +83,7 @@ using UserDataForBodyShape = LuaUserData<SelfForBodyShape, LuaTypeName::graphics
 // 2 definition (optional)
 int luaApi_AddFrame(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     GraphicsPackFrameDefinition definition;
     if(lua_gettop(_lua) > 1)
         tryGetGraphicsPackFrameDefinition(_lua, 2, definition);
@@ -98,7 +97,7 @@ int luaApi_AddFrame(lua_State * _lua)
 // 2 definition (optional)
 int luaApi_InsertFrame(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
     size_t index = static_cast<size_t>(lua_tointeger(_lua, 2));
     GraphicsPackFrameDefinition definition;
@@ -113,7 +112,7 @@ int luaApi_InsertFrame(lua_State * _lua)
 // 2 index
 int luaApi_RemoveFrame(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
     size_t index = static_cast<size_t>(lua_tointeger(_lua, 2));
     bool result = self->getGraphicsPack(_lua)->removeFrame(index);
@@ -126,7 +125,7 @@ int luaApi_RemoveFrame(lua_State * _lua)
 // 3 visibility
 int luaApi_SetFrameVisibility(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
     luaL_argcheck(_lua, lua_isboolean(_lua, 3), 3, "visibility value expected");
     size_t index = static_cast<size_t>(lua_tointeger(_lua, 2));
@@ -140,7 +139,7 @@ int luaApi_SetFrameVisibility(lua_State * _lua)
 // 2 index
 int luaApi_IsFrameVisible(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
     size_t index = static_cast<size_t>(lua_tointeger(_lua, 2));
     std::optional<bool> result = self->getGraphicsPack(_lua)->isFrameVisible(index);
@@ -156,7 +155,7 @@ int luaApi_IsFrameVisible(lua_State * _lua)
 // 3 duration
 int luaApi_SetFrameDuration(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, "duration value expected");
     size_t index = static_cast<size_t>(lua_tointeger(_lua, 2));
@@ -170,7 +169,7 @@ int luaApi_SetFrameDuration(lua_State * _lua)
 // 2 index
 int luaApi_GetFrameDuration(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
     size_t index = static_cast<size_t>(lua_tointeger(_lua, 2));
     std::optional<std::chrono::milliseconds> result = self->getGraphicsPack(_lua)->getFrameDuration(index);
@@ -184,7 +183,7 @@ int luaApi_GetFrameDuration(lua_State * _lua)
 // 1 self
 int luaApi_GetCurrentFrameIndex(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     lua_pushinteger(_lua, self->getGraphicsPack(_lua)->getCurrentFrameIndex());
     return 1;
 }
@@ -193,7 +192,7 @@ int luaApi_GetCurrentFrameIndex(lua_State * _lua)
 // 2 index
 int luaApi_SetCurrentFrameIndex(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
     size_t index = static_cast<size_t>(lua_tointeger(_lua, 2));
     lua_pushboolean(_lua, self->getGraphicsPack(_lua)->setCurrentFrameIndex(index));
@@ -203,7 +202,7 @@ int luaApi_SetCurrentFrameIndex(lua_State * _lua)
 // 1 self
 int luaApi_SwitchToNextVisibleFrame(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     lua_pushboolean(_lua, self->getGraphicsPack(_lua)->switchToNextVisibleFrame());
     return 1;
 }
@@ -213,7 +212,7 @@ int luaApi_SwitchToNextVisibleFrame(lua_State * _lua)
 // 3 sprite definition
 int luaApi_AddSprite(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
     size_t frame_index = static_cast<size_t>(lua_tointeger(_lua, 2));
     GraphicsPackSpriteDefinition definition;
@@ -227,7 +226,7 @@ int luaApi_AddSprite(lua_State * _lua)
 // 3 sprite
 int luaApi_RemoveSprite(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
+    const Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_frame_index_expected);
     size_t frame_index = static_cast<size_t>(lua_tointeger(_lua, 2));
     luaL_argcheck(_lua, lua_isinteger(_lua, 3), 3, gc_message_sprite_index_expected);
@@ -283,6 +282,6 @@ void Sol2D::Lua::pushGraphicsPackApi(
 
 GraphicsPack * Sol2D::Lua::tryGetGraphicsPack(lua_State * _lua, int _idx)
 {
-    Self * self = UserData::tryGetUserData(_lua, _idx);
+    const Self * self = UserData::tryGetUserData(_lua, _idx);
     return self ? self->getGraphicsPack(_lua) : nullptr;
 }
