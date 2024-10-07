@@ -790,6 +790,8 @@ void Scene::drawLayersAndBodies(
 
 void Scene::drawObjectLayer(const TileMapObjectLayer & _layer)
 {
+    // TODO: offset and parallax
+
     SDL_SetRenderDrawColor(&mr_renderer, 255, 20, 0, 255);
     _layer.forEachObject([this](const TileMapObject & __object) {
         if(!__object.isVisible()) return;
@@ -948,6 +950,8 @@ Rect Scene::calculateViewport(const TileMapTileLayer & _layer) const
 
 void Scene::drawImageLayer(const TileMapImageLayer & _layer)
 {
+    // TODO: offset and parallax
+
     std::shared_ptr<SDL_Texture> image = _layer.getImage();
     float width, height;
     SDL_GetTextureSize(image.get(), &width, &height);
