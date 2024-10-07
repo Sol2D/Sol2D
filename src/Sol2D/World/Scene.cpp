@@ -841,16 +841,7 @@ void Scene::drawCircle(const TileMapCircle & _circle)
 
 void Scene::drawTileLayer(const TileMapTileLayer & _layer)
 {
-    Rect viewport;
-    viewport.x = m_world_offset.x;
-    viewport.y = m_world_offset.y;
-    {
-        int w, h;
-        SDL_GetCurrentRenderOutputSize(&mr_renderer, &w, &h);
-        viewport.w = static_cast<float>(w);
-        viewport.h = static_cast<float>(h);
-    }
-
+    const Rect viewport = calculateViewport(_layer);
     const float first_col = std::floor(viewport.x / m_tile_map_ptr->getTileWidth());
     const float first_row = std::floor(viewport.y / m_tile_map_ptr->getTileHeight());
     const float last_col = std::ceil((viewport.x + viewport.w) / m_tile_map_ptr->getTileWidth());
@@ -932,6 +923,27 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
 
         SDL_RenderTexture(&mr_renderer, &cell->tile->getSource(), &tile_rect, &dest_rect);
     }
+}
+
+Rect Scene::calculateViewport(const TileMapTileLayer & _layer) const
+{
+    Rect viewport;
+    Point layer_offset = makePoint(_layer.getOffsetX(), _layer.getOffsetY());
+    Point layer_parallax = makePoint(_layer.getParallaxX(), _layer.getParallaxY());
+    for(const auto * parent_layer = _layer.getParent(); parent_layer; parent_layer = parent_layer->getParent())
+    {
+        layer_offset.x += parent_layer->getOffsetX();
+        layer_offset.y += parent_layer->getOffsetY();
+        layer_parallax.x *= parent_layer->getParallaxX();
+        layer_parallax.y *= parent_layer->getParallaxY();
+    }
+    viewport.x = m_world_offset.x * layer_parallax.x - layer_offset.x;
+    viewport.y = m_world_offset.y * layer_parallax.y - layer_offset.y;
+    int w, h;
+    SDL_GetCurrentRenderOutputSize(&mr_renderer, &w, &h);
+    viewport.w = static_cast<float>(w);
+    viewport.h = static_cast<float>(h);
+    return viewport;
 }
 
 void Scene::drawImageLayer(const TileMapImageLayer & _layer)

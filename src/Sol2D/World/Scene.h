@@ -119,6 +119,7 @@ private:
     void drawPolyXObject(const Tiles::TileMapPolyX & _poly, bool _close);
     void drawCircle(const Tiles::TileMapCircle & _circle);
     void drawTileLayer(const Tiles::TileMapTileLayer & _layer);
+    Rect calculateViewport(const Tiles::TileMapTileLayer & _layer) const;
     void drawImageLayer(const Tiles::TileMapImageLayer & _layer);
     Point toAbsoluteCoords(float _world_x, float _world_y) const;
 

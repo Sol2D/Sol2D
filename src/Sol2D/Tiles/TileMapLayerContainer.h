@@ -38,6 +38,7 @@ public:
 
     virtual ~TileMapLayerContainer();
     TileMapTileLayer & createTileLayer(
+        const TileMapLayer * _parent,
         uint32_t _id,
         const std::string & _name,
         uint32_t _tile_width,
@@ -46,9 +47,9 @@ public:
         int32_t _y,
         uint32_t _width,
         uint32_t _height);
-    TileMapObjectLayer & createObjectLayer(uint32_t _id, const std::string & _name);
-    TileMapImageLayer & createImageLayer(uint32_t _id, const std::string & _name);
-    TileMapGroupLayer & createGroupLayer(uint32_t _id, const std::string & _name);
+    TileMapObjectLayer & createObjectLayer(const TileMapLayer * _parent, uint32_t _id, const std::string & _name);
+    TileMapImageLayer & createImageLayer(const TileMapLayer * _parent, uint32_t _id, const std::string & _name);
+    TileMapGroupLayer & createGroupLayer(const TileMapLayer * _parent, uint32_t _id, const std::string & _name);
 
     void forEachLayer(std::function<void(const TileMapLayer &)> _cb) const
     {
@@ -86,12 +87,13 @@ class TileMapGroupLayer : public TileMapLayer, public TileMapLayerContainer
 {
 public:
     TileMapGroupLayer(
+        const TileMapLayer * _parent,
         const uint32_t _id,
         const std::string & _name,
         const TileHeap & _tile_heap,
         const ObjectHeap & _object_heap
-        ) :
-        TileMapLayer(_id, _name, TileMapLayerType::Group),
+    ) :
+        TileMapLayer(_parent, _id, _name, TileMapLayerType::Group),
         TileMapLayerContainer(_tile_heap, _object_heap)
     {
     }

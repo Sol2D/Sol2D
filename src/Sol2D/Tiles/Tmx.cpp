@@ -48,7 +48,11 @@ public:
     TileMapLayerData(uint32_t _layer_id, const std::string & _layer_name);
     void startChunk(int32_t _x, int32_t _y, uint32_t _width, uint32_t _height);
     void addTile(int32_t _x, int32_t _y, uint32_t _gid);
-    TileMapTileLayer * createLayer(TileMapLayerContainer & _container, uint32_t _tile_width, uint32_t _tile_height);
+    TileMapTileLayer * createLayer(
+        TileMapLayerContainer & _container,
+        const TileMapLayer * _parent,
+        uint32_t _tile_width,
+        uint32_t _tile_height);
 
 private:
     uint32_t m_layer_id;
@@ -109,8 +113,8 @@ public:
 
 private:
     void loadTileSet(const XMLElement & _xml);
-    void loadLayers(const XMLElement & _xml, TileMapLayerContainer & _container);
-    void loadTileLayer(const XMLElement & _xml, TileMapLayerContainer & _container);
+    void loadLayers(const XMLElement & _xml, TileMapLayerContainer & _container, const TileMapLayer * _parent);
+    void loadTileLayer(const XMLElement & _xml, TileMapLayerContainer & _container, const TileMapLayer * _parent);
     TileMapLayerDefinition readLayerDefinition(const XMLElement & _xml);
     void readLayer(const XMLElement & _xml, TileMapLayer & _layer);
     void loadTileLayerChunk(
@@ -144,12 +148,12 @@ private:
         uint32_t _width,
         uint32_t _height,
         TileMapLayerData &_data);
-    void loadObjectLayer(const XMLElement & _xml, TileMapLayerContainer & _container);
+    void loadObjectLayer(const XMLElement & _xml, TileMapLayerContainer & _container, const TileMapLayer * _parent);
     void loadObject(const XMLElement & _xml, TileMapObjectLayer & _layer);
     void loadPoints(const XMLElement & _xml, TileMapPolyX & _poly);
     void loadText(const XMLElement & _xml, TileMapText & _text);
-    void loadImageLayer(const XMLElement & _xml, TileMapLayerContainer & _container);
-    void loadGroupLayer(const XMLElement & _xml, TileMapLayerContainer & _container);
+    void loadImageLayer(const XMLElement & _xml, TileMapLayerContainer & _container, const TileMapLayer * _parent);
+    void loadGroupLayer(const XMLElement & _xml, TileMapLayerContainer & _container, const TileMapLayer * _parent);
 
 private:
     void loadFromXml(const XMLDocument & _xml);
@@ -225,6 +229,7 @@ inline void TileMapLayerData::addTile(int32_t _x, int32_t _y, uint32_t _gid)
 
 TileMapTileLayer * TileMapLayerData::createLayer(
     TileMapLayerContainer & _container,
+    const TileMapLayer * _parent,
     uint32_t _tile_width,
     uint32_t _tile_height)
 {
@@ -233,6 +238,7 @@ TileMapTileLayer * TileMapLayerData::createLayer(
     if(width <= 0 || height <= 0)
         return nullptr;
     TileMapTileLayer & layer = _container.createTileLayer(
+        _parent,
         m_layer_id,
         m_layer_name,
         _tile_width,
@@ -494,7 +500,7 @@ void TileMapXmlLoader::loadFromXml(const XMLDocument & _xml)
     {
         loadTileSet(*xts);
     }
-    loadLayers(*xmap, mr_map);
+    loadLayers(*xmap, mr_map, nullptr);
 }
 
 void TileMapXmlLoader::loadTileSet(const XMLElement & _xml)
@@ -516,23 +522,29 @@ void TileMapXmlLoader::loadTileSet(const XMLElement & _xml)
     }
 }
 
-void TileMapXmlLoader::loadLayers(const XMLElement & _xml, TileMapLayerContainer & _container)
+void TileMapXmlLoader::loadLayers(
+    const XMLElement & _xml,
+    TileMapLayerContainer & _container,
+    const TileMapLayer * _parent)
 {
     for(const XMLElement * xchild = _xml.FirstChildElement(); xchild; xchild = xchild->NextSiblingElement())
     {
         const char * name = xchild->Name();
         if(strcmp("layer", name) == 0)
-            loadTileLayer(*xchild, _container);
+            loadTileLayer(*xchild, _container, _parent);
         else if(strcmp("objectgroup", name) == 0)
-            loadObjectLayer(*xchild, _container);
+            loadObjectLayer(*xchild, _container, _parent);
         else if(strcmp("imagelayer", name) == 0)
-            loadImageLayer(*xchild, _container);
+            loadImageLayer(*xchild, _container, _parent);
         else if(strcmp("group", name) == 0)
-            loadGroupLayer(*xchild, _container);
+            loadGroupLayer(*xchild, _container, _parent);
     }
 }
 
-void TileMapXmlLoader::loadTileLayer(const XMLElement & _xml, TileMapLayerContainer & _container)
+void TileMapXmlLoader::loadTileLayer(
+    const XMLElement & _xml,
+    TileMapLayerContainer & _container,
+    const TileMapLayer * _parent)
 {
     TileMapLayerDefinition def = readLayerDefinition(_xml);
     std::unique_ptr<TileMapLayerData> data(new TileMapLayerData(def.id, def.name));
@@ -566,7 +578,7 @@ void TileMapXmlLoader::loadTileLayer(const XMLElement & _xml, TileMapLayerContai
             loadTileLayerChunk(*xdata, encoding, compression, x, y, width, height, *data);
         }
     }
-    TileMapTileLayer * layer = data->createLayer(_container, mr_map.getTileWidth(), mr_map.getTileHeight());
+    TileMapTileLayer * layer = data->createLayer(_container, _parent, mr_map.getTileWidth(), mr_map.getTileHeight());
     if(layer)
     {
         readLayer(_xml, *layer);
@@ -594,9 +606,9 @@ void TileMapXmlLoader::readLayer(const XMLElement & _xml, TileMapLayer & _layer)
         value = _xml.FloatAttribute("parallaxy", 1.0f);
         if(value  != 1.0f) _layer.setParallaxY(value);
     }
-    if(int32_t offset_x = _xml.IntAttribute("offsetx", 0))
+    if(float offset_x = _xml.FloatAttribute("offsetx", 0))
         _layer.setOffsetX(offset_x);
-    if(int32_t offset_y = _xml.IntAttribute("offsety", 0))
+    if(float offset_y = _xml.FloatAttribute("offsety", 0))
         _layer.setOffsetY(offset_y);
     Color tint_color;
     if(tryParseColor(_xml.Attribute("tintcolor"), tint_color))
@@ -742,10 +754,13 @@ void TileMapXmlLoader::loadTileLayerDataCsv(
     }
 }
 
-void TileMapXmlLoader::loadObjectLayer(const XMLElement & _xml, TileMapLayerContainer & _container)
+void TileMapXmlLoader::loadObjectLayer(
+    const XMLElement & _xml,
+    TileMapLayerContainer & _container,
+    const TileMapLayer * _parent)
 {
     TileMapLayerDefinition def = readLayerDefinition(_xml);
-    TileMapObjectLayer & layer = _container.createObjectLayer(def.id, def.name);
+    TileMapObjectLayer & layer = _container.createObjectLayer(_parent, def.id, def.name);
     readLayer(_xml, layer);
     for(const XMLElement * xobj = _xml.FirstChildElement("object"); xobj; xobj = xobj->NextSiblingElement(xobj->Name()))
         loadObject(*xobj, layer);
@@ -894,22 +909,28 @@ void TileMapXmlLoader::loadText(const XMLElement & _xml, TileMapText & _text)
     }
 }
 
-void TileMapXmlLoader::loadImageLayer(const XMLElement & _xml, TileMapLayerContainer & _container)
+void TileMapXmlLoader::loadImageLayer(
+    const XMLElement & _xml,
+    TileMapLayerContainer & _container,
+    const TileMapLayer * _parent)
 {
     TileMapLayerDefinition def = readLayerDefinition(_xml);
-    TileMapImageLayer & layer = _container.createImageLayer(def.id, def.name);
+    TileMapImageLayer & layer = _container.createImageLayer(_parent, def.id, def.name);
     readLayer(_xml, layer);
     const XMLElement * ximage = _xml.FirstChildElement("image");
     if(ximage)
         layer.setImage(parseImage(*ximage));
 }
 
-void TileMapXmlLoader::loadGroupLayer(const XMLElement & _xml, TileMapLayerContainer & _container)
+void TileMapXmlLoader::loadGroupLayer(
+    const XMLElement & _xml,
+    TileMapLayerContainer & _container,
+    const TileMapLayer * _parent)
 {
     TileMapLayerDefinition def = readLayerDefinition(_xml);
-    TileMapGroupLayer & layer = _container.createGroupLayer(def.id, def.name);
+    TileMapGroupLayer & layer = _container.createGroupLayer(_parent, def.id, def.name);
     readLayer(_xml, layer);
-    loadLayers(_xml, layer);
+    loadLayers(_xml, layer, &layer);
 }
 
 const char * TileSetXmlLoader::sc_root_tag_name = "tileset";

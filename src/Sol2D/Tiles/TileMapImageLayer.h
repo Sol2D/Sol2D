@@ -23,8 +23,8 @@ namespace Sol2D::Tiles {
 class TileMapImageLayer : public TileMapLayer
 {
 public:
-    TileMapImageLayer(uint32_t _id, const std::string & _name) :
-        TileMapLayer(_id, _name, TileMapLayerType::Image)
+    TileMapImageLayer(const TileMapLayer * _parent, uint32_t _id, const std::string & _name) :
+        TileMapLayer(_parent, _id, _name, TileMapLayerType::Image)
     {
     }
 

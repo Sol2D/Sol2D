@@ -42,6 +42,7 @@ class TileMapTileLayer : public TileMapLayer
 {
 public:
     TileMapTileLayer(
+        const TileMapLayer * _parent,
         const TileHeap & _tile_heap,
         uint32_t _id,
         const std::string & _name,

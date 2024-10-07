@@ -19,6 +19,7 @@
 using namespace Sol2D::Tiles;
 
 TileMapTileLayer::TileMapTileLayer(
+    const TileMapLayer * _parent,
     const TileHeap & _tile_heap,
     uint32_t _id,
     const std::string & _name,
@@ -29,7 +30,7 @@ TileMapTileLayer::TileMapTileLayer(
     uint32_t _width,
     uint32_t _height
 ) :
-    TileMapLayer(_id, _name, TileMapLayerType::Tile),
+    TileMapLayer(_parent, _id, _name, TileMapLayerType::Tile),
     mr_tile_heap(_tile_heap),
     m_tile_width(_tile_width),
     m_tile_height(_tile_height),

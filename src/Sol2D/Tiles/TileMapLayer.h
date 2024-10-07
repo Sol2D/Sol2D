@@ -37,7 +37,8 @@ class TileMapLayer
     S2_DISABLE_COPY_AND_MOVE(TileMapLayer)
 
 public:
-    TileMapLayer(const uint32_t _id, const std::string & _name, TileMapLayerType _type) :
+    TileMapLayer(const TileMapLayer * _parent, const uint32_t _id, const std::string & _name, TileMapLayerType _type) :
+        mp_parent(_parent),
         m_id(_id),
         m_name(_name),
         m_type(_type),
@@ -51,6 +52,7 @@ public:
     }
 
     virtual ~TileMapLayer() { }
+    const TileMapLayer * getParent() const { return mp_parent; }
     uint32_t getId() const { return m_id; }
     const std::string & getName() const { return m_name; }
     TileMapLayerType getType() const { return m_type; }
@@ -60,10 +62,10 @@ public:
     bool isVisible() const { return m_is_visible; }
     void setOpacity(float _opacity) { m_opacity = _opacity; }
     float getOpacity() const { return m_opacity; }
-    void setOffsetX(int32_t _offset) { m_offset_x = _offset; }
-    int32_t getOffsetX() const { return m_offset_x; }
-    void setOffsetY(int32_t _offset) { m_offset_y = _offset; }
-    int32_t getOffsetY() const { return m_offset_y; }
+    void setOffsetX(float _offset) { m_offset_x = _offset; }
+    float getOffsetX() const { return m_offset_x; }
+    void setOffsetY(float _offset) { m_offset_y = _offset; }
+    float getOffsetY() const { return m_offset_y; }
     void setParallaxX(float _parallax) { m_parallax_x = _parallax; }
     float getParallaxX() const { return m_parallax_x; }
     void setParallaxY(float _parallax) { m_parallax_y = _parallax; }
@@ -73,14 +75,15 @@ public:
     const std::optional<Color> & getTintColor() const { return m_tint_color; }
 
 private:
+    const TileMapLayer * mp_parent;
     uint32_t m_id;
     const std::string m_name;
     TileMapLayerType m_type;
     std::string m_class;
     bool m_is_visible;
     float m_opacity;
-    int32_t m_offset_x; // TODO: To render offset
-    int32_t m_offset_y;
+    float m_offset_x;
+    float m_offset_y;
     float m_parallax_x; // TODO: To render parallax https://doc.mapeditor.org/en/stable/manual/layers/#parallax-factor
     float m_parallax_y;
     std::optional<Color> m_tint_color; // TODO: To render tint color. https://doc.mapeditor.org/en/stable/manual/layers/#tint-color
