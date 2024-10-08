@@ -407,6 +407,17 @@ uint64_t Scene::createBody(const Point & _position, const BodyDefinition & _defi
     return body->getId();
 }
 
+uint64_t Scene::createJoint(const JointDefinition & _definition)
+{
+    b2RevoluteJointDef b2_joint_def = b2DefaultRevoluteJointDef();
+    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
+        return 0; // FIXEM: null?
+    b2CreateRevoluteJoint(m_b2_world_id, &b2_joint_def);
+    return 0; // TODO: return ID
+}
+
 void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options)
 {
     b2BodyType body_type = mapBodyType(_body_options.type);

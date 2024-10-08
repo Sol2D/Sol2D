@@ -38,15 +38,15 @@ public:
     bool tryGetInteger(const char * _key, lua_Integer * _value) const;
     bool tryGetBoolean(const char * _key, bool * _value) const;
     bool tryGetString(const char * _key, std::string & _value) const;
-    bool tryGetValue(const char * _key);
+    bool tryGetValue(const char * _key) const;
 
     void setValueFromTop(const char * _key);
-    void setIntegerValue(const char * _key, lua_Integer _value) const;
-    void setNumberValue(const char * _key, lua_Number _value) const;
-    void setBooleanValue(const char * _key, bool _value) const;
-    void setStringValue(const char * _key, const char * _value) const;
-    void setNullValue(const char * _key) const;
-    void setStringValue(const char * _key, const std::string & _value) const;
+    void setIntegerValue(const char * _key, lua_Integer _value);
+    void setNumberValue(const char * _key, lua_Number _value);
+    void setBooleanValue(const char * _key, bool _value);
+    void setStringValue(const char * _key, const char * _value);
+    void setNullValue(const char * _key);
+    void setStringValue(const char * _key, const std::string & _value);
 
 private:
     lua_State * mp_lua;
@@ -75,7 +75,7 @@ inline lua_State * LuaTable::getLua() const
     return mp_lua;
 }
 
-inline void LuaTable::setStringValue(const char * _key, const std::string & _value) const
+inline void LuaTable::setStringValue(const char * _key, const std::string & _value)
 {
     setStringValue(_key, _value.c_str());
 }

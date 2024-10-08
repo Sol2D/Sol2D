@@ -59,7 +59,7 @@ bool LuaTable::tryGetString(const char * _key, std::string & _value) const
     return result;
 }
 
-bool LuaTable::tryGetValue(const char * _key)
+bool LuaTable::tryGetValue(const char * _key) const
 {
     lua_pushstring(mp_lua, _key);
     if(lua_gettable(mp_lua, m_idx) == LUA_TNIL)
@@ -78,35 +78,35 @@ void LuaTable::setValueFromTop(const char * _key)
     lua_settable(mp_lua, m_idx);
 }
 
-void LuaTable::setIntegerValue(const char * _key, lua_Integer _value) const
+void LuaTable::setIntegerValue(const char * _key, lua_Integer _value)
 {
     lua_pushstring(mp_lua, _key);
     lua_pushinteger(mp_lua, _value);
     lua_settable(mp_lua, m_idx);
 }
 
-void LuaTable::setNumberValue(const char * _key, lua_Number _value) const
+void LuaTable::setNumberValue(const char * _key, lua_Number _value)
 {
     lua_pushstring(mp_lua, _key);
     lua_pushnumber(mp_lua, _value);
     lua_settable(mp_lua, m_idx);
 }
 
-void LuaTable::setBooleanValue(const char * _key, bool _value) const
+void LuaTable::setBooleanValue(const char * _key, bool _value)
 {
     lua_pushstring(mp_lua, _key);
     lua_pushboolean(mp_lua, _value);
     lua_settable(mp_lua, m_idx);
 }
 
-void LuaTable::setStringValue(const char * _key, const char * _value) const
+void LuaTable::setStringValue(const char * _key, const char * _value)
 {
     lua_pushstring(mp_lua, _key);
     lua_pushstring(mp_lua, _value);
     lua_settable(mp_lua, m_idx);
 }
 
-void LuaTable::setNullValue(const char * _key) const
+void LuaTable::setNullValue(const char * _key)
 {
     lua_pushstring(mp_lua, _key);
     lua_pushnil(mp_lua);

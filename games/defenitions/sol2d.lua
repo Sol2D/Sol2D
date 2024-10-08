@@ -128,6 +128,10 @@ script = nil
 ---@field position Point?
 ---@field sprite sol.Sprite | { spriteSheet: sol.SpriteSheet, spriteIndex: integer }
 
+---@class JointDefinition
+---@field bodyA integer | sol.Body
+---@field bodyB integer | sol.Body
+
 ---@class Fragment
 ---@field top Dimension?
 ---@field right Dimension?
@@ -277,6 +281,10 @@ function __scene:subscribeToPreSolveContact(callback) end
 
 ---@param subscription_id integer
 function __scene:unsubscribePreSolveContact(subscription_id) end
+
+---@param definition JointDefinition
+---@return integer
+function __scene:createJoint(definition) end
 
 ---@param body_id integer | sol.Body
 ---@param destination Point

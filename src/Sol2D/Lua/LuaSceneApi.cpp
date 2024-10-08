@@ -19,6 +19,7 @@
 #include <Sol2D/Lua/LuaGraphicsPackApi.h>
 #include <Sol2D/Lua/LuaBodyPrototypeApi.h>
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
+#include <Sol2D/Lua/LuaJointDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyOptionsApi.h>
 #include <Sol2D/Lua/LuaBodyApi.h>
 #include <Sol2D/Lua/LuaContactApi.h>
@@ -444,6 +445,17 @@ int luaApi_UnsubscribePreSolveContact(lua_State * _lua)
 }
 
 // 1 self
+// 2 joint definition
+int luaApi_CreateJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    JointDefinition definition;
+    luaL_argcheck(_lua, tryGetJointDefinition(_lua, 2, definition), 2, "joint definition expected");
+    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    return 1;
+}
+
+// 1 self
 // 2 body id | body
 // 3 destination
 // TODO: options
@@ -504,6 +516,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "unsubscribeFromSesnsorEndContact", luaApi_UnsubscribeFromSesnsorEndContact },
             { "subscribeToPreSolveContact", luaApi_SubscribeToPreSolveContact },
             { "unsubscribePreSolveContact", luaApi_UnsubscribePreSolveContact },
+            { "createJoint", luaApi_CreateJoint },
             { "findPath", luaApi_FindPath },
             { nullptr, nullptr }
         };

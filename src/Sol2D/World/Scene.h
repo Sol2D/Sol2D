@@ -17,6 +17,7 @@
 #pragma once
 
 #include <Sol2D/World/BodyDefinition.h>
+#include <Sol2D/World/JointDefinition.h>
 #include <Sol2D/World/BodyOptions.h>
 #include <Sol2D/World/Contact.h>
 #include <Sol2D/World/Box2dDebugDraw.h>
@@ -57,6 +58,7 @@ public:
     ~Scene() override;
     void setGravity(const Point & _vector);
     uint64_t createBody(const Point & _position, const BodyDefinition & _definition);
+    uint64_t createJoint(const JointDefinition & _definition);
     void createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options);
     bool destroyBody(uint64_t _body_id);
     bool setFollowedBody(uint64_t _body_id);
