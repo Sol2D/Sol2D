@@ -15,23 +15,23 @@
  </layer>
  <layer id="1" name="ground-1" width="100" height="20">
   <data encoding="base64" compression="zstd">
-   KLUv/WBAHsUHACQDAA0AAAAODwADAAEAAAACAgYABAAAAAUKAAAACwYADAAAAAkNAQEEAQUNBwAAAAgYAwZNoHBtdXCCI4GIHPX1ySkzSgeV6lDOx+Pk6bDp8ZdyuZbBPdnOTwg//CWtRA1MgmqAwi+kutNRCh+YnMqSPicyT570Mw4jqDzFk08+/ZySw1qkczqTTB7sWzzLTyHZR3jf6fTMtFyOIycwlc7H/6zE0QxDH5LUvEtn0iymSo8v1AmBEkwJ62qSM1lVOGmXUD3SL+FMFr+7ybebrpgc6kNcbtik1fi8/NY78kvJLpYLVMtZje7ILyW/WC5Ue5qq3E5Q8L8Y
+   KLUv/WBAHlUHACQDAA0AAAAODwABAAAAAgMABAAAAAUGAAoAAAALBgAMAAAACQ0BAQQBDQcAAAAIGAIDBgNKoHBtdZCCI8EEUusB9ckpYJQOBtWhno/HyabDpsFfCuVagafOnyc88HeqEiowObUBqt/kKZMSmCyVTfpcyDxZ028cBlBxiief/PRzIYetKZ3TkWSyYN/yuY+StA9x7SbS86mIXiBjKp6N+8OSoxuKPmQpeVfOGuNL9YSCctcVNVBIKoAkZQnqn34Z7mTxu5t8u+mZQTWcmhxaoM/Vv14gg67TGIKpN5RvkGXHYcg7rjq6QcG/bA==
   </data>
  </layer>
  <objectgroup id="6" name="places">
-  <object id="1" type="obstacle" x="0.147727" y="2047.94" width="4987.85" height="511.881"/>
+  <object id="1" type="obstacle" x="0.0366159" y="2047.87" width="4987.96" height="511.948"/>
   <object id="4" type="obstacle" x="5506" y="1791.88" width="1917.64" height="767.879"/>
   <object id="5" type="obstacle" x="7424" y="1536" width="1281.33" height="639.75"/>
   <object id="6" type="obstacle" x="8705.1" y="2175.97" width="1023.2" height="384.205"/>
   <object id="7" type="obstacle" x="11392" y="2175.69" width="1408" height="384.343"/>
   <object id="8" type="obstacle" x="12288.3" y="1407.83" width="510.409" height="767.652"/>
-  <object id="9" type="obstacle" x="0.102273" y="510.303" width="127.864" height="1537.5"/>
+  <object id="9" type="obstacle" x="-82.9811" y="510.97" width="82.9418" height="1536.88"/>
   <object id="10" type="water" x="4989.33" y="2079.33" width="515.667" height="480"/>
   <object id="11" type="water" x="9728.58" y="2208.17" width="1661.92" height="351.333"/>
   <object id="12" name="start-position" x="284.758" y="2046.03">
    <point/>
   </object>
-  <object id="13" name="finish" x="12414" y="-6" width="382" height="900"/>
+  <object id="13" name="finish" type="sensor" x="12414" y="-6" width="382" height="900"/>
   <object id="17" type="one-way-platfrom" x="1537" y="1664" width="894" height="57"/>
   <object id="18" type="one-way-platfrom" x="2047" y="1408" width="1663" height="59"/>
   <object id="19" type="one-way-platfrom" x="4481" y="1280" width="1020" height="65"/>

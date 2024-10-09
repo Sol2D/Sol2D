@@ -3,22 +3,38 @@ local ONE_WAY_PLATFORM_SHAPE_KEY = 'one-way-platform'
 local keys_meta = {
     stores = {
         main = 'global',
-        level01 = 'level-01'
+        level01 = '1:level',
+        level02 = '2:level'
     },
     tilemap = {
-        layers = {
-            ground1 = 'ground-1',
-            ground2 = 'ground-2',
-            places = 'places'
+        level01 = {
+            layers = {
+                background = 'background',
+                ground1 = 'ground-1',
+                ground2 = 'ground-2',
+                places = 'places'
+            }
+        },
+        level02 = {
+            layers = {
+                background = 'background',
+                ground1 = 'ground-1',
+                places = 'places'
+            }
         }
     },
     bodies = {
         player = 'player',
-        flyingPlatform3 = 'flying-platform3'
+        flyingPlatform3 = 'flying-platform3',
+        button = 'button',
+        buttonHull = 'hull-button'
     },
     shapes = {
         oneWayPlatfrom = {
             main = ONE_WAY_PLATFORM_SHAPE_KEY
+        },
+        obstacle = {
+            main = 'obstacle'
         },
         player = {
             main = 'main:player',
@@ -26,6 +42,10 @@ local keys_meta = {
         },
         water = {
             main = 'water'
+        },
+        button = {
+            main = 'main:button',
+            hull = 'hull:button'
         }
     },
     shapeGraphics = {
@@ -39,6 +59,10 @@ local keys_meta = {
         },
         flyingPlatform3 = {
             main = 'main:flying-platform3'
+        },
+        button = {
+            main = 'main:button',
+            hull = 'main:button'
         }
     },
     soundEffects = {

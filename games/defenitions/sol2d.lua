@@ -132,6 +132,71 @@ script = nil
 ---@field bodyA integer | sol.Body
 ---@field bodyB integer | sol.Body
 
+---@class DistanceJointDefenition: JointDefinition
+---@field isSpringEnbaled boolean?
+---@field isMotorEnbaled boolean?
+---@field isLimitEnbaled boolean?
+---@field localAnchorA Point?
+---@field localAnchorB Point?
+---@field minLength number?
+---@field maxLength number?
+---@field hertz number?
+---@field dampingRatio number?
+---@field maxMotorForce number?
+---@field motorSpeed number?
+---@field length number?
+
+---@class MotorJointDefinition: JointDefinition
+---@field linearOffset Point?
+---@field angularOffset number?
+---@field maxForce number?
+---@field maxTorque number?
+---@field correctionFactor number?
+
+---@class MouseJointDefinition: JointDefinition
+---@field target Point?
+---@field hertz number?
+---@field dampingRatio number?
+---@field maxForce number?
+
+---@class PrismaticJointDefinition: JointDefinition
+---@field isSpringEnbaled boolean?
+---@field isMotorEnbaled boolean?
+---@field isLimitEnbaled boolean?
+---@field localAnchorA Point?
+---@field localAnchorB Point?
+---@field localAxisA Point?
+---@field hertz number?
+---@field dampingRatio number?
+---@field maxMotorForce number?
+---@field motorSpeed number?
+---@field reference_angle number?
+---@field lowerTranslation number?
+---@field upperTranslation number?
+
+---@class WeldJointDefinition: JointDefinition
+---@field localAnchorA Point?
+---@field localAnchorB Point?
+---@field reference_angle number?
+---@field linearHertz number?
+---@field angularHertz number?
+---@field linearDampingRatio number?
+---@field angularDampingRatio number?
+
+---@class WheelJointDefinition: JointDefinition
+---@field isSpringEnbaled boolean?
+---@field isMotorEnbaled boolean?
+---@field isLimitEnbaled boolean?
+---@field localAnchorA Point?
+---@field localAnchorB Point?
+---@field localAxisA Point?
+---@field hertz number?
+---@field dampingRatio number?
+---@field maxMotorTorque number?
+---@field motorSpeed number?
+---@field lowerTranslation number?
+---@field upperTranslation number?
+
 ---@class Fragment
 ---@field top Dimension?
 ---@field right Dimension?
@@ -282,9 +347,29 @@ function __scene:subscribeToPreSolveContact(callback) end
 ---@param subscription_id integer
 function __scene:unsubscribePreSolveContact(subscription_id) end
 
----@param definition JointDefinition
+---@param definition DistanceJointDefenition
 ---@return integer
-function __scene:createJoint(definition) end
+function __scene:createDistanceJoint(definition) end
+
+---@param definition MotorJointDefinition
+---@return integer
+function __scene:createMotorJoint(definition) end
+
+---@param definition MouseJointDefinition
+---@return integer
+function __scene:createMouseJoint(definition) end
+
+---@param definition PrismaticJointDefinition
+---@return integer
+function __scene:createPrismaticJoint(definition) end
+
+---@param definition WeldJointDefinition
+---@return integer
+function __scene:createWeldJoint(definition) end
+
+---@param definition WheelJointDefinition
+---@return integer
+function __scene:createWheelJoint(definition) end
 
 ---@param body_id integer | sol.Body
 ---@param destination Point

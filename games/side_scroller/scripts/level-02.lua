@@ -1,10 +1,8 @@
 local keys = require 'resources.keys'
+local ButtonFactory = require 'resources.button-factory'
 local BodyContactObserver = require 'body-contact-observer'
 
 local METERS_PER_PIXEL = 0.01
-
----@type function
-local onFinished = nil
 
 ---@param point Point
 ---@return Point
@@ -44,95 +42,41 @@ end
 
 ---@param global_store sol.Store
 ---@param scene sol.Scene
-local function createFlyingPlatforms(global_store, scene)
-    local proto = global_store:getBodyPrototype(keys.bodies.flyingPlatform3)
-    if proto == nil then
-        error('Unable to load flying platform 3 prototype')
+---@param args any
+local function createButton(global_store, scene, args)
+    local button_position_object = scene:getTileMapObjectByName('button')
+    if not button_position_object then
+        error('There is no button-position object on the tile map')
     end
-    local platfroms = scene:getTileMapObjectsByClass('platform')
-    for _, platfrom in ipairs(platfroms) do
-        local points = {}
-        for _, point in ipairs(platfrom.points) do
-            table.insert(
-                points,
-                pixelPointToPhisical({
-                    x = platfrom.position.x + point.x,
-                    y = platfrom.position.y + point.y
-                })
-            )
-        end
-        local platform = scene:createBody(points[1], proto, { points = points })
-        platform:setLayer(keys.tilemap.level01.layers.ground2)
-        local platform_shape = platform:getShape(keys.shapes.oneWayPlatfrom.main)
-        if platform_shape then
-            platform_shape:setCurrentGraphics(keys.shapeGraphics.flyingPlatform3.main)
-        else
-            error(
-                'There is not shape ' .. keys.shapeGraphics.flyingPlatform3.main ..
-                ' in ' .. keys.bodies.flyingPlatform3
-            )
-        end
-    end
-end
-
----@param contact PreSolveContact
----@return boolean
-local function preSolveContact(contact)
-    local player_side = nil
-    local platform_side = nil
-    local sign = 0
-    if contact.sideA.shapeKey == keys.shapes.player.main then
-        player_side = contact.sideA
-        platform_side = contact.sideB
-        sign = 1
-    elseif contact.sideB.shapeKey == keys.shapes.player.main then
-        player_side = contact.sideB
-        platform_side = contact.sideA
-        sign = -1
-    end
-    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= keys.shapes.oneWayPlatfrom.main then
-        return true
-    end
-
-    if contact.manifold.normal.y * sign < 0.95 then
-        return false;
-    end
-
-    for _, point in ipairs(contact.manifold.points) do
-        if point.separation > -0.2 then
-            return true
-        end
-    end
-
-    return false
+    ButtonFactory.createButton(
+        global_store,
+        scene,
+        pixelPointToPhisical(button_position_object.position),
+        { layer = keys.tilemap.level02.layers.background }
+    )
 end
 
 ---@param scene sol.Scene
 ---@param body_contact_observer BodyContactObserver
 local function createContactSubscriptions(scene, body_contact_observer)
-    local begin_contact_subscription = scene:subscribeToBeginContact(function (contact)
+    local begin_contact_subscription = scene:subscribeToBeginContact(function(contact)
         body_contact_observer.callBeginContact(contact)
     end)
     local end_contact_subscription = scene:subscribeToEndContact(function(contact)
         body_contact_observer.callEndContact(contact)
     end)
     local begin_sensor_constact_subscription = scene:subscribeToSensorBeginContact(function(contact)
-        if contact.sensor.tileMapObjectId == 13 and onFinished then -- FIXME: + tile map object NAME and CLASS
-            onFinished()
-        end
         body_contact_observer.callSensorBeginContact(contact)
     end)
     local end_sensor_constact_subscription = scene:subscribeToSensorEndContact(function(contact)
         body_contact_observer.callSensorEndContact(contact)
     end)
-    local pre_solve_subscription = scene:subscribeToPreSolveContact(preSolveContact)
     return {
-        destroy = function ()
+        destroy = function()
             scene:unsubscribeFromBeginContact(begin_contact_subscription)
             scene:unsubscribeFromEndContact(end_contact_subscription)
             scene:unsubscribeFromSensorBeginContact(begin_sensor_constact_subscription)
             scene:unsubscribeFromSesnsorEndContact(end_sensor_constact_subscription)
-            scene:unsubscribePreSolveContact(pre_solve_subscription)
         end
     }
 end
@@ -147,9 +91,8 @@ local function createScene(global_store, local_store)
             metersPerPixel = METERS_PER_PIXEL
         }
     )
-    scene:loadTileMap('tilemaps/level-01.tmx')
+    scene:loadTileMap('tilemaps/level-02.tmx')
     scene:createBodiesFromMapObjects('obstacle')
-    scene:createBodiesFromMapObjects('sensor', { shapePhysics = { isSensor = true } })
     scene:createBodiesFromMapObjects(
         'one-way-platfrom',
         {
@@ -173,25 +116,23 @@ local function createScene(global_store, local_store)
         global_store,
         scene,
         {
-            contactObserver = observer,
-            METERS_PER_PIXEL = METERS_PER_PIXEL
+            METERS_PER_PIXEL = METERS_PER_PIXEL,
+            contactObserver = observer
         }
     )
-    createFlyingPlatforms(global_store, scene)
+    createButton(global_store, scene)
     local contact_subsciptions = createContactSubscriptions(scene, observer)
     return {
         scene = scene,
-        destroy = function ()
+        destroy = function()
             contact_subsciptions.destroy()
         end
     }
 end
 
 ---@param global_store sol.Store
----@param on_finished function
-local function run(global_store, on_finished)
-    local local_store = sol.stores:createStore(keys.stores.level01)
-    onFinished = on_finished
+local function run(global_store)
+    local local_store = sol.stores:createStore(keys.stores.level02)
 
     local music = local_store:createMusic('level-01', 'sounds/level-01/level-01.wav')
     music:loop(-1)
@@ -207,6 +148,7 @@ local function run(global_store, on_finished)
         scene_data.destroy()
         sol.stores:deleteStore(keys.stores.level01)
     end
+
     return setmetatable({}, level_meta)
 end
 

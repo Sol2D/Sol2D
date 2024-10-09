@@ -58,7 +58,12 @@ public:
     ~Scene() override;
     void setGravity(const Point & _vector);
     uint64_t createBody(const Point & _position, const BodyDefinition & _definition);
-    uint64_t createJoint(const JointDefinition & _definition);
+    uint64_t createJoint(const DistanceJointDefenition & _definition);
+    uint64_t createJoint(const MotorJointDefinition & _definition);
+    uint64_t createJoint(const MouseJointDefinition & _definition);
+    uint64_t createJoint(const PrismaticJointDefinition & _definition);
+    uint64_t createJoint(const WeldJointDefinition & _definition);
+    uint64_t createJoint(const WheelJointDefinition & _definition);
     void createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options);
     bool destroyBody(uint64_t _body_id);
     bool setFollowedBody(uint64_t _body_id);

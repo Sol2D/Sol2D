@@ -14,29 +14,20 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+#include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D::Lua::Aux;
 
-bool LuaTable::tryGetNumber(const char * _key, lua_Number * _value) const
+bool LuaTable::tryGetBoolean(const char * _key, std::optional<bool> _value) const
 {
-    lua_pushstring(mp_lua, _key);
-    bool result = lua_gettable(mp_lua, m_idx) == LUA_TNUMBER;
-    if(result)
-        *_value = lua_tonumber(mp_lua, -1);
-    lua_pop(mp_lua, 1);
-    return result;
-}
-
-bool LuaTable::tryGetInteger(const char * _key, lua_Integer * _value) const
-{
-    lua_pushstring(mp_lua, _key);
-    lua_gettable(mp_lua, m_idx);
-    bool result = lua_isinteger(mp_lua, -1);
-    if(result)
-        *_value = lua_tointeger(mp_lua, -1);
-    lua_pop(mp_lua, 1);
-    return result;
+    bool value;
+    if(tryGetBoolean(_key, &value))
+    {
+        _value = value;
+        return true;
+    }
+    return false;
 }
 
 bool LuaTable::tryGetBoolean(const char * _key, bool * _value) const
@@ -49,6 +40,17 @@ bool LuaTable::tryGetBoolean(const char * _key, bool * _value) const
     return result;
 }
 
+bool LuaTable::tryGetString(const char * _key, std::optional<std::string> & _value) const
+{
+    std::string value;
+    if(tryGetString(_key, value))
+    {
+        _value = value;
+        return true;
+    }
+    return false;
+}
+
 bool LuaTable::tryGetString(const char * _key, std::string & _value) const
 {
     lua_pushstring(mp_lua, _key);
@@ -57,6 +59,26 @@ bool LuaTable::tryGetString(const char * _key, std::string & _value) const
         _value = lua_tostring(mp_lua, -1);
     lua_pop(mp_lua, 1);
     return result;
+}
+
+bool LuaTable::tryGetPoint(const char * _key, Point & _value)
+{
+    if(!tryGetValue(_key))
+        return false;
+    bool result = Lua::tryGetPoint(mp_lua, -1, _value);
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
+bool LuaTable::tryGetPoint(const char * _key, std::optional<Point> & _value)
+{
+    Point point;
+    if(tryGetPoint(_key, point))
+    {
+        _value = point;
+        return true;
+    }
+    return false;
 }
 
 bool LuaTable::tryGetValue(const char * _key) const

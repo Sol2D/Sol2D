@@ -446,11 +446,66 @@ int luaApi_UnsubscribePreSolveContact(lua_State * _lua)
 
 // 1 self
 // 2 joint definition
-int luaApi_CreateJoint(lua_State * _lua)
+int luaApi_CreateDistanceJoint(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    JointDefinition definition;
-    luaL_argcheck(_lua, tryGetJointDefinition(_lua, 2, definition), 2, "joint definition expected");
+    DistanceJointDefenition definition;
+    luaL_argcheck(_lua, tryGetDistanceJointDefenition(_lua, 2, definition), 2, "distance joint definition expected");
+    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    return 1;
+}
+
+// 1 self
+// 2 joint definition
+int luaApi_CreateMotorJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    MotorJointDefinition definition;
+    luaL_argcheck(_lua, tryGetMotorJointDefinition(_lua, 2, definition), 2, "motor joint definition expected");
+    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    return 1;
+}
+
+// 1 self
+// 2 joint definition
+int luaApi_CreateMouseJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    MouseJointDefinition definition;
+    luaL_argcheck(_lua, tryGetMouseJointDefinition(_lua, 2, definition), 2, "mouse joint definition expected");
+    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    return 1;
+}
+
+// 1 self
+// 2 joint definition
+int luaApi_CreatePrismaticJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    PrismaticJointDefinition definition;
+    luaL_argcheck(_lua, tryGetPrismaticJointDefinition(_lua, 2, definition), 2, "prismatic joint definition expected");
+    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    return 1;
+}
+
+// 1 self
+// 2 joint definition
+int luaApi_CreateWeldJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    WeldJointDefinition definition;
+    luaL_argcheck(_lua, tryGetWeldJointDefinition(_lua, 2, definition), 2, "weld joint definition expected");
+    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    return 1;
+}
+
+// 1 self
+// 2 joint definition
+int luaApi_CreateWheelJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    WheelJointDefinition definition;
+    luaL_argcheck(_lua, tryGetWheelJointDefinition(_lua, 2, definition), 2, "wheel joint definition expected");
     lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
     return 1;
 }
@@ -516,7 +571,12 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "unsubscribeFromSesnsorEndContact", luaApi_UnsubscribeFromSesnsorEndContact },
             { "subscribeToPreSolveContact", luaApi_SubscribeToPreSolveContact },
             { "unsubscribePreSolveContact", luaApi_UnsubscribePreSolveContact },
-            { "createJoint", luaApi_CreateJoint },
+            { "createDistanceJoint", luaApi_CreateDistanceJoint },
+            { "createMotorJoint", luaApi_CreateMotorJoint },
+            { "createMouseJoint", luaApi_CreateMouseJoint },
+            { "createPrismaticJoint", luaApi_CreatePrismaticJoint },
+            { "createWeldJoint", luaApi_CreateWeldJoint },
+            { "createWheelJoint", luaApi_CreateWheelJoint },
             { "findPath", luaApi_FindPath },
             { nullptr, nullptr }
         };
