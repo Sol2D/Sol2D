@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaFormApi.h>
-#include <Sol2D/Lua/LuaColorApi.h>
 #include <Sol2D/Lua/LuaFontApi.h>
 #include <Sol2D/Lua/LuaWidgetApi.h>
 #include <Sol2D/Lua/LuaStrings.h>

@@ -31,22 +31,21 @@ static constexpr char gc_key_h[] = "h";
 
 bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, Rect & _rect)
 {
-    if(!lua_istable(_lua, _idx))
-    {
-        return false;
-    }
     LuaTable table(_lua, _idx);
-    lua_Number x, y, w, h;
+    if(!table.isValid())
+        return false;
+
+    float x, y, w, h;
     if(
         table.tryGetNumber(gc_key_w, &w) &&
         table.tryGetNumber(gc_key_h, &h) &&
         table.tryGetNumber(gc_key_x, &x) &&
         table.tryGetNumber(gc_key_y, &y))
     {
-        _rect.x = static_cast<float>(x);
-        _rect.y = static_cast<float>(y);
-        _rect.w = static_cast<float>(w);
-        _rect.h = static_cast<float>(h);
+        _rect.x = x;
+        _rect.y = y;
+        _rect.w = w;
+        _rect.h = h;
         return true;
     }
     return false;

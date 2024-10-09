@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaJointDefinitionApi.h>
-#include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaBodyApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 

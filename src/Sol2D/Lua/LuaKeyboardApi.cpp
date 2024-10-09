@@ -57,7 +57,8 @@ void Sol2D::Lua::pushKeyboardApiOntoStack(lua_State * _lua)
     self->kb_state = SDL_GetKeyboardState(&self->kb_state_length);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] = {
+        luaL_Reg funcs[] =
+        {
             { "__gc", UserData::luaGC },
             { "getState", luaApi_GetState },
             { nullptr, nullptr }

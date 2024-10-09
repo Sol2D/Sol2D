@@ -16,11 +16,14 @@
 
 #pragma once
 
+#include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Rect.h>
+#include <Sol2D/Color.h>
 #include <Sol2D/Def.h>
 #include <lua.hpp>
 #include <string>
 #include <optional>
+#include <chrono>
 
 namespace Sol2D::Lua::Aux {
 
@@ -51,6 +54,18 @@ public:
     template<std::integral T>
     bool tryGetInteger(const char * _key, std::optional<T> & _value) const;
 
+    template<std::unsigned_integral T>
+    bool tryGetUnsignedInteger(const char * _key, T * _value) const;
+
+    template<std::unsigned_integral T>
+    bool tryGetUnsignedInteger(const char * _key, std::optional<T> & _value) const;
+
+    template<typename Rep, typename Period>
+    bool tryGetDuration(const char * _key, std::chrono::duration<Rep, Period> * _duration);
+
+    template<typename Rep, typename Period>
+    bool tryGetDuration(const char * _key, std::optional<std::chrono::duration<Rep, Period>> & _duration);
+
     bool tryGetBoolean(const char * _key, bool * _value) const;
 
     bool tryGetBoolean(const char * _key, std::optional<bool> _value) const;
@@ -62,6 +77,24 @@ public:
     bool tryGetPoint(const char * _key, Point & _value);
 
     bool tryGetPoint(const char * _key, std::optional<Point> & _value);
+
+    bool tryGetSize(const char * _key, Size & _value);
+
+    bool tryGetSize(const char * _key, std::optional<Size> & _value);
+
+    bool tryGetRect(const char * _key, Rect & _value);
+
+    bool tryGetRect(const char * _key, std::optional<Rect> & _value);
+
+    bool tryGetColor(const char * _key, Color & _value);
+
+    bool tryGetColor(const char * _key, std::optional<Color> & _value);
+
+    template<DimensionValueConcept Number>
+    bool tryGetDimension(const char * _key, Dimension<Number> & _value);
+
+    template<DimensionValueConcept Number>
+    bool tryGetDimension(const char * _key, std::optional<Dimension<Number>> & _value);
 
     bool tryGetValue(const char * _key) const;
 
@@ -126,14 +159,36 @@ bool LuaTable::tryGetNumber(const char * _key, std::optional<T> & _value) const
 template<std::floating_point T>
 bool LuaTable::tryGetNumber(const char * _key, T * _value) const
 {
-    lua_pushstring(mp_lua, _key);
-    bool result = lua_gettable(mp_lua, m_idx) == LUA_TNUMBER;
+    bool result = lua_getfield(mp_lua, m_idx, _key) == LUA_TNUMBER;
     if(result)
         *_value = static_cast<T>(lua_tonumber(mp_lua, -1));
     lua_pop(mp_lua, 1);
     return result;
 }
 
+template<typename Rep, typename Period>
+bool LuaTable::tryGetDuration(const char * _key, std::optional<std::chrono::duration<Rep, Period>> & _duration)
+{
+    Rep value;
+    if(tryGetInteger(_key, &value))
+    {
+        _duration = std::chrono::duration<Rep, Period>(value);
+        return true;
+    }
+    return false;
+}
+
+template<typename Rep, typename Period>
+bool LuaTable::tryGetDuration(const char * _key, std::chrono::duration<Rep, Period> * _duration)
+{
+    Rep value;
+    if(tryGetInteger(_key, &value))
+    {
+        *_duration = std::chrono::duration<Rep, Period>(value);
+        return true;
+    }
+    return false;
+}
 
 template<std::integral T>
 bool LuaTable::tryGetInteger(const char * _key, std::optional<T> & _value) const
@@ -150,13 +205,64 @@ bool LuaTable::tryGetInteger(const char * _key, std::optional<T> & _value) const
 template<std::integral T>
 bool LuaTable::tryGetInteger(const char * _key, T * _value) const
 {
-    lua_pushstring(mp_lua, _key);
-    lua_gettable(mp_lua, m_idx);
+    lua_getfield(mp_lua, m_idx, _key);
     bool result = lua_isinteger(mp_lua, -1);
     if(result)
         *_value = static_cast<T>(lua_tointeger(mp_lua, -1));
     lua_pop(mp_lua, 1);
     return result;
+}
+
+template<std::unsigned_integral T>
+bool LuaTable::tryGetUnsignedInteger(const char * _key, std::optional<T> & _value) const
+{
+    T value;
+    if(tryGetUnsignedInteger(_key, &value))
+    {
+        _value = value;
+        return true;
+    }
+    return false;
+}
+
+template<std::unsigned_integral T>
+bool LuaTable::tryGetUnsignedInteger(const char * _key, T * _value) const
+{
+    lua_getfield(mp_lua, m_idx, _key);
+    bool result = false;
+    if(lua_isinteger(mp_lua, -1))
+    {
+        lua_Integer value = lua_tointeger(mp_lua, -1);
+        if(value >= 0)
+        {
+            *_value = static_cast<T>(value);
+            result = true;
+        }
+    }
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
+template<DimensionValueConcept Number>
+bool LuaTable::tryGetDimension(const char * _key, std::optional<Dimension<Number> > & _value)
+{
+    if(tryGetValue(_key) && Lua::tryGetDimension(mp_lua, -1, _value))
+    {
+        lua_pop(mp_lua, 1);
+        return true;
+    }
+    return false;
+}
+
+template<DimensionValueConcept Number>
+bool LuaTable::tryGetDimension(const char * _key, Dimension<Number> & _value)
+{
+    if(tryGetValue(_key) && Lua::tryGetDimension(mp_lua, -1, _value))
+    {
+        lua_pop(mp_lua, 1);
+        return true;
+    }
+    return false;
 }
 
 inline void LuaTable::setStringValue(const char * _key, const std::string & _value)

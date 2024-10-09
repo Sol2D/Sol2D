@@ -16,7 +16,6 @@
 
 #include <Sol2D/Lua/LuaWidgetApi.h>
 #include <Sol2D/Lua/LuaFontApi.h>
-#include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/LuaColorApi.h>
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
 #include <Sol2D/Lua/LuaWidgetPaddingApi.h>
@@ -169,8 +168,8 @@ template<typename UserDataT>
 int luaApi_SetX(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    std::optional<Dimension<float>> dimension = tryGetDimension<float>(_lua, 2);
-    luaL_argcheck(_lua, dimension.has_value(), 2, "the X value required");
+    std::optional<Dimension<float>> dimension;
+    luaL_argcheck(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, "the X value required");
     self->getWidget(_lua)->setX(dimension.value());
     return 0;
 }
@@ -181,8 +180,8 @@ template<typename UserDataT>
 int luaApi_SetY(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    std::optional<Dimension<float>> dimension = tryGetDimension<float>(_lua, 2);
-    luaL_argcheck(_lua, dimension.has_value(), 2, "the Y value required");
+    std::optional<Dimension<float>> dimension;
+    luaL_argcheck(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, "the Y value required");
     self->getWidget(_lua)->setY(dimension.value());
     return 0;
 }
@@ -193,8 +192,8 @@ template<typename UserDataT>
 int luaApi_SetWidth(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    std::optional<Dimension<float>> dimension = tryGetDimension<float>(_lua, 2);
-    luaL_argcheck(_lua, dimension.has_value(), 2, "the width value required");
+    std::optional<Dimension<float>> dimension;
+    luaL_argcheck(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, "the width value required");
     self->getWidget(_lua)->setWidth(dimension.value());
     return 0;
 }
@@ -205,8 +204,8 @@ template<typename UserDataT>
 int luaApi_SetHeight(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    std::optional<Dimension<float>> dimension = tryGetDimension<float>(_lua, 2);
-    luaL_argcheck(_lua, dimension.has_value(), 2, "the height value required");
+    std::optional<Dimension<float>> dimension;
+    luaL_argcheck(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, "the height value required");
     self->getWidget(_lua)->setHeight(dimension.value());
     return 0;
 }

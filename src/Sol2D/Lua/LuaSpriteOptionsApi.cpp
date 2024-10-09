@@ -15,51 +15,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaSpriteOptionsApi.h>
-#include <Sol2D/Lua/LuaRectApi.h>
-#include <Sol2D/Lua/LuaColorApi.h>
-#include <lua.hpp>
+#include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D::Lua;
-
-namespace {
-
-constexpr char gc_key_rect[] = "rect";
-constexpr char gc_key_color_to_alpha[] = "colorToAlpha";
-constexpr char gc_key_autodetect_rect[] = "autodetectRect";
-
-} // namespace name
+using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetSpriteOptions(lua_State * _lua, int _idx, SpriteOptions & _sprite_options)
 {
-    if(!lua_istable(_lua, _idx))
-    {
+    LuaTable table(_lua, _idx);
+    if(!table.isValid())
         return false;
-    }
-
-    lua_pushstring(_lua, gc_key_rect);
-    if(lua_gettable(_lua, -2) == LUA_TTABLE)
-    {
-        Rect rect;
-        if(tryGetRect(_lua, -1, rect))
-            _sprite_options.rect = rect;
-    }
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, gc_key_color_to_alpha);
-    if(lua_gettable(_lua, -2) == LUA_TTABLE)
-    {
-        Color color;
-        if(tryGetColor(_lua, -1, color))
-            _sprite_options.color_to_alpha = color;
-    }
-    lua_pop(_lua, 1);
-
-    lua_pushstring(_lua, gc_key_autodetect_rect);
-    if(lua_gettable(_lua, -2) == LUA_TBOOLEAN)
-    {
-        _sprite_options.autodetect_rect = lua_toboolean(_lua, -1);
-    }
-    lua_pop(_lua, 1);
-
+    table.tryGetRect("rect", _sprite_options.rect);
+    table.tryGetColor("colorToAlpha", _sprite_options.color_to_alpha);
+    table.tryGetBoolean("autodetectRect", &_sprite_options.autodetect_rect);
     return true;
 }

@@ -74,9 +74,9 @@ void addShape(
     const std::string & _key,
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
 {
-    if(!lua_istable(_lua, _idx))
-        return;
     LuaTable table(_lua, _idx);
+    if(!table.isValid())
+        return;
     lua_Integer value;
     if(!table.tryGetInteger("type", &value))
         return;
@@ -176,27 +176,20 @@ void addCircle(
             return;
         def.radius = static_cast<float>(radius);
     }
-    {
-        if(!_table.tryGetValue("center"))
-            return;
-        bool success = tryGetPoint(_table.getLua(), -1, def.center);
-        lua_pop(_table.getLua(), 1);
-        if(!success)
-            return;
-    }
+    if(!_table.tryGetPoint("center", def.center))
+        return;
     readBasicShape(_table, def);
     _shapes.emplace_back(_key, def);
 }
-
 
 } // namespace
 
 std::unique_ptr<BodyDefinition> Sol2D::Lua::tryGetBodyDefinition(lua_State * _lua, int _idx)
 {
-    if(!lua_istable(_lua, _idx))
+    LuaTable table(_lua, _idx);
+    if(!table.isValid())
         return nullptr;
     std::unique_ptr<BodyDefinition> def = std::make_unique<BodyDefinition>();
-    LuaTable table(_lua, _idx);
     {
         lua_Integer value;
         if(!table.tryGetInteger("type", &value))

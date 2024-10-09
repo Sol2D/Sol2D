@@ -128,7 +128,8 @@ void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, s
     UserData::pushUserData(_lua, _workspace, _sprite);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] = {
+        luaL_Reg funcs[] =
+        {
             { "__gc", UserData::luaGC },
             { "loadFromFile", luaApi_LoadFromFile },
             { "isValid", luaApi_IsValid },

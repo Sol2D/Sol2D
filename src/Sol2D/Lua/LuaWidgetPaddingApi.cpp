@@ -23,54 +23,21 @@ using namespace Sol2D::Forms;
 using namespace Sol2D::Lua;
 using namespace Sol2D::Lua::Aux;
 
-namespace {
-
-bool tryGetDimensionFromTable(LuaTable & _table, const char * _key, double * _value, DimensionUnit * _unit)
-{
-    bool result = false;
-    if(_table.tryGetValue(_key))
-    {
-        result = tryGetDimension(_table.getLua(), -1, _value, _unit);
-        lua_pop(_table.getLua(), 1);
-    }
-    return result;
-}
-
-} // namespace
-
 bool Sol2D::Lua::tryGetWidgetPadding(lua_State * _lua, int _idx, Forms::WidgetPadding & _padding)
 {
     if(lua_istable(_lua, _idx))
     {
-        double value;
-        DimensionUnit unit;
         LuaTable table(_lua, _idx);
-        if(tryGetDimensionFromTable(table, "top", &value, &unit))
-        {
-            _padding.top.value = static_cast<float>(value);
-            _padding.top.unit = unit;
-        }
-        if(tryGetDimensionFromTable(table, "right", &value, &unit))
-        {
-            _padding.right.value = static_cast<float>(value);
-            _padding.right.unit = unit;
-        }
-        if(tryGetDimensionFromTable(table, "bottom", &value, &unit))
-        {
-            _padding.bottom.value = static_cast<float>(value);
-            _padding.bottom.unit = unit;
-        }
-        if(tryGetDimensionFromTable(table, "left", &value, &unit))
-        {
-            _padding.left.value = static_cast<float>(value);
-            _padding.left.unit = unit;
-        }
+        table.tryGetDimension("top", _padding.top);
+        table.tryGetDimension("right", _padding.right);
+        table.tryGetDimension("bottom", _padding.bottom);
+        table.tryGetDimension("left", _padding.left);
         return true;
     }
     else
     {
-        std::optional<Dimension<float>> dimension = tryGetDimension<float>(_lua, _idx);
-        if(dimension.has_value())
+        std::optional<Dimension<float>> dimension;
+        if(tryGetDimension<float>(_lua, _idx, dimension))
         {
             _padding.top = dimension.value();
             _padding.bottom = dimension.value();

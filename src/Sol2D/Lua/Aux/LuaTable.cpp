@@ -15,6 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaPointApi.h>
+#include <Sol2D/Lua/LuaRectApi.h>
+#include <Sol2D/Lua/LuaSizeApi.h>
+#include <Sol2D/Lua/LuaColorApi.h>
+#include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D::Lua::Aux;
@@ -32,8 +36,7 @@ bool LuaTable::tryGetBoolean(const char * _key, std::optional<bool> _value) cons
 
 bool LuaTable::tryGetBoolean(const char * _key, bool * _value) const
 {
-    lua_pushstring(mp_lua, _key);
-    bool result =  lua_gettable(mp_lua, m_idx) == LUA_TBOOLEAN;
+    bool result = lua_getfield(mp_lua, m_idx, _key) == LUA_TBOOLEAN;
     if(result)
         *_value = lua_toboolean(mp_lua, -1);
     lua_pop(mp_lua, 1);
@@ -53,19 +56,9 @@ bool LuaTable::tryGetString(const char * _key, std::optional<std::string> & _val
 
 bool LuaTable::tryGetString(const char * _key, std::string & _value) const
 {
-    lua_pushstring(mp_lua, _key);
-    bool result = lua_gettable(mp_lua, m_idx) == LUA_TSTRING;
+    bool result = lua_getfield(mp_lua, m_idx, _key) == LUA_TSTRING;
     if(result)
         _value = lua_tostring(mp_lua, -1);
-    lua_pop(mp_lua, 1);
-    return result;
-}
-
-bool LuaTable::tryGetPoint(const char * _key, Point & _value)
-{
-    if(!tryGetValue(_key))
-        return false;
-    bool result = Lua::tryGetPoint(mp_lua, -1, _value);
     lua_pop(mp_lua, 1);
     return result;
 }
@@ -81,10 +74,78 @@ bool LuaTable::tryGetPoint(const char * _key, std::optional<Point> & _value)
     return false;
 }
 
+bool LuaTable::tryGetPoint(const char * _key, Point & _value)
+{
+    if(!tryGetValue(_key))
+        return false;
+    bool result = Lua::tryGetPoint(mp_lua, -1, _value);
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
+bool LuaTable::tryGetSize(const char * _key, std::optional<Size> & _value)
+{
+    Size size;
+    if(tryGetSize(_key, size))
+    {
+        _value = size;
+        return true;
+    }
+    return false;
+}
+
+bool LuaTable::tryGetSize(const char * _key, Size & _value)
+{
+    if(!tryGetValue(_key))
+        return false;
+    bool result = Lua::tryGetSize(mp_lua, -1, _value);
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
+bool LuaTable::tryGetRect(const char * _key, std::optional<Rect> & _value)
+{
+    Rect rect;
+    if(tryGetRect(_key, rect))
+    {
+        _value = rect;
+        return true;
+    }
+    return false;
+}
+
+bool LuaTable::tryGetRect(const char * _key, Rect & _value)
+{
+    if(!tryGetValue(_key))
+        return false;
+    bool result = Lua::tryGetRect(mp_lua, -1, _value);
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
+bool LuaTable::tryGetColor(const char * _key, std::optional<Color> & _value)
+{
+    Color color;
+    if(tryGetColor(_key, color))
+    {
+        _value = color;
+        return true;
+    }
+    return false;
+}
+
+bool LuaTable::tryGetColor(const char * _key, Color & _value)
+{
+    if(!tryGetValue(_key))
+        return false;
+    bool result = Lua::tryGetColor(mp_lua, -1, _value);
+    lua_pop(mp_lua, 1);
+    return result;
+}
+
 bool LuaTable::tryGetValue(const char * _key) const
 {
-    lua_pushstring(mp_lua, _key);
-    if(lua_gettable(mp_lua, m_idx) == LUA_TNIL)
+    if(lua_getfield(mp_lua, m_idx, _key) == LUA_TNIL)
     {
         lua_pop(mp_lua, 1);
         return false;
@@ -94,43 +155,35 @@ bool LuaTable::tryGetValue(const char * _key) const
 
 void LuaTable::setValueFromTop(const char * _key)
 {
-    lua_pushstring(mp_lua, _key);
-    int top = lua_gettop(mp_lua);
-    lua_insert(mp_lua, top -1);
-    lua_settable(mp_lua, m_idx);
+    lua_setfield(mp_lua, m_idx, _key);
 }
 
 void LuaTable::setIntegerValue(const char * _key, lua_Integer _value)
 {
-    lua_pushstring(mp_lua, _key);
     lua_pushinteger(mp_lua, _value);
-    lua_settable(mp_lua, m_idx);
+    lua_setfield(mp_lua, m_idx, _key);
 }
 
 void LuaTable::setNumberValue(const char * _key, lua_Number _value)
 {
-    lua_pushstring(mp_lua, _key);
     lua_pushnumber(mp_lua, _value);
-    lua_settable(mp_lua, m_idx);
+    lua_setfield(mp_lua, m_idx, _key);
 }
 
 void LuaTable::setBooleanValue(const char * _key, bool _value)
 {
-    lua_pushstring(mp_lua, _key);
     lua_pushboolean(mp_lua, _value);
-    lua_settable(mp_lua, m_idx);
+    lua_setfield(mp_lua, m_idx, _key);
 }
 
 void LuaTable::setStringValue(const char * _key, const char * _value)
 {
-    lua_pushstring(mp_lua, _key);
     lua_pushstring(mp_lua, _value);
-    lua_settable(mp_lua, m_idx);
+    lua_setfield(mp_lua, m_idx, _key);
 }
 
 void LuaTable::setNullValue(const char * _key)
 {
-    lua_pushstring(mp_lua, _key);
     lua_pushnil(mp_lua);
-    lua_settable(mp_lua, m_idx);
+    lua_setfield(mp_lua, m_idx, _key);
 }

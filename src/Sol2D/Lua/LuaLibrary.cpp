@@ -32,7 +32,6 @@
 #include <Sol2D/Lua/Aux/LuaScript.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
-#include <functional>
 #include <sstream>
 
 using namespace Sol2D;
@@ -42,14 +41,6 @@ using namespace Sol2D::Lua::Aux;
 namespace {
 
 const char gc_key_path[] = "path";
-
-void addSublibrary(lua_State * _lua, const char * _sublib_name, std::function<void()> _push_sublib)
-{
-    int library_table_idx = lua_gettop(_lua);
-    lua_pushstring(_lua, _sublib_name);
-    _push_sublib();
-    lua_settable(_lua, library_table_idx);
-}
 
 bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
 {
@@ -96,21 +87,30 @@ LuaLibrary::LuaLibrary(
     lua_newuserdata(mp_lua, 1);
     if(pushMetatable(mp_lua, LuaTypeName::lib) == MetatablePushResult::Created)
     {
-        addSublibrary(mp_lua, "window", [this, &_window]() { pushWindowApi(mp_lua, _window); });
-        addSublibrary(mp_lua, "heartbeat", [this]() { pushHeartbeatApi(mp_lua); });
-        addSublibrary(mp_lua, "keyboard", [this]() { pushKeyboardApiOntoStack(mp_lua); });
-        addSublibrary(mp_lua, "stores", [this, &_store_manager, &_workspace, &_renderer] {
-            pushStoreManagerApi(mp_lua, _workspace, _renderer, _store_manager);
-        });
-        addSublibrary(mp_lua, "Scancode", [this]() { pushScancodeEnum(mp_lua); });
-        addSublibrary(mp_lua, "Scancode", [this]() { pushScancodeEnum(mp_lua); });
-        addSublibrary(mp_lua, "BodyType", [this]() { pushBodyTypeEnum(mp_lua); });
-        addSublibrary(mp_lua, "BodyShapeType", [this]() { pushBodyShapeTypeEnum(mp_lua); });
-        addSublibrary(mp_lua, "TileMapObjectType", [this]() { pushTileMapObjectTypeEnum(mp_lua); });
-        addSublibrary(mp_lua, "DimensionUnit", [this]() { pushDimensionUnitEnum(mp_lua); });
-        addSublibrary(mp_lua, "WidgetState", [this]() { pushWidgetStateEnum(mp_lua); });
-        addSublibrary(mp_lua, "VerticalTextAlignment", [this]() { pushVerticalTextAlignmentEmum(mp_lua); });
-        addSublibrary(mp_lua, "HorizontalTextAlignment", [this]() { pushHorizontalTextAlignmentEmum(mp_lua); });
+        pushWindowApi(mp_lua, _window);
+        lua_setfield(mp_lua, -2, "window");
+        pushHeartbeatApi(mp_lua);
+        lua_setfield(mp_lua, -2, "heartbeat");
+        pushKeyboardApiOntoStack(mp_lua);
+        lua_setfield(mp_lua, -2, "keyboard");
+        pushStoreManagerApi(mp_lua, _workspace, _renderer, _store_manager);
+        lua_setfield(mp_lua, -2, "stores");
+        pushScancodeEnum(mp_lua);
+        lua_setfield(mp_lua, -2, "Scancode");
+        pushBodyTypeEnum(mp_lua);
+        lua_setfield(mp_lua, -2, "BodyType");
+        pushBodyShapeTypeEnum(mp_lua);
+        lua_setfield(mp_lua, -2, "BodyShapeType");
+        pushTileMapObjectTypeEnum(mp_lua);
+        lua_setfield(mp_lua, -2, "TileMapObjectType");
+        pushDimensionUnitEnum(mp_lua);
+        lua_setfield(mp_lua, -2, "DimensionUnit");
+        pushWidgetStateEnum(mp_lua);
+        lua_setfield(mp_lua, -2, "WidgetState");
+        pushVerticalTextAlignmentEmum(mp_lua);
+        lua_setfield(mp_lua, -2, "VerticalTextAlignment");
+        pushHorizontalTextAlignmentEmum(mp_lua);
+        lua_setfield(mp_lua, -2, "HorizontalTextAlignment");
     }
     lua_setmetatable(mp_lua, -2);
     lua_setglobal(mp_lua, "sol");

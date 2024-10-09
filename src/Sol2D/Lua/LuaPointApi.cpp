@@ -29,18 +29,17 @@ static constexpr char gc_key_y[] = "y";
 
 bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, Point & _point)
 {
-    if(!lua_istable(_lua, _idx))
-    {
-        return false;
-    }
     LuaTable table(_lua, _idx);
-    lua_Number x, y;
+    if(!table.isValid())
+        return false;
+
+    float x, y;
     if(
         table.tryGetNumber(gc_key_x, &x) &&
         table.tryGetNumber(gc_key_y, &y))
     {
-        _point.x = static_cast<float>(x);
-        _point.y = static_cast<float>(y);
+        _point.x = x;
+        _point.y = y;
         return true;
     }
     return false;

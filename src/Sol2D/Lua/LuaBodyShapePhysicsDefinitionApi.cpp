@@ -22,19 +22,15 @@ using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetBodyShapePhysicsDefinition(lua_State * _lua, int _idx, BodyShapePhysicsDefinition & _definition)
 {
-    if(!lua_istable(_lua, _idx))
-        return false;
     LuaTable table(_lua, _idx);
+    if(table.isValid())
     {
-        lua_Number value;
-        if(table.tryGetNumber("density", &value))
-            _definition.density = static_cast<float>(value);
-        if(table.tryGetNumber("restitution", &value))
-            _definition.restitution = static_cast<float>(value);
-        if(table.tryGetNumber("friction", &value))
-            _definition.friction = static_cast<float>(value);
+        table.tryGetNumber("density", _definition.density);
+        table.tryGetNumber("restitution", _definition.restitution);
+        table.tryGetNumber("friction",  _definition.friction);
+        table.tryGetBoolean("isSensor", &_definition.is_sensor);
+        table.tryGetBoolean("isPreSolveEnabled", &_definition.is_pre_solve_enabled);
+        return true;
     }
-    table.tryGetBoolean("isSensor", &_definition.is_sensor);
-    table.tryGetBoolean("isPreSolveEnabled", &_definition.is_pre_solve_enabled);
-    return true;
+    return false;
 }

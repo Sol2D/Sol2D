@@ -18,7 +18,6 @@
 #include <Sol2D/Lua/LuaGraphicsPackDefinitionApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
-#include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>

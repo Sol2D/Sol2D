@@ -23,17 +23,59 @@
 namespace Sol2D::Lua {
 
 void pushDimensionUnitEnum(lua_State * _lua);
+void pushDimensionD(lua_State * _lua, double _value, DimensionUnit _unit);
+void pushDimensionI(lua_State * _lua, long long _value, DimensionUnit _unit);
+bool tryGetDimensionD(lua_State * _lua, int _idx, double * _value, DimensionUnit * _unit);
+bool tryGetDimensionI(lua_State * _lua, int _idx, long long * _value, DimensionUnit * _unit);
 
-bool tryGetDimension(lua_State * _lua, int _idx, double * _value, DimensionUnit * _unit);
+template<std::integral Number>
+bool tryGetDimension(lua_State * _lua, int _idx, std::optional<Dimension<Number>> & _value)
+{
+    long long value;
+    DimensionUnit unit;
+    if(tryGetDimensionI(_lua, _idx, &value, &unit))
+    {
+        _value = Dimension<Number>(static_cast<Number>(value), unit);;
+        return true;
+    }
+    return false;
+}
 
-template<DimensionValueConcept Number>
-inline std::optional<Dimension<Number>> tryGetDimension(lua_State * _lua, int _idx)
+template<std::integral Number>
+bool tryGetDimension(lua_State * _lua, int _idx, Dimension<Number> & _value)
+{
+    long long value;
+    if(tryGetDimensionI(_lua, _idx, &value, &_value.unit))
+    {
+        _value.value = value;
+        return true;
+    }
+    return false;
+}
+
+template<std::floating_point Number>
+bool tryGetDimension(lua_State * _lua, int _idx, std::optional<Dimension<Number>> & _value)
 {
     double value;
     DimensionUnit unit;
-    if(tryGetDimension(_lua, _idx, &value, &unit))
-        return Dimension<Number>(static_cast<Number>(value), unit);
-    return std::nullopt;
+    if(tryGetDimensionD(_lua, _idx, &value, &unit))
+    {
+        _value = Dimension<Number>(static_cast<Number>(value), unit);
+        return true;
+    }
+    return false;
+}
+
+template<std::floating_point Number>
+bool tryGetDimension(lua_State * _lua, int _idx, Dimension<Number> & _value)
+{
+    double value;
+    if(tryGetDimensionD(_lua, _idx, &value, &_value.unit))
+    {
+        _value.value = value;
+        return true;
+    }
+    return false;
 }
 
 } // namespace Sol2D::Lua

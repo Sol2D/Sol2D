@@ -22,16 +22,13 @@ using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetBodyPhysicsDefinition(lua_State * _lua, int _idx, BodyPhysicsDefinition & _physics)
 {
-    if(!lua_istable(_lua, _idx))
-        return false;
     LuaTable table(_lua, _idx);
+    if(table.isValid())
     {
-        lua_Number value;
-        if(table.tryGetNumber("linearDamping", &value))
-            _physics.linear_damping = static_cast<float>(value);
-        if(table.tryGetNumber("angularDamping", &value))
-            _physics.angular_damping = static_cast<float>(value);
+        table.tryGetNumber("linearDamping", _physics.linear_damping);
+        table.tryGetNumber("angularDamping", _physics.angular_damping);
+        table.tryGetBoolean("fixedRotation", &_physics.fixed_rotation);
+        return true;
     }
-    table.tryGetBoolean("fixedRotation", &_physics.fixed_rotation);
-    return true;
+    return false;
 }

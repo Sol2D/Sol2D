@@ -32,23 +32,20 @@ static constexpr char gc_key_a[] = "a";
 
 bool Sol2D::Lua::tryGetColor(lua_State * _lua, int _idx, Color & _color)
 {
-    if(!lua_istable(_lua, _idx))
-    {
-        return false;
-    }
-    lua_Integer r, g, b;
     LuaTable table(_lua, _idx);
+    if(!table.isValid())
+        return false;
+    Uint8 r, g, b;
     if(
         table.tryGetInteger(gc_key_r, &r) &&
         table.tryGetInteger(gc_key_g, &g) &&
         table.tryGetInteger(gc_key_b, &b))
     {
-        lua_Integer a = 255;
-        table.tryGetInteger(gc_key_a, &a);
-        _color.r = static_cast<Uint8>(r);
-        _color.g = static_cast<Uint8>(g);
-        _color.b = static_cast<Uint8>(b);
-        _color.a = static_cast<Uint8>(a);
+        if(!table.tryGetInteger(gc_key_a, &_color.a))
+            _color.a = 255;
+        _color.r = r;
+        _color.g = g;
+        _color.b = b;
         return true;
     }
     return false;

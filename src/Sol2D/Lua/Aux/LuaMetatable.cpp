@@ -22,9 +22,8 @@ MetatablePushResult Sol2D::Lua::Aux::pushMetatable(lua_State * _lua, const char 
 {
     if(luaL_newmetatable(_lua, _name) != 0)
     {
-        lua_pushstring(_lua, "__index");
-        lua_pushvalue(_lua, -2);
-        lua_settable(_lua, -3);
+        lua_pushvalue(_lua, -1);
+        lua_setfield(_lua, -2, "__index");
         return MetatablePushResult::Created;
     }
     return MetatablePushResult::Loaded;

@@ -16,7 +16,6 @@
 
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
-#include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaGraphicsPackDefinitionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
@@ -61,29 +60,14 @@ bool Sol2D::Lua::tryGetGraphicsPackDefinition(
     int _idx,
     GraphicsPackDefinition & _result)
 {
-    if(!lua_istable(_lua, _idx))
-        return false;
-
     LuaTable table(_lua, _idx);
-    if(table.tryGetValue("position"))
-    {
-        tryGetPoint(_lua, -1, _result.position);
-        lua_pop(_lua, 1); // position
-    }
-    if(table.tryGetValue("flipCenter"))
-    {
-        Point flip_center;
-        if(tryGetPoint(_lua, -1, flip_center))
-            _result.flip_center = flip_center;
-        lua_pop(_lua, 1); // flipCenter
-    }
+    if(!table.isValid())
+        return false;
+    table.tryGetPoint("position", _result.position);
+    table.tryGetPoint("flipCenter", _result.flip_center);
     table.tryGetBoolean("isFlippedHorizontally", &_result.is_flipped_horizontally);
     table.tryGetBoolean("isFlippedVertically", &_result.is_flipped_vertically);
-    {
-        lua_Integer value;
-        if(table.tryGetInteger("animationIterations", &value))
-            _result.animation_iterations = static_cast<int32_t>(value);
-    }
+    table.tryGetInteger("animationIterations", &_result.animation_iterations);
     if(table.tryGetValue("frames"))
     {
         addFrames(_lua, -1, _result);
@@ -94,20 +78,11 @@ bool Sol2D::Lua::tryGetGraphicsPackDefinition(
 
 bool Sol2D::Lua::tryGetGraphicsPackFrameDefinition(lua_State * _lua, int _idx, GraphicsPackFrameDefinition & _result)
 {
-    if(!lua_istable(_lua, _idx))
-        return false;
-
     LuaTable table(_lua, _idx);
-    {
-        lua_Integer value;
-        if(table.tryGetInteger("duration", &value))
-            _result.duration = std::chrono::milliseconds(static_cast<std::chrono::milliseconds::rep>(value));
-    }
-    {
-        bool value;
-        if(table.tryGetBoolean("isVisible", &value))
-            _result.is_visible = value;
-    }
+    if(!table.isValid())
+        return false;
+    table.tryGetDuration("duration", &_result.duration);
+    table.tryGetBoolean("isVisible", &_result.is_visible);
     if(table.tryGetValue("sprites"))
     {
         addSprites(_lua, -1, _result);
@@ -118,10 +93,8 @@ bool Sol2D::Lua::tryGetGraphicsPackFrameDefinition(lua_State * _lua, int _idx, G
 
 bool Sol2D::Lua::tryGetGraphicsPackSpriteDefinition(lua_State * _lua, int _idx, GraphicsPackSpriteDefinition & _result)
 {
-    if(!lua_istable(_lua, _idx))
-        return false;
     LuaTable table(_lua, _idx);
-    if(!table.tryGetValue("sprite"))
+    if(!table.isValid() || !table.tryGetValue("sprite"))
         return false;
 
     bool is_there_sprite = true;
@@ -150,11 +123,7 @@ bool Sol2D::Lua::tryGetGraphicsPackSpriteDefinition(lua_State * _lua, int _idx, 
     if(is_there_sprite)
     {
         table.tryGetBoolean("isVisible", &_result.is_visible);
-        if(table.tryGetValue("position"))
-        {
-            tryGetPoint(_lua, -1, _result.position);
-            lua_pop(_lua, 1); // position
-        }
+        table.tryGetPoint("position", _result.position);
     }
     lua_pop(_lua, 1); // sprite
     return true;

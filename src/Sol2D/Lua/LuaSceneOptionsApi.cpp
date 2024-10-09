@@ -16,7 +16,6 @@
 
 #include <Sol2D/Lua/LuaSceneOptionsApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
-#include <Sol2D/Lua/LuaPointApi.h>
 
 using namespace Sol2D::World;
 using namespace Sol2D::Lua;
@@ -24,21 +23,10 @@ using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetSceneOptions(lua_State * _lua, int _idx, SceneOptions & _options)
 {
-    if(!lua_istable(_lua, _idx))
-        return false;
     LuaTable table(_lua, _idx);
-
-    {
-        lua_Number scale_factor;
-        if(table.tryGetNumber("metersPerPixel", &scale_factor))
-            _options.meters_per_pixel = static_cast<float>(scale_factor);
-    }
-
-    if(table.tryGetValue("gravity"))
-    {
-        tryGetPoint(_lua, -1, _options.gravity);
-        lua_pop(_lua, 1);
-    }
-
+    if(!table.isValid())
+        return false;    
+    table.tryGetNumber("metersPerPixel", &_options.meters_per_pixel);
+    table.tryGetPoint("gravity", _options.gravity);
     return true;
 }

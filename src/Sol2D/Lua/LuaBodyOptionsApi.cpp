@@ -24,11 +24,11 @@ using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetBodyOptions(lua_State * _lua, int _idx, BodyOptions & _body_options)
 {
-    if(!lua_istable(_lua, _idx))
+    LuaTable table(_lua, _idx);
+    if(!table.isValid())
     {
         return false;
     }
-    LuaTable table(_lua, _idx);
     {
         lua_Integer lua_int;
         if(table.tryGetInteger("type", &lua_int))
@@ -48,10 +48,6 @@ bool Sol2D::Lua::tryGetBodyOptions(lua_State * _lua, int _idx, BodyOptions & _bo
         tryGetBodyShapePhysicsDefinition(_lua, -1, _body_options.shape_physics);
         lua_pop(_lua, 1);
     }
-    {
-        std::string value;
-        if(table.tryGetString("shapeKey", value))
-            _body_options.shape_key = value;
-    }
+    table.tryGetString("shapeKey", _body_options.shape_key);
     return true;
 }

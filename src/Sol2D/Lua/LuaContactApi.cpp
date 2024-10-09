@@ -16,7 +16,6 @@
 
 #include <Sol2D/Lua/LuaContactApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
-#include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaManifoldApi.h>
 
 using namespace Sol2D::World;

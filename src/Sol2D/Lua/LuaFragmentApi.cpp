@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaFragmentApi.h>
+#include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D;
@@ -23,8 +24,6 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
-const char gc_key_dimension_unit[] = "unit";
-const char gc_key_dimension_value[] = "value";
 const char gc_key_top[] = "top";
 const char gc_key_right[] = "right";
 const char gc_key_left[] = "left";
@@ -39,44 +38,9 @@ void setDimension(LuaTable & table, const char * _key, const std::optional<Dimen
 {
     if(_dimension.has_value())
     {
-        LuaTable dimension_table = LuaTable::pushNew(table.getLua());
-        dimension_table.setIntegerValue(gc_key_dimension_unit, static_cast<lua_Integer>(_dimension.value().unit));
-        dimension_table.setIntegerValue(gc_key_dimension_value, _dimension.value().value);
+        pushDimensionI(table.getLua(), _dimension->value, _dimension->unit);
         table.setValueFromTop(_key);
     }
-}
-
-inline std::optional<DimensionUnit> tryParseDimensionUnit(lua_Integer _unit)
-{
-    switch(_unit)
-    {
-    case static_cast<lua_Integer>(DimensionUnit::Pixel):
-        return DimensionUnit::Pixel;
-    case static_cast<lua_Integer>(DimensionUnit::Percent):
-        return DimensionUnit::Percent;
-    default:
-        return std::nullopt;
-    }
-}
-
-template<std::integral Int>
-std::optional<Dimension<Int>> tryGetDimension(lua_State * _lua, int _table_idx, const char * _key)
-{
-    std::optional<Dimension<Int>> result;
-    lua_pushstring(_lua, _key);
-    if(lua_gettable(_lua, _table_idx) == LUA_TTABLE)
-    {
-        LuaTable table(_lua, -1);
-        lua_Integer unit_int, value;
-        if(table.tryGetInteger(gc_key_dimension_unit, &unit_int) && table.tryGetInteger(gc_key_dimension_value, &value))
-        {
-            std::optional<DimensionUnit> unit = tryParseDimensionUnit(unit_int);
-            if(unit.has_value())
-                result = Dimension<Int>(static_cast<Int>(value), unit.value());
-        }
-    }
-    lua_pop(_lua, 1);
-    return result;
 }
 
 } // namespace
@@ -96,19 +60,16 @@ void Sol2D::Lua::pushFragment(lua_State * _lua, const Fragment & _fragment)
 
 bool Sol2D::Lua::tryGetFragment(lua_State * _lua, int _idx, Fragment & _fragment)
 {
-    int index = lua_absindex(_lua, _idx);
-    if(!lua_istable(_lua, index))
+    LuaTable table(_lua, _idx);
+    if(!table.isValid())
         return false;
-    _fragment.top = tryGetDimension<int32_t>(_lua, index, gc_key_top);
-    _fragment.right = tryGetDimension<int32_t>(_lua, index, gc_key_right);
-    _fragment.left = tryGetDimension<int32_t>(_lua, index, gc_key_left);
-    _fragment.bottom = tryGetDimension<int32_t>(_lua, index, gc_key_bottom);
-    _fragment.width = tryGetDimension<uint32_t>(_lua, index, gc_key_width);
-    _fragment.height = tryGetDimension<uint32_t>(_lua, index, gc_key_height);
-    LuaTable table(_lua, index);
+    table.tryGetDimension(gc_key_top, _fragment.top);
+    table.tryGetDimension(gc_key_right, _fragment.right);
+    table.tryGetDimension(gc_key_left, _fragment.left);
+    table.tryGetDimension(gc_key_bottom, _fragment.bottom);
+    table.tryGetDimension(gc_key_width, _fragment.width);
+    table.tryGetDimension(gc_key_height, _fragment.height);
     table.tryGetBoolean(gc_key_is_visible, &_fragment.is_visible);
-    lua_Integer z_index;
-    if(table.tryGetInteger(gc_key_z_index, &z_index))
-        _fragment.z_index = static_cast<uint16_t>(z_index);
+    table.tryGetInteger(gc_key_z_index, &_fragment.z_index);
     return true;
 }

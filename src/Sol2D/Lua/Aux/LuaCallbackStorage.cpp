@@ -118,15 +118,13 @@ void LuaCallbackStorage::createCallbackRegisty()
 // The callback registry must be on the top of the stack
 bool LuaCallbackStorage::tryGetEventsTable(const void * _owner, uint16_t _event_id)
 {
-    lua_pushstring(mp_lua, makeOwnerKey(_owner).c_str());
-    if(lua_gettable(mp_lua, -2) != LUA_TTABLE)
+    if(lua_getfield(mp_lua, -1, makeOwnerKey(_owner).c_str()) != LUA_TTABLE)
     {
-         lua_pop(mp_lua, 1);
-         return false;
+        lua_pop(mp_lua, 1);
+        return false;
     }
 
-    lua_pushstring(mp_lua, makeEventKey(_event_id).c_str());
-    if(lua_gettable(mp_lua, -2) != LUA_TTABLE)
+    if(lua_getfield(mp_lua, -1, makeEventKey(_event_id).c_str()) != LUA_TTABLE)
     {
         lua_pop(mp_lua, 2);
         return false;
@@ -213,7 +211,6 @@ void LuaCallbackStorage::destroyCallbacks(const void * _owner)
     if(s_is_disposed) return;
 
     getCallbackRegisty();
-    lua_pushstring(mp_lua, makeOwnerKey(_owner).c_str());
     lua_pushnil(mp_lua);
-    lua_settable(mp_lua, -3);
+    lua_setfield(mp_lua, -2, makeOwnerKey(_owner).c_str());
 }
