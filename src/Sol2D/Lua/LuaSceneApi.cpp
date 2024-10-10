@@ -284,6 +284,20 @@ int luaApi_CreateBody(lua_State * _lua)
 }
 
 // 1 self
+// 2 body or body id
+int luaApi_DestroyBody(lua_State * _lua)
+{
+    const Self * self = UserData::getUserData(_lua, 1);
+    uint64_t body_id;
+    if(lua_isinteger(_lua, 2))
+        body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    else if(!tryGetBodyId(_lua, 2, &body_id))
+        luaL_argerror(_lua, 2, gc_message_body_or_body_id_expected);
+    lua_pushboolean(_lua, self->getScene(_lua)->destroyBody(body_id));
+    return 1;
+}
+
+// 1 self
 // 2 body id
 int luaApi_GetBody(lua_State * _lua)
 {
@@ -569,6 +583,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "getTileMapObjectByName", luaApi_GetTileMapObjectByName },
             { "getTileMapObjectsByClass", luaApi_GetTileMapObjectsByClass },
             { "createBody", luaApi_CreateBody },
+            { "destroyBody", luaApi_DestroyBody },
             { "getBody", luaApi_GetBody },
             { "createBodiesFromMapObjects", luaApi_CreateBodiesFromMapObjects },
             { "setFollowedBody", luaApi_SetFollowedBody },

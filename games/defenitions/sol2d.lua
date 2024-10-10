@@ -294,6 +294,10 @@ function __scene:getTileMapObjectsByClass(class) end
 ---@return sol.Body
 function __scene:createBody(position, proto_or_definition, script_argument) end
 
+---@param body integer | sol.Body
+---@return boolean
+function __scene:destroyBody(body) end
+
 ---@param body_id integer
 ---@return sol.Body | nil
 function __scene:getBody(body_id) end
