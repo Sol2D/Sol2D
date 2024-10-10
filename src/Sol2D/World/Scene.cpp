@@ -150,7 +150,7 @@ class Body final
     S2_DISABLE_COPY_AND_MOVE(Body)
 
 public:
-    Body();
+    explicit Body(uint64_t _id);
     ~Body();
     uint64_t getId() const;
     void setLayer(const std::string & _layer);
@@ -161,16 +161,13 @@ public:
     BodyShape * findShape(const PreHashedKey<std::string> & _key);
 
 private:
-    static uint64_t s_next_id;
-    uint64_t m_id;
+    const uint64_t mc_id;
     std::optional<std::string> m_layer;
     PreHashedMap<std::string, BodyShape *> m_shapes;
 };
 
-uint64_t Body::s_next_id = 1;
-
-inline Body::Body() :
-    m_id(s_next_id++)
+inline Body::Body(uint64_t _id) :
+    mc_id(_id)
 {
 }
 
@@ -182,7 +179,7 @@ inline Body::~Body()
 
 inline uint64_t Body::getId() const
 {
-    return m_id;
+    return mc_id;
 }
 
 inline void Body::setLayer(const std::string & _layer)
@@ -391,7 +388,7 @@ void Scene::setGravity(const Point & _vector)
 
 uint64_t Scene::createBody(const Point & _position, const BodyDefinition & _definition)
 {
-    Body * body = new Body;
+    Body * body = new Body(m_bodies_sequential_id.getNext());
     b2BodyDef b2_body_def = b2DefaultBodyDef();
     b2_body_def.type = mapBodyType(_definition.type);
     b2_body_def.position = { .x = _position.x, .y = _position.y };
@@ -407,248 +404,13 @@ uint64_t Scene::createBody(const Point & _position, const BodyDefinition & _defi
     return body->getId();
 }
 
-uint64_t Scene::createJoint(const DistanceJointDefenition & _definition)
-{
-    b2DistanceJointDef b2_joint_def = b2DefaultDistanceJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
-    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
-        return 0; // FIXEM: null?
-    b2_joint_def.enableSpring = _definition.is_spring_enabled;
-    b2_joint_def.enableLimit = _definition.is_limit_enabled;
-    b2_joint_def.enableMotor = _definition.is_motor_enabled;
-    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
-    if(_definition.local_anchor_a)
-    {
-        b2_joint_def.localAnchorA = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_anchor_a->x),
-            .y = graphicalToPhysical(_definition.local_anchor_a->y)
-        };
-    }
-    if(_definition.local_anchor_b)
-    {
-        b2_joint_def.localAnchorB = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_anchor_b->x),
-            .y = graphicalToPhysical(_definition.local_anchor_b->y)
-        };
-    }
-    if(_definition.min_length)
-        b2_joint_def.minLength = graphicalToPhysical(_definition.min_length.value());
-    if(_definition.max_length)
-        b2_joint_def.maxLength = graphicalToPhysical(_definition.max_length.value());
-    if(_definition.hertz)
-        b2_joint_def.hertz = _definition.hertz.value();
-    if(_definition.damping_ratio)
-        b2_joint_def.dampingRatio = _definition.damping_ratio.value();
-    if(_definition.max_motor_force)
-        b2_joint_def.maxMotorForce = _definition.max_motor_force.value();
-    if(_definition.motor_speed)
-        b2_joint_def.motorSpeed = _definition.motor_speed.value();
-    if(_definition.length)
-        b2_joint_def.length = graphicalToPhysical(_definition.length.value());
-    b2CreateDistanceJoint(m_b2_world_id, &b2_joint_def);
-    return 0; // TODO: return ID
-}
-
-uint64_t Scene::createJoint(const MotorJointDefinition & _definition)
-{
-    b2MotorJointDef b2_joint_def = b2DefaultMotorJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
-    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
-        return 0; // FIXEM: null?
-    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
-    if(_definition.linear_offset)
-    {
-        b2_joint_def.linearOffset = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.linear_offset->x),
-            .y = graphicalToPhysical(_definition.linear_offset->y)
-        };
-    }
-    if(_definition.angular_offset)
-        b2_joint_def.angularOffset = _definition.angular_offset.value();
-    if(_definition.max_force)
-        b2_joint_def.maxForce = _definition.max_force.value();
-    if(_definition.max_torque)
-        b2_joint_def.maxTorque = _definition.max_torque.value();
-    if(_definition.correction_factor)
-        b2_joint_def.correctionFactor = _definition.correction_factor.value();
-    b2CreateMotorJoint(m_b2_world_id, &b2_joint_def);
-    return 0; // TODO: return ID
-}
-
-uint64_t Scene::createJoint(const MouseJointDefinition & _definition)
-{
-    b2MouseJointDef b2_joint_def = b2DefaultMouseJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
-    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
-        return 0; // FIXEM: null?
-    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
-    if(_definition.target)
-    {
-        b2_joint_def.target = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.target->x),
-            .y = graphicalToPhysical(_definition.target->y)
-        };
-    }
-    if(_definition.hertz)
-        b2_joint_def.hertz = _definition.hertz.value();
-    if(_definition.max_force)
-        b2_joint_def.maxForce = _definition.max_force.value();
-    if(_definition.damping_ratio)
-        b2_joint_def.dampingRatio = _definition.damping_ratio.value();
-    b2CreateMouseJoint(m_b2_world_id, &b2_joint_def);
-    return 0; // TODO: return ID
-}
-
-uint64_t Scene::createJoint(const PrismaticJointDefinition & _definition)
-{
-    b2PrismaticJointDef b2_joint_def = b2DefaultPrismaticJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
-    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
-        return 0; // FIXEM: null?
-    b2_joint_def.enableSpring = _definition.is_spring_enabled;
-    b2_joint_def.enableLimit = _definition.is_limit_enabled;
-    b2_joint_def.enableMotor = _definition.is_motor_enabled;
-    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
-    if(_definition.local_anchor_a)
-    {
-        b2_joint_def.localAnchorA = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_anchor_a->x),
-            .y = graphicalToPhysical(_definition.local_anchor_a->y)
-        };
-    }
-    if(_definition.local_anchor_b)
-    {
-        b2_joint_def.localAnchorB = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_anchor_b->x),
-            .y = graphicalToPhysical(_definition.local_anchor_b->y)
-        };
-    }
-    if(_definition.local_axis_a)
-    {
-        b2_joint_def.localAxisA = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_axis_a->x),
-            .y = graphicalToPhysical(_definition.local_axis_a->y)
-        };
-    }
-    if(_definition.reference_angle)
-        b2_joint_def.referenceAngle = _definition.reference_angle.value();
-    if(_definition.hertz)
-        b2_joint_def.hertz = _definition.hertz.value();
-    if(_definition.damping_ratio)
-        b2_joint_def.dampingRatio = _definition.damping_ratio.value();
-    if(_definition.lower_translation)
-        b2_joint_def.lowerTranslation = graphicalToPhysical(_definition.lower_translation.value());
-    if(_definition.upper_translation)
-        b2_joint_def.upperTranslation = graphicalToPhysical(_definition.upper_translation.value());
-    if(_definition.max_motor_force)
-        b2_joint_def.maxMotorForce = _definition.max_motor_force.value();
-    if(_definition.motor_speed)
-        b2_joint_def.motorSpeed = _definition.motor_speed.value();
-    b2CreatePrismaticJoint(m_b2_world_id, &b2_joint_def);
-    return 0; // TODO: return ID
-}
-
-uint64_t Scene::createJoint(const WeldJointDefinition & _definition)
-{
-    b2WeldJointDef b2_joint_def = b2DefaultWeldJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
-    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
-        return 0; // FIXEM: null?
-    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
-    if(_definition.local_anchor_a)
-    {
-        b2_joint_def.localAnchorA = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_anchor_a->x),
-            .y = graphicalToPhysical(_definition.local_anchor_a->y)
-        };
-    }
-    if(_definition.local_anchor_b)
-    {
-        b2_joint_def.localAnchorB = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_anchor_b->x),
-            .y = graphicalToPhysical(_definition.local_anchor_b->y)
-        };
-    }
-    if(_definition.reference_angle)
-        b2_joint_def.referenceAngle = _definition.reference_angle.value();
-    if(_definition.linear_hertz)
-        b2_joint_def.linearHertz = _definition.linear_hertz.value();
-    if(_definition.angular_hertz)
-        b2_joint_def.angularHertz = _definition.angular_hertz.value();
-    if(_definition.linear_damping_ratio)
-        b2_joint_def.linearDampingRatio = _definition.linear_damping_ratio.value();
-    if(_definition.angular_damping_ratio)
-        b2_joint_def.angularDampingRatio = _definition.angular_damping_ratio.value();
-    b2CreateWeldJoint(m_b2_world_id, &b2_joint_def);
-    return 0; // TODO: return ID
-}
-
-uint64_t Scene::createJoint(const WheelJointDefinition & _definition)
-{
-    b2WheelJointDef b2_joint_def = b2DefaultWheelJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
-    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
-        return 0; // FIXEM: null?
-    b2_joint_def.enableSpring = _definition.is_spring_enabled;
-    b2_joint_def.enableLimit = _definition.is_limit_enabled;
-    b2_joint_def.enableMotor = _definition.is_motor_enabled;
-    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
-    if(_definition.local_anchor_a)
-    {
-        b2_joint_def.localAnchorA = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_anchor_a->x),
-            .y = graphicalToPhysical(_definition.local_anchor_a->y)
-        };
-    }
-    if(_definition.local_anchor_b)
-    {
-        b2_joint_def.localAnchorB = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_anchor_b->x),
-            .y = graphicalToPhysical(_definition.local_anchor_b->y)
-        };
-    }
-    if(_definition.local_axis_a)
-    {
-        b2_joint_def.localAxisA = b2Vec2
-        {
-            .x = graphicalToPhysical(_definition.local_axis_a->x),
-            .y = graphicalToPhysical(_definition.local_axis_a->y)
-        };
-    }
-    if(_definition.lower_translation)
-        b2_joint_def.lowerTranslation = graphicalToPhysical(_definition.lower_translation.value());
-    if(_definition.upper_translation)
-        b2_joint_def.upperTranslation = graphicalToPhysical(_definition.upper_translation.value());
-    if(_definition.max_motor_torque)
-        b2_joint_def.maxMotorTorque = _definition.max_motor_torque.value();
-    b2CreateWheelJoint(m_b2_world_id, &b2_joint_def);
-    return 0; // TODO: return ID
-}
-
 void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options)
 {
     b2BodyType body_type = mapBodyType(_body_options.type);
 
     m_object_heap_ptr->forEachObject([&](const TileMapObject & __map_object) {
         if(__map_object.getClass() != _class) return;
-        Body * body = new Body;
+        Body * body = new Body(m_bodies_sequential_id.getNext());
         b2BodyDef b2_body_def = b2DefaultBodyDef();
         b2_body_def.type = body_type;
         initBodyPhysics(b2_body_def, _body_options.body_physics);
@@ -805,6 +567,268 @@ bool Scene::flipBodyShapeGraphics(
     if(shape == nullptr)
         return false;
     return shape->flipGraphics(_graphic_key, _flip_horizontally, _flip_vertically);
+}
+
+uint64_t Scene::createJoint(const DistanceJointDefenition & _definition)
+{
+    b2DistanceJointDef b2_joint_def = b2DefaultDistanceJointDef();
+    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
+        return 0; // FIXEM: null?
+    b2_joint_def.enableSpring = _definition.is_spring_enabled;
+    b2_joint_def.enableLimit = _definition.is_limit_enabled;
+    b2_joint_def.enableMotor = _definition.is_motor_enabled;
+    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
+    if(_definition.local_anchor_a)
+    {
+        b2_joint_def.localAnchorA = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_anchor_a->x),
+                .y = graphicalToPhysical(_definition.local_anchor_a->y)
+            };
+    }
+    if(_definition.local_anchor_b)
+    {
+        b2_joint_def.localAnchorB = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_anchor_b->x),
+                .y = graphicalToPhysical(_definition.local_anchor_b->y)
+            };
+    }
+    if(_definition.min_length)
+        b2_joint_def.minLength = graphicalToPhysical(_definition.min_length.value());
+    if(_definition.max_length)
+        b2_joint_def.maxLength = graphicalToPhysical(_definition.max_length.value());
+    if(_definition.hertz)
+        b2_joint_def.hertz = _definition.hertz.value();
+    if(_definition.damping_ratio)
+        b2_joint_def.dampingRatio = _definition.damping_ratio.value();
+    if(_definition.max_motor_force)
+        b2_joint_def.maxMotorForce = _definition.max_motor_force.value();
+    if(_definition.motor_speed)
+        b2_joint_def.motorSpeed = _definition.motor_speed.value();
+    if(_definition.length)
+        b2_joint_def.length = graphicalToPhysical(_definition.length.value());
+    b2JointId b2_joint_id = b2CreateDistanceJoint(m_b2_world_id, &b2_joint_def);
+    uint64_t id = m_joints_sequential_id.getNext();
+    m_joints.insert(std::make_pair(id, b2_joint_id));
+    return id;
+}
+
+uint64_t Scene::createJoint(const MotorJointDefinition & _definition)
+{
+    b2MotorJointDef b2_joint_def = b2DefaultMotorJointDef();
+    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
+        return 0; // FIXEM: null?
+    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
+    if(_definition.linear_offset)
+    {
+        b2_joint_def.linearOffset = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.linear_offset->x),
+                .y = graphicalToPhysical(_definition.linear_offset->y)
+            };
+    }
+    if(_definition.angular_offset)
+        b2_joint_def.angularOffset = _definition.angular_offset.value();
+    if(_definition.max_force)
+        b2_joint_def.maxForce = _definition.max_force.value();
+    if(_definition.max_torque)
+        b2_joint_def.maxTorque = _definition.max_torque.value();
+    if(_definition.correction_factor)
+        b2_joint_def.correctionFactor = _definition.correction_factor.value();
+    b2JointId b2_joint_id = b2CreateMotorJoint(m_b2_world_id, &b2_joint_def);
+    uint64_t id = m_joints_sequential_id.getNext();
+    m_joints.insert(std::make_pair(id, b2_joint_id));
+    return id;
+}
+
+uint64_t Scene::createJoint(const MouseJointDefinition & _definition)
+{
+    b2MouseJointDef b2_joint_def = b2DefaultMouseJointDef();
+    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
+        return 0; // FIXEM: null?
+    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
+    if(_definition.target)
+    {
+        b2_joint_def.target = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.target->x),
+                .y = graphicalToPhysical(_definition.target->y)
+            };
+    }
+    if(_definition.hertz)
+        b2_joint_def.hertz = _definition.hertz.value();
+    if(_definition.max_force)
+        b2_joint_def.maxForce = _definition.max_force.value();
+    if(_definition.damping_ratio)
+        b2_joint_def.dampingRatio = _definition.damping_ratio.value();
+    b2JointId b2_joint_id = b2CreateMouseJoint(m_b2_world_id, &b2_joint_def);
+    uint64_t id = m_joints_sequential_id.getNext();
+    m_joints.insert(std::make_pair(id, b2_joint_id));
+    return id;
+}
+
+uint64_t Scene::createJoint(const PrismaticJointDefinition & _definition)
+{
+    b2PrismaticJointDef b2_joint_def = b2DefaultPrismaticJointDef();
+    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
+        return 0; // FIXEM: null?
+    b2_joint_def.enableSpring = _definition.is_spring_enabled;
+    b2_joint_def.enableLimit = _definition.is_limit_enabled;
+    b2_joint_def.enableMotor = _definition.is_motor_enabled;
+    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
+    if(_definition.local_anchor_a)
+    {
+        b2_joint_def.localAnchorA = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_anchor_a->x),
+                .y = graphicalToPhysical(_definition.local_anchor_a->y)
+            };
+    }
+    if(_definition.local_anchor_b)
+    {
+        b2_joint_def.localAnchorB = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_anchor_b->x),
+                .y = graphicalToPhysical(_definition.local_anchor_b->y)
+            };
+    }
+    if(_definition.local_axis_a)
+    {
+        b2_joint_def.localAxisA = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_axis_a->x),
+                .y = graphicalToPhysical(_definition.local_axis_a->y)
+            };
+    }
+    if(_definition.reference_angle)
+        b2_joint_def.referenceAngle = _definition.reference_angle.value();
+    if(_definition.hertz)
+        b2_joint_def.hertz = _definition.hertz.value();
+    if(_definition.damping_ratio)
+        b2_joint_def.dampingRatio = _definition.damping_ratio.value();
+    if(_definition.lower_translation)
+        b2_joint_def.lowerTranslation = graphicalToPhysical(_definition.lower_translation.value());
+    if(_definition.upper_translation)
+        b2_joint_def.upperTranslation = graphicalToPhysical(_definition.upper_translation.value());
+    if(_definition.max_motor_force)
+        b2_joint_def.maxMotorForce = _definition.max_motor_force.value();
+    if(_definition.motor_speed)
+        b2_joint_def.motorSpeed = _definition.motor_speed.value();
+    b2JointId b2_joint_id = b2CreatePrismaticJoint(m_b2_world_id, &b2_joint_def);
+    uint64_t id = m_joints_sequential_id.getNext();
+    m_joints.insert(std::make_pair(id, b2_joint_id));
+    return id;
+}
+
+uint64_t Scene::createJoint(const WeldJointDefinition & _definition)
+{
+    b2WeldJointDef b2_joint_def = b2DefaultWeldJointDef();
+    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
+        return 0; // FIXEM: null?
+    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
+    if(_definition.local_anchor_a)
+    {
+        b2_joint_def.localAnchorA = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_anchor_a->x),
+                .y = graphicalToPhysical(_definition.local_anchor_a->y)
+            };
+    }
+    if(_definition.local_anchor_b)
+    {
+        b2_joint_def.localAnchorB = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_anchor_b->x),
+                .y = graphicalToPhysical(_definition.local_anchor_b->y)
+            };
+    }
+    if(_definition.reference_angle)
+        b2_joint_def.referenceAngle = _definition.reference_angle.value();
+    if(_definition.linear_hertz)
+        b2_joint_def.linearHertz = _definition.linear_hertz.value();
+    if(_definition.angular_hertz)
+        b2_joint_def.angularHertz = _definition.angular_hertz.value();
+    if(_definition.linear_damping_ratio)
+        b2_joint_def.linearDampingRatio = _definition.linear_damping_ratio.value();
+    if(_definition.angular_damping_ratio)
+        b2_joint_def.angularDampingRatio = _definition.angular_damping_ratio.value();
+    b2JointId b2_joint_id = b2CreateWeldJoint(m_b2_world_id, &b2_joint_def);
+    uint64_t id = m_joints_sequential_id.getNext();
+    m_joints.insert(std::make_pair(id, b2_joint_id));
+    return id;
+}
+
+uint64_t Scene::createJoint(const WheelJointDefinition & _definition)
+{
+    b2WheelJointDef b2_joint_def = b2DefaultWheelJointDef();
+    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
+        return 0; // FIXEM: null?
+    b2_joint_def.enableSpring = _definition.is_spring_enabled;
+    b2_joint_def.enableLimit = _definition.is_limit_enabled;
+    b2_joint_def.enableMotor = _definition.is_motor_enabled;
+    b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
+    if(_definition.local_anchor_a)
+    {
+        b2_joint_def.localAnchorA = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_anchor_a->x),
+                .y = graphicalToPhysical(_definition.local_anchor_a->y)
+            };
+    }
+    if(_definition.local_anchor_b)
+    {
+        b2_joint_def.localAnchorB = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_anchor_b->x),
+                .y = graphicalToPhysical(_definition.local_anchor_b->y)
+            };
+    }
+    if(_definition.local_axis_a)
+    {
+        b2_joint_def.localAxisA = b2Vec2
+            {
+                .x = graphicalToPhysical(_definition.local_axis_a->x),
+                .y = graphicalToPhysical(_definition.local_axis_a->y)
+            };
+    }
+    if(_definition.lower_translation)
+        b2_joint_def.lowerTranslation = graphicalToPhysical(_definition.lower_translation.value());
+    if(_definition.upper_translation)
+        b2_joint_def.upperTranslation = graphicalToPhysical(_definition.upper_translation.value());
+    if(_definition.max_motor_torque)
+        b2_joint_def.maxMotorTorque = _definition.max_motor_torque.value();
+    b2JointId b2_joint_id = b2CreateWheelJoint(m_b2_world_id, &b2_joint_def);
+    uint64_t id = m_joints_sequential_id.getNext();
+    m_joints.insert(std::make_pair(id, b2_joint_id));
+    return id;
+}
+
+bool Scene::destroyJoing(uint64_t _joint_id)
+{
+    b2JointId b2_joint_id = findJoint(_joint_id);
+    if(B2_IS_NULL(b2_joint_id))
+        return false;
+    b2DestroyJoint(b2_joint_id);
+    return true;
+}
+
+b2JointId Scene::findJoint(uint64_t _joint_id) const
+{
+    auto it = m_joints.find(_joint_id);
+    return it == m_joints.cend() ? b2_nullJointId : it->second;
 }
 
 bool Scene::loadTileMap(const std::filesystem::path & _file_path)

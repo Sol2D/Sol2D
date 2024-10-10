@@ -24,6 +24,7 @@
 #include <Sol2D/Tiles/TileMap.h>
 #include <Sol2D/Utils/Observable.h>
 #include <Sol2D/Utils/PreHashedMap.h>
+#include <Sol2D/Utils/SequentialId.h>
 #include <Sol2D/Canvas.h>
 #include <Sol2D/Workspace.h>
 #include <boost/container/slist.hpp>
@@ -58,12 +59,6 @@ public:
     ~Scene() override;
     void setGravity(const Point & _vector);
     uint64_t createBody(const Point & _position, const BodyDefinition & _definition);
-    uint64_t createJoint(const DistanceJointDefenition & _definition);
-    uint64_t createJoint(const MotorJointDefinition & _definition);
-    uint64_t createJoint(const MouseJointDefinition & _definition);
-    uint64_t createJoint(const PrismaticJointDefinition & _definition);
-    uint64_t createJoint(const WeldJointDefinition & _definition);
-    uint64_t createJoint(const WheelJointDefinition & _definition);
     void createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options);
     bool destroyBody(uint64_t _body_id);
     bool setFollowedBody(uint64_t _body_id);
@@ -81,6 +76,13 @@ public:
            const Utils::PreHashedKey<std::string> & _graphic_key,
            bool _flip_horizontally,
            bool _flip_vertically);
+    uint64_t createJoint(const DistanceJointDefenition & _definition);
+    uint64_t createJoint(const MotorJointDefinition & _definition);
+    uint64_t createJoint(const MouseJointDefinition & _definition);
+    uint64_t createJoint(const PrismaticJointDefinition & _definition);
+    uint64_t createJoint(const WeldJointDefinition & _definition);
+    uint64_t createJoint(const WheelJointDefinition & _definition);
+    bool destroyJoing(uint64_t _joint_id);
     bool loadTileMap(const std::filesystem::path & _file_path);
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(const std::string & _name) const;
@@ -121,6 +123,7 @@ private:
         std::unordered_set<uint64_t> & _bodies_to_render,
         std::chrono::milliseconds _time_passed);
     b2BodyId findBody(uint64_t _body_id) const;
+    b2JointId findJoint(uint64_t _joint_id) const;
     void drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed);
     void drawObjectLayer(const Tiles::TileMapObjectLayer & _layer);
     void drawPolyXObject(const Tiles::TileMapPolyX & _poly, bool _close);
@@ -136,7 +139,10 @@ private:
     Point m_world_offset;
     b2WorldId m_b2_world_id;
     float m_meters_per_pixel;
+    Utils::SequentialId m_bodies_sequential_id;
     std::unordered_map<uint64_t, b2BodyId> m_bodies;
+    Utils::SequentialId m_joints_sequential_id;
+    std::unordered_map<uint64_t, b2JointId> m_joints;
     b2BodyId m_followed_body_id;
     std::unique_ptr<Tiles::TileHeap> m_tile_heap_ptr;
     std::unique_ptr<Tiles::ObjectHeap> m_object_heap_ptr;

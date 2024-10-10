@@ -38,9 +38,10 @@ using namespace Sol2D::Utils;
 
 namespace {
 
-const char gc_message_body_id_expected[] = "a body ID expected";
-const char gc_message_body_or_body_id_expected[] = "a body or body ID expected";
-const char gc_message_subscription_id_expected[] = "a subscriptin ID expected";
+const char gc_message_body_id_expected[] = "body ID expected";
+const char gc_message_body_or_body_id_expected[] = "body or body ID expected";
+const char gc_message_joint_id_expected[] = "joint id expected";
+const char gc_message_subscription_id_expected[] = "subscriptin ID expected";
 const char gc_message_callback_expected[] = "callback expected";
 
 const uint16_t gc_event_begin_contact = 0;
@@ -511,6 +512,17 @@ int luaApi_CreateWheelJoint(lua_State * _lua)
 }
 
 // 1 self
+// 2 joint id
+int luaApi_DestroyJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_joint_id_expected);
+    uint64_t id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    lua_pushboolean(_lua, self->getScene(_lua)->destroyJoing(id));
+    return 1;
+}
+
+// 1 self
 // 2 body id | body
 // 3 destination
 // TODO: options
@@ -577,6 +589,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "createPrismaticJoint", luaApi_CreatePrismaticJoint },
             { "createWeldJoint", luaApi_CreateWeldJoint },
             { "createWheelJoint", luaApi_CreateWheelJoint },
+            { "destroyJoint", luaApi_DestroyJoint },
             { "findPath", luaApi_FindPath },
             { nullptr, nullptr }
         };

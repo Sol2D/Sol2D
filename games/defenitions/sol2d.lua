@@ -371,6 +371,10 @@ function __scene:createWeldJoint(definition) end
 ---@return integer
 function __scene:createWheelJoint(definition) end
 
+---@param id integer
+---@return boolean
+function __scene:destroyJoint(id) end
+
 ---@param body_id integer | sol.Body
 ---@param destination Point
 ---@return Point[] | nil
