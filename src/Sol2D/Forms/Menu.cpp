@@ -23,7 +23,7 @@ Menu::Menu(const Canvas & _parent, SDL_Renderer & _renderer) :
 {
 }
 
-void Menu::render(const RenderState & /*_state*/)
+void Menu::step(const StepState & /*_state*/)
 {
 
 }

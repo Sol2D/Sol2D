@@ -4,7 +4,6 @@
 ---@field Scancode sol.Scancode
 ---@field BodyType sol.BodyType
 ---@field BodyShapeType sol.BodyShapeType
----@field heartbeat sol.Heartbeat
 ---@field keyboard sol.Keyboard
 ---@field stores sol.StoreManager
 ---@field window sol.Window
@@ -315,6 +314,7 @@ function __scene:resetFollowedBody() end
 ---@alias ContactCallback fun(contact: Contact)
 ---@alias SensorContactCallback fun(contact: SensorContact)
 ---@alias PreSolveContactCallback fun(contact: PreSolveContact)
+---@alias StepCallback fun(time_passed: integer)
 
 ---@param callback ContactCallback
 ---@return integer subscription ID
@@ -349,7 +349,14 @@ function __scene:unsubscribeFromSesnsorEndContact(subscription_id) end
 function __scene:subscribeToPreSolveContact(callback) end
 
 ---@param subscription_id integer
-function __scene:unsubscribePreSolveContact(subscription_id) end
+function __scene:unsubscribeFromPreSolveContact(subscription_id) end
+
+---@param callback StepCallback
+---@return integer subscription ID
+function __scene:subscribeToStep(callback) end
+
+---@param subscription_id integer
+function __scene:unsubscribeFromStep(subscription_id) end
 
 ---@param definition DistanceJointDefenition
 ---@return integer
@@ -917,12 +924,6 @@ local __keyboard
 ---@vararg integer
 ---@return boolean ...
 function __keyboard:getState(...) end
-
----@class sol.Heartbeat
-local __heartbeat
-
----@param callback function
-function __heartbeat:subscribe(callback) end
 
 ---@class sol.TileMapObjectType
 ---@field CIRCLE integer

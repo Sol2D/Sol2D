@@ -40,7 +40,7 @@ public:
     const Dimension<float> & getWidth() const;
     void setHeight(const Dimension<float> & _height);
     const Dimension<float> & setHeight() const;
-    virtual void render(const RenderState & _state);
+    virtual void step(const StepState & _state);
     virtual bool setState(WidgetState _state);
     WidgetState getState() const;
 

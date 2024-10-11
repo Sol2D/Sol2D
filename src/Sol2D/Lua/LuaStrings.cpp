@@ -26,7 +26,6 @@ const char Sol2D::Lua::LuaTypeName::body_shape[]                   = "sol.BodySh
 const char Sol2D::Lua::LuaTypeName::tile_map_object_type[]         = "sol.TileMapObjectType";
 const char Sol2D::Lua::LuaTypeName::keyboard[]                     = "sol.Keyboard";
 const char Sol2D::Lua::LuaTypeName::scancode[]                     = "sol.Scancode";
-const char Sol2D::Lua::LuaTypeName::heartbeat[]                    = "sol.Heartbeat";
 const char Sol2D::Lua::LuaTypeName::store[]                        = "sol.Store";
 const char Sol2D::Lua::LuaTypeName::dimension_unit_type[]          = "sol.DimensionUnit";
 const char Sol2D::Lua::LuaTypeName::sprite[]                       = "sol.Sprite";

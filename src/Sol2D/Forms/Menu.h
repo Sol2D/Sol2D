@@ -24,7 +24,7 @@ class Menu : public Widget
 {
 public:
     Menu(const Canvas & _parent, SDL_Renderer & _renderer);
-    void render(const RenderState & _state) override;
+    void step(const StepState & _state) override;
 
     // uint16_t spacing;
     // bool stretch_items;

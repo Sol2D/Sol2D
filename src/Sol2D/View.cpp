@@ -91,8 +91,8 @@ void View::resize()
         pair.second->resize();
 }
 
-void View::render(const RenderState & _state)
+void View::step(const StepState & _state)
 {
     for(auto & pair : m_outlets)
-        pair.second->render(_state);
+        pair.second->step(_state);
 }

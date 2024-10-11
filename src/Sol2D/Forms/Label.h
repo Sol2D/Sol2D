@@ -51,7 +51,7 @@ public:
     bool setText(const std::string & _text);
     const std::string & getText() const;
     bool setState(WidgetState _state) override;
-    void render(const RenderState & _state) override;
+    void step(const StepState & _state) override;
 
 private:
     std::unique_ptr<SideEffect<HorizontalTextAlignment>> m_horizontal_text_alignment_side_effect;

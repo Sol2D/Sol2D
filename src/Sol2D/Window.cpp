@@ -18,10 +18,13 @@
 
 using namespace Sol2D;
 
-void Window::render(const RenderState & _state)
+void Window::step(const StepState & _state)
 {
-    SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 255); // TODO: from Lua or TMX
+    if(m_view_list.empty())
+        return;
+    m_view_list.resize(1);
+    SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 255);
     SDL_RenderClear(&mr_renderer);
-    if(m_view) m_view->render(_state);
+    m_view_list.back()->step(_state);
     SDL_RenderPresent(&mr_renderer);
 }

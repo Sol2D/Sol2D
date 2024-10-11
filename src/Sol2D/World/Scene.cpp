@@ -844,7 +844,7 @@ bool Scene::loadTileMap(const std::filesystem::path & _file_path)
     return m_tile_map_ptr != nullptr; // TODO: only exceptions
 }
 
-void Scene::render(const RenderState & _state)
+void Scene::step(const StepState & _state)
 {
     if(!m_tile_map_ptr)
     {
@@ -867,6 +867,8 @@ void Scene::render(const RenderState & _state)
 
     if(mp_box2d_debug_draw)
         mp_box2d_debug_draw->draw();
+
+    Observable<StepObserver>::callObservers(&StepObserver::onStepComplete, _state);
 }
 
 void Scene::executeDefers()
@@ -881,13 +883,13 @@ void Scene::executeDefers()
 
 bool Scene::box2dPreSolveContact(b2ShapeId _shape_id_a, b2ShapeId _shape_id_b, b2Manifold * _manifold, void * _context)
 {
-    Scene * self = static_cast<Scene *>(_context);
+    Scene * scene = static_cast<Scene *>(_context);
     bool result = true;
     PreSolveContact contact;
     if(!tryGetContactSide(_shape_id_a, contact.side_a) || !tryGetContactSide(_shape_id_b, contact.side_b))
         return true;
     contact.manifold = _manifold;
-    self->forEachObserver([&result, &contact](ContactObserver & __observer) {
+    scene->Observable<ContactObserver>::forEachObserver([&result, &contact](ContactObserver & __observer) {
         if(!__observer.preSolveContact(contact))
             result = false;
         return result;
@@ -904,13 +906,13 @@ void Scene::handleBox2dContactEvents()
         {
             const b2ContactBeginTouchEvent & event = contact_events.beginEvents[i];
             if(tryGetContactSide(event.shapeIdA, contact.side_a) && tryGetContactSide(event.shapeIdB, contact.side_b))
-                callObservers(&ContactObserver::beginContact, contact);
+                Observable<ContactObserver>::callObservers(&ContactObserver::beginContact, contact);
         }
         for(int i = 0; i < contact_events.endCount; ++i)
         {
             const b2ContactEndTouchEvent & event = contact_events.endEvents[i];
             if(tryGetContactSide(event.shapeIdA, contact.side_a) && tryGetContactSide(event.shapeIdB, contact.side_b))
-                callObservers(&ContactObserver::endContact, contact);
+                Observable<ContactObserver>::callObservers(&ContactObserver::endContact, contact);
         }
     }
 
@@ -923,7 +925,7 @@ void Scene::handleBox2dContactEvents()
             if(tryGetContactSide(event.sensorShapeId, contact.sensor) &&
                 tryGetContactSide(event.visitorShapeId, contact.visitor))
             {
-                callObservers(&ContactObserver::beginSensorContact, contact);
+                Observable<ContactObserver>::callObservers(&ContactObserver::beginSensorContact, contact);
             }
         }
         for(int i = 0; i < sensor_events.endCount; ++i)
@@ -932,7 +934,7 @@ void Scene::handleBox2dContactEvents()
             if(tryGetContactSide(event.sensorShapeId, contact.sensor) &&
                 tryGetContactSide(event.visitorShapeId, contact.visitor))
             {
-                callObservers(&ContactObserver::endSensorContact, contact);
+                Observable<ContactObserver>::callObservers(&ContactObserver::endSensorContact, contact);
             }
         }
     }

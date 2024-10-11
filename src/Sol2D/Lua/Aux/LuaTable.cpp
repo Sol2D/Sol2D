@@ -182,6 +182,12 @@ void LuaTable::setStringValue(const char * _key, const char * _value)
     lua_setfield(mp_lua, m_idx, _key);
 }
 
+void LuaTable::setPointValue(const char * _key, const Point & _point)
+{
+    pushPoint(mp_lua, _point.x, _point.y);
+    lua_setfield(mp_lua, m_idx, _key);
+}
+
 void LuaTable::setNullValue(const char * _key)
 {
     lua_pushnil(mp_lua);

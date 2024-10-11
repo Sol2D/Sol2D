@@ -24,13 +24,13 @@ Button::Button(const Canvas & _parent, const std::string & _text, SDL_Renderer &
 {
 }
 
-void Button::render(const RenderState & _state)
+void Button::step(const StepState & _state)
 {
     handleState(_state);
-    Label::render(_state);
+    Label::step(_state);
 }
 
-void Button::handleState(const RenderState & _state)
+void Button::handleState(const StepState & _state)
 {
     Rect rect = makeRect(
         m_x.getPixels(mr_parent.getWidth()),

@@ -31,10 +31,10 @@ class Button : public Label, public Utils::Observable<ButtonClickObserver>
 {
 public:
     Button(const Canvas & _parent, const std::string & _text, SDL_Renderer & _renderer);
-    void render(const RenderState & _state) override;
+    void step(const StepState & _state) override;
 
 private:
-    void handleState(const RenderState & _state);
+    void handleState(const StepState & _state);
     bool isPointIn(const Point & _point, const Rect & _rect) const;
 };
 

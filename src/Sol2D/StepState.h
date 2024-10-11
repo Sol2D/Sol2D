@@ -16,12 +16,43 @@
 
 #pragma once
 
-#include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Workspace.h>
+#include <Sol2D/Rect.h>
+#include <SDL3/SDL_events.h>
+#include <chrono>
 
-namespace Sol2D::Lua {
+namespace Sol2D {
 
-void pushHeartbeatApi(lua_State * _lua);
-void doHeartbeat(lua_State * _lua, const Workspace & _workspace);
+enum class MouseClickState
+{
+    None = 0,
+    Started = 1,
+    Finished = 2
+};
 
-} // namespace Sol2D::Lua
+struct MouseClick
+{
+    MouseClickState state;
+    Point start;
+    Point finish;
+};
+
+struct MouseState
+{
+    Point position;
+    Uint32 buttons;
+    MouseClick lb_click;
+    MouseClick rb_click;
+    MouseClick mb_click;
+
+    bool isLeftButtonDown() const { return buttons & SDL_BUTTON_LMASK; }
+    bool isRightButtonDown() const { return buttons & SDL_BUTTON_RIGHT; }
+    bool isMiddleButtonDown() const { return buttons & SDL_BUTTON_MMASK; }
+};
+
+struct StepState
+{
+    std::chrono::milliseconds time_passed;
+    MouseState mouse_state;
+};
+
+} // namespace Sol2D

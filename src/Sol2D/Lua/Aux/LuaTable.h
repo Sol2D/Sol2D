@@ -112,6 +112,8 @@ public:
 
     void setStringValue(const char * _key, const std::string & _value);
 
+    void setPointValue(const char * _key, const Point & _point);
+
 private:
     lua_State * mp_lua;
     int m_idx;

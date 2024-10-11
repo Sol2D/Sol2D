@@ -18,7 +18,7 @@
 
 using namespace Sol2D::Forms;
 
-void Widget::render(const RenderState & /*_state*/)
+void Widget::step(const StepState & /*_state*/)
 {
     renderBorder();
 }

@@ -17,11 +17,13 @@
 
 #pragma once
 
+#include <Sol2D/Utils/SequentialId.h>
 #include <memory>
-#include <string>
 #include <unordered_map>
 
 namespace Sol2D {
+
+constexpr uint64_t null_companion_id = 0;
 
 class ObjectCompanion
 {
@@ -32,34 +34,42 @@ public:
 class Object
 {
 public:
-    virtual ~Object()
+    S2_DISABLE_COPY_AND_MOVE(Object)
+
+    Object() :
+        m_sequential_id(null_companion_id + 1)
     {
     }
 
-    void addCompanion(const std::string & _key, std::unique_ptr<ObjectCompanion> && _companion)
+    virtual ~Object() { }
+
+    uint64_t addCompanion(std::unique_ptr<ObjectCompanion> && _companion)
     {
-        m_compaions[_key] = std::move(_companion);
+        uint64_t id = m_sequential_id.getNext();
+        m_compaions[id] = std::move(_companion);
+        return id;
     }
 
-    ObjectCompanion * getCompanion(const std::string & _key)
+    ObjectCompanion * getCompanion(uint64_t _id)
     {
-        auto it = m_compaions.find(_key);
+        auto it = m_compaions.find(_id);
         return it == m_compaions.end() ? nullptr : it->second.get();
     }
 
-    const ObjectCompanion * getCompanion(const std::string & _key) const
+    const ObjectCompanion * getCompanion(uint64_t _id) const
     {
-        auto it = m_compaions.find(_key);
+        auto it = m_compaions.find(_id);
         return it == m_compaions.cend() ? nullptr : it->second.get();
     }
 
-    bool removeCompanion(const std::string & _key)
+    bool removeCompanion(uint64_t _id)
     {
-        return m_compaions.erase(_key) > 0;
+        return m_compaions.erase(_id) > 0;
     }
 
 private:
-    std::unordered_map<std::string, std::unique_ptr<ObjectCompanion>> m_compaions;
+    Utils::SequentialId<uint64_t> m_sequential_id;
+    std::unordered_map<uint64_t, std::unique_ptr<ObjectCompanion>> m_compaions;
 };
 
 } // namespace Sol2D

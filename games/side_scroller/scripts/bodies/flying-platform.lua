@@ -1,3 +1,5 @@
+local scene = script.scene
+
 if #script.arg.points < 2 then
     print('Point count < 2, platform is static. Count:', #script.arg.points)
     return
@@ -51,7 +53,7 @@ local function areSamePoints(point1, point2)
     return math.abs(point1.x - point2.x) <= DELTA and math.abs(point1.y - point2.y) <= DELTA
 end
 
-sol.heartbeat:subscribe( -- FIXME: this subscription must die with the object
+scene:subscribeToStep( -- FIXME: this subscription must die with the object
     function()
         local position = platform:getPosition()
         if not position then

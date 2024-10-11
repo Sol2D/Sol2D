@@ -30,7 +30,6 @@ public:
     LuaLibrary(const Workspace & _workspace, StoreManager & _store_manager, Window & _window, SDL_Renderer & _renderer);
     ~LuaLibrary();
     void executeMainScript();
-    void step(const RenderState & _state);
 
 private:
     lua_State * mp_lua;

@@ -132,7 +132,7 @@ local function createContactSubscriptions(scene, body_contact_observer)
             scene:unsubscribeFromEndContact(end_contact_subscription)
             scene:unsubscribeFromSensorBeginContact(begin_sensor_constact_subscription)
             scene:unsubscribeFromSesnsorEndContact(end_sensor_constact_subscription)
-            scene:unsubscribePreSolveContact(pre_solve_subscription)
+            scene:unsubscribeFromPreSolveContact(pre_solve_subscription)
         end
     }
 end

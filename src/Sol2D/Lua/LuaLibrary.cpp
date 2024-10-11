@@ -17,7 +17,6 @@
 #include <Sol2D/Lua/LuaLibrary.h>
 #include <Sol2D/Lua/LuaWindowApi.h>
 #include <Sol2D/Lua/LuaStoreManagerApi.h>
-#include <Sol2D/Lua/LuaHeartbeatApi.h>
 #include <Sol2D/Lua/LuaScancodeApi.h>
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
 #include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
@@ -89,8 +88,6 @@ LuaLibrary::LuaLibrary(
     {
         pushWindowApi(mp_lua, _window);
         lua_setfield(mp_lua, -2, "window");
-        pushHeartbeatApi(mp_lua);
-        lua_setfield(mp_lua, -2, "heartbeat");
         pushKeyboardApiOntoStack(mp_lua);
         lua_setfield(mp_lua, -2, "keyboard");
         pushStoreManagerApi(mp_lua, _workspace, _renderer, _store_manager);
@@ -124,11 +121,4 @@ LuaLibrary::~LuaLibrary()
 void LuaLibrary::executeMainScript()
 {
     executeScript(mp_lua, mr_workspace, mr_workspace.getMainScriptPath());
-}
-
-void LuaLibrary::step(const RenderState & _state)
-{
-    S2_UNUSED(_state)
-
-    doHeartbeat(mp_lua, mr_workspace);
 }

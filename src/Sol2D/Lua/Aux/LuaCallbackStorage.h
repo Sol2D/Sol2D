@@ -17,6 +17,7 @@
 #pragma once
 
 #include <Sol2D/Workspace.h>
+#include <Sol2D/Utils/SequentialId.h>
 #include <lua.hpp>
 #include <cstdint>
 #include <functional>
@@ -55,7 +56,7 @@ private:
 private:
     static const char sc_callback_registry_key;
     static bool s_is_disposed;
-    static uint32_t s_next_subscription_id;
+    static Utils::SequentialId<uint32_t> m_sequential_id;
     lua_State * mp_lua;
 };
 

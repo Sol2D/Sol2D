@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/RenderState.h>
+#include <Sol2D/StepState.h>
 #include <Sol2D/Outlet.h>
 #include <unordered_map>
 #include <list>
@@ -35,7 +35,7 @@ public:
     bool deleteFragment(uint16_t _id);
     bool bindFragment(uint16_t _fragment_id, std::shared_ptr<Canvas> _canvas);
     void resize();
-    void render(const RenderState & _state);
+    void step(const StepState & _state);
 
 private:
     void emplaceOrderedOutlet(Outlet * _outlet);

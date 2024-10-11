@@ -18,23 +18,37 @@
 
 #include <Sol2D/Def.h>
 #include <atomic>
+#include <concepts>
 
 namespace Sol2D::Utils {
 
+template<std::integral T>
 class SequentialId
 {
 public:
     S2_DISABLE_COPY_AND_MOVE(SequentialId)
 
-    SequentialId() :
-        m_next_id(1)
+    explicit SequentialId(T _seed = 1) :
+        m_next_id(_seed)
     {
     }
 
-    uint64_t getNext();
+    T getNext();
 
 private:
-    std::atomic_uint64_t m_next_id;
+    std::atomic<T> m_next_id;
 };
+
+template<std::integral T>
+T SequentialId<T>::getNext()
+{
+    for(;;)
+    {
+        T id = m_next_id.load(std::memory_order::acquire);
+        T next_id = id + 1;
+        if(m_next_id.compare_exchange_strong(id, next_id, std::memory_order::release, std::memory_order::relaxed))
+            return id;
+    }
+}
 
 } // namespace Sol2D::Utils

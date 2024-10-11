@@ -96,7 +96,7 @@ local function getHorizontalForce(current_velocity, footing_velocity, desired_ve
     return player_mass * change / (1 / 60) -- TODO: frame rate
 end
 
-sol.heartbeat:subscribe(function()
+scene:subscribeToStep(function()
     local right_key, left_key, space_key = sol.keyboard:getState(
         sol.Scancode.RIGHT_ARROW,
         sol.Scancode.LEFT_ARROW,

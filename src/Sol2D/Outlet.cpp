@@ -97,12 +97,12 @@ void Outlet::reconfigure(const Fragment & _fragment)
     resize();
 }
 
-void Outlet::render(const RenderState & _state)
+void Outlet::step(const StepState & _state)
 {
     if(!m_canvas || !m_texture)
         return;
     SDL_SetRenderTarget(&mr_renderer, m_texture.get());
-    m_canvas->render(_state);
+    m_canvas->step(_state);
     SDL_SetRenderTarget(&mr_renderer, nullptr);
     SDL_RenderTexture(&mr_renderer, m_texture.get(), nullptr, m_rect.toSdlPtr());
 }

@@ -78,6 +78,8 @@ if(SOL2D_USE_CPPCHECK)
         "--enable=all"
         "--inline-suppr"
     )
+else()
+    set(CMAKE_CXX_CPPCHECK "")
 endif()
 
 add_executable(${PROJECT_NAME} ${SOL2D_SRC})

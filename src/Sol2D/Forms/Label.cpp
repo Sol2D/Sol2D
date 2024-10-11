@@ -69,7 +69,7 @@ bool Label::setState(WidgetState _state)
     return false;
 }
 
-void Label::render(const RenderState & _state)
+void Label::step(const StepState & _state)
 {
     std::shared_ptr<TTF_Font> font = this->font[m_state];
     if(!font)
@@ -156,7 +156,7 @@ void Label::render(const RenderState & _state)
 
     SDL_RenderTexture(&mr_renderer, mp_texture, &src_rect, &dest_rect);
 
-    Widget::render(_state);
+    Widget::step(_state);
 }
 
 void Label::createTexture(TTF_Font * _font)

@@ -35,11 +35,9 @@ namespace {
 const char gc_message_color_required[] = "color required";
 const char gc_message_alignment_required[] = "alignment required";
 
-const char gc_click_companion_key[] = "lua_click_observer";
-
 const uint16_t gc_event_click = 0;
 
-class LuaButtonClickObserver : public ObjectCompanion, public ButtonClickObserver
+class LuaButtonClickObserver : public ButtonClickObserver, public ObjectCompanion
 {
 public:
     LuaButtonClickObserver(lua_State * _lua, const Workspace & _workspace) :
@@ -99,7 +97,8 @@ struct ButtonSelf : Self<Button>
 public:
     ButtonSelf(std::shared_ptr<Button> & _button, const Workspace & _workspace) :
         Self<Button>(_button),
-        mr_workspace(_workspace)
+        mr_workspace(_workspace),
+        m_click_companion_id(null_companion_id)
     {
     }
 
@@ -108,32 +107,32 @@ public:
 
 private:
     const Workspace & mr_workspace;
+    uint64_t m_click_companion_id;
 };
 
 uint32_t ButtonSelf::subscribeOnClick(lua_State * _lua, int _callback_idx)
 {
     std::shared_ptr<Button> button = getWidget(_lua);
-    ObjectCompanion * owner = button->getCompanion(gc_click_companion_key);
-    if(owner == nullptr)
+    LuaButtonClickObserver * observer = static_cast<LuaButtonClickObserver *>(button->getCompanion(m_click_companion_id));
+    if(observer == nullptr)
     {
-        LuaButtonClickObserver * observer = new LuaButtonClickObserver(_lua, mr_workspace);
-        button->addCompanion(gc_click_companion_key, std::unique_ptr<ObjectCompanion>(observer));
+        observer = new LuaButtonClickObserver(_lua, mr_workspace);
+        m_click_companion_id = button->addCompanion(std::unique_ptr<ObjectCompanion>(observer));
         button->addObserver(*observer);
-        owner = observer;
     }
-    return LuaCallbackStorage(_lua).addCallback(owner, gc_event_click, _callback_idx);
+    return LuaCallbackStorage(_lua).addCallback(observer, gc_event_click, _callback_idx);
 }
 
 void ButtonSelf::unsubscribeOnClick(lua_State * _lua, int _subscription_id)
 {
     std::shared_ptr<Button> button = getWidget(_lua);
-    ObjectCompanion * owner = button->getCompanion(gc_click_companion_key);
-    if(owner == nullptr)
+    LuaButtonClickObserver * observer = static_cast<LuaButtonClickObserver *>(button->getCompanion(m_click_companion_id));
+    if(observer == nullptr)
         return;
-    if(LuaCallbackStorage(_lua).removeCallback(owner, gc_event_click, _subscription_id) == 0)
+    if(LuaCallbackStorage(_lua).removeCallback(observer, gc_event_click, _subscription_id) == 0)
     {
-        button->removeObserver(*static_cast<LuaButtonClickObserver *>(owner));
-        button->removeCompanion(gc_click_companion_key);
+        button->removeObserver(*observer);
+        button->removeCompanion(m_click_companion_id);
     }
 }
 

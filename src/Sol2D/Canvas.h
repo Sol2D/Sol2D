@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/RenderState.h>
+#include <Sol2D/StepState.h>
 #include <Sol2D/Object.h>
 #include <Sol2D/Def.h>
 
@@ -34,7 +34,7 @@ public:
     void reconfigure(const Rect & _rect);
     float getWidth() const;
     float getHeight() const;
-    virtual void render(const RenderState & _state) = 0;
+    virtual void step(const StepState & _state) = 0;
     Point getTranslatedPoint(float _x, float _y) const;
     void translatePoint(float * _x, float * _y) const;
 

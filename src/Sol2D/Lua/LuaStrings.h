@@ -31,7 +31,6 @@ struct LuaTypeName
     static const char tile_map_object_type[];
     static const char keyboard[];
     static const char scancode[];
-    static const char heartbeat[];
     static const char store[];
     static const char dimension_unit_type[];
     static const char sprite[];

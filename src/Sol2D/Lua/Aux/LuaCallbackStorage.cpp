@@ -65,7 +65,7 @@ inline std::string makeEventKey(uint16_t _event_id)
 
 const char LuaCallbackStorage::sc_callback_registry_key = '\0';
 bool LuaCallbackStorage::s_is_disposed = false;
-uint32_t LuaCallbackStorage::s_next_subscription_id = 1;
+Utils::SequentialId<uint32_t> LuaCallbackStorage::m_sequential_id(1);
 
 int LuaCallbackStorage::luaGC(lua_State *)
 {
@@ -78,7 +78,7 @@ uint32_t LuaCallbackStorage::addCallback(const void * _owner, uint16_t _event_id
     if(s_is_disposed) return 0;
 
     const int callback_abs_idx = lua_absindex(mp_lua, _callback_idx);
-    const uint32_t id = s_next_subscription_id++;
+    const uint32_t id = m_sequential_id.getNext();
 
     getCallbackRegisty();
     ensureEventsTable(_owner, _event_id);

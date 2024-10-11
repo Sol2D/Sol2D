@@ -29,7 +29,7 @@ class Form final : public Canvas
 {
 public:
     explicit Form(SDL_Renderer & _renderer);
-    void render(const RenderState & _state) override;
+    void step(const StepState & _state) override;
     void setBackgroundColor(const Color & _color);
     std::shared_ptr<Label> createLabel(const std::string & _text);
     std::shared_ptr<Button> createButton(const std::string & _text);

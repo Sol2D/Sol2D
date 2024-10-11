@@ -48,11 +48,27 @@ struct SceneOptions
     Point gravity;
 };
 
-class Scene final : public Canvas, public Utils::Observable<ContactObserver>
+class StepObserver
+{
+public:
+    virtual ~StepObserver() { }
+    virtual void onStepComplete(const StepState & _state) = 0;
+};
+
+class Scene final :
+    public Canvas,
+    public Utils::Observable<ContactObserver>,
+    public Utils::Observable<StepObserver>
 {
 private:
     class BodyShapeCreator;
     friend class Scene::BodyShapeCreator;
+
+public:
+    using Utils::Observable<ContactObserver>::addObserver;
+    using Utils::Observable<ContactObserver>::removeObserver;
+    using Utils::Observable<StepObserver>::addObserver;
+    using Utils::Observable<StepObserver>::removeObserver;
 
 public:
     Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Renderer & _renderer);
@@ -87,7 +103,7 @@ public:
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(const std::string & _name) const;
     boost::container::slist<const Tiles::TileMapObject *> getTileMapObjectsByClass(const std::string & _class) const;
-    void render(const RenderState & _state) override;
+    void step(const StepState & _state) override;
     bool doesBodyExist(uint64_t _body_id) const;
     bool doesBodyShapeExist(uint64_t _body_id, const Utils::PreHashedKey<std::string> & _shape_key) const;
     void applyForceToBodyCenter(uint64_t _body_id, const Point & _force);
@@ -139,9 +155,9 @@ private:
     Point m_world_offset;
     b2WorldId m_b2_world_id;
     float m_meters_per_pixel;
-    Utils::SequentialId m_bodies_sequential_id;
+    Utils::SequentialId<uint64_t> m_bodies_sequential_id;
     std::unordered_map<uint64_t, b2BodyId> m_bodies;
-    Utils::SequentialId m_joints_sequential_id;
+    Utils::SequentialId<uint64_t> m_joints_sequential_id;
     std::unordered_map<uint64_t, b2JointId> m_joints;
     b2BodyId m_followed_body_id;
     std::unique_ptr<Tiles::TileHeap> m_tile_heap_ptr;

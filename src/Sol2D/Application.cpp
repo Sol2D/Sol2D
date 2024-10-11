@@ -39,7 +39,7 @@ private:
 public:
     ~Application();
     static bool run(const Workspace & _workspace);
-    void render();
+    void step();
 
 private:
     bool initialize();
@@ -54,7 +54,7 @@ private:
     SDL_Window * mp_sdl_window;
     SDL_Renderer * mp_sdl_renderer;
     const Workspace & mr_workspace;
-    RenderState m_render_state;
+    StepState m_step_state;
     Window * mp_window;
     StoreManager * mp_store_manager;
     LuaLibrary * mp_lua;
@@ -81,7 +81,7 @@ Application::Application(const Workspace & _workspace) :
     mp_sdl_window(nullptr),
     mp_sdl_renderer(nullptr),
     mr_workspace(_workspace),
-    m_render_state{},
+    m_step_state{},
     mp_window(nullptr),
     mp_store_manager(nullptr),
     mp_lua(nullptr)
@@ -179,17 +179,17 @@ void Application::runMainLoop()
         if(passed_ticks >= render_frame_delay)
         {
             last_rendering_ticks = now_ticks;
-            m_render_state.time_passed = std::chrono::milliseconds(passed_ticks);
-            m_render_state.mouse_state.buttons = SDL_GetMouseState(
-                &m_render_state.mouse_state.position.x,
-                &m_render_state.mouse_state.position.y);
-            render();
-            if(m_render_state.mouse_state.lb_click.state == MouseClickState::Finished)
-                m_render_state.mouse_state.lb_click.state = MouseClickState::None;
-            if(m_render_state.mouse_state.rb_click.state == MouseClickState::Finished)
-                m_render_state.mouse_state.rb_click.state = MouseClickState::None;
-            if(m_render_state.mouse_state.mb_click.state == MouseClickState::Finished)
-                m_render_state.mouse_state.mb_click.state = MouseClickState::None;
+            m_step_state.time_passed = std::chrono::milliseconds(passed_ticks);
+            m_step_state.mouse_state.buttons = SDL_GetMouseState(
+                &m_step_state.mouse_state.position.x,
+                &m_step_state.mouse_state.position.y);
+            step();
+            if(m_step_state.mouse_state.lb_click.state == MouseClickState::Finished)
+                m_step_state.mouse_state.lb_click.state = MouseClickState::None;
+            if(m_step_state.mouse_state.rb_click.state == MouseClickState::Finished)
+                m_step_state.mouse_state.rb_click.state = MouseClickState::None;
+            if(m_step_state.mouse_state.mb_click.state == MouseClickState::Finished)
+                m_step_state.mouse_state.mb_click.state = MouseClickState::None;
         }
         if(render_frame_delay - passed_ticks > 5)
         {
@@ -229,16 +229,16 @@ inline void Application::onMouseButtonDown(const SDL_MouseButtonEvent & _event)
     switch(_event.button)
     {
     case SDL_BUTTON_LEFT:
-        m_render_state.mouse_state.lb_click.state = MouseClickState::Started;
-        m_render_state.mouse_state.lb_click.start = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.lb_click.state = MouseClickState::Started;
+        m_step_state.mouse_state.lb_click.start = makePoint(_event.x, _event.y);
         break;
     case SDL_BUTTON_RIGHT:
-        m_render_state.mouse_state.rb_click.state = MouseClickState::Started;
-        m_render_state.mouse_state.rb_click.start = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.rb_click.state = MouseClickState::Started;
+        m_step_state.mouse_state.rb_click.start = makePoint(_event.x, _event.y);
         break;
     case SDL_BUTTON_MIDDLE:
-        m_render_state.mouse_state.mb_click.state = MouseClickState::Started;
-        m_render_state.mouse_state.mb_click.start = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.mb_click.state = MouseClickState::Started;
+        m_step_state.mouse_state.mb_click.start = makePoint(_event.x, _event.y);
         break;
     }
 }
@@ -248,26 +248,25 @@ inline void Application::onMouseButtonUp(const SDL_MouseButtonEvent & _event)
     switch(_event.button)
     {
     case SDL_BUTTON_LEFT:
-        m_render_state.mouse_state.lb_click.state = MouseClickState::Finished;
-        m_render_state.mouse_state.lb_click.finish = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.lb_click.state = MouseClickState::Finished;
+        m_step_state.mouse_state.lb_click.finish = makePoint(_event.x, _event.y);
         break;
     case SDL_BUTTON_RIGHT:
-        m_render_state.mouse_state.rb_click.state = MouseClickState::Finished;
-        m_render_state.mouse_state.rb_click.finish = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.rb_click.state = MouseClickState::Finished;
+        m_step_state.mouse_state.rb_click.finish = makePoint(_event.x, _event.y);
         break;
     case SDL_BUTTON_MIDDLE:
-        m_render_state.mouse_state.mb_click.state = MouseClickState::Finished;
-        m_render_state.mouse_state.mb_click.finish = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.mb_click.state = MouseClickState::Finished;
+        m_step_state.mouse_state.mb_click.finish = makePoint(_event.x, _event.y);
         break;
     }
 }
 
-void Application::render()
+void Application::step()
 {
     int width, height;
     SDL_GetCurrentRenderOutputSize(mp_sdl_renderer, &width, &height);
-    mp_window->render(m_render_state);
-    mp_lua->step(m_render_state);
+    mp_window->step(m_step_state);
 }
 
 int main(int _argc, const char ** _argv)

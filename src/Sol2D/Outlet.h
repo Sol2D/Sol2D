@@ -31,7 +31,7 @@ public:
     void resize();
     void bind(std::shared_ptr<Canvas> _canvas);
     void reconfigure(const Fragment & _fragment);
-    void render(const RenderState & _state);
+    void step(const StepState & _state);
     const Fragment & getFragment() const;
 
 private:
