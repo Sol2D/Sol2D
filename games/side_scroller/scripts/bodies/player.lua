@@ -34,7 +34,7 @@ end
 
 local METERS_PER_PIXEL = script.arg.METERS_PER_PIXEL
 local WALK_VELOCITY = 5
-local JUMP_DELAY = 15
+local JUMP_DELAY = 200
 
 local Direction = {
     LEFT = 0,
@@ -96,7 +96,7 @@ local function getHorizontalForce(current_velocity, footing_velocity, desired_ve
     return player_mass * change / (1 / 60) -- TODO: frame rate
 end
 
-scene:subscribeToStep(function()
+scene:subscribeToStep(function(time_passed)
     local right_key, left_key, space_key = sol.keyboard:getState(
         sol.Scancode.RIGHT_ARROW,
         sol.Scancode.LEFT_ARROW,
@@ -114,7 +114,7 @@ scene:subscribeToStep(function()
 
     if not state.inAir then
         if state.jumpTimeout > 0 then
-            state.jumpTimeout = state.jumpTimeout - 1
+            state.jumpTimeout = state.jumpTimeout - time_passed
         elseif space_key then
             state.jumping = true
             state.jumpTimeout = JUMP_DELAY
