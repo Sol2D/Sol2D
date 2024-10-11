@@ -1,5 +1,6 @@
 local keys = require 'resources.keys'
 local ButtonFactory = require 'resources.button-factory'
+local PlatfromFactory = require 'resources.platform-factory'
 local BodyContactObserver = require 'body-contact-observer'
 
 local METERS_PER_PIXEL = 0.01
@@ -51,34 +52,9 @@ local function createButton(global_store, scene, args)
     ButtonFactory.createButton(
         global_store,
         scene,
-        pixelPointToPhisical(button_position_object.position),
-        { layer = keys.tilemap.level02.layers.background }
+        pixelPointToPhisical(button_position_object.position) --,
+        -- { layer = keys.tilemap.level02.layers.background }
     )
-end
-
----@param scene sol.Scene
----@param body_contact_observer BodyContactObserver
-local function createContactSubscriptions(scene, body_contact_observer)
-    local begin_contact_subscription = scene:subscribeToBeginContact(function(contact)
-        body_contact_observer.callBeginContact(contact)
-    end)
-    local end_contact_subscription = scene:subscribeToEndContact(function(contact)
-        body_contact_observer.callEndContact(contact)
-    end)
-    local begin_sensor_constact_subscription = scene:subscribeToSensorBeginContact(function(contact)
-        body_contact_observer.callSensorBeginContact(contact)
-    end)
-    local end_sensor_constact_subscription = scene:subscribeToSensorEndContact(function(contact)
-        body_contact_observer.callSensorEndContact(contact)
-    end)
-    return {
-        destroy = function()
-            scene:unsubscribeFromBeginContact(begin_contact_subscription)
-            scene:unsubscribeFromEndContact(end_contact_subscription)
-            scene:unsubscribeFromSensorBeginContact(begin_sensor_constact_subscription)
-            scene:unsubscribeFromSesnsorEndContact(end_sensor_constact_subscription)
-        end
-    }
 end
 
 ---@param global_store sol.Store
@@ -121,7 +97,56 @@ local function createScene(global_store, local_store)
         }
     )
     createButton(global_store, scene)
-    local contact_subsciptions = createContactSubscriptions(scene, observer)
+
+    local platfrom01_point = scene:getTileMapObjectByName('platform-01')
+    if not platfrom01_point then
+        error('Object platform-01 not found')
+    end
+
+    local hook = scene:createBody(pixelPointToPhisical(platfrom01_point.position), { type = sol.BodyType.STATIC })
+    local platform = PlatfromFactory.createPlatform(
+        local_store,
+        scene,
+        pixelPointToPhisical(platfrom01_point.position),
+        {
+            length = 9,
+            bodyType = sol.BodyType.DYNAMIC
+        }
+    )
+    local hook_joint = scene:createWeldJoint({
+        bodyA = hook,
+        bodyB = platform
+    })
+
+    local contact_subsciptions = (function()
+        local begin_contact_subscription = scene:subscribeToBeginContact(function(contact)
+            observer.callBeginContact(contact)
+        end)
+        local end_contact_subscription = scene:subscribeToEndContact(function(contact)
+            observer.callEndContact(contact)
+        end)
+        local begin_sensor_constact_subscription = scene:subscribeToSensorBeginContact(function(contact)
+            print('Conact', contact.sensor.shapeKey, contact.visitor.shapeKey)
+            if contact.sensor.shapeKey == keys.shapes.button.sensor and contact.visitor.shapeKey == keys.shapes.button.main then
+                print('Button pressed')
+                scene:destroyJoint(hook_joint)
+                scene:destroyBody(hook)
+            end
+            observer.callSensorBeginContact(contact)
+        end)
+        local end_sensor_constact_subscription = scene:subscribeToSensorEndContact(function(contact)
+            observer.callSensorEndContact(contact)
+        end)
+        return {
+            destroy = function()
+                scene:unsubscribeFromBeginContact(begin_contact_subscription)
+                scene:unsubscribeFromEndContact(end_contact_subscription)
+                scene:unsubscribeFromSensorBeginContact(begin_sensor_constact_subscription)
+                scene:unsubscribeFromSesnsorEndContact(end_sensor_constact_subscription)
+            end
+        }
+    end)()
+
     return {
         scene = scene,
         destroy = function()

@@ -28,8 +28,8 @@ class SequentialId
 public:
     S2_DISABLE_COPY_AND_MOVE(SequentialId)
 
-    explicit SequentialId(T _seed = 1) :
-        m_next_id(_seed)
+    explicit SequentialId() :
+        m_next_id(1)
     {
     }
 

@@ -1,13 +1,25 @@
 local keys = require 'resources.keys'
 
----@param store sol.Store
-local function createButtonPrototype(store)
-    local sprite = store:createSprite('button')
-    if not sprite:loadFromFile('sprites/button/button.png') then
-        error('Unable to load sprites/button/button.png')
+local function getSprite(store, key, file)
+    local sprite = store:getSprite(key)
+    if not sprite then
+        sprite = store:createSprite(key)
+        if not sprite:loadFromFile(file) then
+            error('Unable to load ' .. file)
+        end
     end
-    return store:createBodyPrototype(
-        keys.bodies.button,
+    return sprite
+end
+
+---@param store sol.Store
+---@param scene sol.Scene
+---@param position Point
+---@param options { layer: string }?
+local function createButton(store, scene, position, options)
+    local button_sprite = getSprite(store, 'button', 'sprites/button/button.png')
+    local hull_sprite = getSprite(store, 'button-hull', 'sprites/button/hull.png')
+    local button = scene:createBody(
+        { x = position.x - 1, y = position.y - 1 },
         {
             type = sol.BodyType.DYNAMIC,
             physics = { fixedRotation = true },
@@ -15,30 +27,21 @@ local function createButtonPrototype(store)
                 [keys.shapes.button.main] = {
                     type = sol.BodyShapeType.POLYGON,
                     physics = {
-                        density = 100,
-                        isPreSolveEnabled = true
+                        density = 100
                     },
                     rect = { x = 0, y = 0, w = 119, h = 26 },
                     graphics = {
                         [keys.shapeGraphics.button.main] = {
                             animationIterations = 0,
-                            frames = { { sprites = { { sprite = sprite } } } }
+                            frames = { { sprites = { { sprite = button_sprite } } } }
                         }
                     }
                 }
             }
         }
     )
-end
-
----@param store sol.Store
-local function createHullPrototype(store)
-    local sprite = store:createSprite('button-hull')
-    if not sprite:loadFromFile('sprites/button/hull.png') then
-        error('Unable to load sprites/button/hull.png')
-    end
-    return store:createBodyPrototype(
-        keys.bodies.buttonHull,
+    local hull = scene:createBody(
+        position,
         {
             type = sol.BodyType.STATIC,
             shapes = {
@@ -48,30 +51,29 @@ local function createHullPrototype(store)
                     graphics = {
                         [keys.shapeGraphics.button.hull] = {
                             animationIterations = 0,
-                            frames = { { sprites = { { sprite = sprite } } } }
+                            frames = { { sprites = { { sprite = hull_sprite } } } }
                         }
                     }
                 }
             }
         }
     )
-end
-
----@param store sol.Store
----@param scene sol.Scene
----@param position Point
----@param options { layer: string }?
-local function createButton(store, scene, position, options)
-    local button_prototype = store:getBodyPrototype(keys.bodies.button)
-    local hull_prototype = store:getBodyPrototype(keys.bodies.buttonHull)
-    if not button_prototype then
-        button_prototype = createButtonPrototype(store)
-    end
-    if not hull_prototype then
-        hull_prototype = createHullPrototype(store)
-    end
-    local button = scene:createBody({ x = position.x - 1, y = position.y - 1 }, button_prototype)
-    local hull = scene:createBody(position, hull_prototype)
+    scene:createBody(
+        -- { x = position.x + 10, y = position.y + 15 },
+        { x = position.x + 0.15, y = position.y + 0.15 },
+        {
+            type = sol.BodyType.STATIC,
+            shapes = {
+                [keys.shapes.button.sensor] = {
+                    type = sol.BodyShapeType.POLYGON,
+                    rect = { x = 0, y = 0, w = 99, h = 5 },
+                    physics = {
+                        isSensor = true
+                    }
+                }
+            }
+        }
+    )
     local button_shape = button:getShape(keys.shapes.button.main)
     if button_shape then
         button_shape:setCurrentGraphics(keys.shapeGraphics.button.main)
@@ -116,10 +118,5 @@ local function createButton(store, scene, position, options)
 end
 
 return {
-    ---@param store sol.Store
-    init = function(store)
-        createButtonPrototype(store)
-        createHullPrototype(store)
-    end,
     createButton = createButton
 }

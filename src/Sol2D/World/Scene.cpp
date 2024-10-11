@@ -818,10 +818,12 @@ uint64_t Scene::createJoint(const WheelJointDefinition & _definition)
 
 bool Scene::destroyJoing(uint64_t _joint_id)
 {
-    b2JointId b2_joint_id = findJoint(_joint_id);
-    if(B2_IS_NULL(b2_joint_id))
+    auto it = m_joints.find(_joint_id);
+    if(it == m_joints.end())
         return false;
-    b2DestroyJoint(b2_joint_id);
+    if(B2_IS_NON_NULL(it->second))
+        b2DestroyJoint(it->second);
+    m_joints.erase(_joint_id);
     return true;
 }
 

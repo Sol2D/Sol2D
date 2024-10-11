@@ -130,6 +130,7 @@ script = nil
 ---@class JointDefinition
 ---@field bodyA integer | sol.Body
 ---@field bodyB integer | sol.Body
+---@field isCollideConnectedEnabled boolean?
 
 ---@class DistanceJointDefenition: JointDefinition
 ---@field isSpringEnbaled boolean?

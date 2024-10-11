@@ -27,7 +27,13 @@ local keys_meta = {
         player = 'player',
         flyingPlatform3 = 'flying-platform3',
         button = 'button',
-        buttonHull = 'hull-button'
+        buttonHull = 'hull-button',
+        ---@param length integer
+        ---@param body_type integer
+        ---@return string
+        platfrom = function(length, body_type)
+            return 'platform-' .. body_type .. '-' .. length
+        end
     },
     shapes = {
         oneWayPlatfrom = {
@@ -45,7 +51,8 @@ local keys_meta = {
         },
         button = {
             main = 'main:button',
-            hull = 'hull:button'
+            hull = 'hull:button',
+            sensor = 'sensor:button'
         }
     },
     shapeGraphics = {
@@ -57,8 +64,8 @@ local keys_meta = {
             jumpLeft = 'jump-left:player',
             jumpRight = 'jump-right:player'
         },
-        flyingPlatform3 = {
-            main = 'main:flying-platform3'
+        platform = {
+            main = 'platform'
         },
         button = {
             main = 'main:button',

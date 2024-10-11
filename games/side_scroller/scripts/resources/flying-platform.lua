@@ -23,7 +23,7 @@ local function createPlatformPrototype3(store)
                     },
                     rect = { x = 0, y = 0, w = 384, h = 64 },
                     graphics = {
-                        [keys.shapeGraphics.flyingPlatform3.main] = {
+                        [keys.shapeGraphics.platform.main] = {
                             animationIterations = 0,
                             frames = {
                                 {

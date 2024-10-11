@@ -54,6 +54,7 @@ bool tryGetJointDefinition(const LuaTable & _table, World::JointDefinition & _re
     {
         return false;
     }
+    _table.tryGetBoolean("isCollideConnectedEnabled", &_result.is_collide_connected_enabled);
     _result.body_a_id = body_a;
     _result.body_b_id = body_b;
     return true;

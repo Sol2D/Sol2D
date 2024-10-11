@@ -36,8 +36,7 @@ class Object
 public:
     S2_DISABLE_COPY_AND_MOVE(Object)
 
-    Object() :
-        m_sequential_id(null_companion_id + 1)
+    Object()
     {
     }
 
