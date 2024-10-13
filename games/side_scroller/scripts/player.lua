@@ -138,7 +138,6 @@ local function getDefinition()
     ---@type BodyDefinition
     definition = {
         type = sol.BodyType.DYNAMIC,
-        script = 'player-script.lua',
         physics = {
             fixedRotation = true
         },
@@ -177,7 +176,7 @@ end
 ---@param script_argument any?
 ---@return sol.Body
 function module.new(scene, position, script_argument)
-    local body = scene:createBody(position, getDefinition(), script_argument)
+    local body = scene:createBody(position, getDefinition(), 'player-script.lua', script_argument)
     local main_shape = body:getShape(module.keys.shapes.MAIN)
     if main_shape then
         main_shape:setCurrentGraphics(module.keys.shapeGraphics.IDLE_RIGHT)

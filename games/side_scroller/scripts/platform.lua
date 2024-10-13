@@ -64,7 +64,6 @@ local function createPlatform(scene, position, options)
         position,
         {
             type = options.bodyType,
-            script = options.script,
             shapes = {
                 [options.shapeKey] = {
                     type = sol.BodyShapeType.POLYGON,
@@ -83,6 +82,7 @@ local function createPlatform(scene, position, options)
                 }
             }
         },
+        options.script,
         options.scriptArgument
     )
     local shape = body:getShape(options.shapeKey)

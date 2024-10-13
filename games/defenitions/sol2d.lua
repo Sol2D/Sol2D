@@ -291,9 +291,10 @@ function __scene:getTileMapObjectsByClass(class) end
 
 ---@param position Point | nil
 ---@param proto_or_definition BodyDefinition
+---@param script_path string?
 ---@param script_argument? any
 ---@return sol.Body
-function __scene:createBody(position, proto_or_definition, script_argument) end
+function __scene:createBody(position, proto_or_definition, script_path, script_argument) end
 
 ---@param body integer | sol.Body
 ---@return boolean

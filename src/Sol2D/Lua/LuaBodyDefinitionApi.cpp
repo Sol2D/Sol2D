@@ -219,10 +219,5 @@ std::unique_ptr<BodyDefinition> Sol2D::Lua::tryGetBodyDefinition(lua_State * _lu
         getShapes(_lua, -1, def->shapes);
         lua_pop(_lua, 1);
     }
-    {
-        std::string script;
-        if(table.tryGetString("script", script))
-            def->script = script;
-    }
     return def;
 }

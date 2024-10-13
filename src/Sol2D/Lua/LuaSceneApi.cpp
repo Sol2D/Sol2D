@@ -303,10 +303,11 @@ int luaApi_GetTileMapObjectsByClass(lua_State * _lua)
 // 1 self
 // 2 position or nil
 // 3 body definition
-// 4 script argument (optional)
+// 4 script path (optional)
+// 5 script argument (optional)
 int luaApi_CreateBody(lua_State * _lua)
 {
-    bool has_script_argument = lua_gettop(_lua) >= 4;
+    bool has_script_argument = lua_gettop(_lua) >= 5;
     const Self * self = UserData::getUserData(_lua, 1);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     Point position = { .0f, .0f };
@@ -317,21 +318,20 @@ int luaApi_CreateBody(lua_State * _lua)
     std::unique_ptr<BodyDefinition> definition = tryGetBodyDefinition(_lua, 3);
     luaL_argcheck(_lua, definition, 3, "body defenition expected");
     body_id = scene->createBody(position, *definition);
-    script_path = definition->script;
-    if(script_path.has_value())
+    if(lua_isstring(_lua, 4))
     {
+        const char * script_path = lua_tostring(_lua, 4);
         LuaTable table = LuaTable::pushNew(_lua);
         pushBodyApi(_lua, scene, body_id);
         table.setValueFromTop("body");
         lua_pushvalue(_lua, 1);
         table.setValueFromTop("scene");
         if(has_script_argument) {
-            lua_pushvalue(_lua, 4);
+            lua_pushvalue(_lua, 5);
             table.setValueFromTop("arg");
         }
-        executeScriptWithContext(_lua, self->workspace, script_path.value());
+        executeScriptWithContext(_lua, self->workspace, script_path);
     }
-
     pushBodyApi(_lua, scene, body_id);
     return 1;
 }

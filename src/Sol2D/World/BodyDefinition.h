@@ -72,7 +72,6 @@ struct BodyDefinition
     }
 
     BodyType type;
-    std::optional<std::filesystem::path> script;
     BodyPhysicsDefinition physics;
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> shapes;
 };
