@@ -54,15 +54,6 @@ struct Utils::ObjectFactory<SpriteSheet>
 };
 
 template<>
-struct Utils::ObjectFactory<World::BodyDefinition>
-{
-    std::shared_ptr<World::BodyDefinition> produce(std::shared_ptr<World::BodyDefinition> _definition) const
-    {
-        return _definition;
-    }
-};
-
-template<>
 struct Utils::ObjectFactory<World::Scene>
 {
     std::shared_ptr<World::Scene> produce(
@@ -114,7 +105,6 @@ using Store = Utils::ObjectStore<
     View,
     Sprite,
     SpriteSheet,
-    World::BodyDefinition,
     World::Scene,
     Forms::Form,
     TTF_Font,

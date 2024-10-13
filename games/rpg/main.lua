@@ -274,8 +274,8 @@ local function createSkeleton()
     end
     local frame_duration = 80;
     local position = { x = -(size.w / 2), y = -(size.h / 2) }
-    local body_proto = store:createBodyPrototype(
-        'skeleton',
+    return scene:createBody(
+        nil,
         {
             type = sol.BodyType.DYNAMIC,
             script = 'skeleton.lua',
@@ -450,10 +450,12 @@ local function createSkeleton()
                     }
                 }
             }
+        },
+        {
+            trackName = 'SkeletonTrack',
+            startPoint = 1
         }
     )
-
-    return scene:createBody(nil, body_proto, { trackName = 'SkeletonTrack', startPoint = 1 })
 end
 
 (function()

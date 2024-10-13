@@ -19,7 +19,6 @@
 #include <Sol2D/Lua/LuaFormApi.h>
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
-#include <Sol2D/Lua/LuaBodyPrototypeApi.h>
 #include <Sol2D/Lua/LuaViewApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
@@ -194,35 +193,6 @@ int luaApi_GetSpriteSheet(lua_State * _lua)
 
 // 1 self
 // 2 key
-// 3 body definition
-int luaApi_CreateBodyPrototype(lua_State * _lua)
-{
-    const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
-    std::unique_ptr<BodyDefinition> definition = tryGetBodyDefinition(_lua, 3);
-    luaL_argcheck(_lua, definition, 3, "a body definition expected");
-    std::shared_ptr<BodyDefinition> shared_definition(definition.release());
-    self->getStore(_lua)->createObject<BodyDefinition>(lua_tostring(_lua, 2), shared_definition);
-    pushBodyPrototype(_lua, shared_definition);
-    return 1;
-}
-
-// 1 self
-// 2 key
-int luaApi_GetBodyPrototype(lua_State * _lua)
-{
-    const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, gc_message_key_required);
-    std::shared_ptr<BodyDefinition> definition = self->getStore(_lua)->getObject<BodyDefinition>(lua_tostring(_lua, 2));
-    if(definition)
-        pushBodyPrototype(_lua, definition);
-    else
-        lua_pushnil(_lua);
-    return 1;
-}
-
-// 1 self
-// 2 key
 // 3 file path
 // 4 font size
 int luaApi_CreateFont(lua_State * _lua)
@@ -362,9 +332,6 @@ void Sol2D::Lua::pushStoreApi(
             { "createSpriteSheet", luaApi_CreateSpriteSheet },
             { "getSpriteSheet", luaApi_GetSpriteSheet },
             { "freeSpriteSheet", luaApi_FreeObject<SpriteSheet> },
-            { "createBodyPrototype", luaApi_CreateBodyPrototype },
-            { "getBodyPrototype", luaApi_GetBodyPrototype },
-            { "freeeBodyDefinition", luaApi_FreeObject<BodyDefinition> },
             { "createSoundEffect", luaApi_CreateSoundEffect },
             { "getSoundEffect", luaApi_GetSoundEffect },
             { "freeSoundEffect", luaApi_FreeObject<Mix_Chunk> },

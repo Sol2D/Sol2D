@@ -17,7 +17,6 @@
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/LuaGraphicsPackApi.h>
-#include <Sol2D/Lua/LuaBodyPrototypeApi.h>
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
 #include <Sol2D/Lua/LuaJointDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyOptionsApi.h>
@@ -303,7 +302,7 @@ int luaApi_GetTileMapObjectsByClass(lua_State * _lua)
 
 // 1 self
 // 2 position or nil
-// 3 body prototype OR body definition
+// 3 body definition
 // 4 script argument (optional)
 int luaApi_CreateBody(lua_State * _lua)
 {
@@ -313,25 +312,12 @@ int luaApi_CreateBody(lua_State * _lua)
     Point position = { .0f, .0f };
     if(!lua_isnil(_lua, 2))
         luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "body position expected");
-
     uint64_t body_id = 0;
-    LuaBodyPrototype proto;
     std::optional<std::filesystem::path> script_path;
-    if(tryGetBodyPrototype(_lua, 3, proto))
-    {
-        body_id = scene->createBody(position, *proto.definition);
-        script_path = proto.definition->script;
-    }
-    else if(std::unique_ptr<BodyDefinition> definition = tryGetBodyDefinition(_lua, 3))
-    {
-        body_id = scene->createBody(position, *definition);
-        script_path = definition->script;
-    }
-    else
-    {
-        luaL_argerror(_lua, 3, "body prototype or defenition expected");
-    }
-
+    std::unique_ptr<BodyDefinition> definition = tryGetBodyDefinition(_lua, 3);
+    luaL_argcheck(_lua, definition, 3, "body defenition expected");
+    body_id = scene->createBody(position, *definition);
+    script_path = definition->script;
     if(script_path.has_value())
     {
         LuaTable table = LuaTable::pushNew(_lua);

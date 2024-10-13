@@ -290,7 +290,7 @@ function __scene:getTileMapObjectByName(name) end
 function __scene:getTileMapObjectsByClass(class) end
 
 ---@param position Point | nil
----@param proto_or_definition sol.BodyPrototype | BodyDefinition
+---@param proto_or_definition BodyDefinition
 ---@param script_argument? any
 ---@return sol.Body
 function __scene:createBody(position, proto_or_definition, script_argument) end
@@ -593,8 +593,6 @@ function __button:unsubscribeOnClick(subscription_id) end
 ---@field shapeKey string
 ---@field tileMapObjectId integer?
 
----@class sol.BodyPrototype
-
 ---@class sol.Store
 local __store
 
@@ -658,18 +656,6 @@ function __store:getSpriteSheet(key) end
 ---@param key string
 ---@return boolean
 function __store:freeSpriteSheet(key) end
-
----@param key string
----@param definition BodyDefinition
----@return sol.BodyPrototype
-function __store:createBodyPrototype(key, definition) end
-
----@param key string
----@return sol.BodyPrototype | nil
-function __store:getBodyPrototype(key, definition) end
-
----@param key string
-function __store:freeBodyPrototype(key) end
 
 ---@param key string
 ---@param file_path string
