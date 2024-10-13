@@ -528,7 +528,7 @@ switch_view_button:subscribeOnClick(function()
 end)
 
 local PLAYER_WALK_FORCE = 1700
-sol.heartbeat:subscribe(function()
+scene:subscribeToStep(function()
     local up, right, down, left, l_shift, r_shift = sol.keyboard:getState(
         sol.Scancode.UP_ARROW,
         sol.Scancode.RIGHT_ARROW,

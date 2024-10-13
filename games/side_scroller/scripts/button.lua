@@ -1,39 +1,49 @@
-local keys = require 'resources.keys'
+local resources = require 'resources'
 
-local function getSprite(store, key, file)
-    local sprite = store:getSprite(key)
-    if not sprite then
-        sprite = store:createSprite(key)
-        if not sprite:loadFromFile(file) then
-            error('Unable to load ' .. file)
-        end
-    end
-    return sprite
-end
+local keys = {
+    shapes = {
+        cap = 'cap',
+        hull = 'hull',
+        sensor = 'sensor'
+    },
+    shapeGraphics = {
+        cap = 'cap',
+        hull = 'hull'
+    }
+}
 
----@param store sol.Store
+local module = {}
+module.__index = module
+module.keys = keys
+
 ---@param scene sol.Scene
 ---@param position Point
 ---@param options { layer: string }?
-local function createButton(store, scene, position, options)
-    local button_sprite = getSprite(store, 'button', 'sprites/button/button.png')
-    local hull_sprite = getSprite(store, 'button-hull', 'sprites/button/hull.png')
+function module.new(scene, position, options)
     local button = scene:createBody(
         { x = position.x - 1, y = position.y - 1 },
         {
             type = sol.BodyType.DYNAMIC,
             physics = { fixedRotation = true },
             shapes = {
-                [keys.shapes.button.main] = {
+                [keys.shapes.cap] = {
                     type = sol.BodyShapeType.POLYGON,
                     physics = {
                         density = 100
                     },
                     rect = { x = 0, y = 0, w = 119, h = 26 },
                     graphics = {
-                        [keys.shapeGraphics.button.main] = {
+                        [keys.shapeGraphics.cap] = {
                             animationIterations = 0,
-                            frames = { { sprites = { { sprite = button_sprite } } } }
+                            frames = {
+                                {
+                                    sprites = {
+                                        {
+                                            sprite = resources.getSprite(resources.keys.sprites.button.cap)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -45,13 +55,21 @@ local function createButton(store, scene, position, options)
         {
             type = sol.BodyType.STATIC,
             shapes = {
-                [keys.shapes.button.hull] = {
+                [keys.shapes.hull] = {
                     type = sol.BodyShapeType.POLYGON,
                     rect = { x = 0, y = 0, w = 129, h = 40 },
                     graphics = {
-                        [keys.shapeGraphics.button.hull] = {
+                        [keys.shapeGraphics.hull] = {
                             animationIterations = 0,
-                            frames = { { sprites = { { sprite = hull_sprite } } } }
+                            frames = {
+                                {
+                                    sprites = {
+                                        {
+                                            sprite = resources.getSprite(resources.keys.sprites.button.hull)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -59,12 +77,11 @@ local function createButton(store, scene, position, options)
         }
     )
     scene:createBody(
-        -- { x = position.x + 10, y = position.y + 15 },
         { x = position.x + 0.15, y = position.y + 0.15 },
         {
             type = sol.BodyType.STATIC,
             shapes = {
-                [keys.shapes.button.sensor] = {
+                [keys.shapes.sensor] = {
                     type = sol.BodyShapeType.POLYGON,
                     rect = { x = 0, y = 0, w = 99, h = 5 },
                     physics = {
@@ -74,13 +91,13 @@ local function createButton(store, scene, position, options)
             }
         }
     )
-    local button_shape = button:getShape(keys.shapes.button.main)
+    local button_shape = button:getShape(keys.shapes.cap)
     if button_shape then
-        button_shape:setCurrentGraphics(keys.shapeGraphics.button.main)
+        button_shape:setCurrentGraphics(keys.shapeGraphics.cap)
     end
-    local hull_shape = hull:getShape(keys.shapes.button.hull)
+    local hull_shape = hull:getShape(keys.shapes.hull)
     if hull_shape then
-        hull_shape:setCurrentGraphics(keys.shapeGraphics.button.hull)
+        hull_shape:setCurrentGraphics(keys.shapeGraphics.hull)
     end
     scene:createPrismaticJoint({
         bodyA = hull,
@@ -117,6 +134,4 @@ local function createButton(store, scene, position, options)
     return button
 end
 
-return {
-    createButton = createButton
-}
+return setmetatable({}, module)

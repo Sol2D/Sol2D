@@ -40,6 +40,7 @@ inline GraphicsPack::Graphics::Graphics(const GraphicsPackSpriteDefinition & _de
     is_visible(_definition.is_visible),
     position(_definition.position)
 {
+    sprite->scale(_definition.scale_factor.x, _definition.scale_factor.y);
 }
 
 std::optional<Sprite> GraphicsPack::Graphics::getSprite(const GraphicsPackSpriteDefinition & _definition)
@@ -72,7 +73,7 @@ struct GraphicsPack::Frame
     bool is_visible;
 };
 
-inline GraphicsPack::Frame::Frame(const GraphicsPackFrameDefinition & _definition) :
+GraphicsPack::Frame::Frame(const GraphicsPackFrameDefinition & _definition) :
     duration(_definition.duration),
     is_visible(_definition.is_visible)
 {

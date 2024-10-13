@@ -124,6 +124,7 @@ bool Sol2D::Lua::tryGetGraphicsPackSpriteDefinition(lua_State * _lua, int _idx, 
     {
         table.tryGetBoolean("isVisible", &_result.is_visible);
         table.tryGetPoint("position", _result.position);
+        table.tryGetPoint("scaleFactor", _result.scale_factor);
     }
     lua_pop(_lua, 1); // sprite
     return true;

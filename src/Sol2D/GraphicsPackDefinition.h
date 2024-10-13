@@ -51,20 +51,23 @@ struct GraphicsPackSpriteDefinition
     explicit GraphicsPackSpriteDefinition(std::shared_ptr<Sprite> _sprite) :
         sprite(_sprite),
         is_visible(true),
-        position{.0f, .0f}
+        position{.0f, .0f},
+        scale_factor{1.0f, 1.0f}
     {
     }
 
     GraphicsPackSpriteDefinition(std::shared_ptr<SpriteSheet> _sprite_sheet, size_t _sprite_index) :
         sprite(GraphicsPackSpriteSheetSpriteDefinition(_sprite_sheet, _sprite_index)),
         is_visible(true),
-        position{.0f, .0f}
+        position{.0f, .0f},
+        scale_factor{1.0f, 1.0f}
     {
     }
 
     std::variant<std::shared_ptr<Sprite>, GraphicsPackSpriteSheetSpriteDefinition> sprite;
     bool is_visible;
     Point position;
+    Point scale_factor;
 };
 
 struct GraphicsPackFrameDefinition

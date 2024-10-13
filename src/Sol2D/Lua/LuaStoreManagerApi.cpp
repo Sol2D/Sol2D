@@ -63,7 +63,10 @@ int luaApi_GetStore(lua_State * _lua)
     const char * key = lua_tostring(_lua, 2);
     luaL_argcheck(_lua, key != nullptr, 2, gc_message_store_key_expected);
     std::shared_ptr<Store> store = self->manager.getStore(key);
-    pushStoreApi(_lua, self->workspace, self->renderer, store);
+    if(store)
+        pushStoreApi(_lua, self->workspace, self->renderer, store);
+    else
+        lua_pushnil(_lua);
     return 1;
 }
 

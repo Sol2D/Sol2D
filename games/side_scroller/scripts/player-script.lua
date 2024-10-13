@@ -1,21 +1,12 @@
-local keys = require 'resources.keys'
+local resources = require 'resources'
+local Player = require 'player'
+local level_common = require 'level-common'
 
 local player = script.body
 local scene = script.scene
 
-local global_store = sol.stores:getStore(keys.stores.main)
-if not global_store then
-    error('Store ' .. keys.stores.level01 .. ' not found')
-end
-
-local sound_effect_armor = global_store:getSoundEffect(keys.soundEffects.armor)
-if not sound_effect_armor then
-    error('Sound effect ' .. keys.soundEffects.armor .. ' not found')
-end
-local sound_effect_swing = global_store:getSoundEffect(keys.soundEffects.swing)
-if not sound_effect_swing then
-    error('Sound effect ' .. keys.soundEffects.swing .. ' not found')
-end
+local sound_effect_armor = resources.getSoundEffect(resources.keys.soundEffects.armor)
+local sound_effect_swing = resources.getSoundEffect(resources.keys.soundEffects.swing)
 
 local start_point = scene:getTileMapObjectByName('start-position')
 if not start_point then
@@ -27,12 +18,12 @@ local contact_observer = script.arg.contactObserver
 
 local player_id = player:getId()
 local player_mass = player:getMass()
-local player_main_shape = player:getShape(keys.shapes.player.main)
+local player_main_shape = player:getShape(Player.keys.shapes.main)
 if not player_main_shape then
     error("Player's main shape not found")
 end
 
-local METERS_PER_PIXEL = script.arg.METERS_PER_PIXEL
+local METERS_PER_PIXEL = script.arg.metersPerPixel
 local WALK_VELOCITY = 5
 local JUMP_DELAY = 200
 
@@ -61,21 +52,21 @@ function state:setAction(direction, action)
         local graphic
         if action == Action.IDLE then
             if direction == Direction.LEFT then
-                graphic = keys.shapeGraphics.player.idleLeft
+                graphic = Player.keys.shapeGraphics.idleLeft
             else
-                graphic = keys.shapeGraphics.player.idleRight
+                graphic = Player.keys.shapeGraphics.idleRight
             end
         elseif action == Action.WALK then
             if direction == Direction.LEFT then
-                graphic = keys.shapeGraphics.player.walkLeft
+                graphic = Player.keys.shapeGraphics.walkLeft
             else
-                graphic = keys.shapeGraphics.player.walkRight
+                graphic = Player.keys.shapeGraphics.walkRight
             end
         elseif action == Action.JUMP then
             if direction == Direction.LEFT then
-                graphic = keys.shapeGraphics.player.jumpLeft
+                graphic = Player.keys.shapeGraphics.jumpLeft
             else
-                graphic = keys.shapeGraphics.player.jumpRight
+                graphic = Player.keys.shapeGraphics.jumpRight
             end
         end
         self.action = action
@@ -159,32 +150,32 @@ scene:subscribeToStep(function(time_passed)
     state:setAction(direction, action)
 end)
 
-contact_observer.setSensorBeginContactListener(player_id, function (sensor, visitor)
-    if sensor.bodyId == player_id and sensor.shapeKey == keys.shapes.player.bottomSensor then
+contact_observer.setSensorBeginContactListener(player_id, function(sensor, visitor)
+    if sensor.bodyId == player_id and sensor.shapeKey == Player.keys.shapes.bottomSensor then
         local visitor_body = scene:getBody(visitor.bodyId)
         if visitor_body then
             table.insert(
-            state.footings, {
-                bodyId = visitor.bodyId,
-                body = visitor_body,
-                shapeKey = visitor.shapeKey
-            })
+                state.footings, {
+                    bodyId = visitor.bodyId,
+                    body = visitor_body,
+                    shapeKey = visitor.shapeKey
+                })
             if state.inAir then
                 sound_effect_armor:play()
                 state.inAir = false
             end
             state.jumping = false
         end
-    elseif sensor.shapeKey == keys.shapes.water.main then
+    elseif sensor.shapeKey == level_common.keys.shapes.water then
         player:setPosition({
             x = start_point.position.x * METERS_PER_PIXEL,
             y = start_point.position.y * METERS_PER_PIXEL
-         })
+        })
     end
 end)
 
 contact_observer.setSensorEndContactListener(player_id, function(sensor, visitor)
-    if sensor.bodyId == player_id and sensor.shapeKey == keys.shapes.player.bottomSensor then
+    if sensor.bodyId == player_id and sensor.shapeKey == Player.keys.shapes.bottomSensor then
         for index, footing in ipairs(state.footings) do
             if footing.bodyId == visitor.bodyId and footing.shapeKey == visitor.shapeKey then
                 table.remove(state.footings, index)

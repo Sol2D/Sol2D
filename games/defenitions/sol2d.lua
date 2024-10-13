@@ -125,6 +125,7 @@ script = nil
 ---@class GraphicsPackSpriteDefinition
 ---@field isVisible boolean? default is true
 ---@field position Point?
+---@field scaleFactor Point?
 ---@field sprite sol.Sprite | { spriteSheet: sol.SpriteSheet, spriteIndex: integer }
 
 ---@class JointDefinition
@@ -225,7 +226,7 @@ local __store_manager
 function __store_manager:createStore(key) end
 
 ---@param key string
----@return sol.Store?
+---@return sol.Store | nil
 function __store_manager:getStore(key) end
 
 ---@param key string
@@ -640,7 +641,7 @@ function __store:createSprite(key) end
 
 ---@param key string
 ---@return sol.Sprite | nil
-function __store:getSprite(type, key) end
+function __store:getSprite(key) end
 
 ---@param key string
 ---@return boolean
@@ -685,7 +686,7 @@ function __store:freeSoundEffect(key) end
 
 ---@param key string
 ---@param file_path string
----@return sol.Music
+---@return sol.Music | nil
 function __store:createMusic(key, file_path) end
 
 ---@param key string
@@ -747,7 +748,7 @@ function __sprite:scale(scale_factor_x, scale_factor_y) end
 local __sprite_sheet
 
 ---@param path string
----@param options SpriteSheetOptions
+---@param options SpriteSheetOptions?
 ---@return boolean
 function __sprite_sheet:loadFromFile(path, options) end
 
