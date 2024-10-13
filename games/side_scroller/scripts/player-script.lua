@@ -5,8 +5,8 @@ local level_common = require 'level-common'
 local player = script.body
 local scene = script.scene
 
-local sound_effect_armor = resources.getSoundEffect(resources.keys.soundEffects.armor)
-local sound_effect_swing = resources.getSoundEffect(resources.keys.soundEffects.swing)
+local sound_effect_armor = resources.getSoundEffect(resources.keys.soundEffects.ARMOR)
+local sound_effect_swing = resources.getSoundEffect(resources.keys.soundEffects.SWING)
 
 local start_point = scene:getTileMapObjectByName('start-position')
 if not start_point then
@@ -18,7 +18,7 @@ local contact_observer = script.arg.contactObserver
 
 local player_id = player:getId()
 local player_mass = player:getMass()
-local player_main_shape = player:getShape(Player.keys.shapes.main)
+local player_main_shape = player:getShape(Player.keys.shapes.MAIN)
 if not player_main_shape then
     error("Player's main shape not found")
 end
@@ -52,21 +52,21 @@ function state:setAction(direction, action)
         local graphic
         if action == Action.IDLE then
             if direction == Direction.LEFT then
-                graphic = Player.keys.shapeGraphics.idleLeft
+                graphic = Player.keys.shapeGraphics.IDLE_LEFT
             else
-                graphic = Player.keys.shapeGraphics.idleRight
+                graphic = Player.keys.shapeGraphics.IDLE_RIGHT
             end
         elseif action == Action.WALK then
             if direction == Direction.LEFT then
-                graphic = Player.keys.shapeGraphics.walkLeft
+                graphic = Player.keys.shapeGraphics.WALK_LEFT
             else
-                graphic = Player.keys.shapeGraphics.walkRight
+                graphic = Player.keys.shapeGraphics.WALK_RIGT
             end
         elseif action == Action.JUMP then
             if direction == Direction.LEFT then
-                graphic = Player.keys.shapeGraphics.jumpLeft
+                graphic = Player.keys.shapeGraphics.JUMP_LEFT
             else
-                graphic = Player.keys.shapeGraphics.jumpRight
+                graphic = Player.keys.shapeGraphics.JUMP_RIGHT
             end
         end
         self.action = action
@@ -151,7 +151,7 @@ scene:subscribeToStep(function(time_passed)
 end)
 
 contact_observer.setSensorBeginContactListener(player_id, function(sensor, visitor)
-    if sensor.bodyId == player_id and sensor.shapeKey == Player.keys.shapes.bottomSensor then
+    if sensor.bodyId == player_id and sensor.shapeKey == Player.keys.shapes.BOTTOM_SENSOR then
         local visitor_body = scene:getBody(visitor.bodyId)
         if visitor_body then
             table.insert(
@@ -166,7 +166,7 @@ contact_observer.setSensorBeginContactListener(player_id, function(sensor, visit
             end
             state.jumping = false
         end
-    elseif sensor.shapeKey == level_common.keys.shapes.water then
+    elseif sensor.shapeKey == level_common.keys.shapes.WATER then
         player:setPosition({
             x = start_point.position.x * METERS_PER_PIXEL,
             y = start_point.position.y * METERS_PER_PIXEL
@@ -175,7 +175,7 @@ contact_observer.setSensorBeginContactListener(player_id, function(sensor, visit
 end)
 
 contact_observer.setSensorEndContactListener(player_id, function(sensor, visitor)
-    if sensor.bodyId == player_id and sensor.shapeKey == Player.keys.shapes.bottomSensor then
+    if sensor.bodyId == player_id and sensor.shapeKey == Player.keys.shapes.BOTTOM_SENSOR then
         for index, footing in ipairs(state.footings) do
             if footing.bodyId == visitor.bodyId and footing.shapeKey == visitor.shapeKey then
                 table.remove(state.footings, index)

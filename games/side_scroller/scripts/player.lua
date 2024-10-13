@@ -5,16 +5,16 @@ local SCALE_FACTOR = 0.25
 local module = {
     keys = {
         shapes = {
-            main = 'main',
-            bottomSensor = 'bottom-sensor'
+            MAIN = 'main',
+            BOTTOM_SENSOR = 'bottom-sensor'
         },
         shapeGraphics = {
-            idleLeft = 'ilde-left',
-            idleRight = 'ilde-right',
-            walkLeft = 'walk-left',
-            walkRight = 'walk-right',
-            jumpLeft = 'jump-left',
-            jumpRight = 'jump-right'
+            IDLE_LEFT = 'ilde-left',
+            IDLE_RIGHT = 'ilde-right',
+            WALK_LEFT = 'walk-left',
+            WALK_RIGT = 'walk-right',
+            JUMP_LEFT = 'jump-left',
+            JUMP_RIGHT = 'jump-right'
         }
     }
 }
@@ -43,12 +43,12 @@ local function addIdleAnimation(graphics_defs)
             }
         )
     end
-    graphics_defs[module.keys.shapeGraphics.idleLeft] = {
+    graphics_defs[module.keys.shapeGraphics.IDLE_LEFT] = {
         isFlippedHorizontally = true,
         position = animation_position,
         frames = frames
     }
-    graphics_defs[module.keys.shapeGraphics.idleRight] = {
+    graphics_defs[module.keys.shapeGraphics.IDLE_RIGHT] = {
         position = animation_position,
         frames = frames
     }
@@ -77,12 +77,12 @@ local function addWalkAnimations(graphics_defs)
             }
         )
     end
-    graphics_defs[module.keys.shapeGraphics.walkLeft] = {
+    graphics_defs[module.keys.shapeGraphics.WALK_LEFT] = {
         isFlippedHorizontally = true,
         position = animation_position,
         frames = frames
     }
-    graphics_defs[module.keys.shapeGraphics.walkRight] = {
+    graphics_defs[module.keys.shapeGraphics.WALK_RIGT] = {
         position = animation_position,
         frames = frames
     }
@@ -110,12 +110,12 @@ local function addJumpAnimations(graphics_defs)
             }
         )
     end
-    graphics_defs[module.keys.shapeGraphics.jumpLeft] = {
+    graphics_defs[module.keys.shapeGraphics.JUMP_LEFT] = {
         isFlippedHorizontally = true,
         position = animation_position,
         frames = frames
     }
-    graphics_defs[module.keys.shapeGraphics.jumpRight] = {
+    graphics_defs[module.keys.shapeGraphics.JUMP_RIGHT] = {
         position = animation_position,
         frames = frames
     }
@@ -143,7 +143,7 @@ local function getDefinition()
             fixedRotation = true
         },
         shapes = {
-            [module.keys.shapes.main] = {
+            [module.keys.shapes.MAIN] = {
                 type = sol.BodyShapeType.POLYGON,
                 physics = {
                     friction = 1.1,
@@ -152,7 +152,7 @@ local function getDefinition()
                 rect = hit_box,
                 graphics = {}
             },
-            [module.keys.shapes.bottomSensor] = {
+            [module.keys.shapes.BOTTOM_SENSOR] = {
                 type = sol.BodyShapeType.POLYGON,
                 physics = {
                     isSensor = true
@@ -166,9 +166,9 @@ local function getDefinition()
             }
         }
     }
-    addIdleAnimation(definition.shapes[module.keys.shapes.main].graphics)
-    addWalkAnimations(definition.shapes[module.keys.shapes.main].graphics)
-    addJumpAnimations(definition.shapes[module.keys.shapes.main].graphics)
+    addIdleAnimation(definition.shapes[module.keys.shapes.MAIN].graphics)
+    addWalkAnimations(definition.shapes[module.keys.shapes.MAIN].graphics)
+    addJumpAnimations(definition.shapes[module.keys.shapes.MAIN].graphics)
     return definition
 end
 
@@ -178,11 +178,11 @@ end
 ---@return sol.Body
 function module.new(scene, position, script_argument)
     local body = scene:createBody(position, getDefinition(), script_argument)
-    local main_shape = body:getShape(module.keys.shapes.main)
+    local main_shape = body:getShape(module.keys.shapes.MAIN)
     if main_shape then
-        main_shape:setCurrentGraphics(module.keys.shapeGraphics.idleRight)
+        main_shape:setCurrentGraphics(module.keys.shapeGraphics.IDLE_RIGHT)
     else
-        error('There is no shape ' .. module.keys.shapes.main .. ' in the player body')
+        error('There is no shape ' .. module.keys.shapes.MAIN .. ' in the player body')
     end
     return body
 end

@@ -4,8 +4,8 @@ local Platform = require 'platform'
 
 local keys = {
     shapes = {
-        oneWayPlatfrom = 'one-way-platform',
-        water = 'water'
+        ONE_WAY_PLATFORM = 'one-way-platform',
+        WATER = 'water'
     }
 }
 
@@ -60,7 +60,7 @@ local function createFlyingPlatforms(scene)
                 bodyType = sol.BodyType.KINEMATIC,
                 length = 3,
                 layer = layers.GROUND_2,
-                script = 'flying-platform.lua',
+                script = 'flying-platform-script.lua',
                 scriptArgument = { points = points }
             }
         )
@@ -73,16 +73,16 @@ local function preSolveContact(contact)
     local player_side = nil
     local platform_side = nil
     local sign = 0
-    if contact.sideA.shapeKey == Player.keys.shapes.main then
+    if contact.sideA.shapeKey == Player.keys.shapes.MAIN then
         player_side = contact.sideA
         platform_side = contact.sideB
         sign = 1
-    elseif contact.sideB.shapeKey == Player.keys.shapes.main then
+    elseif contact.sideB.shapeKey == Player.keys.shapes.MAIN then
         player_side = contact.sideB
         platform_side = contact.sideA
         sign = -1
     end
-    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= keys.shapes.oneWayPlatfrom then
+    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= keys.shapes.ONE_WAY_PLATFORM then
         return true
     end
 
@@ -172,7 +172,7 @@ function level:run(on_finish)
     scene:createBodiesFromMapObjects(
         'one-way-platfrom',
         {
-            shapeKey = keys.shapes.oneWayPlatfrom,
+            shapeKey = keys.shapes.ONE_WAY_PLATFORM,
             shapePhysics = {
                 isPreSolveEnabled = true
             }
@@ -181,7 +181,7 @@ function level:run(on_finish)
     scene:createBodiesFromMapObjects(
         'water',
         {
-            shapeKey = keys.shapes.water,
+            shapeKey = keys.shapes.WATER,
             shapePhysics = {
                 isSensor = true
             }

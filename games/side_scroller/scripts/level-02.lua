@@ -48,12 +48,12 @@ function level_02:init(scene)
 
     local result = {}
     function result.onSensorBeginContact(contact)
-        if contact.sensor.shapeKey == Button.keys.shapes.sensor and contact.visitor.shapeKey == Button.keys.shapes.cap then
+        if contact.sensor.shapeKey == Button.keys.shapes.SENSOR and contact.visitor.shapeKey == Button.keys.shapes.CAP then
             scene:destroyJoint(hook_joint)
         end
     end
     function result.onSensorEndContact(contact)
-        if contact.sensor.shapeKey == Button.keys.shapes.sensor and contact.visitor.shapeKey == Button.keys.shapes.cap then
+        if contact.sensor.shapeKey == Button.keys.shapes.SENSOR and contact.visitor.shapeKey == Button.keys.shapes.CAP then
             hook_joint = scene:createWeldJoint({
                 bodyA = hook,
                 bodyB = platform

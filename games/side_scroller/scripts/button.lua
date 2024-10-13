@@ -2,13 +2,13 @@ local resources = require 'resources'
 
 local keys = {
     shapes = {
-        cap = 'cap',
-        hull = 'hull',
-        sensor = 'sensor'
+        CAP = 'cap',
+        HULL = 'hull',
+        SENSOR = 'sensor'
     },
     shapeGraphics = {
-        cap = 'cap',
-        hull = 'hull'
+        CAP = 'cap',
+        HULL = 'hull'
     }
 }
 
@@ -26,20 +26,20 @@ function module.new(scene, position, options)
             type = sol.BodyType.DYNAMIC,
             physics = { fixedRotation = true },
             shapes = {
-                [keys.shapes.cap] = {
+                [keys.shapes.CAP] = {
                     type = sol.BodyShapeType.POLYGON,
                     physics = {
                         density = 100
                     },
                     rect = { x = 0, y = 0, w = 119, h = 26 },
                     graphics = {
-                        [keys.shapeGraphics.cap] = {
+                        [keys.shapeGraphics.CAP] = {
                             animationIterations = 0,
                             frames = {
                                 {
                                     sprites = {
                                         {
-                                            sprite = resources.getSprite(resources.keys.sprites.button.cap)
+                                            sprite = resources.getSprite(resources.keys.sprites.button.CAP)
                                         }
                                     }
                                 }
@@ -55,17 +55,17 @@ function module.new(scene, position, options)
         {
             type = sol.BodyType.STATIC,
             shapes = {
-                [keys.shapes.hull] = {
+                [keys.shapes.HULL] = {
                     type = sol.BodyShapeType.POLYGON,
                     rect = { x = 0, y = 0, w = 129, h = 40 },
                     graphics = {
-                        [keys.shapeGraphics.hull] = {
+                        [keys.shapeGraphics.HULL] = {
                             animationIterations = 0,
                             frames = {
                                 {
                                     sprites = {
                                         {
-                                            sprite = resources.getSprite(resources.keys.sprites.button.hull)
+                                            sprite = resources.getSprite(resources.keys.sprites.button.HULL)
                                         }
                                     }
                                 }
@@ -81,7 +81,7 @@ function module.new(scene, position, options)
         {
             type = sol.BodyType.STATIC,
             shapes = {
-                [keys.shapes.sensor] = {
+                [keys.shapes.SENSOR] = {
                     type = sol.BodyShapeType.POLYGON,
                     rect = { x = 0, y = 0, w = 99, h = 5 },
                     physics = {
@@ -91,13 +91,13 @@ function module.new(scene, position, options)
             }
         }
     )
-    local button_shape = button:getShape(keys.shapes.cap)
+    local button_shape = button:getShape(keys.shapes.CAP)
     if button_shape then
-        button_shape:setCurrentGraphics(keys.shapeGraphics.cap)
+        button_shape:setCurrentGraphics(keys.shapeGraphics.CAP)
     end
-    local hull_shape = hull:getShape(keys.shapes.hull)
+    local hull_shape = hull:getShape(keys.shapes.HULL)
     if hull_shape then
-        hull_shape:setCurrentGraphics(keys.shapeGraphics.hull)
+        hull_shape:setCurrentGraphics(keys.shapeGraphics.HULL)
     end
     scene:createPrismaticJoint({
         bodyA = hull,

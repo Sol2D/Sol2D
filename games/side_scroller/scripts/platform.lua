@@ -2,17 +2,17 @@ local resources = require 'resources'
 
 local keys = {
     shapes = {
-        oneWayPlatfrom = 'one-way-platform'
+        ONE_WAY_PLATFORM = 'one-way-platform'
     },
     shapeGraphics = {
-        platform = 'platform'
+        PLATFORM = 'platform'
     }
 }
 
 ---@class PlatformCreationOptions
 ---@field length integer? default = 3
 ---@field bodyType integer? default sol.BodyType.STATIC
----@field shapeKey string? default keys.shapes.oneWayPlatfrom.main
+---@field shapeKey string? default keys.shapes.ONE_WAY_PLATFORM
 ---@field script string?
 ---@field scriptArgument any?
 ---@field layer string?
@@ -34,10 +34,10 @@ local function createPlatform(scene, position, options)
         options.bodyType = sol.BodyType.STATIC
     end
     if not options.shapeKey then
-        options.shapeKey = keys.shapes.oneWayPlatfrom
+        options.shapeKey = keys.shapes.ONE_WAY_PLATFORM
     end
     local SPRITE_WIDTH = 128
-    local sprite_sheet = resources.getSpriteSheet(resources.keys.spriteSheets.platform)
+    local sprite_sheet = resources.getSpriteSheet(resources.keys.spriteSheets.PLATFORM)
     local sprites = {
         {
             sprite = { spriteSheet = sprite_sheet, spriteIndex = 0 },
@@ -75,7 +75,7 @@ local function createPlatform(scene, position, options)
                     },
                     rect = { x = 0, y = 0, w = options.length * SPRITE_WIDTH, h = 64 },
                     graphics = {
-                        [keys.shapeGraphics.platform] = {
+                        [keys.shapeGraphics.PLATFORM] = {
                             animationIterations = 0,
                             frames = { { sprites = sprites } }
                         }
@@ -87,7 +87,7 @@ local function createPlatform(scene, position, options)
     )
     local shape = body:getShape(options.shapeKey)
     if shape then
-        shape:setCurrentGraphics(keys.shapeGraphics.platform)
+        shape:setCurrentGraphics(keys.shapeGraphics.PLATFORM)
     end
     if options.layer then
         body:setLayer(options.layer)

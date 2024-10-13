@@ -1,10 +1,9 @@
 local keys = {
     sprites = {
         button = {
-            cap = 'cap:button',
-            hull = 'hull:button',
+            CAP = 'cap:button',
+            HULL = 'hull:button',
         },
-        crate = 'crate',
         knight = {
             idle = {
                 'idle-1:knight',
@@ -48,11 +47,11 @@ local keys = {
         }
     },
     spriteSheets = {
-        platform = 'platform'
+        PLATFORM = 'platform'
     },
     soundEffects = {
-        armor = 'armor',
-        swing = 'swing'
+        ARMOR = 'armor',
+        SWING = 'swing'
     }
 }
 
@@ -90,9 +89,8 @@ end
 
 ---@param store sol.Store
 local function load(store)
-    loadSprite(store, keys.sprites.button.cap, 'sprites/button/button.png')
-    loadSprite(store, keys.sprites.button.hull, 'sprites/button/hull.png')
-    loadSprite(store, keys.sprites.crate, 'sprites/crate/crate.png')
+    loadSprite(store, keys.sprites.button.CAP, 'sprites/button/button.png')
+    loadSprite(store, keys.sprites.button.HULL, 'sprites/button/hull.png')
     for index, key in ipairs(keys.sprites.knight.idle) do
         loadSprite(
             store,
@@ -120,13 +118,13 @@ local function load(store)
 
     loadSpriteSheet(
         store,
-        keys.spriteSheets.platform,
+        keys.spriteSheets.PLATFORM,
         'sprites/platform/platform.png',
         { colCount = 3, rowCount = 1, spriteWidth = 128, spriteHeight = 64 }
     )
 
-    loadSoundEffect(store, keys.soundEffects.armor, 'sounds/sound-effects/rpg-sound-pack/inventory/armor-light.wav')
-    loadSoundEffect(store, keys.soundEffects.swing, 'sounds/sound-effects/rpg-sound-pack/battle/swing.wav')
+    loadSoundEffect(store, keys.soundEffects.ARMOR, 'sounds/sound-effects/rpg-sound-pack/inventory/armor-light.wav')
+    loadSoundEffect(store, keys.soundEffects.SWING, 'sounds/sound-effects/rpg-sound-pack/battle/swing.wav')
 end
 
 local function construct()
