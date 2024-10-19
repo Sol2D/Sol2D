@@ -16,10 +16,12 @@
 
 #pragma once
 
+#include <Sol2D/World/Body.h>
 #include <Sol2D/World/BodyDefinition.h>
 #include <Sol2D/World/JointDefinition.h>
 #include <Sol2D/World/BodyOptions.h>
 #include <Sol2D/World/Contact.h>
+#include <Sol2D/World/ActionQueue.h>
 #include <Sol2D/World/Box2dDebugDraw.h>
 #include <Sol2D/Tiles/TileMap.h>
 #include <Sol2D/Utils/Observable.h>
@@ -27,10 +29,8 @@
 #include <Sol2D/Utils/SequentialId.h>
 #include <Sol2D/Canvas.h>
 #include <Sol2D/Workspace.h>
-#include <boost/container/slist.hpp>
 #include <filesystem>
 #include <unordered_set>
-#include <functional>
 
 namespace Sol2D::World {
 
@@ -76,6 +76,7 @@ public:
     void setGravity(const Point & _vector);
     uint64_t createBody(const Point & _position, const BodyDefinition & _definition);
     void createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options);
+    Body * getBody(uint64_t _body_id);
     bool destroyBody(uint64_t _body_id);
     bool setFollowedBody(uint64_t _body_id);
     void resetFollowedBody();
@@ -98,7 +99,7 @@ public:
     uint64_t createJoint(const PrismaticJointDefinition & _definition);
     uint64_t createJoint(const WeldJointDefinition & _definition);
     uint64_t createJoint(const WheelJointDefinition & _definition);
-    bool destroyJoing(uint64_t _joint_id);
+    bool destroyJoint(uint64_t _joint_id);
     bool loadTileMap(const std::filesystem::path & _file_path);
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(const std::string & _name) const;
@@ -106,13 +107,6 @@ public:
     void step(const StepState & _state) override;
     bool doesBodyExist(uint64_t _body_id) const;
     bool doesBodyShapeExist(uint64_t _body_id, const Utils::PreHashedKey<std::string> & _shape_key) const;
-    void applyForceToBodyCenter(uint64_t _body_id, const Point & _force);
-    void applyImpulseToBodyCenter(uint64_t _body_id, const Point & _impulse);
-    std::optional<Point> getBodyLinearVelocity(uint64_t _body_id) const;
-    bool setBodyLinearVelocity(uint64_t _body_id, const Point & _velocity) const;
-    std::optional<float> getBodyMass(uint64_t _body_id) const;
-    void setBodyPosition(uint64_t _body_id, const Point & _position);
-    std::optional<Point> getBodyPosition(uint64_t _body_id) const;
     std::optional<std::vector<Point> > findPath(
         uint64_t _body_id,
         const Point & _destination,
@@ -123,9 +117,7 @@ private:
     float physicalToGraphical(float _value);
     float graphicalToPhysical(float _value);
     void deinitializeTileMap();
-    void destroyBody(b2BodyId _body_id);
     static b2BodyType mapBodyType(BodyType _type);
-    void executeDefers();
     static bool box2dPreSolveContact(
         b2ShapeId _shape_id_a,
         b2ShapeId _shape_id_b,
@@ -138,7 +130,7 @@ private:
         const Tiles::TileMapLayerContainer & _container,
         std::unordered_set<uint64_t> & _bodies_to_render,
         std::chrono::milliseconds _time_passed);
-    b2BodyId findBody(uint64_t _body_id) const;
+    b2BodyId findBox2dBody(uint64_t _body_id) const;
     b2JointId findJoint(uint64_t _joint_id) const;
     void drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed);
     void drawObjectLayer(const Tiles::TileMapObjectLayer & _layer);
@@ -155,7 +147,6 @@ private:
     Point m_world_offset;
     b2WorldId m_b2_world_id;
     float m_meters_per_pixel;
-    Utils::SequentialId<uint64_t> m_bodies_sequential_id;
     std::unordered_map<uint64_t, b2BodyId> m_bodies;
     Utils::SequentialId<uint64_t> m_joints_sequential_id;
     std::unordered_map<uint64_t, b2JointId> m_joints;
@@ -163,7 +154,7 @@ private:
     std::unique_ptr<Tiles::TileHeap> m_tile_heap_ptr;
     std::unique_ptr<Tiles::ObjectHeap> m_object_heap_ptr;
     std::unique_ptr<Tiles::TileMap> m_tile_map_ptr;
-    boost::container::slist<std::function<void()>> m_defers;
+    ActionAccumulator m_defers;
     Box2dDebugDraw * mp_box2d_debug_draw;
 };
 

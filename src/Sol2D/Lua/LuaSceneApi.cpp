@@ -607,7 +607,7 @@ int luaApi_DestroyJoint(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_joint_id_expected);
     uint64_t id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
-    lua_pushboolean(_lua, self->getScene(_lua)->destroyJoing(id));
+    lua_pushboolean(_lua, self->getScene(_lua)->destroyJoint(id));
     return 1;
 }
 

@@ -51,161 +51,15 @@ void initShapePhysics(b2ShapeDef & _b2_shape_def, const BodyShapePhysicsDefiniti
         _b2_shape_def.friction = _physics.friction.value();
 }
 
-class BodyShape final
+struct Joint
 {
-    S2_DISABLE_COPY_AND_MOVE(BodyShape)
-
-public:
-    BodyShape(const std::string & _key, std::optional<uint32_t> _tile_map_object_id);
-    ~BodyShape();
-    const std::string & getKey() const;
-    const std::optional<uint32_t> getTileMapObjectId() const;
-    void addGraphics(
-        SDL_Renderer & _renderer,
-        const PreHashedKey<std::string> & _key,
-        const GraphicsPackDefinition & _definition);
-    bool setCurrentGraphics(const PreHashedKey<std::string> & _key);
-    GraphicsPack * getCurrentGraphics();
-    GraphicsPack * getGraphics(const PreHashedKey<std::string> & _key);
-    bool flipGraphics(const PreHashedKey<std::string> & _key, bool _flip_horizontally, bool _flip_vertically);
-
-private:
-    const std::string m_key;
-    const std::optional<uint32_t> m_tile_map_object_id;
-    PreHashedMap<std::string, GraphicsPack *> m_graphics;
-    GraphicsPack * mp_current_graphic;
-};
-
-inline BodyShape::BodyShape(const std::string & _key, std::optional<uint32_t> _tile_map_object_id) :
-    m_key(_key),
-    m_tile_map_object_id(_tile_map_object_id),
-    mp_current_graphic(nullptr)
-{
-}
-
-inline BodyShape::~BodyShape()
-{
-    for(const auto & pair : m_graphics)
-        delete pair.second;
-}
-
-inline const std::string & BodyShape::getKey() const
-{
-    return m_key;
-}
-
-inline const std::optional<uint32_t> BodyShape::getTileMapObjectId() const
-{
-    return m_tile_map_object_id;
-}
-
-inline void BodyShape::addGraphics(
-    SDL_Renderer & _renderer,
-    const PreHashedKey<std::string> & _key,
-    const GraphicsPackDefinition & _definition)
-{
-    auto it = m_graphics.find(_key);
-    if(it != m_graphics.end())
-        delete it->second;
-    m_graphics[_key] = new GraphicsPack(_renderer, _definition);
-}
-
-inline bool BodyShape::setCurrentGraphics(const PreHashedKey<std::string> & _key)
-{
-    GraphicsPack * graphics = getGraphics(_key);
-    if(graphics)
+    explicit Joint(uint64_t _id) :
+        id(_id)
     {
-        mp_current_graphic = graphics;
-        return true;
     }
-    return false;
-}
 
-inline GraphicsPack * BodyShape::getGraphics(const PreHashedKey<std::string> & _key)
-{
-    auto it = m_graphics.find(_key);
-    return it == m_graphics.end() ? nullptr : it->second;
-}
-
-inline GraphicsPack * BodyShape::getCurrentGraphics()
-{
-    return mp_current_graphic;
-}
-
-inline bool BodyShape::flipGraphics(
-    const PreHashedKey<std::string> & _key,
-    bool _flip_horizontally,
-    bool _flip_vertically)
-{
-    auto it = m_graphics.find(_key);
-    if(it == m_graphics.end())
-        return false;
-    it->second->setFilippedHorizontally(_flip_horizontally);
-    it->second->setFilippedVertically(_flip_vertically);
-    return true;
-}
-
-class Body final
-{
-    S2_DISABLE_COPY_AND_MOVE(Body)
-
-public:
-    explicit Body(uint64_t _id);
-    ~Body();
-    uint64_t getId() const;
-    void setLayer(const std::string & _layer);
-    const std::optional<std::string> & getLayer() const;
-    BodyShape & createShape(
-        const std::string & _key,
-        std::optional<uint32_t> _tile_map_object_id = std::nullopt);
-    BodyShape * findShape(const PreHashedKey<std::string> & _key);
-
-private:
-    const uint64_t mc_id;
-    std::optional<std::string> m_layer;
-    PreHashedMap<std::string, BodyShape *> m_shapes;
+    const uint64_t id;
 };
-
-inline Body::Body(uint64_t _id) :
-    mc_id(_id)
-{
-}
-
-inline Body::~Body()
-{
-    for(const auto & shape : m_shapes)
-        delete shape.second;
-}
-
-inline uint64_t Body::getId() const
-{
-    return mc_id;
-}
-
-inline void Body::setLayer(const std::string & _layer)
-{
-    m_layer = _layer;
-}
-
-inline const std::optional<std::string> & Body::getLayer() const
-{
-    return m_layer;
-}
-
-inline BodyShape & Body::createShape(
-    const std::string & _key,
-    std::optional<uint32_t> _tile_map_object_id /*= std::nullopt*/)
-{
-    BodyShape * shape = new BodyShape(_key, _tile_map_object_id);
-    m_shapes.insert(std::make_pair(_key, shape));
-    return *shape;
-}
-
-inline BodyShape * Body::findShape(const PreHashedKey<std::string> & _key)
-{
-    auto it = m_shapes.find(_key);
-    return it == m_shapes.end() ? nullptr : it->second;
-}
 
 inline Body * getUserData(b2BodyId _body_id)
 {
@@ -215,6 +69,11 @@ inline Body * getUserData(b2BodyId _body_id)
 inline BodyShape * getUserData(b2ShapeId _shape_id)
 {
     return static_cast<BodyShape *>(b2Shape_GetUserData(_shape_id));
+}
+
+inline Joint * getUserData(b2JointId _joint_id)
+{
+    return static_cast<Joint *>(b2Joint_GetUserData(_joint_id));
 }
 
 } // namespace
@@ -370,9 +229,10 @@ Scene::~Scene()
 
 void Scene::deinitializeTileMap()
 {
-    for(auto & pair : m_bodies)
-        destroyBody(pair.second);
+    for(auto it = m_bodies.begin(); it != m_bodies.end();)
+        destroyBody(it->first);
     m_bodies.clear();
+    m_joints.clear();
     m_tile_heap_ptr.reset();
     m_object_heap_ptr.reset();
     m_tile_map_ptr.reset();
@@ -381,36 +241,34 @@ void Scene::deinitializeTileMap()
 
 void Scene::setGravity(const Point & _vector)
 {
-    m_defers.push_front([this, _vector]() {
+    m_defers.getQueue().enqueueAction([this, _vector]() {
         b2World_SetGravity(m_b2_world_id, *_vector.toBox2DPtr()); // TODO: scale factor?
     });
 }
 
 uint64_t Scene::createBody(const Point & _position, const BodyDefinition & _definition)
 {
-    Body * body = new Body(m_bodies_sequential_id.getNext());
     b2BodyDef b2_body_def = b2DefaultBodyDef();
     b2_body_def.type = mapBodyType(_definition.type);
     b2_body_def.position = { .x = _position.x, .y = _position.y };
     initBodyPhysics(b2_body_def, _definition.physics);
     b2BodyId b2_body_id = b2CreateBody(m_b2_world_id, &b2_body_def);
+    Body * body = new Body(b2_body_id, m_defers.getQueue());
     b2Body_SetUserData(b2_body_id, body);
-    m_bodies.insert(std::make_pair(body->getId(), b2_body_id));
+    m_bodies.insert(std::make_pair(body->getGid(), b2_body_id));
     for(const auto & shape_kv : _definition.shapes)
     {
         BodyShapeCreator visitor(*this, *body, b2_body_id, shape_kv.first);
         std::visit(visitor, shape_kv.second);
     }
-    return body->getId();
+    return body->getGid();
 }
 
 void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options)
 {
     b2BodyType body_type = mapBodyType(_body_options.type);
-
     m_object_heap_ptr->forEachObject([&](const TileMapObject & __map_object) {
         if(__map_object.getClass() != _class) return;
-        Body * body = new Body(m_bodies_sequential_id.getNext());
         b2BodyDef b2_body_def = b2DefaultBodyDef();
         b2_body_def.type = body_type;
         initBodyPhysics(b2_body_def, _body_options.body_physics);
@@ -419,9 +277,11 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
             .x = graphicalToPhysical(__map_object.getX()),
             .y = graphicalToPhysical(__map_object.getY())
         };
-        b2_body_def.userData = body;
         b2BodyId b2_body_id = b2CreateBody(m_b2_world_id, &b2_body_def);
-        m_bodies.insert(std::make_pair(body->getId(), b2_body_id));
+        Body * body = new Body(b2_body_id, m_defers.getQueue());
+        b2Body_SetUserData(b2_body_id, body);
+
+        m_bodies.insert(std::make_pair(body->getGid(), b2_body_id));
         b2ShapeDef b2_shape_def = b2DefaultShapeDef();
         initShapePhysics(b2_shape_def, _body_options.shape_physics);
 
@@ -469,24 +329,31 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
 
 bool Scene::destroyBody(uint64_t _body_id)
 {
-    b2BodyId b2_body_id = findBody(_body_id);
+    b2BodyId b2_body_id = findBox2dBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
-        return false;
+         return false;
     if(B2_ID_EQUALS(m_followed_body_id, b2_body_id))
         m_followed_body_id = b2_nullBodyId;
+    if(int joints_count = b2Body_GetJointCount(b2_body_id))
+    {
+        std::vector<b2JointId> b2_joints(joints_count);
+        b2Body_GetJoints(b2_body_id, b2_joints.data(), joints_count);
+        for(const b2JointId & b2_joint_id : b2_joints)
+            destroyJoint(getUserData(b2_joint_id)->id);
+    }
+    delete getUserData(b2_body_id);
+    b2DestroyBody(b2_body_id);
     m_bodies.erase(_body_id);
-    destroyBody(b2_body_id);
     return true;
 }
 
-void Scene::destroyBody(b2BodyId _body_id)
+Body * Scene::getBody(uint64_t _body_id)
 {
-    Body * body = getUserData(_body_id);
-    b2DestroyBody(_body_id);
-    delete body;
+    auto it = m_bodies.find(_body_id);
+    return it == m_bodies.end() ? nullptr : getUserData(it->second);
 }
 
-b2BodyId Scene::findBody(uint64_t _body_id) const
+b2BodyId Scene::findBox2dBody(uint64_t _body_id) const
 {
     auto it = m_bodies.find(_body_id);
     return it == m_bodies.end() ? b2_nullBodyId : it->second;
@@ -507,7 +374,7 @@ b2BodyType Scene::mapBodyType(BodyType _type)
 
 bool Scene::setFollowedBody(uint64_t _body_id)
 {
-    m_followed_body_id = findBody(_body_id);
+    m_followed_body_id = findBox2dBody(_body_id);
     return B2_IS_NON_NULL(m_followed_body_id);
 }
 
@@ -518,7 +385,7 @@ void Scene::resetFollowedBody()
 
 bool Scene::setBodyLayer(uint64_t _body_id, const std::string & _layer)
 {
-    b2BodyId b2_body_id = findBody(_body_id);
+    b2BodyId b2_body_id = findBox2dBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
         return false;
     getUserData(b2_body_id)->setLayer(_layer);
@@ -530,7 +397,7 @@ GraphicsPack * Scene::getBodyShapeGraphicsPack(
     const PreHashedKey<std::string> & _shape_key,
     const PreHashedKey<std::string> & _graphics_key)
 {
-    b2BodyId b2_body_id = findBody(_body_id);
+    b2BodyId b2_body_id = findBox2dBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
         return nullptr;
     BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
@@ -544,7 +411,7 @@ bool Scene::setBodyShapeCurrentGraphics(
     const PreHashedKey<std::string> & _shape_key,
     const PreHashedKey<std::string> & _graphic_key)
 {
-    b2BodyId b2_body_id = findBody(_body_id);
+    b2BodyId b2_body_id = findBox2dBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
         return false;
     BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
@@ -560,7 +427,7 @@ bool Scene::flipBodyShapeGraphics(
     bool _flip_horizontally,
     bool _flip_vertically)
 {
-    b2BodyId b2_body_id = findBody(_body_id);
+    b2BodyId b2_body_id = findBox2dBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
         return false;
     BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
@@ -572,8 +439,8 @@ bool Scene::flipBodyShapeGraphics(
 uint64_t Scene::createJoint(const DistanceJointDefenition & _definition)
 {
     b2DistanceJointDef b2_joint_def = b2DefaultDistanceJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    b2_joint_def.bodyIdA = findBox2dBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBox2dBody(_definition.body_b_id);
     if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
         return 0; // FIXEM: null?
     b2_joint_def.enableSpring = _definition.is_spring_enabled;
@@ -610,17 +477,18 @@ uint64_t Scene::createJoint(const DistanceJointDefenition & _definition)
         b2_joint_def.motorSpeed = _definition.motor_speed.value();
     if(_definition.length)
         b2_joint_def.length = graphicalToPhysical(_definition.length.value());
+    Joint * joint = new Joint(m_joints_sequential_id.getNext());
+    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateDistanceJoint(m_b2_world_id, &b2_joint_def);
-    uint64_t id = m_joints_sequential_id.getNext();
-    m_joints.insert(std::make_pair(id, b2_joint_id));
-    return id;
+    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
+    return joint->id;
 }
 
 uint64_t Scene::createJoint(const MotorJointDefinition & _definition)
 {
     b2MotorJointDef b2_joint_def = b2DefaultMotorJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    b2_joint_def.bodyIdA = findBox2dBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBox2dBody(_definition.body_b_id);
     if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
         return 0; // FIXEM: null?
     b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
@@ -640,17 +508,18 @@ uint64_t Scene::createJoint(const MotorJointDefinition & _definition)
         b2_joint_def.maxTorque = _definition.max_torque.value();
     if(_definition.correction_factor)
         b2_joint_def.correctionFactor = _definition.correction_factor.value();
+    Joint * joint = new Joint(m_joints_sequential_id.getNext());
+    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateMotorJoint(m_b2_world_id, &b2_joint_def);
-    uint64_t id = m_joints_sequential_id.getNext();
-    m_joints.insert(std::make_pair(id, b2_joint_id));
-    return id;
+    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
+    return joint->id;
 }
 
 uint64_t Scene::createJoint(const MouseJointDefinition & _definition)
 {
     b2MouseJointDef b2_joint_def = b2DefaultMouseJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    b2_joint_def.bodyIdA = findBox2dBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBox2dBody(_definition.body_b_id);
     if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
         return 0; // FIXEM: null?
     b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
@@ -668,17 +537,18 @@ uint64_t Scene::createJoint(const MouseJointDefinition & _definition)
         b2_joint_def.maxForce = _definition.max_force.value();
     if(_definition.damping_ratio)
         b2_joint_def.dampingRatio = _definition.damping_ratio.value();
+    Joint * joint = new Joint(m_joints_sequential_id.getNext());
+    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateMouseJoint(m_b2_world_id, &b2_joint_def);
-    uint64_t id = m_joints_sequential_id.getNext();
-    m_joints.insert(std::make_pair(id, b2_joint_id));
-    return id;
+    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
+    return joint->id;
 }
 
 uint64_t Scene::createJoint(const PrismaticJointDefinition & _definition)
 {
     b2PrismaticJointDef b2_joint_def = b2DefaultPrismaticJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    b2_joint_def.bodyIdA = findBox2dBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBox2dBody(_definition.body_b_id);
     if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
         return 0; // FIXEM: null?
     b2_joint_def.enableSpring = _definition.is_spring_enabled;
@@ -723,17 +593,18 @@ uint64_t Scene::createJoint(const PrismaticJointDefinition & _definition)
         b2_joint_def.maxMotorForce = _definition.max_motor_force.value();
     if(_definition.motor_speed)
         b2_joint_def.motorSpeed = _definition.motor_speed.value();
+    Joint * joint = new Joint(m_joints_sequential_id.getNext());
+    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreatePrismaticJoint(m_b2_world_id, &b2_joint_def);
-    uint64_t id = m_joints_sequential_id.getNext();
-    m_joints.insert(std::make_pair(id, b2_joint_id));
-    return id;
+    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
+    return joint->id;
 }
 
 uint64_t Scene::createJoint(const WeldJointDefinition & _definition)
 {
     b2WeldJointDef b2_joint_def = b2DefaultWeldJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    b2_joint_def.bodyIdA = findBox2dBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBox2dBody(_definition.body_b_id);
     if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
         return 0; // FIXEM: null?
     b2_joint_def.collideConnected = _definition.is_collide_connected_enabled;
@@ -763,17 +634,18 @@ uint64_t Scene::createJoint(const WeldJointDefinition & _definition)
         b2_joint_def.linearDampingRatio = _definition.linear_damping_ratio.value();
     if(_definition.angular_damping_ratio)
         b2_joint_def.angularDampingRatio = _definition.angular_damping_ratio.value();
+    Joint * joint = new Joint(m_joints_sequential_id.getNext());
+    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateWeldJoint(m_b2_world_id, &b2_joint_def);
-    uint64_t id = m_joints_sequential_id.getNext();
-    m_joints.insert(std::make_pair(id, b2_joint_id));
-    return id;
+    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
+    return joint->id;
 }
 
 uint64_t Scene::createJoint(const WheelJointDefinition & _definition)
 {
     b2WheelJointDef b2_joint_def = b2DefaultWheelJointDef();
-    b2_joint_def.bodyIdA = findBody(_definition.body_a_id);
-    b2_joint_def.bodyIdB = findBody(_definition.body_b_id);
+    b2_joint_def.bodyIdA = findBox2dBody(_definition.body_a_id);
+    b2_joint_def.bodyIdB = findBox2dBody(_definition.body_b_id);
     if(B2_IS_NULL(b2_joint_def.bodyIdA) | B2_IS_NULL(b2_joint_def.bodyIdB))
         return 0; // FIXEM: null?
     b2_joint_def.enableSpring = _definition.is_spring_enabled;
@@ -810,20 +682,22 @@ uint64_t Scene::createJoint(const WheelJointDefinition & _definition)
         b2_joint_def.upperTranslation = graphicalToPhysical(_definition.upper_translation.value());
     if(_definition.max_motor_torque)
         b2_joint_def.maxMotorTorque = _definition.max_motor_torque.value();
+    Joint * joint = new Joint(m_joints_sequential_id.getNext());
+    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateWheelJoint(m_b2_world_id, &b2_joint_def);
-    uint64_t id = m_joints_sequential_id.getNext();
-    m_joints.insert(std::make_pair(id, b2_joint_id));
-    return id;
+    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
+    return joint->id;
 }
 
-bool Scene::destroyJoing(uint64_t _joint_id)
+bool Scene::destroyJoint(uint64_t _joint_id)
 {
-    auto it = m_joints.find(_joint_id);
-    if(it == m_joints.end())
+    b2JointId b2_joint_id = findJoint(_joint_id);
+    if(B2_IS_NULL(b2_joint_id))
         return false;
-    if(B2_IS_NON_NULL(it->second))
-        b2DestroyJoint(it->second);
-    m_joints.erase(_joint_id);
+    const Joint * joint = getUserData(b2_joint_id);
+    m_joints.erase(joint->id);
+    b2DestroyJoint(b2_joint_id);
+    delete joint;
     return true;
 }
 
@@ -852,7 +726,7 @@ void Scene::step(const StepState & _state)
     {
         return;
     }
-    executeDefers();
+    m_defers.executeActions();
     b2World_Step(m_b2_world_id, _state.time_passed.count() / 1000.0f, 4); // TODO: stable rate (1.0f / 60.0f), all from user settings
     handleBox2dContactEvents();
     syncWorldWithFollowedBody();
@@ -871,16 +745,6 @@ void Scene::step(const StepState & _state)
         mp_box2d_debug_draw->draw();
 
     Observable<StepObserver>::callObservers(&StepObserver::onStepComplete, _state);
-}
-
-void Scene::executeDefers()
-{
-    if(!m_defers.empty())
-    {
-        for(const auto & action : m_defers)
-            action();
-        m_defers.clear();
-    }
 }
 
 bool Scene::box2dPreSolveContact(b2ShapeId _shape_id_a, b2ShapeId _shape_id_b, b2Manifold * _manifold, void * _context)
@@ -949,7 +813,7 @@ bool Scene::tryGetContactSide(b2ShapeId _shape_id, ContactSide & _contact_side)
     const Body * body = getUserData(b2_body_id);
     if(shape && body)
     {
-        _contact_side.body_id = body->getId();
+        _contact_side.body_id = body->getGid();
         _contact_side.shape_key = shape->getKey();
         _contact_side.tile_map_object_id = shape->getTileMapObjectId();
         return true;
@@ -1224,13 +1088,13 @@ void Scene::drawImageLayer(const TileMapImageLayer & _layer)
 
 bool Scene::doesBodyExist(uint64_t _body_id) const
 {
-    b2BodyId b2_body_id = findBody(_body_id);
+    b2BodyId b2_body_id = findBox2dBody(_body_id);
     return B2_IS_NON_NULL(b2_body_id);
 }
 
 bool Scene::doesBodyShapeExist(uint64_t _body_id, const PreHashedKey<std::string> & _shape_key) const
 {
-    b2BodyId b2_body_id = findBody(_body_id);
+    b2BodyId b2_body_id = findBox2dBody(_body_id);
     if(B2_IS_NON_NULL(b2_body_id))
     {
         Body * body = getUserData(b2_body_id);
@@ -1239,73 +1103,13 @@ bool Scene::doesBodyShapeExist(uint64_t _body_id, const PreHashedKey<std::string
     return false;
 }
 
-void Scene::applyForceToBodyCenter(uint64_t _body_id, const Point & _force)
-{
-    m_defers.push_front([this, _body_id, _force]() {
-        b2BodyId b2_body_id = findBody(_body_id);
-        if(B2_IS_NON_NULL(b2_body_id))
-            b2Body_ApplyForceToCenter(b2_body_id, _force, true); // TODO: what is wake?
-    });
-}
-
-void Scene::applyImpulseToBodyCenter(uint64_t _body_id, const Point & _impulse)
-{
-    m_defers.push_front([this, _body_id, _impulse]() {
-        b2BodyId b2_body_id = findBody(_body_id);
-        if(B2_IS_NON_NULL(b2_body_id))
-            b2Body_ApplyLinearImpulseToCenter(b2_body_id, _impulse, true); // TODO: what is wake?
-    });
-}
-
-std::optional<Point> Scene::getBodyLinearVelocity(uint64_t _body_id) const
-{
-    b2BodyId b2_body = findBody(_body_id);
-    if(B2_IS_NULL(b2_body))
-        return std::nullopt;
-    return asPoint(b2Body_GetLinearVelocity(b2_body));
-}
-
-bool Scene::setBodyLinearVelocity(uint64_t _body_id, const Point & _velocity) const
-{
-    b2BodyId b2_body = findBody(_body_id);
-    if(B2_IS_NULL(b2_body))
-        return false;
-    b2Body_SetLinearVelocity(b2_body, asBox2dVec2(_velocity));
-    return true;
-}
-
-std::optional<float> Scene::getBodyMass(uint64_t _body_id) const
-{
-    b2BodyId b2_body = findBody(_body_id);
-    if(B2_IS_NULL(b2_body))
-        return std::nullopt;
-    return b2Body_GetMass(b2_body);
-}
-
-void Scene::setBodyPosition(uint64_t _body_id, const Point & _position)
-{
-    m_defers.push_front([this, _body_id, _position]() {
-        b2BodyId b2_body_id = findBody(_body_id);
-        if(B2_IS_NON_NULL(b2_body_id))
-            b2Body_SetTransform(b2_body_id, _position, b2Body_GetRotation(b2_body_id));
-    });
-}
-
-std::optional<Point> Scene::getBodyPosition(uint64_t _body_id) const
-{
-    b2BodyId b2_body_id = findBody(_body_id);
-    if(B2_IS_NON_NULL(b2_body_id))
-        return asPoint(b2Body_GetPosition(b2_body_id));
-    return std::nullopt;
-}
-
 std::optional<std::vector<Point>> Scene::findPath(
     uint64_t _body_id,
     const Point & _destination,
     bool _allow_diagonal_steps,
     bool _avoid_sensors) const
 {
-    const b2BodyId b2_body_id = findBody(_body_id);
+    const b2BodyId b2_body_id = findBox2dBody(_body_id);
     if(B2_IS_NULL(b2_body_id))
         return std::nullopt;
     AStarOptions options;

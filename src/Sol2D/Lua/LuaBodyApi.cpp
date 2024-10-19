@@ -28,6 +28,12 @@ using namespace Sol2D::Lua::Aux;
 
 namespace {
 
+struct Data
+{
+    std::shared_ptr<Scene> scene;
+    Body * body;
+};
+
 struct Self : LuaSelfBase
 {
     Self(std::shared_ptr<Scene> & _scene, uint64_t _body_id) :
@@ -42,6 +48,16 @@ struct Self : LuaSelfBase
         if(!ptr)
             luaL_error(_lua, "the scene is destroyed");
         return ptr;
+    }
+
+    Data getData(lua_State * _lua)
+    {
+        Data data;
+        data.scene = getScene(_lua);
+        data.body = data.scene->getBody(body_id);
+        if(!data.body)
+            luaL_error(_lua, "body with ID %I does not exist");
+        return data;
     }
 
     const uint64_t body_id;
@@ -106,7 +122,7 @@ int luaApi_SetLayer(lua_State * _lua)
 int luaApi_GetPosition(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    std::optional<Point> position = self->getScene(_lua)->getBodyPosition(self->body_id);
+    std::optional<Point> position = self->getData(_lua).body->getPosition();
     ensureResult(_lua, position);
     pushPoint(_lua, position.value().x, position.value().y);
     return 1;
@@ -119,7 +135,7 @@ int luaApi_SetPosition(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     Point position;
     luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "position expected");
-    self->getScene(_lua)->setBodyPosition(self->body_id, position);
+    self->getData(_lua).body->setPosition(position);
     return 0;
 }
 
@@ -130,7 +146,7 @@ int luaApi_ApplyForceToCenter(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     Point force;
     luaL_argcheck(_lua, tryGetPoint(_lua, 2, force), 2, "force vector expected");
-    self->getScene(_lua)->applyForceToBodyCenter(self->body_id, force);
+    self->getData(_lua).body->applyForceToCenter(force);
     return 0;
 }
 
@@ -141,7 +157,7 @@ int luaApi_ApplyImpulseToCenter(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     Point impulse;
     luaL_argcheck(_lua, tryGetPoint(_lua, 2, impulse), 2, "impulse vector expected");
-    self->getScene(_lua)->applyImpulseToBodyCenter(self->body_id, impulse);
+    self->getData(_lua).body->applyImpulseToCenter(impulse);
     return 0;
 }
 
@@ -149,7 +165,7 @@ int luaApi_ApplyImpulseToCenter(lua_State * _lua)
 int luaApi_GetLinearVelocity(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    std::optional<Point> velocity = self->getScene(_lua)->getBodyLinearVelocity(self->body_id);
+    std::optional<Point> velocity = self->getData(_lua).body->getLinearVelocity();
     ensureResult(_lua, velocity);
     pushPoint(_lua, velocity.value().x, velocity.value().y);
     return 1;
@@ -162,7 +178,7 @@ int luaApi_SetLinearVelocity(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     Point velocity;
     luaL_argcheck(_lua, tryGetPoint(_lua, 2, velocity), 2, "velocity vector expected");
-    lua_pushboolean(_lua, self->getScene(_lua)->setBodyLinearVelocity(self->body_id, velocity));
+    lua_pushboolean(_lua, self->getData(_lua).body->setLinearVelocity(velocity));
     return 1;
 }
 
@@ -170,7 +186,7 @@ int luaApi_SetLinearVelocity(lua_State * _lua)
 int luaApi_GetBodyMass(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    std::optional<float> mass = self->getScene(_lua)->getBodyMass(self->body_id);
+    std::optional<float> mass = self->getData(_lua).body->getMass();
     ensureResult(_lua, mass);
     lua_pushnumber(_lua, mass.value());
     return 1;
