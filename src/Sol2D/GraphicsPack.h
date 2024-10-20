@@ -45,7 +45,7 @@ public:
 
     void setFilippedHorizontally(bool _flipped);
     void setFilippedVertically(bool _flipped);
-    void setFlipCenter(std::optional<Point> _flip_center);
+    void setCenter(const Point & _center);
     size_t addFrame(const GraphicsPackFrameDefinition & _definition);
     size_t insertFrame(size_t _index, const GraphicsPackFrameDefinition & _definition);
     bool removeFrame(size_t _index);
@@ -58,18 +58,18 @@ public:
     bool switchToNextVisibleFrame();
     std::pair<bool, size_t> addSprite(size_t _frame, const GraphicsPackSpriteDefinition & _definition);
     bool removeSprite(size_t _frame, size_t _sprite);
-    void render(const Point & _position, float _angle_deg, std::chrono::milliseconds _time_passed);
+    void render(const Point & _position, const Utils::Rotation & _rotation, std::chrono::milliseconds _time_passed);
 
 private:
     bool switchToNextVisibleFrame(bool _respect_iteration);
     void destroy();
-    void performRender(const Point & _position, float _angle_deg);
+    void performRender(const Point & _position, const Utils::Rotation & _rotation);
 
 private:
     SDL_Renderer * mp_renderer;
     Point m_position;
     SDL_FlipMode m_flip_mode;
-    std::optional<Point> m_flip_center;
+    Point m_center;
     std::vector<Frame *> m_frames;
     int32_t m_max_iterations;
     int32_t m_current_iteration;
@@ -97,9 +97,9 @@ inline void GraphicsPack::setFilippedVertically(bool _flipped)
         : static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) & ~SDL_FLIP_VERTICAL);
 }
 
-inline void GraphicsPack::setFlipCenter(std::optional<Point> _flip_center)
+inline void GraphicsPack::setCenter(const Point & _center)
 {
-    m_flip_center = _flip_center;
+    m_center = _center;
 }
 
 } // namespace Sol2D

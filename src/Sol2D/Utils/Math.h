@@ -18,16 +18,43 @@
 
 #include <Sol2D/Rect.h>
 #include <vector>
+#include <optional>
 #include <cmath>
 
 namespace Sol2D::Utils {
 
+class Rotation
+{
+public:
+    enum Unit
+    {
+        Radian,
+        Degree
+    };
+
+public:
+    Rotation(double _value, Unit _unit);
+    Rotation(double _sine, double _cosine);
+    bool isRotated() const { return m_is_rotated; }
+    double getRadians() const;
+    double getDegrees() const;
+    double getSine() const;
+    double getCosine() const;
+
+private:
+    bool m_is_rotated;
+    mutable std::optional<double> m_radians;
+    mutable std::optional<double> m_degrees;
+    mutable std::optional<double> m_sine;
+    mutable std::optional<double> m_cosine;
+};
+
 class VectorRotator
 {
 public:
-    explicit VectorRotator(float _angle_rads) :
-        m_sine{std::sin(_angle_rads)},
-        m_cosine{std::cos(_angle_rads)}
+    explicit VectorRotator(const Rotation & _rotation) :
+        m_sine{_rotation.getSine()},
+        m_cosine{_rotation.getCosine()}
     {
     }
 
@@ -54,6 +81,6 @@ inline double radiansToDegrees(double _radians)
     return _radians == 0.0 ? 0.0 : (_radians * 180.0) / std::numbers::pi;
 }
 
-void rotateVectors(std::vector<Point> & _vectors, double _angle_rad);
+void rotateVectors(std::vector<Point> & _vectors, const Rotation & _rotation);
 
 } // namespace Sol2D::Utils

@@ -50,6 +50,18 @@ struct Point
     {
         return { x + _point.x, y + _point.y };
     }
+
+    void operator += (const Point & _point) noexcept
+    {
+        x += _point.x;
+        y += _point.y;
+    }
+
+    void operator -= (const Point & _point) noexcept
+    {
+        x -= _point.x;
+        y -= _point.y;
+    }
 };
 
 struct Size

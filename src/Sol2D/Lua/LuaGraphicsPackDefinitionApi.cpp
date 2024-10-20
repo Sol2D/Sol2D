@@ -64,7 +64,7 @@ bool Sol2D::Lua::tryGetGraphicsPackDefinition(
     if(!table.isValid())
         return false;
     table.tryGetPoint("position", _result.position);
-    table.tryGetPoint("flipCenter", _result.flip_center);
+    table.tryGetPoint("center", _result.center);
     table.tryGetBoolean("isFlippedHorizontally", &_result.is_flipped_horizontally);
     table.tryGetBoolean("isFlippedVertically", &_result.is_flipped_vertically);
     table.tryGetInteger("animationIterations", &_result.animation_iterations);

@@ -99,7 +99,7 @@ struct GraphicsPackDefinition
 
     Point position;
     std::vector<GraphicsPackFrameDefinition> frames;
-    std::optional<Point> flip_center;
+    std::optional<Point> center;
     bool is_flipped_horizontally;
     bool is_flipped_vertically;
     int32_t animation_iterations;

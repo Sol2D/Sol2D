@@ -113,7 +113,7 @@ script = nil
 ---@field position Point?
 ---@field isFlippedHorizontally boolean?
 ---@field isFlippedVertically boolean?
----@field flipCenter Point?
+---@field center Point?
 ---@field animationIterations integer?
 ---@field frames GraphicsPackFrameDefinition[]
 

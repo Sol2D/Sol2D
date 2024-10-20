@@ -205,7 +205,8 @@ Scene::~Scene()
 
 void Scene::deinitializeTileMap()
 {
-    for(auto it = m_bodies.begin(); it != m_bodies.end();)
+
+    for(auto it = m_bodies.begin(); it != m_bodies.end(); it = m_bodies.begin())
         destroyBody(it->first);
     m_bodies.clear();
     m_joints.clear();
@@ -842,15 +843,16 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
     int shape_count = b2Body_GetShapeCount(_body_id);
     std::vector<b2ShapeId> shapes(shape_count);
     b2Body_GetShapes(_body_id, shapes.data(), shape_count);
+    b2Rot b2_rotation = b2Body_GetRotation(_body_id);
+    Rotation rotation(b2_rotation.s, b2_rotation.c); // TODO: https://github.com/libsdl-org/SDL/issues/11279
     for(const b2ShapeId & shape_id : shapes)
     {
         BodyShape * shape = getUserData(shape_id);
         GraphicsPack * graphics = shape->getCurrentGraphics();
         if(graphics)
         {
-            // TODO: rotation
             // TODO: How to rotate multiple shapes?
-            graphics->render(body_position, .0f, _time_passed);
+            graphics->render(body_position, rotation, _time_passed);
         }
     }
 }

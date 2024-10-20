@@ -16,7 +16,6 @@
 
 #include <Sol2D/Sprite.h>
 #include <Sol2D/SDL/SDL.h>
-#include <Sol2D/Utils/Math.h>
 #include <SDL3_image/SDL_image.h>
 
 using namespace Sol2D;
@@ -69,11 +68,7 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     return true;
 }
 
-void Sprite::render(
-    const Point & _point,
-    float _angle_deg,
-    SDL_FlipMode _flip_mode,
-    const Point * _flip_center /*= nullptr*/)
+void Sprite::render(const Point & _point, const Rotation & _rotation, SDL_FlipMode _flip_mode, const Point & _center)
 {
     if(!isValid())
         return;
@@ -89,8 +84,8 @@ void Sprite::render(
         m_texture_ptr.get(),
         m_source_rect.toSdlPtr(),
         &dest_rect,
-        _angle_deg,
-        _flip_center ? _flip_center->toSdlPtr() : nullptr,
+        _rotation.getDegrees(),
+        _center.toSdlPtr(),
         _flip_mode
     );
 }

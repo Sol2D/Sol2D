@@ -89,7 +89,7 @@ GraphicsPack::GraphicsPack(
     mp_renderer(&_renderer),
     m_position(_definition.position),
     m_flip_mode(SDL_FLIP_NONE),
-    m_flip_center(_definition.flip_center),
+    m_center(_definition.center.value_or(_definition.position)),
     m_max_iterations(_definition.animation_iterations),
     m_current_iteration(0),
     m_current_frame_index(0),
@@ -307,11 +307,11 @@ bool GraphicsPack::removeSprite(size_t _frame, size_t _sprite)
     return true;
 }
 
-void GraphicsPack::render(const Point & _position, float _angle_deg, std::chrono::milliseconds _time_passed)
+void GraphicsPack::render(const Point & _position, const Rotation & _rotation, std::chrono::milliseconds _time_passed)
 {
     if(m_max_iterations == 0 || m_total_duration == std::chrono::milliseconds::zero())
     {
-        performRender(_position, _angle_deg);
+        performRender(_position, _rotation);
         return;
     }
     m_current_frame_duration += _time_passed;
@@ -343,7 +343,7 @@ void GraphicsPack::render(const Point & _position, float _angle_deg, std::chrono
             break;
         }
     }
-    performRender(_position, _angle_deg);
+    performRender(_position, _rotation);
 }
 
 bool GraphicsPack::switchToNextVisibleFrame()
@@ -383,23 +383,31 @@ bool GraphicsPack::switchToNextVisibleFrame(bool _respect_iteration)
     return m_frames[m_current_frame_index]->is_visible;
 }
 
-void GraphicsPack::performRender(const Point & _position, float _angle_deg)
+void GraphicsPack::performRender(const Point & _position, const Rotation & _rotation)
 {
     if(m_frames.empty())
+    {
         return;
+    }
     Frame * frame = m_frames[m_current_frame_index];
     if(!frame->is_visible)
+    {
         return;
+    }
     Point position = _position + m_position;
+    std::optional<VectorRotator> rotator;
     for(Graphics & graphics : frame->graphics)
     {
+        Point graphics_position = graphics.position;
+        if(_rotation.isRotated() && (graphics.position.x || graphics.position.y))
+        {
+            if(!rotator.has_value())
+                rotator.emplace(_rotation);
+            graphics_position = rotator->rotate(graphics_position);
+        }
         if(graphics.sprite.has_value() && graphics.is_visible)
         {
-            graphics.sprite->render(
-                position + graphics.position,
-                _angle_deg,
-                m_flip_mode,
-                m_flip_center.has_value() ? &m_flip_center.value() : nullptr);
+            graphics.sprite->render(position + graphics_position, _rotation, m_flip_mode, m_center);
         }
     }
 }

@@ -19,6 +19,7 @@
 #include <Sol2D/Def.h>
 #include <Sol2D/Color.h>
 #include <Sol2D/Rect.h>
+#include <Sol2D/Utils/Math.h>
 #include <SDL3/SDL.h>
 #include <filesystem>
 #include <optional>
@@ -52,7 +53,7 @@ public:
     void setDesinationSize(const Size & _size);
     void scale(float _scale_factor);
     void scale(float _scale_factor_x, float _scale_factor_y);
-    void render(const Point & _point, float _angle_deg, SDL_FlipMode _flip_mode, const Point * _flip_center = nullptr);
+    void render(const Point & _point, const Utils::Rotation & _rotation, SDL_FlipMode _flip_mode, const Point & _center);
 
 private:
     SDL_Renderer * mp_renderer;

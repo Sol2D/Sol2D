@@ -156,10 +156,25 @@ protected:
     }
 
 public:
-    const std::vector<Point> & getPoints() const { return m_points; }
-    std::vector<Point> & getPoints() { return m_points; }
-    void addPoint(const Point & _point) { m_points.push_back(_point); }
-    void rotate(float _angle_rad) { Utils::rotateVectors(m_points, _angle_rad); }
+    const std::vector<Point> & getPoints() const
+    {
+        return m_points;
+    }
+
+    std::vector<Point> & getPoints()
+    {
+        return m_points;
+    }
+
+    void addPoint(const Point & _point)
+    {
+        m_points.push_back(_point);
+    }
+
+    void rotate(float _angle_rad)
+    {
+        Utils::rotateVectors(m_points, Utils::Rotation(_angle_rad, Utils::Rotation::Radian));
+    }
 
 private:
     std::vector<Point> m_points;
