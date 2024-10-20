@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/World/Scene.h>
+#include <Sol2D/World/UserData.h>
 #include <Sol2D/World/AStar.h>
 #include <Sol2D/Tiles/Tmx.h>
 #include <Sol2D/Utils/Observable.h>
@@ -49,31 +50,6 @@ void initShapePhysics(b2ShapeDef & _b2_shape_def, const BodyShapePhysicsDefiniti
         _b2_shape_def.restitution = _physics.restitution.value();
     if(_physics.friction.has_value())
         _b2_shape_def.friction = _physics.friction.value();
-}
-
-struct Joint
-{
-    explicit Joint(uint64_t _id) :
-        id(_id)
-    {
-    }
-
-    const uint64_t id;
-};
-
-inline Body * getUserData(b2BodyId _body_id)
-{
-    return static_cast<Body *>(b2Body_GetUserData(_body_id));
-}
-
-inline BodyShape * getUserData(b2ShapeId _shape_id)
-{
-    return static_cast<BodyShape *>(b2Shape_GetUserData(_shape_id));
-}
-
-inline Joint * getUserData(b2JointId _joint_id)
-{
-    return static_cast<Joint *>(b2Joint_GetUserData(_joint_id));
 }
 
 } // namespace
@@ -339,7 +315,7 @@ bool Scene::destroyBody(uint64_t _body_id)
         std::vector<b2JointId> b2_joints(joints_count);
         b2Body_GetJoints(b2_body_id, b2_joints.data(), joints_count);
         for(const b2JointId & b2_joint_id : b2_joints)
-            destroyJoint(getUserData(b2_joint_id)->id);
+            destroyJoint(getUserData(b2_joint_id)->getGid());
     }
     delete getUserData(b2_body_id);
     b2DestroyBody(b2_body_id);
@@ -477,11 +453,11 @@ uint64_t Scene::createJoint(const DistanceJointDefenition & _definition)
         b2_joint_def.motorSpeed = _definition.motor_speed.value();
     if(_definition.length)
         b2_joint_def.length = graphicalToPhysical(_definition.length.value());
-    Joint * joint = new Joint(m_joints_sequential_id.getNext());
-    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateDistanceJoint(m_b2_world_id, &b2_joint_def);
-    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
-    return joint->id;
+    Joint * joint = new DistanceJoint(b2_joint_id);
+    b2Joint_SetUserData(b2_joint_id, joint);
+    m_joints.insert(std::make_pair(joint->getGid(), b2_joint_id));
+    return joint->getGid();
 }
 
 uint64_t Scene::createJoint(const MotorJointDefinition & _definition)
@@ -508,11 +484,11 @@ uint64_t Scene::createJoint(const MotorJointDefinition & _definition)
         b2_joint_def.maxTorque = _definition.max_torque.value();
     if(_definition.correction_factor)
         b2_joint_def.correctionFactor = _definition.correction_factor.value();
-    Joint * joint = new Joint(m_joints_sequential_id.getNext());
-    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateMotorJoint(m_b2_world_id, &b2_joint_def);
-    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
-    return joint->id;
+    Joint * joint = new MotorJoint(b2_joint_id);
+    b2Joint_SetUserData(b2_joint_id, joint);
+    m_joints.insert(std::make_pair(joint->getGid(), b2_joint_id));
+    return joint->getGid();
 }
 
 uint64_t Scene::createJoint(const MouseJointDefinition & _definition)
@@ -537,11 +513,11 @@ uint64_t Scene::createJoint(const MouseJointDefinition & _definition)
         b2_joint_def.maxForce = _definition.max_force.value();
     if(_definition.damping_ratio)
         b2_joint_def.dampingRatio = _definition.damping_ratio.value();
-    Joint * joint = new Joint(m_joints_sequential_id.getNext());
-    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateMouseJoint(m_b2_world_id, &b2_joint_def);
-    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
-    return joint->id;
+    Joint * joint = new MouseJoint(b2_joint_id);
+    b2Joint_SetUserData(b2_joint_id, joint);
+    m_joints.insert(std::make_pair(joint->getGid(), b2_joint_id));
+    return joint->getGid();
 }
 
 uint64_t Scene::createJoint(const PrismaticJointDefinition & _definition)
@@ -593,11 +569,11 @@ uint64_t Scene::createJoint(const PrismaticJointDefinition & _definition)
         b2_joint_def.maxMotorForce = _definition.max_motor_force.value();
     if(_definition.motor_speed)
         b2_joint_def.motorSpeed = _definition.motor_speed.value();
-    Joint * joint = new Joint(m_joints_sequential_id.getNext());
-    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreatePrismaticJoint(m_b2_world_id, &b2_joint_def);
-    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
-    return joint->id;
+    Joint * joint = new PrismaticJoint(b2_joint_id);
+    b2Joint_SetUserData(b2_joint_id, joint);
+    m_joints.insert(std::make_pair(joint->getGid(), b2_joint_id));
+    return joint->getGid();
 }
 
 uint64_t Scene::createJoint(const WeldJointDefinition & _definition)
@@ -634,11 +610,11 @@ uint64_t Scene::createJoint(const WeldJointDefinition & _definition)
         b2_joint_def.linearDampingRatio = _definition.linear_damping_ratio.value();
     if(_definition.angular_damping_ratio)
         b2_joint_def.angularDampingRatio = _definition.angular_damping_ratio.value();
-    Joint * joint = new Joint(m_joints_sequential_id.getNext());
-    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateWeldJoint(m_b2_world_id, &b2_joint_def);
-    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
-    return joint->id;
+    Joint * joint = new WeldJoint(b2_joint_id);
+    b2Joint_SetUserData(b2_joint_id, joint);
+    m_joints.insert(std::make_pair(joint->getGid(), b2_joint_id));
+    return joint->getGid();
 }
 
 uint64_t Scene::createJoint(const WheelJointDefinition & _definition)
@@ -682,11 +658,11 @@ uint64_t Scene::createJoint(const WheelJointDefinition & _definition)
         b2_joint_def.upperTranslation = graphicalToPhysical(_definition.upper_translation.value());
     if(_definition.max_motor_torque)
         b2_joint_def.maxMotorTorque = _definition.max_motor_torque.value();
-    Joint * joint = new Joint(m_joints_sequential_id.getNext());
-    b2_joint_def.userData = joint;
     b2JointId b2_joint_id = b2CreateWheelJoint(m_b2_world_id, &b2_joint_def);
-    m_joints.insert(std::make_pair(joint->id, b2_joint_id));
-    return joint->id;
+    Joint * joint = new WheelJoint(b2_joint_id);
+    b2Joint_SetUserData(b2_joint_id, joint);
+    m_joints.insert(std::make_pair(joint->getGid(), b2_joint_id));
+    return joint->getGid();
 }
 
 bool Scene::destroyJoint(uint64_t _joint_id)
@@ -695,7 +671,7 @@ bool Scene::destroyJoint(uint64_t _joint_id)
     if(B2_IS_NULL(b2_joint_id))
         return false;
     const Joint * joint = getUserData(b2_joint_id);
-    m_joints.erase(joint->id);
+    m_joints.erase(joint->getGid());
     b2DestroyJoint(b2_joint_id);
     delete joint;
     return true;

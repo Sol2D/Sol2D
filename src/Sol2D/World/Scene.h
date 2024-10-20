@@ -18,6 +18,7 @@
 
 #include <Sol2D/World/Body.h>
 #include <Sol2D/World/BodyDefinition.h>
+#include <Sol2D/World/Joint.h>
 #include <Sol2D/World/JointDefinition.h>
 #include <Sol2D/World/BodyOptions.h>
 #include <Sol2D/World/Contact.h>
@@ -26,7 +27,6 @@
 #include <Sol2D/Tiles/TileMap.h>
 #include <Sol2D/Utils/Observable.h>
 #include <Sol2D/Utils/PreHashedMap.h>
-#include <Sol2D/Utils/SequentialId.h>
 #include <Sol2D/Canvas.h>
 #include <Sol2D/Workspace.h>
 #include <filesystem>
@@ -148,7 +148,6 @@ private:
     b2WorldId m_b2_world_id;
     float m_meters_per_pixel;
     std::unordered_map<uint64_t, b2BodyId> m_bodies;
-    Utils::SequentialId<uint64_t> m_joints_sequential_id;
     std::unordered_map<uint64_t, b2JointId> m_joints;
     b2BodyId m_followed_body_id;
     std::unique_ptr<Tiles::TileHeap> m_tile_heap_ptr;
