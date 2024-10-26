@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cmath>
 #include <cstring>
 #include <vector>
 #include <algorithm>
@@ -22,55 +21,38 @@
 
 void Sol2D::SDL::sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, uint32_t _radius) // TODO: float radius
 {
-    constexpr double pi = std::numbers::pi;
-    constexpr uint16_t min_points_count_per_quarter = 2;
-    constexpr uint16_t k = 6;
-
-    uint16_t points_count_per_quarter = _radius / k;
-    if(points_count_per_quarter < min_points_count_per_quarter)
-        points_count_per_quarter = min_points_count_per_quarter;
-    std::vector<SDL_FPoint> points(points_count_per_quarter * 4 + 1);
-    SDL_FPoint * q1 = points.data();
-    SDL_FPoint * q2 = q1 + points_count_per_quarter;
-    SDL_FPoint * q3 = q2 + points_count_per_quarter;
-    SDL_FPoint * q4 = q3 + points_count_per_quarter;
-
-    q1[0].x = _center.x +_radius;
-    q1[0].y = _center.y;
-    q2[0].x= _center.x;
-    q2[0].y= _center.y + _radius;
-    q3[0].x= _center.x - _radius;
-    q3[0].y= _center.y;
-    q4[0].x= _center.x;
-    q4[0].y= _center.y - _radius;
-    points[points.size() - 1] = points[0];
-
-    const double base_angle = pi / (2 * points_count_per_quarter);
-
-    for(uint16_t i = 1; i < points_count_per_quarter; ++i)
+    const int radius = static_cast<int>(_radius);
+    int x = radius - 1;
+    int y = 0;
+    int dx = 1;
+    int dy = 1;
+    int err = dx - (radius << 1);
+    std::vector<SDL_FPoint> points;
+    while(x >= y)
     {
-        const double angle = base_angle * i;
-        const double x = cos(angle) * _radius;
-        const double y = sin(angle) * _radius;
-
-        size_t mirror_index = points_count_per_quarter - i;
-
-        int pos_x = _center.x + x;
-        int neg_x = _center.x - x;
-        int pos_y = _center.y + y;
-        int neg_y = _center.y - y;
-
-        q1[i].x = pos_x;
-        q1[i].y = pos_y;
-        q2[mirror_index].x = neg_x;
-        q2[mirror_index].y = pos_y;
-        q3[i].x = neg_x;
-        q3[i].y = neg_y;
-        q4[mirror_index].x = pos_x;
-        q4[mirror_index].y = neg_y;
+        points.reserve(points.size() + 8);
+        points.push_back({ .x = _center.x + x, .y = _center.y + y });
+        points.push_back({ .x = _center.x + y, .y = _center.y + x });
+        points.push_back({ .x = _center.x - y, .y = _center.y + x });
+        points.push_back({ .x = _center.x - x, .y = _center.y + y });
+        points.push_back({ .x = _center.x - x, .y = _center.y - y });
+        points.push_back({ .x = _center.x - y, .y = _center.y - x });
+        points.push_back({ .x = _center.x + y, .y = _center.y - x });
+        points.push_back({ .x = _center.x + x, .y = _center.y - y });
+        if(err <= 0)
+        {
+            ++y;
+            err += dy;
+            dy += 2;
+        }
+        if(err > 0)
+        {
+            --x;
+            dx += 2;
+            err += dx - (radius << 1);
+        }
     }
-
-    SDL_RenderLines(_renderer, q1, points.size());
+    SDL_RenderPoints(_renderer, points.data(), points.size());
 }
 
 bool operator == (const SDL_Color & _color1, const SDL_Color & _color2)
