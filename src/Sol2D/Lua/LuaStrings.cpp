@@ -16,6 +16,11 @@
 
 #include <Sol2D/Lua/LuaStrings.h>
 
+const char Sol2D::Lua::LuaTypeName::boolean[]                      = "boolean";
+const char Sol2D::Lua::LuaTypeName::integer[]                      = "integer";
+const char Sol2D::Lua::LuaTypeName::number[]                       = "number";
+const char Sol2D::Lua::LuaTypeName::string[]                       = "string";
+const char Sol2D::Lua::LuaTypeName::point[]                        = "Point";
 const char Sol2D::Lua::LuaTypeName::lib[]                          = "sol.Library";
 const char Sol2D::Lua::LuaTypeName::store_manager[]                = "sol.StoreManager";
 const char Sol2D::Lua::LuaTypeName::window[]                       = "sol.Window";
@@ -34,6 +39,13 @@ const char Sol2D::Lua::LuaTypeName::graphics_pack[]                = "sol.Graphi
 const char Sol2D::Lua::LuaTypeName::body_type[]                    = "sol.BodyType";
 const char Sol2D::Lua::LuaTypeName::body_shape_type[]              = "sol.BodyShapeType";
 const char Sol2D::Lua::LuaTypeName::body_prototype[]               = "sol.BodyPrototype";
+const char Sol2D::Lua::LuaTypeName::distance_joint[]               = "sol.DistanceJoint";
+const char Sol2D::Lua::LuaTypeName::motor_joint[]                  = "sol.MotorJoint";
+const char Sol2D::Lua::LuaTypeName::mouse_joint[]                  = "sol.MouseJoint";
+const char Sol2D::Lua::LuaTypeName::prismatic_joint[]              = "sol.PrismaticJoint";
+const char Sol2D::Lua::LuaTypeName::revolute_joint[]               = "sol.RevoluteJoint";
+const char Sol2D::Lua::LuaTypeName::weld_joint[]                   = "sol.WeldJoint";
+const char Sol2D::Lua::LuaTypeName::wheel_joint[]                  = "sol.WheelJoint";
 const char Sol2D::Lua::LuaTypeName::font[]                         = "sol.Font";
 const char Sol2D::Lua::LuaTypeName::form[]                         = "sol.Form";
 const char Sol2D::Lua::LuaTypeName::vertical_text_alignment[]      = "sol.VerticalTextAlignment";

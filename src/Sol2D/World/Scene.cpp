@@ -691,6 +691,60 @@ uint64_t Scene::createJoint(const WheelJointDefinition & _definition)
     return joint->getGid();
 }
 
+std::optional<DistanceJoint> Scene::getDistanceJoint(uint64_t _id) const
+{
+    b2JointId b2_id = findJoint(_id);
+    if(B2_IS_NULL(b2_id))
+        return std::nullopt;
+    DistanceJoint * joint = dynamic_cast<DistanceJoint *>(getUserData(b2_id));
+    return joint ? std::make_optional(*joint) : std::nullopt;
+}
+
+std::optional<MotorJoint> Scene::getMotorJoint(uint64_t _id) const
+{
+    b2JointId b2_id = findJoint(_id);
+    if(B2_IS_NULL(b2_id))
+        return std::nullopt;
+    MotorJoint * joint = dynamic_cast<MotorJoint *>(getUserData(b2_id));
+    return joint ? std::make_optional(*joint) : std::nullopt;
+}
+
+std::optional<MouseJoint> Scene::getMouseJoint(uint64_t _id) const
+{
+    b2JointId b2_id = findJoint(_id);
+    if(B2_IS_NULL(b2_id))
+        return std::nullopt;
+    MouseJoint * joint = dynamic_cast<MouseJoint *>(getUserData(b2_id));
+    return joint ? std::make_optional(*joint) : std::nullopt;
+}
+
+std::optional<PrismaticJoint> Scene::getPrismaticJoint(uint64_t _id) const
+{
+    b2JointId b2_id = findJoint(_id);
+    if(B2_IS_NULL(b2_id))
+        return std::nullopt;
+    PrismaticJoint * joint = dynamic_cast<PrismaticJoint *>(getUserData(b2_id));
+    return joint ? std::make_optional(*joint) : std::nullopt;
+}
+
+std::optional<WeldJoint> Scene::getWeldJoint(uint64_t _id) const
+{
+    b2JointId b2_id = findJoint(_id);
+    if(B2_IS_NULL(b2_id))
+        return std::nullopt;
+    WeldJoint * joint = dynamic_cast<WeldJoint *>(getUserData(b2_id));
+    return joint ? std::make_optional(*joint) : std::nullopt;
+}
+
+std::optional<WheelJoint> Scene::getWheelJoint(uint64_t _id) const
+{
+    b2JointId b2_id = findJoint(_id);
+    if(B2_IS_NULL(b2_id))
+        return std::nullopt;
+    WheelJoint * joint = dynamic_cast<WheelJoint *>(getUserData(b2_id));
+    return joint ? std::make_optional(*joint) : std::nullopt;
+}
+
 bool Scene::destroyJoint(uint64_t _joint_id)
 {
     b2JointId b2_joint_id = findJoint(_joint_id);

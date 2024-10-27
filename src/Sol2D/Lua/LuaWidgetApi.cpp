@@ -24,6 +24,7 @@
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 #include <Sol2D/Object.h>
+#include <Sol2D/Utils/Array.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -137,14 +138,6 @@ void ButtonSelf::unsubscribeOnClick(lua_State * _lua, int _subscription_id)
 }
 
 using ButtonUserData = LuaUserData<ButtonSelf, LuaTypeName::button>;
-
-template<typename T, size_t left_len, size_t right_len>
-constexpr std::array<T, left_len + right_len> operator + (std::array<T, left_len> _left, std::array<T, right_len> _right)
-{
-    std::array<T, left_len + right_len> result;
-    std::copy(_right.begin(), _right.end(), std::copy(_left.begin(), _left.end(), result.begin()));
-    return result;
-}
 
 WidgetState getWidgetState(lua_State * _lua, int _idx)
 {

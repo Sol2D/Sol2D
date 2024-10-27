@@ -21,7 +21,12 @@ namespace Sol2D::Lua {
 
 struct LuaTypeName
 {
+    static const char boolean[];
+    static const char integer[];
+    static const char number[];
+    static const char string[];
     static const char lib[];
+    static const char point[];
     static const char store_manager[];
     static const char window[];
     static const char view[];
@@ -39,6 +44,13 @@ struct LuaTypeName
     static const char body_type[];
     static const char body_shape_type[];
     static const char body_prototype[];
+    static const char distance_joint[];
+    static const char motor_joint[];
+    static const char mouse_joint[];
+    static const char prismatic_joint[];
+    static const char revolute_joint[];
+    static const char weld_joint[];
+    static const char wheel_joint[];
     static const char font[];
     static const char form[];
     static const char vertical_text_alignment[];

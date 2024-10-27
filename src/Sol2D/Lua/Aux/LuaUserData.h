@@ -19,8 +19,9 @@
 #include <lua.hpp>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <cstring>
-#include <new>
+#include <vector>
 #include <concepts>
+#include <sstream>
 
 namespace Sol2D::Lua::Aux {
 
@@ -38,7 +39,7 @@ struct LuaUserData
     {
         void * data = lua_newuserdata(_lua, sizeof(LuaSelf));
         std::memset(data, 0, sizeof(LuaSelf));
-        return new(data) LuaSelf(_ctor_args...);
+        return new(data) LuaSelf(std::forward<CtorArgs>(_ctor_args)...);
     }
 
     static MetatablePushResult pushMetatable(lua_State * _lua)
@@ -63,5 +64,42 @@ struct LuaUserData
         return 0;
     }
 };
+
+template<std::derived_from<LuaSelfBase> LuaSelf>
+LuaSelf * getLuaUserData(lua_State * _lua, int _idx, const std::vector<const char *> & _metatables)
+{
+    void * user_data = lua_touserdata(_lua, _idx);
+    if(!user_data || !lua_getmetatable(_lua, _idx))
+    {
+        return nullptr;
+    }
+    LuaSelf * self = nullptr;
+    for(const char * metatable : _metatables)
+    {
+        if(luaL_getmetatable(_lua, metatable) && lua_rawequal(_lua, -1, -2))
+        {
+            self = static_cast<LuaSelf *>(user_data);
+        }
+        lua_pop(_lua, 1);
+        if(self)
+        {
+            break;
+        }
+    }
+    lua_pop(_lua, 1);
+    if(!self)
+    {
+        std::stringstream ss;
+        ss << "one of the following type is expected: ";
+        for(size_t i = 0; i < _metatables.size(); ++i)
+        {
+            if(i > 0)
+                ss << ", ";
+            ss << _metatables[i];
+        }
+        luaL_argerror(_lua, _idx, ss.str().c_str());
+    }
+    return self;
+}
 
 } // namespace Sol2D::Lua::Aux

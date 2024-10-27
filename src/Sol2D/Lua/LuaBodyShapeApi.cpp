@@ -32,10 +32,10 @@ const char gc_message_graphic_key_expected[] = "a graphic key expected";
 
 struct Self : LuaSelfBase
 {
-    Self(std::shared_ptr<Scene> scene, uint64_t _body_id, const PreHashedKey<std::string> & _shape_key) :
+    Self(std::shared_ptr<Scene> _scene, uint64_t _body_id, const PreHashedKey<std::string> & _shape_key) :
         body_id(_body_id),
         shape_key(_shape_key),
-        m_scene(scene)
+        m_scene(_scene)
     {
     }
 

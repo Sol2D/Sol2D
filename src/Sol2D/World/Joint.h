@@ -48,38 +48,26 @@ public:
         return b2Joint_IsValid(m_b2_joint_id);
     }
 
-    Body * getBodyA()
+    uint64_t getBodyA() const
     {
         b2BodyId m_b2_body_id = b2Joint_GetBodyA(m_b2_joint_id);
-        return B2_IS_NULL(m_b2_body_id) ? nullptr : getUserData(m_b2_body_id);
+        return B2_IS_NULL(m_b2_body_id) ? 0 : getUserData(m_b2_body_id)->getGid();
     }
 
-    const Body * getBodyA() const
-    {
-        b2BodyId m_b2_body_id = b2Joint_GetBodyA(m_b2_joint_id);
-        return B2_IS_NULL(m_b2_body_id) ? nullptr : getUserData(m_b2_body_id);
-    }
-
-    Body * getdBodyB()
+    uint64_t getBodyB() const
     {
         b2BodyId m_b2_body_id = b2Joint_GetBodyB(m_b2_joint_id);
-        return B2_IS_NULL(m_b2_body_id) ? nullptr : getUserData(m_b2_body_id);
+        return B2_IS_NULL(m_b2_body_id) ? 0 : getUserData(m_b2_body_id)->getGid();
     }
 
-    const Body * getdBodyB() const
+    Point getLocalAnchorA() const
     {
-        b2BodyId m_b2_body_id = b2Joint_GetBodyB(m_b2_joint_id);
-        return B2_IS_NULL(m_b2_body_id) ? nullptr : getUserData(m_b2_body_id);
+        return asPoint(b2Joint_GetLocalAnchorA(m_b2_joint_id));
     }
 
-    b2Vec2 getLocalAnchorA() const
+    Point getLocalAnchorB() const
     {
-        return b2Joint_GetLocalAnchorA(m_b2_joint_id);
-    }
-
-    b2Vec2 getLocalAnchorB() const
-    {
-        return b2Joint_GetLocalAnchorB(m_b2_joint_id);
+        return asPoint(b2Joint_GetLocalAnchorB(m_b2_joint_id));
     }
 
     bool isCollideConnectedEnabled() const
@@ -225,14 +213,14 @@ public:
     {
     }
 
-    b2Vec2 getLinearOffset() const
+    Point getLinearOffset() const
     {
-        return b2MotorJoint_GetLinearOffset(m_b2_joint_id);
+        return asPoint(b2MotorJoint_GetLinearOffset(m_b2_joint_id));
     }
 
-    void setLinearOffset(b2Vec2 _offset)
+    void setLinearOffset(Point _offset)
     {
-        b2MotorJoint_SetLinearOffset(m_b2_joint_id, _offset);
+        b2MotorJoint_SetLinearOffset(m_b2_joint_id, asBox2dVec2(_offset));
     }
 
     float getAngularOffset() const
@@ -286,14 +274,14 @@ public:
     {
     }
 
-    b2Vec2 getTarget() const
+    Point getTarget() const
     {
-        return b2MouseJoint_GetTarget(m_b2_joint_id);
+        return asPoint(b2MouseJoint_GetTarget(m_b2_joint_id));
     }
 
-    void setTarget(b2Vec2 _target)
+    void setTarget(Point _target)
     {
-        b2MouseJoint_SetTarget(m_b2_joint_id, _target);
+        b2MouseJoint_SetTarget(m_b2_joint_id, asBox2dVec2(_target));
     }
 
     float getSpringHertz() const
@@ -412,7 +400,6 @@ public:
     {
         b2PrismaticJoint_SetMotorSpeed(m_b2_joint_id, _speed);
     }
-
 
     float getMaxMotorForce() const
     {

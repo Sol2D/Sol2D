@@ -99,6 +99,12 @@ public:
     uint64_t createJoint(const PrismaticJointDefinition & _definition);
     uint64_t createJoint(const WeldJointDefinition & _definition);
     uint64_t createJoint(const WheelJointDefinition & _definition);
+    std::optional<DistanceJoint> getDistanceJoint(uint64_t _id) const;
+    std::optional<MotorJoint> getMotorJoint(uint64_t _id) const;
+    std::optional<MouseJoint> getMouseJoint(uint64_t _id) const;
+    std::optional<PrismaticJoint> getPrismaticJoint(uint64_t _id) const;
+    std::optional<WeldJoint> getWeldJoint(uint64_t _id) const;
+    std::optional<WheelJoint> getWheelJoint(uint64_t _id) const;
     bool destroyJoint(uint64_t _joint_id);
     bool loadTileMap(const std::filesystem::path & _file_path);
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;

@@ -95,14 +95,21 @@ void Sol2D::SDL::sdlRenderCapsule(
     const double rect_height = std::sqrt(delta_x * delta_x + delta_y * delta_y);
     const double sine = delta_y / rect_height;
     const double cosine = delta_x / rect_height;
-
     VectorRotator rotator(Rotation(sine, cosine));
-
     Point delta = rotator.rotate(makePoint(.0f, _radius - 1));
-    SDL_RenderLine(_renderer, centers[0].x + delta.x, centers[0].y + delta.y, centers[1].x + delta.x, centers[1].y + delta.y);
-
+    SDL_RenderLine(
+        _renderer,
+        centers[0].x + delta.x,
+        centers[0].y + delta.y,
+        centers[1].x + delta.x,
+        centers[1].y + delta.y);
     delta = rotator.rotate(makePoint(.0f, 1 - _radius));
-    SDL_RenderLine(_renderer, centers[0].x + delta.x, centers[0].y + delta.y, centers[1].x + delta.x, centers[1].y + delta.y);
+    SDL_RenderLine(
+        _renderer,
+        centers[0].x + delta.x,
+        centers[0].y + delta.y,
+        centers[1].x + delta.x,
+        centers[1].y + delta.y);
 
     renderCircles(_renderer, _radius, centers, 2);
 }
