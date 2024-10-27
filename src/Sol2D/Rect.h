@@ -21,6 +21,13 @@
 
 namespace Sol2D {
 
+template<typename P>
+concept PointConcept = requires(P _point)
+{
+    requires std::same_as<decltype(_point.x), float>;
+    requires std::same_as<decltype(_point.y), float>;
+};
+
 struct Point
 {
     float x;
@@ -116,6 +123,11 @@ inline constexpr Point makePoint(float _x, float _y) noexcept
 inline const Point & asPoint(const b2Vec2 & _vec) noexcept
 {
     return *reinterpret_cast<const Point *>(&_vec);
+}
+
+inline const Point & asPoint(const SDL_FPoint & _point) noexcept
+{
+    return *reinterpret_cast<const Point *>(&_point);
 }
 
 inline const b2Vec2 & asBox2dVec2(const Point & _point) noexcept

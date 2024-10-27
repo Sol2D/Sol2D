@@ -45,6 +45,11 @@ void addCircle(
     const std::string & _key,
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
 
+void addCapsule(
+    LuaTable & _table,
+    const std::string & _key,
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
+
 void addShape(
     lua_State * _lua,
     int _idx,
@@ -87,6 +92,9 @@ void addShape(
         break;
     case static_cast<lua_Integer>(BodyShapeType::Circle):
         addCircle(table, _key, _shapes);
+        break;
+    case static_cast<lua_Integer>(BodyShapeType::Capsule):
+        addCapsule(table, _key, _shapes);
         break;
     default:
         break;
@@ -178,6 +186,23 @@ void addCircle(
     }
     if(!_table.tryGetPoint("center", def.center))
         return;
+    readBasicShape(_table, def);
+    _shapes.emplace_back(_key, def);
+}
+
+void addCapsule(
+    LuaTable & _table,
+    const std::string & _key,
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
+{
+    BodyCapsuleShapeDefinition def;
+    if(
+        !_table.tryGetNumber("radius", &def.radius) ||
+        !_table.tryGetPoint("center1", def.center1) ||
+        !_table.tryGetPoint("center2", def.center2))
+    {
+        return;
+    }
     readBasicShape(_table, def);
     _shapes.emplace_back(_key, def);
 }

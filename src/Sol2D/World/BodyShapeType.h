@@ -23,7 +23,8 @@ namespace Sol2D::World {
 enum class BodyShapeType
 {
     Polygon,
-    Circle
+    Circle,
+    Capsule
 };
 
 std::optional<BodyShapeType> castToBodyShapeType(std::integral auto _integer)

@@ -90,7 +90,7 @@ script = nil
 ---@field type integer
 ---@field script string?
 ---@field physics BodyPhysicsDefinition?
----@field shapes table<string, BodyShapeRectDefinition | BodyShapePolygonDefinition | BodyShapeCircleDefinition>?
+---@field shapes table<string, BodyShapeRectDefinition | BodyShapePolygonDefinition | BodyShapeCircleDefinition | BodyShapeCapsuleDefinition>?
 ---@see sol.BodyType
 
 ---@class BodyShapeDefinitionBase
@@ -107,6 +107,11 @@ script = nil
 
 ---@class BodyShapeCircleDefinition: BodyShapeDefinitionBase
 ---@field center Point
+---@field radius number
+
+---@class BodyShapeCapsuleDefinition: BodyShapeDefinitionBase
+---@field center1 Point
+---@field center2 Point
 ---@field radius number
 
 ---@class GraphicsPackDefinition
@@ -290,11 +295,11 @@ function __scene:getTileMapObjectByName(name) end
 function __scene:getTileMapObjectsByClass(class) end
 
 ---@param position Point | nil
----@param proto_or_definition BodyDefinition
+---@param definition BodyDefinition
 ---@param script_path string?
 ---@param script_argument? any
 ---@return sol.Body
-function __scene:createBody(position, proto_or_definition, script_path, script_argument) end
+function __scene:createBody(position, definition, script_path, script_argument) end
 
 ---@param body integer | sol.Body
 ---@return boolean
@@ -699,8 +704,9 @@ function __store:getFont(key) end
 function __store:freeFont(key) end
 
 ---@class sol.BodyShapeType
----@field CIRCLE integer
+---@field CIRCLE integerw
 ---@field POLYGON integer
+---@field CAPSULE integer
 
 ---@class sol.Sprite
 local __sprite

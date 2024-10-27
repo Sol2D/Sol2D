@@ -31,6 +31,7 @@ void Sol2D::Lua::pushBodyShapeTypeEnum(lua_State * _lua)
         LuaTable table(_lua);
         table.setIntegerValue("CIRCLE", static_cast<lua_Integer>(BodyShapeType::Circle));
         table.setIntegerValue("POLYGON", static_cast<lua_Integer>(BodyShapeType::Polygon));
+        table.setIntegerValue("CAPSULE", static_cast<lua_Integer>(BodyShapeType::Capsule));
     }
     lua_setmetatable(_lua, -2);
 }

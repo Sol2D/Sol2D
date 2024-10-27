@@ -53,14 +53,16 @@ class VectorRotator
 {
 public:
     explicit VectorRotator(const Rotation & _rotation) :
-        m_sine{_rotation.getSine()},
-        m_cosine{_rotation.getCosine()}
+        m_sine(_rotation.getSine()),
+        m_cosine(_rotation.getCosine())
     {
     }
 
-    Point rotate(const Point & _vector)
+    template<PointConcept Vector>
+    Vector rotate(const Vector & _vector)
     {
-        return Point {
+        return Vector
+        {
             .x = static_cast<float>(m_cosine * _vector.x - m_sine * _vector.y),
             .y  = static_cast<float>(m_sine * _vector.x + m_cosine * _vector.y)
         };

@@ -22,7 +22,6 @@
 #include <Sol2D/World/BodyPhysicsDefinition.h>
 #include <Sol2D/GraphicsPack.h>
 #include <SDL3/SDL_surface.h>
-#include <filesystem>
 #include <variant>
 #include <vector>
 
@@ -47,6 +46,13 @@ struct CircleShapeDefinition
     float radius;
 };
 
+struct CapsuleShapeDefinition
+{
+    Point center1;
+    Point center2;
+    float radius;
+};
+
 template<BodyShapeType shape_type>
 struct BodyBasicShapeDefinition
 {
@@ -62,7 +68,13 @@ struct BodyRectDefinition : BodyBasicShapeDefinition<BodyShapeType::Polygon>, Re
 
 struct BodyCircleDefinition : BodyBasicShapeDefinition<BodyShapeType::Circle>, CircleShapeDefinition { };
 
-using BodyVariantShapeDefinition = std::variant<BodyPolygonDefinition, BodyRectDefinition, BodyCircleDefinition>;
+struct BodyCapsuleShapeDefinition : BodyBasicShapeDefinition<BodyShapeType::Capsule>, CapsuleShapeDefinition  { };
+
+using BodyVariantShapeDefinition = std::variant<
+    BodyPolygonDefinition,
+    BodyRectDefinition,
+    BodyCircleDefinition,
+    BodyCapsuleShapeDefinition>;
 
 struct BodyDefinition
 {

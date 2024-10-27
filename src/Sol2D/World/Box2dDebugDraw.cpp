@@ -43,6 +43,7 @@ Box2dDebugDraw::Box2dDebugDraw(
     m_b2_debug_draw.DrawSolidCircle = &Box2dDebugDraw::drawSolidCircle;
     m_b2_debug_draw.DrawPoint = &Box2dDebugDraw::drawPoint;
     m_b2_debug_draw.DrawSegment = &Box2dDebugDraw::drawSegment;
+    m_b2_debug_draw.DrawSolidCapsule = &Box2dDebugDraw::drawSolidCapsule;
 }
 
 void Box2dDebugDraw::draw()
@@ -145,4 +146,15 @@ void Box2dDebugDraw::drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void
         self->m_translate_point(_p2.x, _p2.y),
     };
     SDL_RenderLine(self->mp_renderer, points[0].x, points[0].y, points[1].x, points[1].y);
+}
+
+void Box2dDebugDraw:: drawSolidCapsule(b2Vec2 _p1, b2Vec2 _p2, float _radius, b2HexColor _color, void * _context)
+{
+    Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
+    self->setRendererDrawColor(_color);
+    Sol2D::SDL::sdlRenderCapsule(
+        self->mp_renderer,
+        self->m_translate_point(_p1.x, _p1.y),
+        self->m_translate_point(_p2.x, _p2.y),
+        self->m_translate_length(_radius));
 }

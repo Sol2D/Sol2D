@@ -14,12 +14,19 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cstring>
+#include <Sol2D/Utils/Math.h>
+#include <Sol2D/SDL/SDL.h>
 #include <vector>
 #include <algorithm>
-#include <Sol2D/SDL/SDL.h>
+#include <cstring>
+#include <cmath>
 
-void Sol2D::SDL::sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, uint32_t _radius) // TODO: float radius
+using namespace Sol2D;
+using namespace Sol2D::Utils;
+
+namespace {
+
+void renderCircles(SDL_Renderer * _renderer, uint32_t _radius, const SDL_FPoint * _centers, size_t _count)
 {
     const int radius = static_cast<int>(_radius);
     int x = radius - 1;
@@ -30,15 +37,18 @@ void Sol2D::SDL::sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _c
     std::vector<SDL_FPoint> points;
     while(x >= y)
     {
-        points.reserve(points.size() + 8);
-        points.push_back({ .x = _center.x + x, .y = _center.y + y });
-        points.push_back({ .x = _center.x + y, .y = _center.y + x });
-        points.push_back({ .x = _center.x - y, .y = _center.y + x });
-        points.push_back({ .x = _center.x - x, .y = _center.y + y });
-        points.push_back({ .x = _center.x - x, .y = _center.y - y });
-        points.push_back({ .x = _center.x - y, .y = _center.y - x });
-        points.push_back({ .x = _center.x + y, .y = _center.y - x });
-        points.push_back({ .x = _center.x + x, .y = _center.y - y });
+        points.reserve(points.size() + 8 * _count);
+        for(size_t i = 0; i < _count; ++i)
+        {
+            points.push_back({ .x = _centers[i].x + x, .y = _centers[i].y + y });
+            points.push_back({ .x = _centers[i].x + y, .y = _centers[i].y + x });
+            points.push_back({ .x = _centers[i].x - y, .y = _centers[i].y + x });
+            points.push_back({ .x = _centers[i].x - x, .y = _centers[i].y + y });
+            points.push_back({ .x = _centers[i].x - x, .y = _centers[i].y - y });
+            points.push_back({ .x = _centers[i].x - y, .y = _centers[i].y - x });
+            points.push_back({ .x = _centers[i].x + y, .y = _centers[i].y - x });
+            points.push_back({ .x = _centers[i].x + x, .y = _centers[i].y - y });
+        }
         if(err <= 0)
         {
             ++y;
@@ -53,6 +63,48 @@ void Sol2D::SDL::sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _c
         }
     }
     SDL_RenderPoints(_renderer, points.data(), points.size());
+}
+
+} // namespace
+
+void Sol2D::SDL::sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, float _radius)
+{
+    renderCircles(_renderer, _radius, &_center, 1);
+}
+
+void Sol2D::SDL::sdlRenderCapsule(
+    SDL_Renderer * _renderer,
+    const SDL_FPoint & _center1,
+    const SDL_FPoint & _center2,
+    float _radius)
+{
+    SDL_FPoint centers[2];
+    if(_center1.y < _center2.y)
+    {
+        centers[0] = _center1;
+        centers[1] = _center2;
+    }
+    else
+    {
+        centers[0] = _center2;
+        centers[1] = _center1;
+    }
+
+    const double delta_x = _center2.x - _center1.x;
+    const double delta_y = _center2.y - _center1.y;
+    const double rect_height = std::sqrt(delta_x * delta_x + delta_y * delta_y);
+    const double sine = delta_y / rect_height;
+    const double cosine = delta_x / rect_height;
+
+    VectorRotator rotator(Rotation(sine, cosine));
+
+    Point delta = rotator.rotate(makePoint(.0f, _radius - 1));
+    SDL_RenderLine(_renderer, centers[0].x + delta.x, centers[0].y + delta.y, centers[1].x + delta.x, centers[1].y + delta.y);
+
+    delta = rotator.rotate(makePoint(.0f, 1 - _radius));
+    SDL_RenderLine(_renderer, centers[0].x + delta.x, centers[0].y + delta.y, centers[1].x + delta.x, centers[1].y + delta.y);
+
+    renderCircles(_renderer, _radius, centers, 2);
 }
 
 bool operator == (const SDL_Color & _color1, const SDL_Color & _color2)

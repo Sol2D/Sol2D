@@ -61,6 +61,7 @@ public:
     void operator ()(const BodyPolygonDefinition & _polygon);
     void operator ()(const BodyRectDefinition & _rect);
     void operator ()(const BodyCircleDefinition & _circle);
+    void operator ()(const BodyCapsuleShapeDefinition & _capsule);
 
 private:
     template<BodyShapeType shape_type>
@@ -88,21 +89,21 @@ Scene::BodyShapeCreator::BodyShapeCreator(
 {
 }
 
-void Scene::BodyShapeCreator::operator ()(const BodyPolygonDefinition & _polygon)
+void Scene::BodyShapeCreator::operator ()(const BodyPolygonDefinition & _capsule)
 {
-    if(_polygon.points.size() < 3 || _polygon.points.size() > b2_maxPolygonVertices)
+    if(_capsule.points.size() < 3 || _capsule.points.size() > b2_maxPolygonVertices)
         return; // TODO: log
-    std::vector<b2Vec2> shape_points(_polygon.points.size());
-    for(size_t i = 0; i < _polygon.points.size(); ++i)
+    std::vector<b2Vec2> shape_points(_capsule.points.size());
+    for(size_t i = 0; i < _capsule.points.size(); ++i)
     {
-        shape_points[i].x = mr_scene.graphicalToPhysical(_polygon.points[i].x);
-        shape_points[i].y = mr_scene.graphicalToPhysical(_polygon.points[i].y);
+        shape_points[i].x = mr_scene.graphicalToPhysical(_capsule.points[i].x);
+        shape_points[i].y = mr_scene.graphicalToPhysical(_capsule.points[i].y);
     }
     b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
     b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
-    b2ShapeDef b2_shape_def = createBox2dShapeDef(_polygon);
+    b2ShapeDef b2_shape_def = createBox2dShapeDef(_capsule);
     b2ShapeId b2_shape_id = b2CreatePolygonShape(mr_b2_body_id, &b2_shape_def, &b2_polygon);
-    BodyShape & body_shape = createShape(_polygon);
+    BodyShape & body_shape = createShape(_capsule);
     b2Shape_SetUserData(b2_shape_id, &body_shape);
 }
 
@@ -162,6 +163,30 @@ void Scene::BodyShapeCreator::operator ()(const BodyCircleDefinition & _circle)
     b2ShapeDef b2_shape_def = createBox2dShapeDef(_circle);
     b2ShapeId b2_shape_id = b2CreateCircleShape(mr_b2_body_id, &b2_shape_def, &b2_circle);
     BodyShape & body_shape = createShape(_circle);
+    b2Shape_SetUserData(b2_shape_id, &body_shape);
+}
+
+void Scene::BodyShapeCreator::operator ()(const BodyCapsuleShapeDefinition & _capsule)
+{
+    b2Capsule b2_capsule
+    {
+        .center1 = b2Vec2
+        {
+            .x = mr_scene.graphicalToPhysical(_capsule.center1.x),
+            .y = mr_scene.graphicalToPhysical(_capsule.center1.y)
+        },
+        .center2 = b2Vec2
+        {
+            .x = mr_scene.graphicalToPhysical(_capsule.center2.x),
+            .y = mr_scene.graphicalToPhysical(_capsule.center2.y)
+        },
+        .radius = mr_scene.graphicalToPhysical(_capsule.radius)
+    };
+    if(b2_capsule.radius <= .0f)
+        return; // TODO: log
+    b2ShapeDef b2_shape_def = createBox2dShapeDef(_capsule);
+    b2ShapeId b2_shape_id = b2CreateCapsuleShape(mr_b2_body_id, &b2_shape_def, &b2_capsule);
+    BodyShape & body_shape = createShape(_capsule);
     b2Shape_SetUserData(b2_shape_id, &body_shape);
 }
 

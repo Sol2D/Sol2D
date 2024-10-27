@@ -135,6 +135,7 @@ local function getDefinition()
     }
     hit_box.x = -(hit_box.w / 2)
     hit_box.y = -hit_box.h
+    local radius = hit_box.w / 2
     ---@type BodyDefinition
     definition = {
         type = sol.BodyType.DYNAMIC,
@@ -143,12 +144,14 @@ local function getDefinition()
         },
         shapes = {
             [module.keys.shapes.MAIN] = {
-                type = sol.BodyShapeType.POLYGON,
+                type = sol.BodyShapeType.CAPSULE,
                 physics = {
                     friction = 1.1,
                     density = 80
                 },
-                rect = hit_box,
+                radius = radius,
+                center1 = { x = hit_box.x + radius , y = hit_box.y + radius },
+                center2 = { x = hit_box.x + radius, y = hit_box.y + hit_box.h - radius },
                 graphics = {}
             },
             [module.keys.shapes.BOTTOM_SENSOR] = {

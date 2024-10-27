@@ -26,7 +26,13 @@ inline std::shared_ptr<SDL_Texture> wrapTexture(SDL_Texture * _texture)
     return std::shared_ptr<SDL_Texture>(_texture, SDL_DestroyTexture);
 }
 
-void sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, uint32_t _radius);
+void sdlRenderCircle(SDL_Renderer * _renderer, const SDL_FPoint & _center, float _radius);
+
+void sdlRenderCapsule(
+    SDL_Renderer * _renderer,
+    const SDL_FPoint & _center1,
+    const SDL_FPoint & _center2,
+    float _radius);
 
 void sdlDetectContentRect(const SDL_Surface & _surface, SDL_Rect & _rect);
 
