@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 #pragma once
+
+#include <vector>
 
 namespace Sol2D::Lua {
 
@@ -61,5 +62,19 @@ struct LuaTypeName
     static const char sound_effect[];
     static const char music[];
 };
+
+constexpr std::vector<const char *> getAllJointTypes()
+{
+    return std::vector<const char *>
+    {
+        LuaTypeName::distance_joint,
+        LuaTypeName::motor_joint,
+        LuaTypeName::mouse_joint,
+        LuaTypeName::prismatic_joint,
+        LuaTypeName::revolute_joint,
+        LuaTypeName::weld_joint,
+        LuaTypeName::wheel_joint
+    };
+}
 
 } // namespace Sol2D::Lua

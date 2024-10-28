@@ -66,7 +66,7 @@ struct LuaUserData
 };
 
 template<std::derived_from<LuaSelfBase> LuaSelf>
-LuaSelf * getLuaUserData(lua_State * _lua, int _idx, const std::vector<const char *> & _metatables)
+LuaSelf * tryGetLuaUserData(lua_State * _lua, int _idx, const std::vector<const char *> & _metatables)
 {
     void * user_data = lua_touserdata(_lua, _idx);
     if(!user_data || !lua_getmetatable(_lua, _idx))
@@ -87,6 +87,13 @@ LuaSelf * getLuaUserData(lua_State * _lua, int _idx, const std::vector<const cha
         }
     }
     lua_pop(_lua, 1);
+    return self;
+}
+
+template<std::derived_from<LuaSelfBase> LuaSelf>
+LuaSelf * getLuaUserData(lua_State * _lua, int _idx, const std::vector<const char *> & _metatables)
+{
+    LuaSelf * self = tryGetLuaUserData<LuaSelf>(_lua, _idx, _metatables);
     if(!self)
     {
         std::stringstream ss;

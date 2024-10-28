@@ -220,32 +220,26 @@ using RevoluteJointUserData = LuaUserData<RevoluteJointSelf, LuaTypeName::revolu
 using WeldJointUserData = LuaUserData<WeldJointSelf, LuaTypeName::weld_joint>;
 using WheelJointUserData = LuaUserData<WheelJointSelf, LuaTypeName::wheel_joint>;
 
-constexpr std::vector<const char *> getAllMetatables()
-{
-    return std::vector<const char *>
-    {
-        LuaTypeName::distance_joint,
-        LuaTypeName::motor_joint,
-        LuaTypeName::mouse_joint,
-        LuaTypeName::prismatic_joint,
-        LuaTypeName::revolute_joint,
-        LuaTypeName::weld_joint,
-        LuaTypeName::wheel_joint
-    };
-}
-
 // 1 self
 int luaApi_IsValid(lua_State * _lua)
 {
-    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllMetatables());
+    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
     lua_pushboolean(_lua, self->getJoint().isValid());
+    return 1;
+}
+
+// 1 self
+int luaApi_GetId(lua_State * _lua)
+{
+    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
+    lua_pushinteger(_lua, self->getJoint().getGid());
     return 1;
 }
 
 // 1 self
 int luaApi_GetBodyA(lua_State * _lua)
 {
-    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllMetatables());
+    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
     pushBodyApi(_lua, self->getScene(_lua), self->getJoint().getBodyA());
     return 1;
 }
@@ -253,7 +247,7 @@ int luaApi_GetBodyA(lua_State * _lua)
 // 1 self
 int luaApi_GetBodyB(lua_State * _lua)
 {
-    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllMetatables());
+    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
     pushBodyApi(_lua, self->getScene(_lua), self->getJoint().getBodyB());
     return 1;
 }
@@ -261,7 +255,7 @@ int luaApi_GetBodyB(lua_State * _lua)
 // 1 self
 int luaApi_GetLocalAnchorA(lua_State * _lua)
 {
-    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllMetatables());
+    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
     Point anchor = self->getJoint().getLocalAnchorA();
     pushPoint(_lua, anchor.x, anchor.y);
     return 1;
@@ -270,7 +264,7 @@ int luaApi_GetLocalAnchorA(lua_State * _lua)
 // 1 self
 int luaApi_GetLocalAnchorB(lua_State * _lua)
 {
-    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllMetatables());
+    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
     Point anchor = self->getJoint().getLocalAnchorB();
     pushPoint(_lua, anchor.x, anchor.y);
     return 1;
@@ -279,7 +273,7 @@ int luaApi_GetLocalAnchorB(lua_State * _lua)
 // 1 self
 int luaApi_IsCollideConnectedEnabled(lua_State * _lua)
 {
-    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllMetatables());
+    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
     lua_pushboolean(_lua, self->getJoint().isCollideConnectedEnabled());
     return 1;
 }
@@ -288,7 +282,7 @@ int luaApi_IsCollideConnectedEnabled(lua_State * _lua)
 // 2 is enabled?
 int luaApi_EnableCollideConnected(lua_State * _lua)
 {
-    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllMetatables());
+    BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getJoint().enableCollideConnected(lua_toboolean(_lua, 2));
     return 0;
@@ -1270,11 +1264,12 @@ int luaApi_GetMotorTorque(lua_State * _lua)
 } // namespace WheelJointApi
 
 template<typename UserDataT>
-constexpr std::array<luaL_Reg, 8> gc_joint_funcs =
+constexpr std::array<luaL_Reg, 9> gc_joint_funcs =
 {
     {
         { "__gc", UserDataT::luaGC },
         { "isValid", luaApi_IsValid },
+        { "getId", luaApi_GetId },
         { "getBodyA", luaApi_GetBodyA },
         { "getBodyB", luaApi_GetBodyB },
         { "getLocalAnchorA", luaApi_GetLocalAnchorA },
@@ -1535,4 +1530,10 @@ void Sol2D::Lua::pushJointApi(lua_State * _lua, std::shared_ptr<Scene> _scene, W
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);
+}
+
+World::Joint * Sol2D::Lua::tryGetJoint(lua_State * _lua, int _idx)
+{
+    BasicSelf * self = tryGetLuaUserData<BasicSelf>(_lua, _idx, getAllJointTypes());
+    return self ? &self->getJoint() : nullptr;
 }

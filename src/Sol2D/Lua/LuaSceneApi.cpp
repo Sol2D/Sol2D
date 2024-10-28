@@ -21,6 +21,7 @@
 #include <Sol2D/Lua/LuaJointDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyOptionsApi.h>
 #include <Sol2D/Lua/LuaBodyApi.h>
+#include <Sol2D/Lua/LuaJointApi.h>
 #include <Sol2D/Lua/LuaContactApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaStrings.h>
@@ -28,6 +29,7 @@
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaScript.h>
+#include <sstream>
 
 using namespace Sol2D;
 using namespace Sol2D::World;
@@ -601,12 +603,121 @@ int luaApi_CreateWheelJoint(lua_State * _lua)
 }
 
 // 1 self
-// 2 joint id
+// 2 id
+int luaApi_GetDistanceJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    std::optional<DistanceJoint> joint = scene->getDistanceJoint(static_cast<uint64_t>(lua_tointeger(_lua, 2)));
+    if(joint.has_value())
+        pushJointApi(_lua, scene, std::move(joint.value()));
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 id
+int luaApi_GetMotorJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    std::optional<MotorJoint> joint = scene->getMotorJoint(static_cast<uint64_t>(lua_tointeger(_lua, 2)));
+    if(joint.has_value())
+        pushJointApi(_lua, scene, std::move(joint.value()));
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 id
+int luaApi_GetMouseJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    std::optional<MouseJoint> joint = scene->getMouseJoint(static_cast<uint64_t>(lua_tointeger(_lua, 2)));
+    if(joint.has_value())
+        pushJointApi(_lua, scene, std::move(joint.value()));
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 id
+int luaApi_GetPrismaticJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    std::optional<PrismaticJoint> joint = scene->getPrismaticJoint(static_cast<uint64_t>(lua_tointeger(_lua, 2)));
+    if(joint.has_value())
+        pushJointApi(_lua, scene, std::move(joint.value()));
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 id
+int luaApi_GetWeldJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    std::optional<WeldJoint> joint = scene->getWeldJoint(static_cast<uint64_t>(lua_tointeger(_lua, 2)));
+    if(joint.has_value())
+        pushJointApi(_lua, scene, std::move(joint.value()));
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 id
+int luaApi_GetWheelJoint(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    std::optional<WheelJoint> joint = scene->getWheelJoint(static_cast<uint64_t>(lua_tointeger(_lua, 2)));
+    if(joint.has_value())
+        pushJointApi(_lua, scene, std::move(joint.value()));
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 joint or joint id
 int luaApi_DestroyJoint(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_joint_id_expected);
-    uint64_t id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    uint64_t id = 0;
+    if(lua_isinteger(_lua, 2))
+    {
+        id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
+    }
+    else if(Joint * joint = tryGetJoint(_lua, 2))
+    {
+        id = joint->getGid();
+    }
+    else
+    {
+        std::vector<const char *> all_joint_types = getAllJointTypes();
+        std::stringstream ss;
+        for(size_t i = 0; i < all_joint_types.size(); ++i)
+        {
+            if(i > 0) ss << ", ";
+            ss << all_joint_types[i];
+        }
+        ss << " or " << LuaTypeName::integer;
+        luaL_argexpected(_lua, false, 2, ss.str().c_str());
+    }
     lua_pushboolean(_lua, self->getScene(_lua)->destroyJoint(id));
     return 1;
 }
@@ -681,6 +792,12 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             { "createPrismaticJoint", luaApi_CreatePrismaticJoint },
             { "createWeldJoint", luaApi_CreateWeldJoint },
             { "createWheelJoint", luaApi_CreateWheelJoint },
+            { "getDistanceJoint", luaApi_GetDistanceJoint },
+            { "getMotorJoint", luaApi_GetMotorJoint },
+            { "getMouseJoint", luaApi_GetMouseJoint },
+            { "getPrismaticJoint", luaApi_GetPrismaticJoint },
+            { "getWeldJoint", luaApi_GetWeldJoint },
+            { "getWheelJoint", luaApi_GetWheelJoint },
             { "destroyJoint", luaApi_DestroyJoint },
             { "findPath", luaApi_FindPath },
             { nullptr, nullptr }

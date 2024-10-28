@@ -391,8 +391,32 @@ function __scene:createWeldJoint(definition) end
 function __scene:createWheelJoint(definition) end
 
 ---@param id integer
+---@return sol.DistanceJoint | nil
+function __scene:getDistanceJoint(id) end
+
+---@param id integer
+---@return sol.MotorJoin | nil
+function __scene:getMotorJoint(id) end
+
+---@param id integer
+---@return sol.MotorJoin | nil
+function __scene:getMouseJoint(id) end
+
+---@param id integer
+---@return sol.PrismaticJoint | nil
+function __scene:getPrismaticJoint(id) end
+
+---@param id integer
+---@return sol.WeldJoint | nil
+function __scene:getWeldJoint(id) end
+
+---@param id integer
+---@return sol.WheelJoint | nil
+function __scene:getWheelJoint(id) end
+
+---@param joint sol.Joint | integer
 ---@return boolean
-function __scene:destroyJoint(id) end
+function __scene:destroyJoint(joint) end
 
 ---@param body_id integer | sol.Body
 ---@param destination Point
@@ -472,9 +496,12 @@ local __joint
 function __joint:isValid() end
 
 ---@return integer
+function __joint:getId() end
+
+---@return sol.Body
 function __joint:getBodyA() end
 
----@return integer
+---@return sol.Body
 function __joint:getBodyB() end
 
 ---@return Point
@@ -616,7 +643,7 @@ function __mouse_joint:getMaxForce() end
 ---@param force number
 function __mouse_joint:setMaxForce(force) end
 
----@class PrismaticJoint: sol.Joint
+---@class sol.PrismaticJoint: sol.Joint
 local __prismatic_joint
 
 ---@return boolean
@@ -768,63 +795,63 @@ function __weld_joint:getAngularDampingRatio() end
 ---@param ratio number
 function __weld_joint:setAngularDampingRatio(ratio) end
 
----@class sol.WeelJoint: sol.Joint
-local __weel_joing
+---@class sol.WheelJoint: sol.Joint
+local __wheel_joint
 
 ---@return boolean
-function __weel_joing:isSpringEnabled() end
+function __wheel_joint:isSpringEnabled() end
 
 ---@param enable boolean
-function __weel_joing:enableSpring(enable) end
+function __wheel_joint:enableSpring(enable) end
 
 ---@return number
-function __weel_joing:getSpringHertz() end
+function __wheel_joint:getSpringHertz() end
 
 ---@param hertz number
-function __weel_joing:setSpringHertz(hertz) end
+function __wheel_joint:setSpringHertz(hertz) end
 
 ---@return number
-function __weel_joing:getSpringDampingRatio() end
+function __wheel_joint:getSpringDampingRatio() end
 
 ---@param ratio number
-function __weel_joing:setSpringDampingRatio(ratio) end
+function __wheel_joint:setSpringDampingRatio(ratio) end
 
 ---@return boolean
-function __weel_joing:isLimitEnabled() end
+function __wheel_joint:isLimitEnabled() end
 
 ---@return number
-function __weel_joing:getLowerLimit() end
+function __wheel_joint:getLowerLimit() end
 
 ---@return number
-function __weel_joing:getUpperLimit() end
+function __wheel_joint:getUpperLimit() end
 
 ---@param lower_limit number
 ---@param upper_limit number
-function __weel_joing:setLimits(lower_limit, upper_limit) end
+function __wheel_joint:setLimits(lower_limit, upper_limit) end
 
 ---@param enable boolean
-function __weel_joing:enableLimit(enable) end
+function __wheel_joint:enableLimit(enable) end
 
 ---@return boolean
-function __weel_joing:isMotorEnabled() end
+function __wheel_joint:isMotorEnabled() end
 
 ---@param enable boolean
-function __weel_joing:enableMotor(enable) end
+function __wheel_joint:enableMotor(enable) end
 
 ---@return number
-function __weel_joing:getMotorSpeed() end
+function __wheel_joint:getMotorSpeed() end
 
 ---@param speed number
-function __weel_joing:setMotorSpeed(speed) end
+function __wheel_joint:setMotorSpeed(speed) end
 
 ---@return number
-function __weel_joing:getMaxMotorTorque() end
+function __wheel_joint:getMaxMotorTorque() end
 
 ---@param torque number
-function __weel_joing:setMaxMotorTorque(torque) end
+function __wheel_joint:setMaxMotorTorque(torque) end
 
 ---@return number
-function __weel_joing:getMotorTorque() end
+function __wheel_joint:getMotorTorque() end
 
 ---@class sol.Form
 local __form
