@@ -367,11 +367,11 @@ function __scene:subscribeToStep(callback) end
 function __scene:unsubscribeFromStep(subscription_id) end
 
 ---@param definition DistanceJointDefenition
----@return integer
+---@return sol.DistanceJoint
 function __scene:createDistanceJoint(definition) end
 
 ---@param definition MotorJointDefinition
----@return integer
+---@return sol.MotorJoin
 function __scene:createMotorJoint(definition) end
 
 ---@param definition MouseJointDefinition
@@ -379,15 +379,15 @@ function __scene:createMotorJoint(definition) end
 function __scene:createMouseJoint(definition) end
 
 ---@param definition PrismaticJointDefinition
----@return integer
+---@return sol.PrismaticJoint
 function __scene:createPrismaticJoint(definition) end
 
 ---@param definition WeldJointDefinition
----@return integer
+---@return sol.WeldJoint
 function __scene:createWeldJoint(definition) end
 
 ---@param definition WheelJointDefinition
----@return integer
+---@return sol.WheelJoint
 function __scene:createWheelJoint(definition) end
 
 ---@param id integer

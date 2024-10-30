@@ -543,7 +543,9 @@ int luaApi_CreateDistanceJoint(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     DistanceJointDefenition definition;
     luaL_argcheck(_lua, tryGetDistanceJointDefenition(_lua, 2, definition), 2, "distance joint definition expected");
-    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    uint64_t id = scene->createJoint(definition);
+    pushJointApi(_lua, scene, scene->getDistanceJoint(id).value());
     return 1;
 }
 
@@ -554,7 +556,9 @@ int luaApi_CreateMotorJoint(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     MotorJointDefinition definition;
     luaL_argcheck(_lua, tryGetMotorJointDefinition(_lua, 2, definition), 2, "motor joint definition expected");
-    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    uint64_t id = scene->createJoint(definition);
+    pushJointApi(_lua, scene, scene->getMotorJoint(id).value());
     return 1;
 }
 
@@ -565,7 +569,9 @@ int luaApi_CreateMouseJoint(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     MouseJointDefinition definition;
     luaL_argcheck(_lua, tryGetMouseJointDefinition(_lua, 2, definition), 2, "mouse joint definition expected");
-    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    uint64_t id = scene->createJoint(definition);
+    pushJointApi(_lua, scene, scene->getMouseJoint(id).value());
     return 1;
 }
 
@@ -576,7 +582,9 @@ int luaApi_CreatePrismaticJoint(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     PrismaticJointDefinition definition;
     luaL_argcheck(_lua, tryGetPrismaticJointDefinition(_lua, 2, definition), 2, "prismatic joint definition expected");
-    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    uint64_t id = scene->createJoint(definition);
+    pushJointApi(_lua, scene, scene->getPrismaticJoint(id).value());
     return 1;
 }
 
@@ -587,7 +595,9 @@ int luaApi_CreateWeldJoint(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     WeldJointDefinition definition;
     luaL_argcheck(_lua, tryGetWeldJointDefinition(_lua, 2, definition), 2, "weld joint definition expected");
-    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    uint64_t id = scene->createJoint(definition);
+    pushJointApi(_lua, scene, scene->getWeldJoint(id).value());
     return 1;
 }
 
@@ -598,7 +608,9 @@ int luaApi_CreateWheelJoint(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     WheelJointDefinition definition;
     luaL_argcheck(_lua, tryGetWheelJointDefinition(_lua, 2, definition), 2, "wheel joint definition expected");
-    lua_pushinteger(_lua, self->getScene(_lua)->createJoint(definition));
+    std::shared_ptr<Scene> scene = self->getScene(_lua);
+    uint64_t id = scene->createJoint(definition);
+    pushJointApi(_lua, scene, scene->getWheelJoint(id).value());
     return 1;
 }
 

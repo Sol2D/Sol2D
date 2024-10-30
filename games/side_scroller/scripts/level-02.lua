@@ -21,6 +21,7 @@ local function createButton(level, scene)
     )
 end
 
+---@param scene sol.Scene
 function level_02:init(scene)
     createButton(self, scene)
 
