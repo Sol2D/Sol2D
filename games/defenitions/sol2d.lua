@@ -14,44 +14,44 @@
 ---@field VerticalTextAlignment sol.VerticalTextAlignment
 sol = nil
 
----@type ScriptContext
+---@type sol.ScriptContext
 script = nil
 
----@class ScriptContext
+---@class sol.ScriptContext
 ---@field body sol.Body
 ---@field scene sol.Scene
 ---@field arg any?
 
----@class Point
+---@class sol.Point
 ---@field x number
 ---@field y number
 
----@class Size
+---@class sol.Size
 ---@field w number
 ---@field h number
 
----@class Rectangle
+---@class sol.Rectangle
 ---@field x number
 ---@field y number
 ---@field w number
 ---@field h number
 
----@class Color
+---@class sol.Color
 ---@field r integer
 ---@field g integer
 ---@field b integer
 ---@field a integer?
 
----@class SceneOptions
+---@class sol.SceneOptions
 ---@field metersPerPixel number?
----@field gravity Point?
+---@field gravity sol.Point?
 
 ---@class SpriteOptions
----@field colorToAlpha Color?
----@field rect Rectangle?
+---@field colorToAlpha sol.Color?
+---@field rect sol.Rectangle?
 ---@field autodetectRect boolean? default false
 
----@class SpriteSheetOptions
+---@class sol.SpriteSheetOptions
 ---@field spriteWidth integer
 ---@field spriteHeight integer
 ---@field rowCount integer
@@ -60,90 +60,90 @@ script = nil
 ---@field marginLeft integer?
 ---@field horizontalSpacing integer?
 ---@field verticalSpacing integer?
----@field colorToAlpha Color?
+---@field colorToAlpha sol.Color?
 
----@class BodyShapeGraphicsOptions
----@field position Point?
+---@class sol.BodyShapeGraphicsOptions
+---@field position sol.Point?
 ---@field isFlippedHorizontally boolean?
 ---@field isFlippedVertically boolean?
 
----@class BodyPhysicsDefinition
+---@class sol.BodyPhysicsDefinition
 ---@field linearDamping number?
 ---@field angularDamping number?
 ---@field fixedRotation boolean?
 
----@class BodyShapePhysicsDefinition
+---@class sol.BodyShapePhysicsDefinition
 ---@field density number?
 ---@field restitution number?
 ---@field friction number?
 ---@field isSensor boolean?
 ---@field isPreSolveEnabled boolean?
 
----@class BodyOptions
+---@class sol.BodyOptions
 ---@field type integer?
 ---@field shapeKey string?
----@field bodyPhysics BodyPhysicsDefinition?
----@field shapePhysics BodyShapePhysicsDefinition?
+---@field bodyPhysics sol.BodyPhysicsDefinition?
+---@field shapePhysics sol.BodyShapePhysicsDefinition?
 ---@see sol.BodyType
 
----@class BodyDefinition
+---@class sol.BodyDefinition
 ---@field type integer
 ---@field script string?
----@field physics BodyPhysicsDefinition?
----@field shapes table<string, BodyShapeRectDefinition | BodyShapePolygonDefinition | BodyShapeCircleDefinition | BodyShapeCapsuleDefinition>?
+---@field physics sol.BodyPhysicsDefinition?
+---@field shapes table<string, sol.BodyShapeRectDefinition | sol.BodyShapePolygonDefinition | sol.BodyShapeCircleDefinition | sol.BodyShapeCapsuleDefinition>?
 ---@see sol.BodyType
 
----@class BodyShapeDefinitionBase
+---@class sol.BodyShapeDefinitionBase
 ---@field type integer
----@field physics BodyShapePhysicsDefinition?
----@field graphics table<string, GraphicsPackDefinition>?
+---@field physics sol.BodyShapePhysicsDefinition?
+---@field graphics table<string, sol.GraphicsPackDefinition>?
 ---@see sol.BodyShapeType
 
----@class BodyShapeRectDefinition: BodyShapeDefinitionBase
----@field rect Rectangle
+---@class sol.BodyShapeRectDefinition: sol.BodyShapeDefinitionBase
+---@field rect sol.Rectangle
 
----@class BodyShapePolygonDefinition: BodyShapeDefinitionBase
----@field points Point[]
+---@class sol.BodyShapePolygonDefinition: sol.BodyShapeDefinitionBase
+---@field points sol.Point[]
 
----@class BodyShapeCircleDefinition: BodyShapeDefinitionBase
----@field center Point
+---@class sol.BodyShapeCircleDefinition: sol.BodyShapeDefinitionBase
+---@field center sol.Point
 ---@field radius number
 
----@class BodyShapeCapsuleDefinition: BodyShapeDefinitionBase
----@field center1 Point
----@field center2 Point
+---@class sol.BodyShapeCapsuleDefinition: sol.BodyShapeDefinitionBase
+---@field center1 sol.Point
+---@field center2 sol.Point
 ---@field radius number
 
----@class GraphicsPackDefinition
----@field position Point?
+---@class sol.GraphicsPackDefinition
+---@field position sol.Point?
 ---@field isFlippedHorizontally boolean?
 ---@field isFlippedVertically boolean?
----@field center Point?
+---@field center sol.Point?
 ---@field animationIterations integer?
----@field frames GraphicsPackFrameDefinition[]
+---@field frames sol.GraphicsPackFrameDefinition[]
 
----@class GraphicsPackFrameDefinition
+---@class sol.GraphicsPackFrameDefinition
 ---@field duration integer? milliseconds
 ---@field isVisible boolean? default is true
----@field sprites GraphicsPackSpriteDefinition[]
+---@field sprites sol.GraphicsPackSpriteDefinition[]
 
----@class GraphicsPackSpriteDefinition
+---@class sol.GraphicsPackSpriteDefinition
 ---@field isVisible boolean? default is true
----@field position Point?
----@field scaleFactor Point?
+---@field position sol.Point?
+---@field scaleFactor sol.Point?
 ---@field sprite sol.Sprite | { spriteSheet: sol.SpriteSheet, spriteIndex: integer }
 
----@class JointDefinition
+---@class sol.JointDefinition
 ---@field bodyA integer | sol.Body
 ---@field bodyB integer | sol.Body
 ---@field isCollideConnectedEnabled boolean?
 
----@class DistanceJointDefenition: JointDefinition
+---@class sol.DistanceJointDefenition: sol.JointDefinition
 ---@field isSpringEnbaled boolean?
 ---@field isMotorEnbaled boolean?
 ---@field isLimitEnbaled boolean?
----@field localAnchorA Point?
----@field localAnchorB Point?
+---@field localAnchorA sol.Point?
+---@field localAnchorB sol.Point?
 ---@field minLength number?
 ---@field maxLength number?
 ---@field hertz number?
@@ -152,26 +152,26 @@ script = nil
 ---@field motorSpeed number?
 ---@field length number?
 
----@class MotorJointDefinition: JointDefinition
----@field linearOffset Point?
+---@class sol.MotorJointDefinition: sol.JointDefinition
+---@field linearOffset sol.Point?
 ---@field angularOffset number?
 ---@field maxForce number?
 ---@field maxTorque number?
 ---@field correctionFactor number?
 
----@class MouseJointDefinition: JointDefinition
----@field target Point?
+---@class sol.MouseJointDefinition: sol.JointDefinition
+---@field target sol.Point?
 ---@field hertz number?
 ---@field dampingRatio number?
 ---@field maxForce number?
 
----@class PrismaticJointDefinition: JointDefinition
+---@class sol.PrismaticJointDefinition: sol.JointDefinition
 ---@field isSpringEnbaled boolean?
 ---@field isMotorEnbaled boolean?
 ---@field isLimitEnbaled boolean?
----@field localAnchorA Point?
----@field localAnchorB Point?
----@field localAxisA Point?
+---@field localAnchorA sol.Point?
+---@field localAnchorB sol.Point?
+---@field localAxisA sol.Point?
 ---@field hertz number?
 ---@field dampingRatio number?
 ---@field maxMotorForce number?
@@ -180,22 +180,22 @@ script = nil
 ---@field lowerTranslation number?
 ---@field upperTranslation number?
 
----@class WeldJointDefinition: JointDefinition
----@field localAnchorA Point?
----@field localAnchorB Point?
+---@class sol.WeldJointDefinition: sol.JointDefinition
+---@field localAnchorA sol.Point?
+---@field localAnchorB sol.Point?
 ---@field reference_angle number?
 ---@field linearHertz number?
 ---@field angularHertz number?
 ---@field linearDampingRatio number?
 ---@field angularDampingRatio number?
 
----@class WheelJointDefinition: JointDefinition
+---@class sol.WheelJointDefinition: sol.JointDefinition
 ---@field isSpringEnbaled boolean?
 ---@field isMotorEnbaled boolean?
 ---@field isLimitEnbaled boolean?
----@field localAnchorA Point?
----@field localAnchorB Point?
----@field localAxisA Point?
+---@field localAnchorA sol.Point?
+---@field localAnchorB sol.Point?
+---@field localAxisA sol.Point?
 ---@field hertz number?
 ---@field dampingRatio number?
 ---@field maxMotorTorque number?
@@ -203,21 +203,21 @@ script = nil
 ---@field lowerTranslation number?
 ---@field upperTranslation number?
 
----@class Fragment
----@field top Dimension?
----@field right Dimension?
----@field left Dimension?
----@field bottom Dimension?
----@field width Dimension?
----@field height Dimension?
+---@class sol.Fragment
+---@field top sol.Dimension?
+---@field right sol.Dimension?
+---@field left sol.Dimension?
+---@field bottom sol.Dimension?
+---@field width sol.Dimension?
+---@field height sol.Dimension?
 ---@field zIndex integer? default: 0
 ---@field isVisible boolean? default: true
 
----@class DimensionTable
+---@class sol.DimensionTable
 ---@field unit integer
 ---@field value integer
 
----@alias Dimension DimensionTable | string | number
+---@alias sol.Dimension sol.DimensionTable | string | number
 
 ---@class sol.DimensionUnit
 ---@field PIXEL integer
@@ -250,17 +250,17 @@ function __window:getView() end
 ---@class sol.View
 local __view
 
----@param fragment Fragment
+---@param fragment sol.Fragment
 ---@return integer
 function __view:createFragment(fragment) end
 
 ---@param fragment_id integer
----@param fragment Fragment
+---@param fragment sol.Fragment
 ---@return boolean
 function __view:updateFragment(fragment_id, fragment) end
 
 ---@param fragment_id integer
----@return Fragment?
+---@return sol.Fragment?
 function __view:getFragment(fragment_id) end
 
 ---@param fragment_id integer
@@ -275,7 +275,7 @@ function __view:bindFragment(fragment_id, target) end
 ---@class sol.Scene
 local __scene
 
----@param vector Point
+---@param vector sol.Point
 function __scene:setGravity(vector) end
 
 ---@param path string
@@ -283,19 +283,19 @@ function __scene:setGravity(vector) end
 function __scene:loadTileMap(path) end
 
 ---@param id integer
----@return TileMapObject | nil
+---@return sol.TileMapObject | nil
 function __scene:getTileMapObjectById(id) end
 
 ---@param name string
----@return TileMapObject | nil
+---@return sol.TileMapObject | nil
 function __scene:getTileMapObjectByName(name) end
 
 ---@param class string
----@return TileMapObject[]
+---@return sol.TileMapObject[]
 function __scene:getTileMapObjectsByClass(class) end
 
----@param position Point | nil
----@param definition BodyDefinition
+---@param position sol.Point | nil
+---@param definition sol.BodyDefinition
 ---@param script_path string?
 ---@param script_argument? any
 ---@return sol.Body
@@ -310,7 +310,7 @@ function __scene:destroyBody(body) end
 function __scene:getBody(body_id) end
 
 ---@param class string
----@param body_options BodyOptions?
+---@param body_options sol.BodyOptions?
 function __scene:createBodiesFromMapObjects(class, body_options) end
 
 ---@param body integer | sol.Body
@@ -319,74 +319,74 @@ function __scene:setFollowedBody(body) end
 
 function __scene:resetFollowedBody() end
 
----@alias ContactCallback fun(contact: Contact)
----@alias SensorContactCallback fun(contact: SensorContact)
----@alias PreSolveContactCallback fun(contact: PreSolveContact)
----@alias StepCallback fun(time_passed: integer)
+---@alias sol.ContactCallback fun(contact: sol.Contact)
+---@alias sol.SensorContactCallback fun(contact: sol.SensorContact)
+---@alias sol.PreSolveContactCallback fun(contact: sol.PreSolveContact)
+---@alias sol.StepCallback fun(time_passed: integer)
 
----@param callback ContactCallback
+---@param callback sol.ContactCallback
 ---@return integer subscription ID
 function __scene:subscribeToBeginContact(callback) end
 
 ---@param subscription_id integer
 function __scene:unsubscribeFromBeginContact(subscription_id) end
 
----@param callback ContactCallback
+---@param callback sol.ContactCallback
 ---@return integer subscription ID
 function __scene:subscribeToEndContact(callback) end
 
 ---@param subscription_id integer
 function __scene:unsubscribeFromEndContact(subscription_id) end
 
----@param callback SensorContactCallback
+---@param callback sol.SensorContactCallback
 ---@return integer subscription ID
 function __scene:subscribeToSensorBeginContact(callback) end
 
 ---@param subscription_id integer
 function __scene:unsubscribeFromSensorBeginContact(subscription_id) end
 
----@param callback SensorContactCallback
+---@param callback sol.SensorContactCallback
 ---@return integer subscription ID
 function __scene:subscribeToSensorEndContact(callback) end
 
 ---@param subscription_id integer
 function __scene:unsubscribeFromSesnsorEndContact(subscription_id) end
 
----@param callback PreSolveContactCallback
+---@param callback sol.PreSolveContactCallback
 ---@return integer subscription ID
 function __scene:subscribeToPreSolveContact(callback) end
 
 ---@param subscription_id integer
 function __scene:unsubscribeFromPreSolveContact(subscription_id) end
 
----@param callback StepCallback
+---@param callback sol.StepCallback
 ---@return integer subscription ID
 function __scene:subscribeToStep(callback) end
 
 ---@param subscription_id integer
 function __scene:unsubscribeFromStep(subscription_id) end
 
----@param definition DistanceJointDefenition
+---@param definition sol.DistanceJointDefenition
 ---@return sol.DistanceJoint
 function __scene:createDistanceJoint(definition) end
 
----@param definition MotorJointDefinition
+---@param definition sol.MotorJointDefinition
 ---@return sol.MotorJoin
 function __scene:createMotorJoint(definition) end
 
----@param definition MouseJointDefinition
+---@param definition sol.MouseJointDefinition
 ---@return integer
 function __scene:createMouseJoint(definition) end
 
----@param definition PrismaticJointDefinition
+---@param definition sol.PrismaticJointDefinition
 ---@return sol.PrismaticJoint
 function __scene:createPrismaticJoint(definition) end
 
----@param definition WeldJointDefinition
+---@param definition sol.WeldJointDefinition
 ---@return sol.WeldJoint
 function __scene:createWeldJoint(definition) end
 
----@param definition WheelJointDefinition
+---@param definition sol.WheelJointDefinition
 ---@return sol.WheelJoint
 function __scene:createWheelJoint(definition) end
 
@@ -419,8 +419,8 @@ function __scene:getWheelJoint(id) end
 function __scene:destroyJoint(joint) end
 
 ---@param body_id integer | sol.Body
----@param destination Point
----@return Point[] | nil
+---@param destination sol.Point
+---@return sol.Point[] | nil
 function __scene:findPath(body_id, destination) end
 
 ---@class sol.Body
@@ -440,23 +440,23 @@ function __body:getShape(shpe_key) end
 function __body:setLayer(layer) end
 
 --- Throws an error if the body is invalid or has been destroyed
----@return Point
+---@return sol.Point
 function __body:getPosition() end
 
----@pram position Point
+---@pram position sol.Point
 function __body:setPosition(position) end
 
----@pram vector Point
+---@pram vector sol.Point
 function __body:applyForceToCenter(vector) end
 
----@pram vector Point
+---@pram vector sol.Point
 function __body:applyImpulseToCenter(vector) end
 
 --- Throws an error if the body is invalid or has been destroyed
----@return Point
+---@return sol.Point
 function __body:getLinearVelocity() end
 
----@pram velocity Point
+---@pram velocity sol.Point
 function __body:setLinearVelocity(velocity) end
 
 --- Throws an error if the body is invalid or has been destroyed
@@ -504,10 +504,10 @@ function __joint:getBodyA() end
 ---@return sol.Body
 function __joint:getBodyB() end
 
----@return Point
+---@return sol.Point
 function __joint:getLocalAnchorA() end
 
----@return Point
+---@return sol.Point
 function __joint:getLocalAnchorB() end
 
 ---@return boolean
@@ -586,10 +586,10 @@ function __distance_joint:setMaxMotorForce(force) end
 ---@class sol.MotorJoin: sol.Joint
 local __motor_joint
 
----@return Point
+---@return sol.Point
 function getLinearOffset() end
 
----@return Point
+---@return sol.Point
 function __motor_joint:setLinearOffset() end
 
 ---@return number
@@ -619,10 +619,10 @@ function __motor_joint:setCorrectionFactor(correction_factor) end
 ---@class sol.MouseJoint: sol.Joint
 local __mouse_joint
 
----@return Point
+---@return sol.Point
 function __mouse_joint:getTarget() end
 
----@param target Point
+---@param target sol.Point
 function __mouse_joint:setTarget(target) end
 
 ---@return number
@@ -881,38 +881,38 @@ function __form:createButton(text) end
 ---@field CENTER integer
 ---@field BOTTOM integer
 
----@class WidgetPadding
----@field top Dimension?
----@field right Dimension?
----@field bottom Dimension?
----@field left Dimension?
+---@class sol.WidgetPadding
+---@field top sol.Dimension?
+---@field right sol.Dimension?
+---@field bottom sol.Dimension?
+---@field left sol.Dimension?
 
 ---@class sol.Widget
 local __widget
 
----@param value Dimension
+---@param value sol.Dimension
 function __widget:setX(value) end
 
----@param value Dimension
+---@param value sol.Dimension
 function __widget:setY(value) end
 
----@param value Dimension
+---@param value sol.Dimension
 function __widget:setWidth(value) end
 
----@param value Dimension
+---@param value sol.Dimension
 function __widget:setHeight(value) end
 
----@param color Color
+---@param color sol.Color
 ---@param widget_state integer?
 ---@see sol.WidgetState
 function __widget:setBackgroundColor(color, widget_state) end
 
----@param color Color
+---@param color sol.Color
 ---@param widget_state integer?
 ---@see sol.WidgetState
 function __widget:setForegroundColor(color, widget_state) end
 
----@param color Color
+---@param color sol.Color
 ---@param widget_state integer?
 ---@see sol.WidgetState
 function __widget:setBorderColor(color, widget_state) end
@@ -922,7 +922,7 @@ function __widget:setBorderColor(color, widget_state) end
 ---@see sol.WidgetState
 function __widget:setBorderWidth(width, widget_state) end
 
----@param padding WidgetPadding | Dimension
+---@param padding sol.WidgetPadding | sol.Dimension
 ---@param widget_state integer?
 ---@see sol.WidgetState
 function __widget:setPadding(padding, widget_state) end
@@ -956,33 +956,33 @@ function __button:subscribeOnClick(callback) end
 ---@param subscription_id integer
 function __button:unsubscribeOnClick(subscription_id) end
 
----@class Contact
----@field sideA ContactSide
----@field sideB ContactSide
+---@class sol.Contact
+---@field sideA sol.ContactSide
+---@field sideB sol.ContactSide
 
----@class SensorContact
----@field sensor ContactSide
----@field visitor ContactSide
+---@class sol.SensorContact
+---@field sensor sol.ContactSide
+---@field visitor sol.ContactSide
 
----@class PreSolveContact
----@field sideA ContactSide
----@field sideB ContactSide
----@field manifold Manifold
+---@class sol.PreSolveContact
+---@field sideA sol.ContactSide
+---@field sideB sol.ContactSide
+---@field manifold sol.Manifold
 
----@class Manifold
----@field normal Point
----@field points ManifoldPoint[]
+---@class sol.Manifold
+---@field normal sol.Point
+---@field points sol.ManifoldPoint[]
 
----@class ManifoldPoint
----@field point Point
----@field anchorA Point
----@field anchorB Point
+---@class sol.ManifoldPoint
+---@field point sol.Point
+---@field anchorA sol.Point
+---@field anchorB sol.Point
 ---@field separation number
 ---@field normalImpulse number
 ---@field tangentImpulse number
 ---@field normalVelocity number
 
----@class ContactSide
+---@class sol.ContactSide
 ---@field bodyId integer
 ---@field shapeKey string
 ---@field tileMapObjectId integer?
@@ -1003,7 +1003,7 @@ function __store:getView(key) end
 function __store:freeView(key) end
 
 ---@param key string
----@param options SceneOptions?
+---@param options sol.SceneOptions?
 ---@return sol.Scene
 function __store:createScene(key, options) end
 
@@ -1092,7 +1092,7 @@ function __store:getFont(key) end
 function __store:freeFont(key) end
 
 ---@class sol.BodyShapeType
----@field CIRCLE integerw
+---@field CIRCLE integer
 ---@field POLYGON integer
 ---@field CAPSULE integer
 
@@ -1107,13 +1107,13 @@ function __sprite:loadFromFile(path, options) end
 ---@return boolean
 function __sprite:isValid() end
 
----@return Rectangle
+---@return sol.Rectangle
 function __sprite:getSourceRect() end
 
----@return Size
+---@return sol.Size
 function __sprite:getDestinationSize() end
 
----@param size Size
+---@param size sol.Size
 function __sprite:setDestinationSize(size) end
 
 function __sprite:scale() end
@@ -1129,19 +1129,19 @@ function __sprite:scale(scale_factor_x, scale_factor_y) end
 local __sprite_sheet
 
 ---@param path string
----@param options SpriteSheetOptions?
+---@param options sol.SpriteSheetOptions?
 ---@return boolean
 function __sprite_sheet:loadFromFile(path, options) end
 
 ---@class sol.GraphicsPack
 local __graphics_pack
 
----@param definition GraphicsPackFrameDefinition
+---@param definition sol.GraphicsPackFrameDefinition
 ---@return integer # index of the new frame
 function __graphics_pack:addFrame(definition) end
 
 ---@param frame_index integer # position to insert
----@param definition GraphicsPackFrameDefinition
+---@param definition sol.GraphicsPackFrameDefinition
 ---@return integer # index of the new frame
 function __graphics_pack:insertFrame(frame_index, definition) end
 
@@ -1178,7 +1178,7 @@ function __graphics_pack:setCurrentFrameIndex(frame_index) end
 function __graphics_pack:switchToNextVisibleFrame() end
 
 ---@param frame_index integer
----@param definition? GraphicsPackSpriteDefinition
+---@param definition? sol.GraphicsPackSpriteDefinition
 function __graphics_pack:addSprite(frame_index, definition) end
 
 ---@param frame_index integer
@@ -1315,14 +1315,14 @@ function __keyboard:getState(...) end
 ---@field POLYLINE integer
 ---@field TEXT integer
 
----@class TileMapObject
+---@class sol.TileMapObject
 ---@field id integer
 ---@field tile string?
 ---@field class string
 ---@field name string
 ---@field type integer
----@field position Point
----@field points? Point[]
+---@field position sol.Point
+---@field points? sol.Point[]
 
 ---@class sol.Font
 local __font

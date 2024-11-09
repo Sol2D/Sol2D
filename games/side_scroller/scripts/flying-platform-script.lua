@@ -46,8 +46,8 @@ end
 local places = makePlaces()
 local target_index = 0
 
----@param point1 Point
----@param point2 Point
+---@param point1 sol.Point
+---@param point2 sol.Point
 ---@return boolean
 local function areSamePoints(point1, point2)
     return math.abs(point1.x - point2.x) <= DELTA and math.abs(point1.y - point2.y) <= DELTA

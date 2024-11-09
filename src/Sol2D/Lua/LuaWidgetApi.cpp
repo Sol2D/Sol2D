@@ -301,14 +301,18 @@ int luaApi_SetHorizontalTextAlignment(lua_State * _lua)
 }
 
 // 1 self
-// 2 padding
+// 2 padding (padding or dimention)
 // 3 widget state?
 template<typename UserDataT>
 int luaApi_SetPadding(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     WidgetPadding padding;
-    luaL_argexpected(_lua, tryGetWidgetPadding(_lua, 2, padding), 2, LuaTypeName::widget_padding);
+    luaL_argexpected(
+        _lua,
+        tryGetWidgetPadding(_lua, 2, padding),
+        2,
+        LuaTypeName::joinTypes(LuaTypeName::widget_padding, LuaTypeName::dimension).c_str());
     self->getWidget(_lua)->padding.setValue(getWidgetState(_lua, 3), padding);
     return 0;
 }

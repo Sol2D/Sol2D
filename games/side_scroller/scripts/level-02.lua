@@ -42,7 +42,7 @@ function level_02:init(scene)
             bodyType = sol.BodyType.DYNAMIC
         }
     )
-    local hook_joint = scene:createWeldJoint({
+    local hook_joint = scene:createDistanceJoint({
         bodyA = hook,
         bodyB = platform
     })
@@ -55,7 +55,7 @@ function level_02:init(scene)
     end
     function result.onSensorEndContact(contact)
         if contact.sensor.shapeKey == Button.keys.shapes.SENSOR and contact.visitor.shapeKey == Button.keys.shapes.CAP then
-            hook_joint = scene:createWeldJoint({
+            hook_joint = scene:createDistanceJoint({
                 bodyA = hook,
                 bodyB = platform
             })

@@ -20,14 +20,14 @@ local module = {
 }
 module.__index = module
 
----@param graphics_defs table<string, GraphicsPackDefinition>
+---@param graphics_defs table<string, sol.GraphicsPackDefinition>
 local function addIdleAnimation(graphics_defs)
     local frame_duration = 80
     local animation_position = {
         x = -(resources.keys.sprites.knight.idle.rect.w * SCALE_FACTOR) / 2,
         y = -resources.keys.sprites.knight.idle.rect.h * SCALE_FACTOR
     }
-    ---@type GraphicsPackFrameDefinition[]
+    ---@type sol.GraphicsPackFrameDefinition[]
     local frames = {}
     for _, sprite_key in ipairs(resources.keys.sprites.knight.idle) do
         table.insert(
@@ -54,14 +54,14 @@ local function addIdleAnimation(graphics_defs)
     }
 end
 
----@param graphics_defs table<string, GraphicsPackDefinition>
+---@param graphics_defs table<string, sol.GraphicsPackDefinition>
 local function addWalkAnimations(graphics_defs)
     local frame_duration = 80
     local animation_position = {
         x = -(resources.keys.sprites.knight.walk.rect.w * SCALE_FACTOR) / 2,
         y = -resources.keys.sprites.knight.walk.rect.h * SCALE_FACTOR + 9
     }
-    ---@type GraphicsPackFrameDefinition[]
+    ---@type sol.GraphicsPackFrameDefinition[]
     local frames = {}
     for _, sprite_key in ipairs(resources.keys.sprites.knight.walk) do
         table.insert(
@@ -88,7 +88,7 @@ local function addWalkAnimations(graphics_defs)
     }
 end
 
----@param graphics_defs table<string, GraphicsPackDefinition>
+---@param graphics_defs table<string, sol.GraphicsPackDefinition>
 local function addJumpAnimations(graphics_defs)
     local frame_duration = 52
     local animation_position = {
@@ -121,10 +121,10 @@ local function addJumpAnimations(graphics_defs)
     }
 end
 
----@type BodyDefinition | nil
+---@type sol.BodyDefinition | nil
 local definition = nil
 
----@return BodyDefinition
+---@return sol.BodyDefinition
 local function getDefinition()
     if definition then
         return definition
@@ -136,7 +136,7 @@ local function getDefinition()
     hit_box.x = -(hit_box.w / 2)
     hit_box.y = -hit_box.h
     local radius = hit_box.w / 2
-    ---@type BodyDefinition
+    ---@type sol.BodyDefinition
     definition = {
         type = sol.BodyType.DYNAMIC,
         physics = {
@@ -175,7 +175,7 @@ local function getDefinition()
 end
 
 ---@param scene sol.Scene
----@param position Point
+---@param position sol.Point
 ---@param script_argument any?
 ---@return sol.Body
 function module.new(scene, position, script_argument)

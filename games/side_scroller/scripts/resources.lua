@@ -69,7 +69,7 @@ end
 ---@param store sol.Store
 ---@param key string
 ---@param file string
----@param options SpriteSheetOptions?
+---@param options sol.SpriteSheetOptions?
 local function loadSpriteSheet(store, key, file, options)
     local sprite_sheet = store:createSpriteSheet(key)
     if (not sprite_sheet:loadFromFile(file, options)) then

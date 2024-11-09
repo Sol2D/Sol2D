@@ -16,8 +16,8 @@ local layers = {
     GROUND_2 = 'ground-2'
 }
 
----@param point Point
----@return Point
+---@param point sol.Point
+---@return sol.Point
 local function pixelPontToMeters(point)
     return {
         x = point.x * METERS_PER_PIXEL,
@@ -30,7 +30,7 @@ level.__index = level
 level.pixelPontToMeters = pixelPontToMeters
 
 ---@param scene sol.Scene
----@return Point
+---@return sol.Point
 local function getPlayerStartPosition(scene)
     local start_point = scene:getTileMapObjectByName('start-position')
     if not start_point then
@@ -67,7 +67,7 @@ local function createFlyingPlatforms(scene)
     end
 end
 
----@param contact PreSolveContact
+---@param contact sol.PreSolveContact
 ---@return boolean
 local function preSolveContact(contact)
     local player_side = nil
@@ -218,8 +218,8 @@ end
 ---@return DerivedInitResult
 
 ---@class DerivedInitResult
----@field onSensorBeginContact SensorContactCallback?
----@field onSensorEndContact SensorContactCallback?
+---@field onSensorBeginContact sol.SensorContactCallback?
+---@field onSensorEndContact sol.SensorContactCallback?
 
 local module = {
     keys = keys,

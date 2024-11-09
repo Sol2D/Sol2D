@@ -18,7 +18,7 @@ local keys = {
 ---@field layer string?
 
 ---@param scene sol.Scene
----@param position Point
+---@param position sol.Point
 ---@param options PlatformCreationOptions?
 ---@return sol.Body
 local function createPlatform(scene, position, options)

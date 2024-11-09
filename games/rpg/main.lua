@@ -278,7 +278,6 @@ local function createSkeleton()
         nil,
         {
             type = sol.BodyType.DYNAMIC,
-            script = 'skeleton.lua',
             physics = {
                 fixedRotation = true,
                 linearDamping = 100
@@ -451,6 +450,7 @@ local function createSkeleton()
                 }
             }
         },
+        'skeleton.lua',
         {
             trackName = 'SkeletonTrack',
             startPoint = 1
