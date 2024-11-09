@@ -27,11 +27,13 @@ function module.new(scene, position, options)
             physics = { fixedRotation = true },
             shapes = {
                 [keys.shapes.CAP] = {
-                    type = sol.BodyShapeType.POLYGON,
+                    type = sol.BodyShapeType.CAPSULE,
                     physics = {
                         density = 100
                     },
-                    rect = { x = 0, y = 0, w = 119, h = 26 },
+                    center1 = { x = 13, y = 13 },
+                    center2 = { x = 106, y = 13 },
+                    radius = 13,
                     graphics = {
                         [keys.shapeGraphics.CAP] = {
                             animationIterations = 0,
