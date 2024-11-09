@@ -16,14 +16,14 @@
 
 #pragma once
 
-#include <lua.hpp>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
+#include <lua.hpp>
 #include <cstring>
 #include <vector>
 #include <concepts>
-#include <sstream>
 
-namespace Sol2D::Lua::Aux {
+namespace Sol2D::Lua {
 
 struct LuaSelfBase
 {
@@ -44,7 +44,7 @@ struct LuaUserData
 
     static MetatablePushResult pushMetatable(lua_State * _lua)
     {
-        return Sol2D::Lua::Aux::pushMetatable(_lua, metatable);
+        return Sol2D::Lua::pushMetatable(_lua, metatable);
     }
 
     static LuaSelf * getUserData(lua_State * _lua, int _idx)
@@ -96,17 +96,10 @@ LuaSelf * getLuaUserData(lua_State * _lua, int _idx, const std::vector<const cha
     LuaSelf * self = tryGetLuaUserData<LuaSelf>(_lua, _idx, _metatables);
     if(!self)
     {
-        std::stringstream ss;
-        ss << "one of the following type is expected: ";
-        for(size_t i = 0; i < _metatables.size(); ++i)
-        {
-            if(i > 0)
-                ss << ", ";
-            ss << _metatables[i];
-        }
-        luaL_argerror(_lua, _idx, ss.str().c_str());
+        std::string message = LuaMessage::formatOneOfTypesExpected(_metatables.begin(), _metatables.end());
+        luaL_argerror(_lua, _idx, message.c_str());
     }
     return self;
 }
 
-} // namespace Sol2D::Lua::Aux
+} // namespace Sol2D::Lua

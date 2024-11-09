@@ -47,7 +47,7 @@
 //
 
 using namespace Sol2D;
-using namespace Sol2D::Lua::Aux;
+using namespace Sol2D::Lua;
 
 namespace {
 

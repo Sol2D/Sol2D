@@ -25,7 +25,7 @@
 #include <optional>
 #include <chrono>
 
-namespace Sol2D::Lua::Aux {
+namespace Sol2D::Lua {
 
 class LuaTable final
 {
@@ -272,4 +272,4 @@ inline void LuaTable::setStringValue(const char * _key, const std::string & _val
     setStringValue(_key, _value.c_str());
 }
 
-} // namespace Sol2D::Lua::Aux
+} // namespace Sol2D::Lua

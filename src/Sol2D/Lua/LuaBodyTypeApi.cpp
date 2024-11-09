@@ -17,12 +17,11 @@
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/World/BodyType.h>
 
 using namespace Sol2D::World;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 
 void Sol2D::Lua::pushBodyTypeEnum(lua_State * _lua)

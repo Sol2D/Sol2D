@@ -21,7 +21,7 @@
 #include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
-using namespace Sol2D::Lua::Aux;
+using namespace Sol2D::Lua;
 
 bool LuaTable::tryGetBoolean(const char * _key, std::optional<bool> _value) const
 {

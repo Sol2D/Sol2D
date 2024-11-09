@@ -18,12 +18,11 @@
 #include <Sol2D/Lua/LuaSpriteOptionsApi.h>
 #include <Sol2D/Lua/LuaRectApi.h>
 #include <Sol2D/Lua/LuaSizeApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 namespace {
 
@@ -39,7 +38,7 @@ struct Self : LuaSelfBase
     {
         std::shared_ptr<Sprite> ptr = sprite.lock();
         if(!ptr)
-            luaL_error(_lua, "the sprite is destroyed");
+            luaL_error(_lua, LuaMessage::sprite_is_destroyed);
         return ptr;
     }
 
@@ -55,8 +54,8 @@ using UserData = LuaUserData<Self, LuaTypeName::sprite>;
 int luaApi_LoadFromFile(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    const char * path = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, path != nullptr, 2, "path expected");
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
+    const char * path = lua_tostring(_lua, 2);    
     SpriteOptions options;
     tryGetSpriteOptions(_lua, 3, options);
     bool result = self->getSprite(_lua)->loadFromFile(self->workspace.getResourceFullPath(path), options);
@@ -95,7 +94,7 @@ int luaApi_SetDestinationSize(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
     Size size;
-    luaL_argcheck(_lua, tryGetSize(_lua, 2, size), 2, "size required");
+    luaL_argexpected(_lua, tryGetSize(_lua, 2, size), 2, LuaTypeName::size);
     self->getSprite(_lua)->setDesinationSize(size);
     return 0;
 }

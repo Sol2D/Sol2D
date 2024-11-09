@@ -15,13 +15,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaDimensionApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <cstring>
 
 using namespace Sol2D;
-using namespace Sol2D::Lua::Aux;
+using namespace Sol2D::Lua;
 
 namespace {
 

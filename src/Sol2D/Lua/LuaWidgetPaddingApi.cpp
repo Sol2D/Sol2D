@@ -21,7 +21,6 @@
 using namespace Sol2D;
 using namespace Sol2D::Forms;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetWidgetPadding(lua_State * _lua, int _idx, Forms::WidgetPadding & _padding)
 {

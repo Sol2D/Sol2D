@@ -16,12 +16,11 @@
 
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetOptionsApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 namespace {
 
@@ -37,7 +36,7 @@ struct Self : LuaSelfBase
     {
         std::shared_ptr<SpriteSheet> ptr = sprite_sheet.lock();
         if(!ptr)
-            luaL_error(_lua, "the sprite sheet is destroyed");
+            luaL_error(_lua, LuaMessage::sprite_sheet_is_destroyed);
         return ptr;
     }
 
@@ -53,10 +52,10 @@ using UserData = LuaUserData<Self, LuaTypeName::sprite_sheet>;
 int luaApi_LoadFromFile(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isstring(_lua, 2), 2, "path expected");
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     const char * path = lua_tostring(_lua, 2);
     SpriteSheetOptions options = {};
-    luaL_argcheck(_lua,  tryGetSpriteSheetOptions(_lua, 3, options), 3, "sprite sheet options expected");
+    luaL_argexpected(_lua,  tryGetSpriteSheetOptions(_lua, 3, options), 3, LuaTypeName::sprite_sheet_options);
     bool result = self->getSpriteSheet(_lua)->loadFromFile(self->workspace.getResourceFullPath(path), options);
     lua_pushboolean(_lua, result);
     return 1;

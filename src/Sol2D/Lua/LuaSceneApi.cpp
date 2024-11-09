@@ -24,7 +24,7 @@
 #include <Sol2D/Lua/LuaJointApi.h>
 #include <Sol2D/Lua/LuaContactApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
@@ -34,16 +34,9 @@
 using namespace Sol2D;
 using namespace Sol2D::World;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 using namespace Sol2D::Utils;
 
 namespace {
-
-const char gc_message_body_id_expected[] = "body ID expected";
-const char gc_message_body_or_body_id_expected[] = "body or body ID expected";
-const char gc_message_joint_id_expected[] = "joint id expected";
-const char gc_message_subscription_id_expected[] = "subscriptin ID expected";
-const char gc_message_callback_expected[] = "callback expected";
 
 const uint16_t gc_event_begin_contact = 0;
 const uint16_t gc_event_end_contact = 1;
@@ -238,7 +231,7 @@ int luaApi_SetGravity(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
     Point gravity;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 2, gravity), 2, "gravity vector expected");
+    luaL_argexpected(_lua, tryGetPoint(_lua, 2, gravity), 2, LuaTypeName::point);
     self->getScene(_lua)->setGravity(gravity);
     return 1;
 }
@@ -248,8 +241,8 @@ int luaApi_SetGravity(lua_State * _lua)
 int luaApi_LoadTileMap(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     const char * path = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, path != nullptr, 2, "a file path expected");
     bool result = self->getScene(_lua)->loadTileMap(self->workspace.getResourceFullPath(path));
     lua_pushboolean(_lua, result);
     return 1;
@@ -260,8 +253,10 @@ int luaApi_LoadTileMap(lua_State * _lua)
 int luaApi_GetTileMapObjectById(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "object id expected");
-    const Tiles::TileMapObject * object = self->getScene(_lua)->getTileMapObjectById(static_cast<uint32_t>(lua_tointeger(_lua, 2)));
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
+    const Tiles::TileMapObject * object = self
+        ->getScene(_lua)
+        ->getTileMapObjectById(static_cast<uint32_t>(lua_tointeger(_lua, 2)));
     if(object)
         pushTileMapObject(_lua, *object);
     else
@@ -274,8 +269,8 @@ int luaApi_GetTileMapObjectById(lua_State * _lua)
 int luaApi_GetTileMapObjectByName(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     const char * name = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, name, 2, "object name expected");
     const Tiles::TileMapObject * object = self->getScene(_lua)->getTileMapObjectByName(name);
     if(object)
         pushTileMapObject(_lua, *object);
@@ -289,8 +284,8 @@ int luaApi_GetTileMapObjectByName(lua_State * _lua)
 int luaApi_GetTileMapObjectsByClass(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     const char * class_name = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, class_name, 2, "class expected");
     auto objects = self->getScene(_lua)->getTileMapObjectsByClass(class_name);
     lua_newtable(_lua);
     int i = 0;
@@ -314,11 +309,11 @@ int luaApi_CreateBody(lua_State * _lua)
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     Point position = { .0f, .0f };
     if(!lua_isnil(_lua, 2))
-        luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "body position expected");
+        luaL_argexpected(_lua, tryGetPoint(_lua, 2, position), 2, LuaTypeName::point);
     uint64_t body_id = 0;
     std::optional<std::filesystem::path> script_path;
     std::unique_ptr<BodyDefinition> definition = tryGetBodyDefinition(_lua, 3);
-    luaL_argcheck(_lua, definition, 3, "body defenition expected");
+    luaL_argexpected(_lua, definition, 3, LuaTypeName::body_definition);
     body_id = scene->createBody(position, *definition);
     if(lua_isstring(_lua, 4))
     {
@@ -347,7 +342,7 @@ int luaApi_DestroyBody(lua_State * _lua)
     if(lua_isinteger(_lua, 2))
         body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     else if(!tryGetBodyId(_lua, 2, &body_id))
-        luaL_argerror(_lua, 2, gc_message_body_or_body_id_expected);
+        luaL_argexpected(_lua, false, 2, LuaTypeName::joinTypes(LuaTypeName::body, LuaTypeName::integer).c_str());
     lua_pushboolean(_lua, self->getScene(_lua)->destroyBody(body_id));
     return 1;
 }
@@ -357,7 +352,7 @@ int luaApi_DestroyBody(lua_State * _lua)
 int luaApi_GetBody(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_body_id_expected);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint64_t body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     if(scene->doesBodyExist(body_id))
@@ -373,11 +368,11 @@ int luaApi_GetBody(lua_State * _lua)
 int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    const char * class_name = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, class_name != nullptr, 2, "a class name expected");
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
+    const char * class_name = lua_tostring(_lua, 2);    
     BodyOptions options;
     if(lua_gettop(_lua) >= 3)
-        luaL_argcheck(_lua, tryGetBodyOptions(_lua, 3, options), 3, "body options expected");
+        luaL_argexpected(_lua, tryGetBodyOptions(_lua, 3, options), 3, LuaTypeName::body_options);
     self->getScene(_lua)->createBodiesFromMapObjects(class_name, options);
     return 0;
 }
@@ -391,7 +386,7 @@ int luaApi_SetFollowedBody(lua_State * _lua)
     if(lua_isinteger(_lua, 2))
         body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     else if(!tryGetBodyId(_lua, 2, &body_id))
-        luaL_argerror(_lua, 2, gc_message_body_or_body_id_expected);
+        luaL_argexpected(_lua, false, 2, LuaTypeName::joinTypes(LuaTypeName::body, LuaTypeName::integer).c_str());
     lua_pushboolean(_lua, self->getScene(_lua)->setFollowedBody(body_id));
     return 1;
 }
@@ -409,7 +404,7 @@ int luaApi_ResetFollowedBody(lua_State * _lua)
 int luaApi_SubscribeToBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
     uint32_t id = self->subscribeOnContact(_lua, gc_event_begin_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
@@ -420,7 +415,7 @@ int luaApi_SubscribeToBeginContact(lua_State * _lua)
 int luaApi_UnsubscribeFromBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     self->unsubscribeOnContact(_lua, gc_event_begin_contact, subscription_id);
     return 0;
@@ -431,7 +426,7 @@ int luaApi_UnsubscribeFromBeginContact(lua_State * _lua)
 int luaApi_SubscribeToEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
     uint32_t id = self->subscribeOnContact(_lua, gc_event_end_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
@@ -442,7 +437,7 @@ int luaApi_SubscribeToEndContact(lua_State * _lua)
 int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     self->unsubscribeOnContact(_lua, gc_event_end_contact, subscription_id);
     return 0;
@@ -453,7 +448,7 @@ int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
 int luaApi_SubscribeToSensorBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
     uint32_t id = self->subscribeOnContact(_lua, gc_event_begin_sensor_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
@@ -464,7 +459,7 @@ int luaApi_SubscribeToSensorBeginContact(lua_State * _lua)
 int luaApi_UnsubscribeFromSensorBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     self->unsubscribeOnContact(_lua, gc_event_begin_sensor_contact, subscription_id);
     return 0;
@@ -475,7 +470,7 @@ int luaApi_UnsubscribeFromSensorBeginContact(lua_State * _lua)
 int luaApi_SubscribeToSensorEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
     uint32_t id = self->subscribeOnContact(_lua, gc_event_end_sensor_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
@@ -486,7 +481,7 @@ int luaApi_SubscribeToSensorEndContact(lua_State * _lua)
 int luaApi_UnsubscribeFromSesnsorEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     self->unsubscribeOnContact(_lua, gc_event_end_sensor_contact, subscription_id);
     return 0;
@@ -497,7 +492,7 @@ int luaApi_UnsubscribeFromSesnsorEndContact(lua_State * _lua)
 int luaApi_SubscribeToPreSolveContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
     uint32_t id = self->subscribeOnContact(_lua, gc_event_pre_solve_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
@@ -508,7 +503,7 @@ int luaApi_SubscribeToPreSolveContact(lua_State * _lua)
 int luaApi_UnsubscribeFromPreSolveContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     self->unsubscribeOnContact(_lua, gc_event_pre_solve_contact, subscription_id);
     return 0;
@@ -519,7 +514,7 @@ int luaApi_UnsubscribeFromPreSolveContact(lua_State * _lua)
 int luaApi_SubscribeToStep(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, gc_message_callback_expected);
+    luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
     uint32_t id = self->subscribeOnStep(_lua, 2);
     lua_pushinteger(_lua, id);
     return 1;
@@ -530,7 +525,7 @@ int luaApi_SubscribeToStep(lua_State * _lua)
 int luaApi_UnsubscribeFromStep(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, gc_message_subscription_id_expected);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     self->unsubscribeOnStep(_lua, subscription_id);
     return 0;
@@ -542,7 +537,11 @@ int luaApi_CreateDistanceJoint(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     DistanceJointDefenition definition;
-    luaL_argcheck(_lua, tryGetDistanceJointDefenition(_lua, 2, definition), 2, "distance joint definition expected");
+    luaL_argexpected(
+        _lua,
+        tryGetDistanceJointDefenition(_lua, 2, definition),
+        2,
+        LuaTypeName::distance_joint_definition);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     uint64_t id = scene->createJoint(definition);
     pushJointApi(_lua, scene, scene->getDistanceJoint(id).value());
@@ -555,7 +554,7 @@ int luaApi_CreateMotorJoint(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     MotorJointDefinition definition;
-    luaL_argcheck(_lua, tryGetMotorJointDefinition(_lua, 2, definition), 2, "motor joint definition expected");
+    luaL_argexpected(_lua, tryGetMotorJointDefinition(_lua, 2, definition), 2, LuaTypeName::motor_joint_definition);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     uint64_t id = scene->createJoint(definition);
     pushJointApi(_lua, scene, scene->getMotorJoint(id).value());
@@ -568,7 +567,7 @@ int luaApi_CreateMouseJoint(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     MouseJointDefinition definition;
-    luaL_argcheck(_lua, tryGetMouseJointDefinition(_lua, 2, definition), 2, "mouse joint definition expected");
+    luaL_argexpected(_lua, tryGetMouseJointDefinition(_lua, 2, definition), 2, LuaTypeName::mouse_joint_definition);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     uint64_t id = scene->createJoint(definition);
     pushJointApi(_lua, scene, scene->getMouseJoint(id).value());
@@ -581,7 +580,11 @@ int luaApi_CreatePrismaticJoint(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     PrismaticJointDefinition definition;
-    luaL_argcheck(_lua, tryGetPrismaticJointDefinition(_lua, 2, definition), 2, "prismatic joint definition expected");
+    luaL_argexpected(
+        _lua,
+        tryGetPrismaticJointDefinition(_lua, 2, definition),
+        2,
+        LuaTypeName::prismatic_joint_definition);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     uint64_t id = scene->createJoint(definition);
     pushJointApi(_lua, scene, scene->getPrismaticJoint(id).value());
@@ -594,7 +597,7 @@ int luaApi_CreateWeldJoint(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     WeldJointDefinition definition;
-    luaL_argcheck(_lua, tryGetWeldJointDefinition(_lua, 2, definition), 2, "weld joint definition expected");
+    luaL_argexpected(_lua, tryGetWeldJointDefinition(_lua, 2, definition), 2, LuaTypeName::weld_joint_definition);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     uint64_t id = scene->createJoint(definition);
     pushJointApi(_lua, scene, scene->getWeldJoint(id).value());
@@ -607,7 +610,7 @@ int luaApi_CreateWheelJoint(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     WheelJointDefinition definition;
-    luaL_argcheck(_lua, tryGetWheelJointDefinition(_lua, 2, definition), 2, "wheel joint definition expected");
+    luaL_argexpected(_lua, tryGetWheelJointDefinition(_lua, 2, definition), 2, LuaTypeName::wheel_joint_definition);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     uint64_t id = scene->createJoint(definition);
     pushJointApi(_lua, scene, scene->getWheelJoint(id).value());
@@ -727,7 +730,7 @@ int luaApi_DestroyJoint(lua_State * _lua)
             if(i > 0) ss << ", ";
             ss << all_joint_types[i];
         }
-        ss << " or " << LuaTypeName::integer;
+        ss << ", " << LuaTypeName::integer;
         luaL_argexpected(_lua, false, 2, ss.str().c_str());
     }
     lua_pushboolean(_lua, self->getScene(_lua)->destroyJoint(id));
@@ -745,9 +748,9 @@ int luaApi_FindPath(lua_State * _lua)
     if(lua_isinteger(_lua, 2))
         body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     else if(!tryGetBodyId(_lua, 2, &body_id))
-        luaL_argerror(_lua, 2, gc_message_body_or_body_id_expected);
+        luaL_argexpected(_lua, false, 2, LuaTypeName::joinTypes(LuaTypeName::body, LuaTypeName::integer).c_str());
     Point destination;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 3, destination), 3, "a destination point expected");
+    luaL_argexpected(_lua, tryGetPoint(_lua, 3, destination), 3, LuaTypeName::string);
     auto result = self->getScene(_lua)->findPath(body_id, destination, false, false);
     if(result.has_value())
     {

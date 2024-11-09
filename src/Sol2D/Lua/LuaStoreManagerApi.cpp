@@ -16,16 +16,13 @@
 
 #include <Sol2D/Lua/LuaStoreManagerApi.h>
 #include <Sol2D/Lua/LuaStoreApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 namespace {
-
-const char gc_message_store_key_expected[] = "a store key expected";
 
 struct Self : LuaSelfBase
 {
@@ -48,8 +45,8 @@ using UserData = LuaUserData<Self, LuaTypeName::store_manager>;
 int luaApi_CreateStore(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     const char * key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, key != nullptr, 2, gc_message_store_key_expected);
     std::shared_ptr<Store> store = self->manager.createStore(key);
     pushStoreApi(_lua, self->workspace, self->renderer, store);
     return 1;
@@ -60,8 +57,8 @@ int luaApi_CreateStore(lua_State * _lua)
 int luaApi_GetStore(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     const char * key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, key != nullptr, 2, gc_message_store_key_expected);
     std::shared_ptr<Store> store = self->manager.getStore(key);
     if(store)
         pushStoreApi(_lua, self->workspace, self->renderer, store);
@@ -75,8 +72,8 @@ int luaApi_GetStore(lua_State * _lua)
 int luaApi_DeleteStore(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     const char * key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, key != nullptr, 2, gc_message_store_key_expected);
     lua_pushboolean(_lua, self->manager.deleteStore(key));
     return 1;
 }

@@ -18,7 +18,6 @@
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetSpriteOptions(lua_State * _lua, int _idx, SpriteOptions & _sprite_options)
 {

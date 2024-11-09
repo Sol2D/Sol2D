@@ -17,18 +17,15 @@
 #include <Sol2D/Lua/LuaGraphicsPackApi.h>
 #include <Sol2D/Lua/LuaBodyApi.h>
 #include <Sol2D/Lua/LuaBodyShapeApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
 using namespace Sol2D::World;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 using namespace Sol2D::Utils;
 
 namespace {
-
-const char gc_message_graphic_key_expected[] = "a graphic key expected";
 
 struct Self : LuaSelfBase
 {
@@ -43,7 +40,7 @@ struct Self : LuaSelfBase
     {
         std::shared_ptr<Scene> ptr =  m_scene.lock();
         if(!ptr)
-            luaL_error(_lua, "the scene is destroyed");
+            luaL_error(_lua, LuaMessage::scene_is_destroyed);
         return ptr;
     }
 
@@ -85,8 +82,8 @@ int luaApi_GetBody(lua_State * _lua)
 int luaApi_GetGraphicsPack(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, 2, lua_isstring(_lua, 2), LuaTypeName::string);
     const char * graphic_key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, graphic_key != nullptr, 2, gc_message_graphic_key_expected);
     const GraphicsPack *  pack = self->getScene(_lua)->getBodyShapeGraphicsPack(
         self->body_id,
         self->shape_key,
@@ -111,8 +108,8 @@ int luaApi_GetGraphicsPack(lua_State * _lua)
 int luaApi_SetCurrentGraphics(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, 2, lua_isstring(_lua, 2), LuaTypeName::string);
     const char * graphic_key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, graphic_key != nullptr, 2, gc_message_graphic_key_expected);
     lua_pushboolean(_lua, self->getScene(_lua)->setBodyShapeCurrentGraphics(
         self->body_id,
         self->shape_key,
@@ -127,8 +124,8 @@ int luaApi_SetCurrentGraphics(lua_State * _lua)
 int luaApi_FlipGraphics(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, 2, lua_isstring(_lua, 2), LuaTypeName::string);
     const char * graphic_key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, graphic_key != nullptr, 2, gc_message_graphic_key_expected);
     luaL_checktype(_lua, 3, LUA_TBOOLEAN);
     luaL_checktype(_lua, 4, LUA_TBOOLEAN);
     bool result = self->getScene(_lua)->flipBodyShapeGraphics(

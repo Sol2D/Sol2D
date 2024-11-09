@@ -15,11 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaMusicApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 namespace {
 
@@ -34,7 +33,7 @@ struct Self : LuaSelfBase
     {
         std::shared_ptr<Mix_Music> ptr = music.lock();
         if(!ptr)
-            luaL_error(_lua, "the music is destroyed");
+            luaL_error(_lua, LuaMessage::music_is_destroyed);
         return ptr;
     }
 
@@ -57,7 +56,7 @@ int luaApi_Play(lua_State * _lua)
 int luaApi_Loop(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "iteration count required");
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     bool result = Mix_PlayMusic(self->getMusic(_lua).get(), lua_tointeger(_lua, 2)) == 0;
     lua_pushboolean(_lua, result);
     return 1;

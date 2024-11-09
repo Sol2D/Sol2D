@@ -17,11 +17,10 @@
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/LuaFontApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 namespace {
 

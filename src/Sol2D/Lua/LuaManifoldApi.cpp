@@ -18,7 +18,7 @@
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 
-using namespace Sol2D::Lua::Aux;
+using namespace Sol2D::Lua;
 
 namespace {
 

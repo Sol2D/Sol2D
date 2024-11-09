@@ -17,14 +17,13 @@
 #include <Sol2D/Lua/LuaJointApi.h>
 #include <Sol2D/Lua/LuaBodyApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Utils/Array.h>
 
 using namespace Sol2D;
 using namespace Sol2D::World;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 namespace {
 
@@ -43,7 +42,7 @@ public:
     {
         std::shared_ptr<Scene> ptr =  m_scene.lock();
         if(!ptr)
-            luaL_error(_lua, "the scene is destroyed");
+            luaL_error(_lua, LuaMessage::scene_is_destroyed);
         return ptr;
     }
 

@@ -23,7 +23,7 @@
 #include <functional>
 #include <optional>
 
-namespace Sol2D::Lua::Aux {
+namespace Sol2D::Lua {
 
 class LuaCallbackStorage final
 {
@@ -60,4 +60,4 @@ private:
     lua_State * mp_lua;
 };
 
-} // namespace Sol2D::Lua::Aux
+} // namespace Sol2D::Lua

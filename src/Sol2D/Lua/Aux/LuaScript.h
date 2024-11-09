@@ -20,9 +20,9 @@
 #include <lua.hpp>
 #include <filesystem>
 
-namespace Sol2D::Lua::Aux {
+namespace Sol2D::Lua {
 
 void executeScript(lua_State * _lua, const Workspace & _workspace, const std::filesystem::path & _path);
 void executeScriptWithContext(lua_State * _lua, const Workspace & _workspace, const std::filesystem::path & _path);
 
-} // namespace Sol2D::Lua::Aux
+} // namespace Sol2D::Lua

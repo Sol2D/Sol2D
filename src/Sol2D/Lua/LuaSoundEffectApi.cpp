@@ -15,12 +15,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaSoundEffectApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
 using namespace Sol2D;
 using namespace Lua;
-using namespace Lua::Aux;
 
 namespace {
 
@@ -35,7 +34,7 @@ struct Self : LuaSelfBase
     {
         std::shared_ptr<Mix_Chunk> ptr = chunk.lock();
         if(!ptr)
-            luaL_error(_lua, "the chunk is destroyed");
+            luaL_error(_lua, LuaMessage::sound_effect_is_destroyed);
         return ptr;
     }
 
@@ -61,7 +60,7 @@ int luaApi_Play(lua_State * _lua)
 int luaApi_Loop(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "iteration count required");
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     int iteration_count = lua_tointeger(_lua, 2);
     int channel = lua_isinteger(_lua, 3) ? lua_tointeger(_lua, 3) : -1;
     bool result = Mix_PlayChannel(channel, self->getChunk(_lua).get(), iteration_count) >= 0;

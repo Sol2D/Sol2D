@@ -15,13 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/World/BodyShapeType.h>
 
 using namespace Sol2D::World;
-using namespace Sol2D::Lua::Aux;
 
 void Sol2D::Lua::pushBodyShapeTypeEnum(lua_State * _lua)
 {

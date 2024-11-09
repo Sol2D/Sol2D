@@ -18,13 +18,12 @@
 #include <Sol2D/Lua/LuaBodyShapeApi.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/LuaPointApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Utils;
 using namespace Sol2D::World;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 namespace {
 
@@ -46,7 +45,7 @@ struct Self : LuaSelfBase
     {
         std::shared_ptr<Scene> ptr =  m_scene.lock();
         if(!ptr)
-            luaL_error(_lua, "the scene is destroyed");
+            luaL_error(_lua, LuaMessage::scene_is_destroyed);
         return ptr;
     }
 
@@ -56,7 +55,10 @@ struct Self : LuaSelfBase
         data.scene = getScene(_lua);
         data.body = data.scene->getBody(body_id);
         if(!data.body)
-            luaL_error(_lua, "body with ID %I does not exist");
+        {
+            luaL_error(_lua, LuaMessage::body_with_id_not_found_template, body_id);
+            std::unreachable();
+        }
         return data;
     }
 
@@ -72,7 +74,7 @@ template<typename T>
 inline void ensureResult(lua_State * _lua, const T & _result)
 {
     if(!_result)
-        luaL_error(_lua, "the body is invalid or has been destroyed");
+        luaL_error(_lua, LuaMessage::body_is_destroyed);
 }
 
 // 1 self
@@ -96,8 +98,8 @@ int luaApi_GetId(lua_State * _lua)
 int luaApi_GetShape(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     const char * shape_key = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, shape_key != nullptr, 2, "shape key expected");
     PreHashedKey<std::string> shape_pre_hashed_key = makePreHashedKey(std::string(shape_key));
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     if(scene->doesBodyShapeExist(self->body_id, shape_pre_hashed_key))
@@ -112,8 +114,8 @@ int luaApi_GetShape(lua_State * _lua)
 int luaApi_SetLayer(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     const char * layer = lua_tostring(_lua, 2);
-    luaL_argcheck(_lua, layer != nullptr, 2, "layer name expected");
     ensureResult(_lua, self->getScene(_lua)->setBodyLayer(self->body_id, layer));
     return 0;
 }
@@ -134,7 +136,7 @@ int luaApi_SetPosition(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     Point position;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 2, position), 2, "position expected");
+    luaL_argexpected(_lua, tryGetPoint(_lua, 2, position), 2, LuaTypeName::point);
     self->getData(_lua).body->setPosition(position);
     return 0;
 }
@@ -145,7 +147,7 @@ int luaApi_ApplyForceToCenter(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     Point force;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 2, force), 2, "force vector expected");
+    luaL_argexpected(_lua, tryGetPoint(_lua, 2, force), 2, LuaTypeName::point);
     self->getData(_lua).body->applyForceToCenter(force);
     return 0;
 }
@@ -156,7 +158,7 @@ int luaApi_ApplyImpulseToCenter(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     Point impulse;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 2, impulse), 2, "impulse vector expected");
+    luaL_argexpected(_lua, tryGetPoint(_lua, 2, impulse), 2, LuaTypeName::point);
     self->getData(_lua).body->applyImpulseToCenter(impulse);
     return 0;
 }
@@ -177,7 +179,7 @@ int luaApi_SetLinearVelocity(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     Point velocity;
-    luaL_argcheck(_lua, tryGetPoint(_lua, 2, velocity), 2, "velocity vector expected");
+    luaL_argexpected(_lua, tryGetPoint(_lua, 2, velocity), 2, LuaTypeName::point);
     lua_pushboolean(_lua, self->getData(_lua).body->setLinearVelocity(velocity));
     return 1;
 }

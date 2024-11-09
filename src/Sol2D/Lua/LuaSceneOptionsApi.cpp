@@ -19,7 +19,6 @@
 
 using namespace Sol2D::World;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetSceneOptions(lua_State * _lua, int _idx, SceneOptions & _options)
 {

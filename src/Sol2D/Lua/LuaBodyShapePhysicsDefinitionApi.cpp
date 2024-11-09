@@ -18,7 +18,6 @@
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D::World;
-using namespace Sol2D::Lua::Aux;
 
 bool Sol2D::Lua::tryGetBodyShapePhysicsDefinition(lua_State * _lua, int _idx, BodyShapePhysicsDefinition & _definition)
 {

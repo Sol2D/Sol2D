@@ -18,7 +18,7 @@
 
 #include <lua.hpp>
 
-namespace Sol2D::Lua::Aux {
+namespace Sol2D::Lua {
 
 enum class MetatablePushResult
 {
@@ -29,4 +29,4 @@ enum class MetatablePushResult
 MetatablePushResult pushMetatable(lua_State * _lua, const char * _name);
 void pushTableFromRegistry(lua_State * _lua, void * _key);
 
-} // namespace Sol2D::Lua::Aux
+} // namespace Sol2D::Lua

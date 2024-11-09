@@ -16,7 +16,7 @@
 
 #include <Sol2D/Lua/Aux/LuaScript.h>
 
-void Sol2D::Lua::Aux::executeScript(
+void Sol2D::Lua::executeScript(
     lua_State * _lua,
     const Workspace & _workspace,
     const std::filesystem::path & _path)
@@ -36,7 +36,7 @@ void Sol2D::Lua::Aux::executeScript(
     }
 }
 
-void Sol2D::Lua::Aux::executeScriptWithContext(
+void Sol2D::Lua::executeScriptWithContext(
     lua_State * _lua,
     const Workspace & _workspace,
     const std::filesystem::path & _path)

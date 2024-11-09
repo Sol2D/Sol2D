@@ -20,7 +20,6 @@
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 namespace {
 

@@ -15,12 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
 using namespace Sol2D::Forms;
-using namespace Sol2D::Lua::Aux;
+using namespace Sol2D::Lua;
 
 void Sol2D::Lua::pushVerticalTextAlignmentEmum(lua_State * _lua)
 {

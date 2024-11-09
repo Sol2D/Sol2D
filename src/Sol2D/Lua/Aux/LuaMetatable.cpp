@@ -16,9 +16,9 @@
 
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 
-using namespace Sol2D::Lua::Aux;
+using namespace Sol2D::Lua;
 
-MetatablePushResult Sol2D::Lua::Aux::pushMetatable(lua_State * _lua, const char * _name)
+MetatablePushResult Sol2D::Lua::pushMetatable(lua_State * _lua, const char * _name)
 {
     if(luaL_newmetatable(_lua, _name) != 0)
     {
@@ -29,7 +29,7 @@ MetatablePushResult Sol2D::Lua::Aux::pushMetatable(lua_State * _lua, const char 
     return MetatablePushResult::Loaded;
 }
 
-void Sol2D::Lua::Aux::pushTableFromRegistry(lua_State * _lua, void * _key)
+void Sol2D::Lua::pushTableFromRegistry(lua_State * _lua, void * _key)
 {
     auto load = [_lua, _key]() {
         lua_pushlightuserdata(_lua, _key);

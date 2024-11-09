@@ -15,12 +15,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaKeyboardApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <SDL3/SDL_keyboard.h>
 
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 namespace {
 
@@ -42,7 +41,7 @@ int luaApi_GetState(lua_State * _lua)
     int top = lua_gettop(_lua);
     for(int idx = 2; idx <= top; ++idx)
     {
-        luaL_argcheck(_lua, lua_isinteger(_lua, idx), idx, "only integer arguments are allowed");
+        luaL_argexpected(_lua, lua_isinteger(_lua, idx), idx, LuaTypeName::integer);
         lua_Integer scancode = lua_tointeger(_lua, idx);
         lua_pushboolean(_lua, scancode >= 0 && scancode < self->kb_state_length && self->kb_state[scancode]);
     }

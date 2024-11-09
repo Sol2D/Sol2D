@@ -15,13 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaScancodeApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <SDL3/SDL_scancode.h>
 
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 
 void Sol2D::Lua::pushScancodeEnum(lua_State * _lua)
 {

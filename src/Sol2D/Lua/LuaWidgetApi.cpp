@@ -19,7 +19,7 @@
 #include <Sol2D/Lua/LuaColorApi.h>
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
 #include <Sol2D/Lua/LuaWidgetPaddingApi.h>
-#include <Sol2D/Lua/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
@@ -28,13 +28,9 @@
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
-using namespace Sol2D::Lua::Aux;
 using namespace Sol2D::Forms;
 
 namespace {
-
-const char gc_message_color_required[] = "color required";
-const char gc_message_alignment_required[] = "alignment required";
 
 const uint16_t gc_event_click = 0;
 
@@ -76,7 +72,7 @@ struct Self : LuaSelfBase
     {
         std::shared_ptr<WidgetT> ptr = widget.lock();
         if(!ptr)
-            luaL_error(_lua, "the widget is destroyed");
+            luaL_error(_lua, LuaMessage::widget_is_destroyed);
         return ptr;
     }
 
@@ -161,7 +157,7 @@ int luaApi_SetX(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     std::optional<Dimension<float>> dimension;
-    luaL_argcheck(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, "the X value required");
+    luaL_argexpected(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
     self->getWidget(_lua)->setX(dimension.value());
     return 0;
 }
@@ -173,7 +169,7 @@ int luaApi_SetY(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     std::optional<Dimension<float>> dimension;
-    luaL_argcheck(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, "the Y value required");
+    luaL_argexpected(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
     self->getWidget(_lua)->setY(dimension.value());
     return 0;
 }
@@ -185,7 +181,7 @@ int luaApi_SetWidth(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     std::optional<Dimension<float>> dimension;
-    luaL_argcheck(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, "the width value required");
+    luaL_argexpected(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
     self->getWidget(_lua)->setWidth(dimension.value());
     return 0;
 }
@@ -197,13 +193,13 @@ int luaApi_SetHeight(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     std::optional<Dimension<float>> dimension;
-    luaL_argcheck(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, "the height value required");
+    luaL_argexpected(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
     self->getWidget(_lua)->setHeight(dimension.value());
     return 0;
 }
 
 // 1 self
-// 2 text
+// 2 text (optional)
 template<typename UserDataT>
 int luaApi_SetText(lua_State * _lua)
 {
@@ -222,7 +218,7 @@ int luaApi_SetFont(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     std::shared_ptr<TTF_Font> font = tryGetFont(_lua, 2);
-    luaL_argcheck(_lua, font != nullptr, 2, "font required");
+    luaL_argexpected(_lua, font != nullptr, 2, LuaTypeName::font);
     self->getWidget(_lua)->font = font;
     return 0;
 }
@@ -235,7 +231,7 @@ int luaApi_SetForegroundColor(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     Color color;
-    luaL_argcheck(_lua, tryGetColor(_lua, 2, color), 2, gc_message_color_required);
+    luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
     self->getWidget(_lua)->foreground_color.setValue(getWidgetState(_lua, 3), color);
     return 0;
 }
@@ -248,7 +244,7 @@ int luaApi_SetBackgroundColor(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     Color color;
-    luaL_argcheck(_lua, tryGetColor(_lua, 2, color), 2, gc_message_color_required);
+    luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
     self->getWidget(_lua)->background_color.setValue(getWidgetState(_lua, 3), color);
     return 0;
 }
@@ -261,7 +257,7 @@ int luaApi_SetBorderColor(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     Color color;
-    luaL_argcheck(_lua, tryGetColor(_lua, 2, color), 2, gc_message_color_required);
+    luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
     self->getWidget(_lua)->border_color.setValue(getWidgetState(_lua, 3), color);
     return 0;
 }
@@ -273,7 +269,7 @@ template<typename UserDataT>
 int luaApi_SetBorderWidth(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isnumber(_lua, 2), 2, "width required");
+    luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWidget(_lua)->border_width.setValue(getWidgetState(_lua, 3), static_cast<float>(lua_tonumber(_lua, 2)));
     return 0;
 }
@@ -286,7 +282,7 @@ int luaApi_SetVerticalTextAlignment(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     VerticalTextAlignment alignment;
-    luaL_argcheck(_lua, tryGetVerticalTextAlignment(_lua, 2, &alignment), 2, gc_message_alignment_required);
+    luaL_argexpected(_lua, tryGetVerticalTextAlignment(_lua, 2, &alignment), 2, LuaTypeName::vertical_text_alignment);
     self->getWidget(_lua)->vertical_text_alignment.setValue(getWidgetState(_lua, 3), alignment);
     return 0;
 }
@@ -299,7 +295,7 @@ int luaApi_SetHorizontalTextAlignment(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     HorizontalTextAlignment alignment;
-    luaL_argcheck(_lua, tryGetHorizontalTextAlignment(_lua, 2, &alignment), 2, gc_message_alignment_required);
+    luaL_argexpected(_lua, tryGetHorizontalTextAlignment(_lua, 2, &alignment), 2, LuaTypeName::horizontal_text_alignment);
     self->getWidget(_lua)->horizontal_text_alignment.setValue(getWidgetState(_lua, 3), alignment);
     return 0;
 }
@@ -312,7 +308,7 @@ int luaApi_SetPadding(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     WidgetPadding padding;
-    luaL_argcheck(_lua, tryGetWidgetPadding(_lua, 2, padding), 2, "padding required");
+    luaL_argexpected(_lua, tryGetWidgetPadding(_lua, 2, padding), 2, LuaTypeName::widget_padding);
     self->getWidget(_lua)->padding.setValue(getWidgetState(_lua, 3), padding);
     return 0;
 }
@@ -322,7 +318,7 @@ int luaApi_SetPadding(lua_State * _lua)
 int luaApi_ButtonSubscribeOnClick(lua_State * _lua)
 {
     ButtonSelf * self = ButtonUserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isfunction(_lua, 2), 2, "callback required");
+    luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
     uint32_t id = self->subscribeOnClick(_lua, 2);
     lua_pushinteger(_lua, static_cast<lua_Integer>(id));
     return 1;
@@ -333,7 +329,7 @@ int luaApi_ButtonSubscribeOnClick(lua_State * _lua)
 int luaApi_ButtonUnsubscribeOnClick(lua_State * _lua)
 {
     ButtonSelf * self = ButtonUserData::getUserData(_lua, 1);
-    luaL_argcheck(_lua, lua_isinteger(_lua, 2), 2, "subscription ID required");
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
     self->unsubscribeOnClick(_lua, subscription_id);
     return 0;
