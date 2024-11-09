@@ -89,7 +89,7 @@ GraphicsPack::GraphicsPack(
     mp_renderer(&_renderer),
     m_position(_definition.position),
     m_flip_mode(SDL_FLIP_NONE),
-    m_center(_definition.center.value_or(_definition.position)),
+    m_center(_definition.center.value_or(makePoint(.0f, .0f))),
     m_max_iterations(_definition.animation_iterations),
     m_current_iteration(0),
     m_current_frame_index(0),
@@ -394,20 +394,19 @@ void GraphicsPack::performRender(const Point & _position, const Rotation & _rota
     {
         return;
     }
-    Point position = _position + m_position;
     std::optional<VectorRotator> rotator;
     for(Graphics & graphics : frame->graphics)
     {
-        Point graphics_position = graphics.position;
-        if(_rotation.isRotated() && (graphics.position.x || graphics.position.y))
-        {
-            if(!rotator.has_value())
-                rotator.emplace(_rotation);
-            graphics_position = rotator->rotate(graphics_position);
-        }
         if(graphics.sprite.has_value() && graphics.is_visible)
         {
-            graphics.sprite->render(position + graphics_position, _rotation, m_flip_mode, m_center);
+            Point graphics_position = m_position + graphics.position;
+            if(_rotation.isRotated() && (graphics_position.x || graphics_position.y))
+            {
+                if(!rotator.has_value())
+                    rotator.emplace(_rotation);
+                graphics_position = rotator->rotate(graphics_position);
+            }
+            graphics.sprite->render(graphics_position + _position, _rotation, m_flip_mode, m_center);
         }
     }
 }

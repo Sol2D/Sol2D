@@ -934,6 +934,13 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
             graphics->render(body_position, rotation, _time_passed);
         }
     }
+    if(mp_box2d_debug_draw)
+    {
+        SDL_SetRenderDrawColor(&mr_renderer, 0, 128, 255, 255);
+        SDL::sdlRenderCircle(&mr_renderer, body_position, 8.0f);
+        SDL_RenderLine(&mr_renderer, body_position.x - 8, body_position.y, body_position.x + 8, body_position.y);
+        SDL_RenderLine(&mr_renderer, body_position.x, body_position.y - 8, body_position.x, body_position.y + 8);
+    }
 }
 
 void Scene::drawLayersAndBodies(

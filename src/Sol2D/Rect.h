@@ -21,6 +21,12 @@
 
 namespace Sol2D {
 
+struct Size
+{
+    float w;
+    float h;
+};
+
 template<typename P>
 concept PointConcept = requires(P _point)
 {
@@ -64,17 +70,38 @@ struct Point
         y += _point.y;
     }
 
+    Point operator - (const Point & _point) const noexcept
+    {
+        return { x - _point.x, y - _point.y };
+    }
+
     void operator -= (const Point & _point) noexcept
     {
         x -= _point.x;
         y -= _point.y;
     }
-};
 
-struct Size
-{
-    float w;
-    float h;
+    Point operator + (const Size & _size) const noexcept
+    {
+        return { x + _size.w, y + _size.h };
+    }
+
+    void operator += (const Size & _size) noexcept
+    {
+        x += _size.w;
+        y += _size.h;
+    }
+
+    Point operator - (const Size & _size) const noexcept
+    {
+        return { x - _size.w, y - _size.h };
+    }
+
+    void operator -= (const Size & _size) noexcept
+    {
+        x -= _size.w;
+        y -= _size.h;
+    }
 };
 
 struct Rect
