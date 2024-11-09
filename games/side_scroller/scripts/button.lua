@@ -106,8 +106,8 @@ function module.new(scene, position, options)
         localAnchorA = { x = 5, y = 20 },
         localAnchorB = { x = 0, y = 13 },
         isLimitEnbaled = true,
-        lowerTranslation = 10,
-        upperTranslation = 16,
+        lowerTranslation = 12,
+        upperTranslation = 25,
         isMotorEnbaled = true,
         motorSpeed = 1,
         maxMotorForce = 1300
@@ -119,8 +119,8 @@ function module.new(scene, position, options)
         localAnchorA = { x = 124, y = 20 },
         localAnchorB = { x = 119, y = 13 },
         isLimitEnbaled = true,
-        lowerTranslation = 10,
-        upperTranslation = 16,
+        lowerTranslation = 12,
+        upperTranslation = 25,
         isMotorEnbaled = true,
         motorSpeed = 1,
         maxMotorForce = 1300

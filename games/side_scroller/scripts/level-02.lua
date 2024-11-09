@@ -31,7 +31,7 @@ function level_02:init(scene)
     end
 
     local hook = scene:createBody(
-        self.pixelPontToMeters({ x = platfrom01_point.position.x, y = platfrom01_point.position.y }),
+        self.pixelPontToMeters({ x = platfrom01_point.position.x + 128 * 9 / 2, y = platfrom01_point.position.y }),
         { type = sol.BodyType.STATIC }
     )
     local platform = Platfrom.new(
@@ -42,23 +42,23 @@ function level_02:init(scene)
             bodyType = sol.BodyType.DYNAMIC
         }
     )
-    local hook_joint = scene:createDistanceJoint({
+    local hook_joint = scene:createPrismaticJoint({
         bodyA = hook,
-        bodyB = platform
+        bodyB = platform,
+        localAnchorB = { x = 128 * 9 / 2, y = 0 },
+        isMotorEnbaled = true,
+        motorSpeed = 1000,
+        maxMotorForce = 100000,
+        isLimitEnbaled = true,
+        upperTranslation = 0,
+        lowerTranslation = -1000,
+        localAxisA = { x = 0, y = -1 }
     })
 
     local result = {}
     function result.onSensorBeginContact(contact)
         if contact.sensor.shapeKey == Button.keys.shapes.SENSOR and contact.visitor.shapeKey == Button.keys.shapes.CAP then
-            scene:destroyJoint(hook_joint)
-        end
-    end
-    function result.onSensorEndContact(contact)
-        if contact.sensor.shapeKey == Button.keys.shapes.SENSOR and contact.visitor.shapeKey == Button.keys.shapes.CAP then
-            hook_joint = scene:createDistanceJoint({
-                bodyA = hook,
-                bodyB = platform
-            })
+            hook_joint:enableMotor(false)
         end
     end
     return result

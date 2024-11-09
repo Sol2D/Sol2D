@@ -452,18 +452,18 @@ uint64_t Scene::createJoint(const DistanceJointDefenition & _definition)
     if(_definition.local_anchor_a)
     {
         b2_joint_def.localAnchorA = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_anchor_a->x),
-                .y = graphicalToPhysical(_definition.local_anchor_a->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_anchor_a->x),
+            .y = graphicalToPhysical(_definition.local_anchor_a->y)
+        };
     }
     if(_definition.local_anchor_b)
     {
         b2_joint_def.localAnchorB = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_anchor_b->x),
-                .y = graphicalToPhysical(_definition.local_anchor_b->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_anchor_b->x),
+            .y = graphicalToPhysical(_definition.local_anchor_b->y)
+        };
     }
     if(_definition.min_length)
         b2_joint_def.minLength = graphicalToPhysical(_definition.min_length.value());
@@ -497,10 +497,10 @@ uint64_t Scene::createJoint(const MotorJointDefinition & _definition)
     if(_definition.linear_offset)
     {
         b2_joint_def.linearOffset = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.linear_offset->x),
-                .y = graphicalToPhysical(_definition.linear_offset->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.linear_offset->x),
+            .y = graphicalToPhysical(_definition.linear_offset->y)
+        };
     }
     if(_definition.angular_offset)
         b2_joint_def.angularOffset = _definition.angular_offset.value();
@@ -528,10 +528,10 @@ uint64_t Scene::createJoint(const MouseJointDefinition & _definition)
     if(_definition.target)
     {
         b2_joint_def.target = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.target->x),
-                .y = graphicalToPhysical(_definition.target->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.target->x),
+            .y = graphicalToPhysical(_definition.target->y)
+        };
     }
     if(_definition.hertz)
         b2_joint_def.hertz = _definition.hertz.value();
@@ -560,26 +560,26 @@ uint64_t Scene::createJoint(const PrismaticJointDefinition & _definition)
     if(_definition.local_anchor_a)
     {
         b2_joint_def.localAnchorA = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_anchor_a->x),
-                .y = graphicalToPhysical(_definition.local_anchor_a->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_anchor_a->x),
+            .y = graphicalToPhysical(_definition.local_anchor_a->y)
+        };
     }
     if(_definition.local_anchor_b)
     {
         b2_joint_def.localAnchorB = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_anchor_b->x),
-                .y = graphicalToPhysical(_definition.local_anchor_b->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_anchor_b->x),
+            .y = graphicalToPhysical(_definition.local_anchor_b->y)
+        };
     }
     if(_definition.local_axis_a)
     {
         b2_joint_def.localAxisA = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_axis_a->x),
-                .y = graphicalToPhysical(_definition.local_axis_a->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_axis_a->x),
+            .y = graphicalToPhysical(_definition.local_axis_a->y)
+        };
     }
     if(_definition.reference_angle)
         b2_joint_def.referenceAngle = _definition.reference_angle.value();
@@ -613,18 +613,18 @@ uint64_t Scene::createJoint(const WeldJointDefinition & _definition)
     if(_definition.local_anchor_a)
     {
         b2_joint_def.localAnchorA = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_anchor_a->x),
-                .y = graphicalToPhysical(_definition.local_anchor_a->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_anchor_a->x),
+            .y = graphicalToPhysical(_definition.local_anchor_a->y)
+        };
     }
     if(_definition.local_anchor_b)
     {
         b2_joint_def.localAnchorB = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_anchor_b->x),
-                .y = graphicalToPhysical(_definition.local_anchor_b->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_anchor_b->x),
+            .y = graphicalToPhysical(_definition.local_anchor_b->y)
+        };
     }
     if(_definition.reference_angle)
         b2_joint_def.referenceAngle = _definition.reference_angle.value();
@@ -657,26 +657,26 @@ uint64_t Scene::createJoint(const WheelJointDefinition & _definition)
     if(_definition.local_anchor_a)
     {
         b2_joint_def.localAnchorA = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_anchor_a->x),
-                .y = graphicalToPhysical(_definition.local_anchor_a->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_anchor_a->x),
+            .y = graphicalToPhysical(_definition.local_anchor_a->y)
+        };
     }
     if(_definition.local_anchor_b)
     {
         b2_joint_def.localAnchorB = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_anchor_b->x),
-                .y = graphicalToPhysical(_definition.local_anchor_b->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_anchor_b->x),
+            .y = graphicalToPhysical(_definition.local_anchor_b->y)
+        };
     }
     if(_definition.local_axis_a)
     {
         b2_joint_def.localAxisA = b2Vec2
-            {
-                .x = graphicalToPhysical(_definition.local_axis_a->x),
-                .y = graphicalToPhysical(_definition.local_axis_a->y)
-            };
+        {
+            .x = graphicalToPhysical(_definition.local_axis_a->x),
+            .y = graphicalToPhysical(_definition.local_axis_a->y)
+        };
     }
     if(_definition.lower_translation)
         b2_joint_def.lowerTranslation = graphicalToPhysical(_definition.lower_translation.value());

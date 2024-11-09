@@ -284,6 +284,7 @@ int luaApi_EnableCollideConnected(lua_State * _lua)
     BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getJoint().enableCollideConnected(lua_toboolean(_lua, 2));
+    self->getJoint().wakeBodies();
     return 0;
 }
 
@@ -304,6 +305,7 @@ int luaApi_SetLength(lua_State * _lua)
     DistanceJointSelf * self = DistanceJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getDistanceJoint().setLength(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getDistanceJoint().wakeBodies();
     return 0;
 }
 
@@ -322,6 +324,7 @@ int luaApi_EnableSpring(lua_State * _lua)
     DistanceJointSelf * self = DistanceJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getDistanceJoint().enableSpring(lua_toboolean(_lua, 2));
+    self->getDistanceJoint().wakeBodies();
     return 0;
 }
 
@@ -340,6 +343,7 @@ int luaApi_SetSpringDampingRatio(lua_State * _lua)
     DistanceJointSelf * self = DistanceJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getDistanceJoint().setSpringDampingRatio(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getDistanceJoint().wakeBodies();
     return 0;
 }
 
@@ -358,6 +362,7 @@ int luaApi_SetSpringHertz(lua_State * _lua)
     DistanceJointSelf * self = DistanceJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getDistanceJoint().setSpringHertz(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getDistanceJoint().wakeBodies();
     return 0;
 }
 
@@ -376,6 +381,7 @@ int luaApi_EnableLimit(lua_State * _lua)
     DistanceJointSelf * self = DistanceJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getDistanceJoint().enableLimit(lua_toboolean(_lua, 2));
+    self->getDistanceJoint().wakeBodies();
     return 0;
 }
 
@@ -414,6 +420,7 @@ int luaApi_SetLengthRange(lua_State * _lua)
     self->getDistanceJoint().setLengthRange(
         static_cast<float>(lua_tonumber(_lua, 2)),
         static_cast<float>(lua_tonumber(_lua, 3)));
+    self->getDistanceJoint().wakeBodies();
     return 0;
 }
 
@@ -432,6 +439,7 @@ int luaApi_EnableMotor(lua_State * _lua)
     DistanceJointSelf * self = DistanceJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getDistanceJoint().enableMotor(lua_toboolean(_lua, 2));
+    self->getDistanceJoint().wakeBodies();
     return 0;
 }
 
@@ -450,6 +458,7 @@ int luaApi_SetMotorSpeed(lua_State * _lua)
     DistanceJointSelf * self = DistanceJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getDistanceJoint().setMotorSpeed(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getDistanceJoint().wakeBodies();
     return 0;
 }
 
@@ -476,6 +485,7 @@ int luaApi_SetMaxMotorForce(lua_State * _lua)
     DistanceJointSelf * self = DistanceJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getDistanceJoint().setMaxMotorForce(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getDistanceJoint().wakeBodies();
     return 0;
 }
 
@@ -500,6 +510,7 @@ int luaApi_SetLinearOffset(lua_State * _lua)
     Point offset;
     luaL_argexpected(_lua, tryGetPoint(_lua, 2, offset), 2, LuaTypeName::point);
     self->getMotorJoint().setLinearOffset(offset);
+    self->getMotorJoint().wakeBodies();
     return 0;
 }
 
@@ -518,6 +529,7 @@ int luaApi_SetAngularOffset(lua_State * _lua)
     MotorJointSelf * self = MotorJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getMotorJoint().setAngularOffset(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getMotorJoint().wakeBodies();
     return 0;
 }
 
@@ -536,6 +548,7 @@ int luaApi_SetMaxForce(lua_State * _lua)
     MotorJointSelf * self = MotorJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getMotorJoint().setMaxForce(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getMotorJoint().wakeBodies();
     return 0;
 }
 
@@ -554,6 +567,7 @@ int luaApi_SetMaxTorque(lua_State * _lua)
     MotorJointSelf * self = MotorJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getMotorJoint().setMaxTorque(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getMotorJoint().wakeBodies();
     return 0;
 }
 
@@ -572,6 +586,7 @@ int luaApi_SetCorrectionFactor(lua_State * _lua)
     MotorJointSelf * self = MotorJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getMotorJoint().setCorrectionFactor(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getMotorJoint().wakeBodies();
     return 0;
 }
 
@@ -596,6 +611,7 @@ int luaApi_SetTarget(lua_State * _lua)
     Point target;
     luaL_argexpected(_lua, tryGetPoint(_lua, 2, target), 2, LuaTypeName::point);
     self->getMouseJoint().setTarget(target);
+    self->getMouseJoint().wakeBodies();
     return 0;
 }
 
@@ -614,6 +630,7 @@ int luaApi_SetSpringHertz(lua_State * _lua)
     MouseJointSelf * self = MouseJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getMouseJoint().setSpringHertz(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getMouseJoint().wakeBodies();
     return 0;
 }
 
@@ -632,6 +649,7 @@ int luaApi_SetSpringDampingRatio(lua_State * _lua)
     MouseJointSelf * self = MouseJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getMouseJoint().setSpringDampingRatio(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getMouseJoint().wakeBodies();
     return 0;
 }
 
@@ -650,6 +668,7 @@ int luaApi_SetMaxForce(lua_State * _lua)
     MouseJointSelf * self = MouseJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getMouseJoint().setMaxForce(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getMouseJoint().wakeBodies();
     return 0;
 }
 
@@ -672,6 +691,7 @@ int luaApi_EnableSpring(lua_State * _lua)
     PrismaticJointSelf * self = PrismaticJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getPrismaticJoint().enableSpring(lua_toboolean(_lua, 2));
+    self->getPrismaticJoint().wakeBodies();
     return 0;
 }
 
@@ -690,6 +710,7 @@ int luaApi_SetSpringHertz(lua_State * _lua)
     PrismaticJointSelf * self = PrismaticJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getPrismaticJoint().setSpringHertz(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getPrismaticJoint().wakeBodies();
     return 0;
 }
 
@@ -708,6 +729,7 @@ int luaApi_SetSpringDampingRatio(lua_State * _lua)
     PrismaticJointSelf * self = PrismaticJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getPrismaticJoint().setSpringDampingRatio(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getPrismaticJoint().wakeBodies();
     return 0;
 }
 
@@ -726,6 +748,7 @@ int luaApi_EnableLimit(lua_State * _lua)
     PrismaticJointSelf * self = PrismaticJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getPrismaticJoint().enableLimit(lua_toboolean(_lua, 2));
+    self->getPrismaticJoint().wakeBodies();
     return 0;
 }
 
@@ -756,6 +779,7 @@ int luaApi_SetLimits(lua_State * _lua)
     self->getPrismaticJoint().setLimits(
         static_cast<float>(lua_tonumber(_lua, 2)),
         static_cast<float>(lua_tonumber(_lua, 3)));
+    self->getPrismaticJoint().wakeBodies();
     return 0;
 }
 
@@ -774,6 +798,7 @@ int luaApi_EnableMotor(lua_State * _lua)
     PrismaticJointSelf * self = PrismaticJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getPrismaticJoint().enableMotor(lua_toboolean(_lua, 2));
+    self->getPrismaticJoint().wakeBodies();
     return 0;
 }
 
@@ -792,6 +817,7 @@ int luaApi_SetMotorSpeed(lua_State * _lua)
     PrismaticJointSelf * self = PrismaticJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getPrismaticJoint().setMotorSpeed(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getPrismaticJoint().wakeBodies();
     return 0;
 }
 
@@ -818,6 +844,7 @@ int luaApi_SetMaxMotorForce(lua_State * _lua)
     PrismaticJointSelf * self = PrismaticJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getPrismaticJoint().setMaxMotorForce(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getPrismaticJoint().wakeBodies();
     return 0;
 }
 
@@ -840,6 +867,7 @@ int luaApi_EnableSpring(lua_State * _lua)
     RevoluteJointSelf * self = RevoluteJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getRevoluteJoint().enableSpring(lua_toboolean(_lua, 2));
+    self->getRevoluteJoint().wakeBodies();
     return 0;
 }
 
@@ -858,6 +886,7 @@ int luaApi_SetSpringHertz(lua_State * _lua)
     RevoluteJointSelf * self = RevoluteJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getRevoluteJoint().setSpringHertz(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getRevoluteJoint().wakeBodies();
     return 0;
 }
 
@@ -876,6 +905,7 @@ int luaApi_SetSpringDampingRatio(lua_State * _lua)
     RevoluteJointSelf * self = RevoluteJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getRevoluteJoint().setSpringDampingRatio(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getRevoluteJoint().wakeBodies();
     return 0;
 }
 
@@ -902,6 +932,7 @@ int luaApi_EnableLimit(lua_State * _lua)
     RevoluteJointSelf * self = RevoluteJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getRevoluteJoint().enableLimit(lua_toboolean(_lua, 2));
+    self->getRevoluteJoint().wakeBodies();
     return 0;
 }
 
@@ -917,6 +948,7 @@ int luaApi_SetLimits(lua_State * _lua)
         static_cast<float>(lua_tonumber(_lua, 2)),
         static_cast<float>(lua_tonumber(_lua, 3))
     );
+    self->getRevoluteJoint().wakeBodies();
     return 0;
 }
 
@@ -951,6 +983,7 @@ int luaApi_EnableMotor(lua_State * _lua)
     RevoluteJointSelf * self = RevoluteJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getRevoluteJoint().enableMotor(lua_toboolean(_lua, 2));
+    self->getRevoluteJoint().wakeBodies();
     return 0;
 }
 
@@ -969,6 +1002,7 @@ int luaApi_SetMotorSpeed(lua_State * _lua)
     RevoluteJointSelf * self = RevoluteJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getRevoluteJoint().setMotorSpeed(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getRevoluteJoint().wakeBodies();
     return 0;
 }
 
@@ -995,6 +1029,7 @@ int luaApi_SetMaxMotorTorque(lua_State * _lua)
     RevoluteJointSelf * self = RevoluteJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getRevoluteJoint().setMaxMotorTorque(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getRevoluteJoint().wakeBodies();
     return 0;
 }
 
@@ -1017,6 +1052,7 @@ int luaApi_SetReferenceAngle(lua_State * _lua)
     WeldJointSelf * self = WeldJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWeldJoint().setReferenceAngle(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getWeldJoint().wakeBodies();
     return 0;
 }
 
@@ -1035,6 +1071,7 @@ int luaApi_SetLinearHertz(lua_State * _lua)
     WeldJointSelf * self = WeldJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWeldJoint().setLinearHertz(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getWeldJoint().wakeBodies();
     return 0;
 }
 
@@ -1053,6 +1090,7 @@ int luaApi_SetLinearDampingRatio(lua_State * _lua)
     WeldJointSelf * self = WeldJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWeldJoint().setLinearDampingRatio(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getWeldJoint().wakeBodies();
     return 0;
 }
 
@@ -1071,6 +1109,7 @@ int luaApi_SetAngularHertz(lua_State * _lua)
     WeldJointSelf * self = WeldJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWeldJoint().setAngularHertz(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getWeldJoint().wakeBodies();
     return 0;
 }
 
@@ -1089,6 +1128,7 @@ int luaApi_SetAngularDampingRatio(lua_State * _lua)
     WeldJointSelf * self = WeldJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWeldJoint().setAngularDampingRatio(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getWeldJoint().wakeBodies();
     return 0;
 }
 
@@ -1111,6 +1151,7 @@ int luaApi_EnableSpring(lua_State * _lua)
     WheelJointSelf * self = WheelJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getWheelJoint().enableSpring(lua_toboolean(_lua, 2));
+    self->getWheelJoint().wakeBodies();
     return 0;
 }
 
@@ -1129,6 +1170,7 @@ int luaApi_SetSpringHertz(lua_State * _lua)
     WheelJointSelf * self = WheelJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWheelJoint().setSpringHertz(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getWheelJoint().wakeBodies();
     return 0;
 }
 
@@ -1147,6 +1189,7 @@ int luaApi_SetSpringDampingRatio(lua_State * _lua)
     WheelJointSelf * self = WheelJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWheelJoint().setSpringDampingRatio(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getWheelJoint().wakeBodies();
     return 0;
 }
 
@@ -1185,6 +1228,7 @@ int luaApi_SetLimits(lua_State * _lua)
     self->getWheelJoint().setLimits(
         static_cast<float>(lua_tonumber(_lua, 2)),
         static_cast<float>(lua_tonumber(_lua, 3)));
+    self->getWheelJoint().wakeBodies();
     return 0;
 }
 
@@ -1195,6 +1239,7 @@ int luaApi_EnableLimit(lua_State * _lua)
     WheelJointSelf * self = WheelJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getWheelJoint().enableLimit(lua_toboolean(_lua, 2));
+    self->getWheelJoint().wakeBodies();
     return 0;
 }
 
@@ -1213,6 +1258,7 @@ int luaApi_EnableMotor(lua_State * _lua)
     WheelJointSelf * self = WheelJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isboolean(_lua, 2), 2, LuaTypeName::boolean);
     self->getWheelJoint().enableMotor(lua_toboolean(_lua, 2));
+    self->getWheelJoint().wakeBodies();
     return 0;
 }
 
@@ -1231,6 +1277,7 @@ int luaApi_SetMotorSpeed(lua_State * _lua)
     WheelJointSelf * self = WheelJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWheelJoint().setMotorSpeed(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getWheelJoint().wakeBodies();
     return 0;
 }
 
@@ -1249,6 +1296,7 @@ int luaApi_SetMaxMotorTorque(lua_State * _lua)
     WheelJointSelf * self = WheelJointUserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     self->getWheelJoint().setMaxMotorTorque(static_cast<float>(lua_tonumber(_lua, 2)));
+    self->getWheelJoint().wakeBodies();
     return 0;
 }
 

@@ -80,6 +80,11 @@ public:
         b2Joint_SetCollideConnected(m_b2_joint_id, _enable);
     }
 
+    void wakeBodies()
+    {
+        b2Joint_WakeBodies(m_b2_joint_id);
+    }
+
 protected:
     b2JointId m_b2_joint_id;
 
