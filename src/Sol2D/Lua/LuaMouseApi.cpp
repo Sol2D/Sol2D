@@ -14,46 +14,43 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/LuaKeyboardApi.h>
+#include <Sol2D/Lua/LuaMouseApi.h>
+#include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
-#include <SDL3/SDL_keyboard.h>
+#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <SDL3/SDL_mouse.h>
 
+using namespace Sol2D;
 using namespace Sol2D::Lua;
 
 namespace {
 
-struct Self : LuaSelfBase
-{
-    int kb_state_length;
-    const bool * kb_state;
-};
+struct Self : LuaSelfBase { };
 
-using UserData = LuaUserData<Self, LuaTypeName::keyboard>;
+using UserData = LuaUserData<Self, LuaTypeName::mouse>;
 
 // 1 self
-// 2 scancode
-// ...
-// n scancode
 int luaApi_GetState(lua_State * _lua)
 {
-    Self * self = UserData::getUserData(_lua, 1);
-    int top = lua_gettop(_lua);
-    for(int idx = 2; idx <= top; ++idx)
-    {
-        luaL_argexpected(_lua, lua_isinteger(_lua, idx), idx, LuaTypeName::integer);
-        lua_Integer scancode = lua_tointeger(_lua, idx);
-        lua_pushboolean(_lua, scancode >= 0 && scancode < self->kb_state_length && self->kb_state[scancode]);
-    }
-    return top - 1;
+    UserData::validateUserData(_lua, 1);
+    Point point;
+    SDL_MouseButtonFlags flags = SDL_GetMouseState(&point.x, &point.y);
+    LuaTable table = LuaTable::pushNew(_lua);
+    table.setBooleanValue("left", SDL_BUTTON_LMASK & flags);
+    table.setBooleanValue("right", SDL_BUTTON_RMASK & flags);
+    table.setBooleanValue("middle", SDL_BUTTON_MMASK & flags);
+    table.setBooleanValue("x1", SDL_BUTTON_X1MASK & flags);
+    table.setBooleanValue("x2", SDL_BUTTON_X2MASK & flags);
+    table.setPointValue("point", point);
+    return 1;
 }
 
-} // namespace name
+} // namespace
 
-void Sol2D::Lua::pushKeyboardApi(lua_State * _lua)
+void Sol2D::Lua::pushMouseApi(lua_State * _lua)
 {
-    Self * self = UserData::pushUserData(_lua);
-    self->kb_state = SDL_GetKeyboardState(&self->kb_state_length);
+    UserData::pushUserData(_lua);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] =

@@ -20,6 +20,6 @@
 
 namespace Sol2D::Lua {
 
-void pushKeyboardApi(lua_State * _lua);
+void pushMouseApi(lua_State * _lua);
 
 } // namespace Sol2D::Lua

@@ -60,7 +60,7 @@ function state:setAction(direction, action)
             if direction == Direction.LEFT then
                 graphic = Player.keys.shapeGraphics.WALK_LEFT
             else
-                graphic = Player.keys.shapeGraphics.WALK_RIGT
+                graphic = Player.keys.shapeGraphics.WALK_RIGHT
             end
         elseif action == Action.JUMP then
             if direction == Direction.LEFT then

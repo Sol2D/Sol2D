@@ -12,9 +12,11 @@ local module = {
             IDLE_LEFT = 'ilde-left',
             IDLE_RIGHT = 'ilde-right',
             WALK_LEFT = 'walk-left',
-            WALK_RIGT = 'walk-right',
+            WALK_RIGHT = 'walk-right',
             JUMP_LEFT = 'jump-left',
-            JUMP_RIGHT = 'jump-right'
+            JUMP_RIGHT = 'jump-right',
+            ATTACK_LEFT = 'attac-left',
+            ATTACK_RIGHT = 'attac-right'
         }
     }
 }
@@ -82,7 +84,7 @@ local function addWalkAnimations(graphics_defs)
         position = animation_position,
         frames = frames
     }
-    graphics_defs[module.keys.shapeGraphics.WALK_RIGT] = {
+    graphics_defs[module.keys.shapeGraphics.WALK_RIGHT] = {
         position = animation_position,
         frames = frames
     }
@@ -117,6 +119,44 @@ local function addJumpAnimations(graphics_defs)
     }
     graphics_defs[module.keys.shapeGraphics.JUMP_RIGHT] = {
         position = animation_position,
+        frames = frames
+    }
+end
+
+---@param graphics_defs table<string, sol.GraphicsPackDefinition>
+local function addAttackAnimations(graphics_defs)
+    local frame_duration = 80
+    ---@type sol.GraphicsPackFrameDefinition[]
+    local frames = {}
+    for _, sprite_key in ipairs(resources.keys.sprites.knight.attack) do
+        table.insert(
+            frames,
+            {
+                duration = frame_duration,
+                sprites = {
+                    {
+                        sprite = resources.getSprite(sprite_key),
+                        scaleFactor = { x = SCALE_FACTOR, y = SCALE_FACTOR }
+                    }
+                }
+            }
+        )
+    end
+    graphics_defs[module.keys.shapeGraphics.ATTACK_LEFT] = {
+        isFlippedHorizontally = true,
+        animationIterations = 1,
+        position = {
+            x = -(resources.keys.sprites.knight.attack.rect.w * SCALE_FACTOR) / 2 - 4,
+            y = -resources.keys.sprites.knight.attack.rect.h * SCALE_FACTOR + 1
+        },
+        frames = frames
+    }
+    graphics_defs[module.keys.shapeGraphics.ATTACK_RIGHT] = {
+        animationIterations = 1,
+        position = {
+            x = -(resources.keys.sprites.knight.attack.rect.w * SCALE_FACTOR) / 2 + 4,
+            y = -resources.keys.sprites.knight.attack.rect.h * SCALE_FACTOR + 1
+        },
         frames = frames
     }
 end
@@ -171,6 +211,7 @@ local function getDefinition()
     addIdleAnimation(definition.shapes[module.keys.shapes.MAIN].graphics)
     addWalkAnimations(definition.shapes[module.keys.shapes.MAIN].graphics)
     addJumpAnimations(definition.shapes[module.keys.shapes.MAIN].graphics)
+    addAttackAnimations(definition.shapes[module.keys.shapes.MAIN].graphics)
     return definition
 end
 

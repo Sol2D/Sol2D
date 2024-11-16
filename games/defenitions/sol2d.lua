@@ -5,6 +5,7 @@
 ---@field BodyType sol.BodyType
 ---@field BodyShapeType sol.BodyShapeType
 ---@field keyboard sol.Keyboard
+---@field mouse sol.Mouse
 ---@field stores sol.StoreManager
 ---@field window sol.Window
 ---@field TileMapObjectType sol.TileMapObjectType
@@ -478,6 +479,9 @@ function __body_shape:getBody() end
 ---@param graphic_key string
 ---@return sol.GraphicsPack | nil
 function __body_shape:getGraphicsPack(graphic_key) end
+
+---@return sol.GraphicsPack | nil
+function __body_shape:getCurrentGraphicsPack() end
 
 ---@param graphic_key string
 ---@return boolean
@@ -1175,6 +1179,12 @@ function __graphics_pack:getCurrentFrameIndex() end
 function __graphics_pack:setCurrentFrameIndex(frame_index) end
 
 ---@return integer
+function __graphics_pack:getCurrentAnimationIteration() end
+
+---@return boolean
+function __graphics_pack:switchToFirstVisibleFrame() end
+
+---@return boolean
 function __graphics_pack:switchToNextVisibleFrame() end
 
 ---@param frame_index integer
@@ -1307,6 +1317,21 @@ local __keyboard
 ---@vararg integer
 ---@return boolean ...
 function __keyboard:getState(...) end
+
+---@class sol.Mouse
+local __mouse
+
+---@vararg integer
+---@return sol.MouseStatge
+function __mouse:getState() end
+
+---@class sol.MouseStatge
+---@field left boolean
+---@field right boolean
+---@field middle boolean
+---@field x1 boolean
+---@field x2 boolean
+---@field point sol.Point
 
 ---@class sol.TileMapObjectType
 ---@field CIRCLE integer

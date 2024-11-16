@@ -47,6 +47,11 @@ struct LuaUserData
         return Sol2D::Lua::pushMetatable(_lua, metatable);
     }
 
+    static void validateUserData(lua_State * _lua, int _idx)
+    {
+        luaL_checkudata(_lua, _idx, metatable);
+    }
+
     static LuaSelf * getUserData(lua_State * _lua, int _idx)
     {
         return static_cast<LuaSelf *>(luaL_checkudata(_lua, _idx, metatable));

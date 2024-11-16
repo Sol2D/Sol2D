@@ -408,6 +408,17 @@ GraphicsPack * Scene::getBodyShapeGraphicsPack(
     return shape->getGraphics(_graphics_key);
 }
 
+GraphicsPack * Scene::getBodyShapeCurrentGraphics(uint64_t _body_id, const PreHashedKey<std::string> & _shape_key)
+{
+    b2BodyId b2_body_id = findBox2dBody(_body_id);
+    if(B2_IS_NULL(b2_body_id))
+        return nullptr;
+    BodyShape * shape = getUserData(b2_body_id)->findShape(_shape_key);
+    if(shape == nullptr)
+        return nullptr;
+    return shape->getCurrentGraphics();
+}
+
 bool Scene::setBodyShapeCurrentGraphics(
     uint64_t _body_id,
     const PreHashedKey<std::string> & _shape_key,

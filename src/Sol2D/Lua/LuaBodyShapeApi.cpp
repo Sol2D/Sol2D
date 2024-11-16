@@ -104,6 +104,28 @@ int luaApi_GetGraphicsPack(lua_State * _lua)
 }
 
 // 1 self
+int luaApi_GetCurrentGraphicsPack(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    Body * body = self->getScene(_lua)->getBody(self->body_id);
+    if(body)
+    {
+        BodyShape * shape = body->findShape(self->shape_key);
+        if(shape)
+        {
+            std::optional<PreHashedKey<std::string>> key = shape->getCurrentGraphicsKey();
+            if(key.has_value())
+            {
+                pushGraphicsPackApi(_lua, self->getScene(_lua), self->body_id, self->shape_key, key.value());
+                return 1;
+            }
+        }
+    }
+    lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
 // 2 graphic key
 int luaApi_SetCurrentGraphics(lua_State * _lua)
 {
@@ -156,6 +178,7 @@ void Sol2D::Lua::pushBodyShapeApi(
             { "getKey", luaApi_GetKey },
             { "getBody", luaApi_GetBody },
             { "getGraphicsPack", luaApi_GetGraphicsPack },
+            { "getCurrentGraphicsPack", luaApi_GetCurrentGraphicsPack },
             { "setCurrentGraphics", luaApi_SetCurrentGraphics },
             { "flipGraphics", luaApi_FlipGraphics },
             { nullptr, nullptr }

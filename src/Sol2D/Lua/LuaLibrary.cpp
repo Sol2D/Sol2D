@@ -21,6 +21,7 @@
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
 #include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
 #include <Sol2D/Lua/LuaKeyboardApi.h>
+#include <Sol2D/Lua/LuaMouseApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
 #include <Sol2D/Lua/LuaFragmentApi.h>
 #include <Sol2D/Lua/LuaDimensionApi.h>
@@ -87,8 +88,10 @@ LuaLibrary::LuaLibrary(
     {
         pushWindowApi(mp_lua, _window);
         lua_setfield(mp_lua, -2, "window");
-        pushKeyboardApiOntoStack(mp_lua);
+        pushKeyboardApi(mp_lua);
         lua_setfield(mp_lua, -2, "keyboard");
+        pushMouseApi(mp_lua);
+        lua_setfield(mp_lua, -2, "mouse");
         pushStoreManagerApi(mp_lua, _workspace, _renderer, _store_manager);
         lua_setfield(mp_lua, -2, "stores");
         pushScancodeEnum(mp_lua);

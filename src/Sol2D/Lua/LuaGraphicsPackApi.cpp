@@ -59,7 +59,7 @@ public:
     {
         std::shared_ptr<Scene> ptr =  m_scene.lock();
         if(!ptr)
-            luaL_error(_lua, "the scene is destroyed");
+            luaL_error(_lua, LuaMessage::scene_is_destroyed);
         return ptr;
     }
 
@@ -195,6 +195,22 @@ int luaApi_SetCurrentFrameIndex(lua_State * _lua)
 }
 
 // 1 self
+int luaApi_GetCurrentAnimationIteration(lua_State * _lua)
+{
+    const Self * self = UserData::getUserData(_lua, 1);
+    lua_pushinteger(_lua, self->getGraphicsPack(_lua)->getCurrentAnimationIteration());
+    return 1;
+}
+
+// 1 self
+int luaApi_SwitchToFirstVisibleFrame(lua_State * _lua)
+{
+    const Self * self = UserData::getUserData(_lua, 1);
+    lua_pushboolean(_lua, self->getGraphicsPack(_lua)->switchToFirstVisibleFrame());
+    return 1;
+}
+
+// 1 self
 int luaApi_SwitchToNextVisibleFrame(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
@@ -252,6 +268,8 @@ struct GraphicsPackApiPusher
                 { "getFrameDuration", luaApi_GetFrameDuration },
                 { "getCurrentFrameIndex", luaApi_GetCurrentFrameIndex },
                 { "setCurrentFrameIndex", luaApi_SetCurrentFrameIndex },
+                { "getCurrentAnimationIteration", luaApi_GetCurrentAnimationIteration },
+                { "switchToFirstVisibleFrame", luaApi_SwitchToFirstVisibleFrame },
                 { "switchToNextVisibleFrame", luaApi_SwitchToNextVisibleFrame },
                 { "addSprite", luaApi_AddSprite },
                 { "removeSprite", luaApi_RemoveSprite },

@@ -45,6 +45,7 @@ struct LuaTypeName
     static const char tile_map_object_type[];
     static const char keyboard[];
     static const char scancode[];
+    static const char mouse[];
     static const char store[];
     static const char dimension[];
     static const char dimension_unit_type[];
@@ -121,6 +122,8 @@ struct LuaMessage
     static const char body_is_destroyed[];
     static const char sprite_is_destroyed[];
     static const char sprite_sheet_is_destroyed[];
+    static const char view_is_destroyed[];
+    static const char form_is_destroyed[];
     static const char widget_is_destroyed[];
     static const char music_is_destroyed[];
     static const char sound_effect_is_destroyed[];

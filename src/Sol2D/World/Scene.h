@@ -88,6 +88,7 @@ public:
     bool setBodyShapeCurrentGraphics(uint64_t _body_id,
          const Utils::PreHashedKey<std::string> & _shape_key,
          const Utils::PreHashedKey<std::string> & _graphic_key);
+    GraphicsPack * getBodyShapeCurrentGraphics(uint64_t _body_id, const Utils::PreHashedKey<std::string> & _shape_key);
     bool flipBodyShapeGraphics(uint64_t _body_id,
            const Utils::PreHashedKey<std::string> & _shape_key,
            const Utils::PreHashedKey<std::string> & _graphic_key,

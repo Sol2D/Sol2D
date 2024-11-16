@@ -36,6 +36,7 @@ public:
         const GraphicsPackDefinition & _definition);
     bool setCurrentGraphics(const Utils::PreHashedKey<std::string> & _key);
     GraphicsPack * getCurrentGraphics();
+    std::optional<Utils::PreHashedKey<std::string>> getCurrentGraphicsKey() const;
     GraphicsPack * getGraphics(const Utils::PreHashedKey<std::string> & _key);
     bool flipGraphics(const Utils::PreHashedKey<std::string> & _key, bool _flip_horizontally, bool _flip_vertically);
 
@@ -43,76 +44,18 @@ private:
     const std::string m_key;
     const std::optional<uint32_t> m_tile_map_object_id;
     Utils::PreHashedMap<std::string, GraphicsPack *> m_graphics;
-    GraphicsPack * mp_current_graphic;
+    GraphicsPack * mp_current_graphics;
+    std::optional<Utils::PreHashedKey<std::string>> m_current_graphics_key;
 };
-
-inline BodyShape::BodyShape(const std::string & _key, std::optional<uint32_t> _tile_map_object_id) :
-    m_key(_key),
-    m_tile_map_object_id(_tile_map_object_id),
-    mp_current_graphic(nullptr)
-{
-}
-
-inline BodyShape::~BodyShape()
-{
-    for(const auto & pair : m_graphics)
-        delete pair.second;
-}
-
-inline const std::string & BodyShape::getKey() const
-{
-    return m_key;
-}
-
-inline const std::optional<uint32_t> BodyShape::getTileMapObjectId() const
-{
-    return m_tile_map_object_id;
-}
-
-inline void BodyShape::addGraphics(
-    SDL_Renderer & _renderer,
-    const Utils::PreHashedKey<std::string> & _key,
-    const GraphicsPackDefinition & _definition)
-{
-    auto it = m_graphics.find(_key);
-    if(it != m_graphics.end())
-        delete it->second;
-    m_graphics[_key] = new GraphicsPack(_renderer, _definition);
-}
-
-inline bool BodyShape::setCurrentGraphics(const Utils::PreHashedKey<std::string> & _key)
-{
-    GraphicsPack * graphics = getGraphics(_key);
-    if(graphics)
-    {
-        mp_current_graphic = graphics;
-        return true;
-    }
-    return false;
-}
-
-inline GraphicsPack * BodyShape::getGraphics(const Utils::PreHashedKey<std::string> & _key)
-{
-    auto it = m_graphics.find(_key);
-    return it == m_graphics.end() ? nullptr : it->second;
-}
 
 inline GraphicsPack * BodyShape::getCurrentGraphics()
 {
-    return mp_current_graphic;
+    return mp_current_graphics;
 }
 
-inline bool BodyShape::flipGraphics(
-    const Utils::PreHashedKey<std::string> & _key,
-    bool _flip_horizontally,
-    bool _flip_vertically)
+inline std::optional<Utils::PreHashedKey<std::string>> BodyShape::getCurrentGraphicsKey() const
 {
-    auto it = m_graphics.find(_key);
-    if(it == m_graphics.end())
-        return false;
-    it->second->setFilippedHorizontally(_flip_horizontally);
-    it->second->setFilippedVertically(_flip_vertically);
-    return true;
+    return m_current_graphics_key;
 }
 
 } // namespace Sol2D::World

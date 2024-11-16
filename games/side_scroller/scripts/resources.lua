@@ -43,7 +43,20 @@ local keys = {
                 'jump-9:knight',
                 'jump-10:knight',
                 rect = { x = 23, y = 27, w = 480, h = 668 }
-            }
+            },
+            attack = {
+                'attack-1:knight',
+                'attack-2:knight',
+                'attack-3:knight',
+                'attack-4:knight',
+                'attack-5:knight',
+                'attack-6:knight',
+                'attack-7:knight',
+                'attack-8:knight',
+                'attack-9:knight',
+                'attack-10:knight',
+                rect = { x = 43, y = 40, w = 495, h = 620 }
+            },
         }
     },
     spriteSheets = {
@@ -113,6 +126,14 @@ local function load(store)
             key,
             'sprites/knight/jump (' .. index .. ').png',
             { rect = keys.sprites.knight.jump.rect }
+        )
+    end
+    for index, key in ipairs(keys.sprites.knight.attack) do
+        loadSprite(
+            store,
+            key,
+            'sprites/knight/attack (' .. index .. ').png',
+            { rect = keys.sprites.knight.attack.rect }
         )
     end
 

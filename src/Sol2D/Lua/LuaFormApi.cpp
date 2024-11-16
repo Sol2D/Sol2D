@@ -39,7 +39,7 @@ struct Self : LuaSelfBase
     {
         std::shared_ptr<Form> ptr = form.lock();
         if(!ptr)
-            luaL_error(_lua, "the form is destroyed");
+            luaL_error(_lua, LuaMessage::form_is_destroyed);
         return ptr;
     }
 

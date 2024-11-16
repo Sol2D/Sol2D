@@ -150,7 +150,7 @@ public:
     {
         std::shared_ptr<Scene> ptr =  m_scene.lock();
         if(!ptr)
-            luaL_error(_lua, "the scene is destroyed");
+            luaL_error(_lua, LuaMessage::scene_is_destroyed);
         return ptr;
     }
 

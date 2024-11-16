@@ -346,6 +346,19 @@ void GraphicsPack::render(const Point & _position, const Rotation & _rotation, s
     performRender(_position, _rotation);
 }
 
+bool GraphicsPack::switchToFirstVisibleFrame()
+{
+    if(m_frames.empty())
+        return false;
+    if(m_current_frame_index == 0)
+        return true;
+    m_current_frame_index = 0;
+    m_current_frame_duration = std::chrono::milliseconds::zero();
+    if(!m_frames[m_current_frame_index]->is_visible)
+        return switchToNextVisibleFrame();
+    return true;
+}
+
 bool GraphicsPack::switchToNextVisibleFrame()
 {
     return switchToNextVisibleFrame(false);
@@ -367,7 +380,7 @@ bool GraphicsPack::switchToNextVisibleFrame(bool _respect_iteration)
 
     if(m_current_frame_index > 0)
     {
-        if(_respect_iteration && ++m_current_iteration > m_max_iterations)
+        if(_respect_iteration && ++m_current_iteration >= m_max_iterations)
             return false;
 
         for(size_t i = 0; i < m_current_frame_index; ++i)

@@ -55,7 +55,9 @@ public:
     std::optional<std::chrono::milliseconds> getFrameDuration(size_t _index) const;
     bool setCurrentFrameIndex(size_t _index);
     size_t getCurrentFrameIndex() const;
+    bool switchToFirstVisibleFrame();
     bool switchToNextVisibleFrame();
+    size_t getCurrentAnimationIteration() const;
     std::pair<bool, size_t> addSprite(size_t _frame, const GraphicsPackSpriteDefinition & _definition);
     bool removeSprite(size_t _frame, size_t _sprite);
     void render(const Point & _position, const Utils::Rotation & _rotation, std::chrono::milliseconds _time_passed);
@@ -100,6 +102,11 @@ inline void GraphicsPack::setFilippedVertically(bool _flipped)
 inline void GraphicsPack::setCenter(const Point & _center)
 {
     m_center = _center;
+}
+
+inline size_t GraphicsPack::getCurrentAnimationIteration() const
+{
+    return m_current_iteration;
 }
 
 } // namespace Sol2D

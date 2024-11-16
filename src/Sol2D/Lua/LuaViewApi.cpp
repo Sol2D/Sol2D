@@ -38,7 +38,7 @@ struct Self : LuaSelfBase
     {
         std::shared_ptr<View> ptr = view.lock();
         if(!ptr)
-            luaL_error(_lua, "the view is destroyed");
+            luaL_error(_lua, LuaMessage::view_is_destroyed);
         return ptr;
     }
 
