@@ -159,14 +159,8 @@ local function addAttackAnimations(graphics_defs)
     }
 end
 
----@type sol.BodyDefinition | nil
-local definition = nil
-
 ---@return sol.BodyDefinition
 local function getDefinition()
-    if definition then
-        return definition
-    end
     local hit_box = {
         w = 240 * SCALE_FACTOR,
         h = 525 * SCALE_FACTOR
@@ -175,7 +169,7 @@ local function getDefinition()
     hit_box.y = -hit_box.h
     local radius = hit_box.w / 2
     ---@type sol.BodyDefinition
-    definition = {
+    local definition = {
         type = sol.BodyType.DYNAMIC,
         physics = {
             fixedRotation = true
@@ -218,14 +212,14 @@ end
 ---@param script_argument any?
 ---@return sol.Body
 function module.new(scene, position, script_argument)
-    local body = scene:createBody(position, getDefinition(), 'player-script.lua', script_argument)
-    local main_shape = body:getShape(module.keys.shapes.MAIN)
+    local player = scene:createBody(position, getDefinition(), 'player-script.lua', script_argument)
+    local main_shape = player:getShape(module.keys.shapes.MAIN)
     if main_shape then
         main_shape:setCurrentGraphics(module.keys.shapeGraphics.IDLE_RIGHT)
     else
         error('There is no shape ' .. module.keys.shapes.MAIN .. ' in the player body')
     end
-    return body
+    return player
 end
 
 return setmetatable({}, module)

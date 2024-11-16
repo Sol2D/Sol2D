@@ -17,6 +17,41 @@ if not start_point then
     error('Start position not found')
 end
 
+local attack_body = scene:createBody(
+    player:getPosition(),
+    {
+        type = sol.BodyType.DYNAMIC,
+        physics = {
+            fixedRotation = true
+        },
+        shapes = {
+            ['player-attack-sensor'] = {
+                type = sol.BodyShapeType.POLYGON,
+                rect = {
+                    x = -14,
+                    y = -100,
+                    w = 28,
+                    h = 100
+                },
+                physics = {
+                    isSensor = true
+                }
+            }
+        }
+    })
+local attack_joint = scene:createPrismaticJoint({
+    bodyA = player,
+    bodyB = attack_body,
+    localAxisA = { x = 1, y = 0 },
+    isLimitEnbaled = true,
+    lowerTranslation = -55,
+    upperTranslation = 55,
+    isSpringEnbaled = true,
+    hertz = 100,
+    isMotorEnbaled = false,
+    maxMotorForce = 7
+})
+
 local Direction = {
     LEFT = -1,
     RIGHT = 1
@@ -54,6 +89,18 @@ local function createState()
     }
 
     local state = {}
+
+    local function activateAtack()
+        attack_joint:enableSpring(false)
+        attack_joint:enableMotor(true)
+        attack_joint:setMotorSpeed(inner_state.direction * 100)
+    end
+
+    local function deactivateAtack()
+        attack_joint:enableSpring(true)
+        attack_joint:enableMotor(false)
+        attack_joint:setMotorSpeed(0)
+    end
 
     function state.addFooting(footing)
         if #inner_state.footings == 0 then
@@ -99,6 +146,7 @@ local function createState()
     function state.startAtack()
         if catAtack() then
             inner_state.action = Action.ATACK
+            activateAtack()
         end
     end
 
@@ -150,6 +198,7 @@ local function createState()
             local graphics = player_main_shape:getCurrentGraphicsPack()
             if not graphics or graphics:getCurrentAnimationIteration() > inner_state.attack_start_iteration then
                 inner_state.action = Action.NONE
+                deactivateAtack()
             end
         else
             inner_state.action = Action.NONE
@@ -200,7 +249,6 @@ local function createState()
                 local gr = player_main_shape:getCurrentGraphicsPack()
                 if gr then
                     inner_state.attack_start_iteration = gr:getCurrentAnimationIteration()
-                    print('Start Attack', inner_state.attack_start_iteration)
                 end
             end
         end
