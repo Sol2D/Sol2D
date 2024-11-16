@@ -33,7 +33,8 @@ local function createState()
     }
     local Action = {
         NONE = 0,
-        WALK = 1
+        WALK = 1,
+        ATACK = 2
     }
 
     local player_mass = player:getMass()
@@ -48,7 +49,8 @@ local function createState()
         action = Action.NONE,
         footings = {},
         current_graphics = Player.keys.shapeGraphics.IDLE_RIGHT,
-        jump_timeout = 0
+        jump_timeout = 0,
+        attack_start_iteration = 0
     }
 
     local state = {}
@@ -73,14 +75,31 @@ local function createState()
         end
     end
 
+    local function canJump()
+        return
+            inner_state.fly_state == FlyState.NONE and
+            inner_state.jump_timeout == 0 and
+            inner_state.action ~= Action.ATACK
+    end
+
     function state.startJump()
-        if inner_state.fly_state ~= FlyState.NONE or inner_state.jump_timeout > 0 then
+        if not canJump() then
             return
         end
         inner_state.fly_state = FlyState.JUMP
         sound_effect_swing:play()
         player:applyImpulseToCenter({ x = 0, y = -1300 })
         inner_state.jump_timeout = JUMP_DELAY
+    end
+
+    local function catAtack()
+        return inner_state.fly_state == FlyState.NONE
+    end
+
+    function state.startAtack()
+        if catAtack() then
+            inner_state.action = Action.ATACK
+        end
     end
 
     local function getFootingVelocity()
@@ -95,7 +114,14 @@ local function createState()
         return player_mass * change / (1 / 60) -- TODO: frame rate
     end
 
+    local function canChangeDirection()
+        return inner_state.action ~= Action.ATACK
+    end
+
     function state.applyHorizontalForce(direction)
+        if not canChangeDirection() then
+            return
+        end
         inner_state.direction = direction
         if inner_state.fly_state == FlyState.NONE then
             inner_state.action = Action.WALK
@@ -116,6 +142,17 @@ local function createState()
                 ),
                 y = 0
             })
+        end
+    end
+
+    local function resetAction()
+        if inner_state.action == Action.ATACK then
+            local graphics = player_main_shape:getCurrentGraphicsPack()
+            if not graphics or graphics:getCurrentAnimationIteration() > inner_state.attack_start_iteration then
+                inner_state.action = Action.NONE
+            end
+        else
+            inner_state.action = Action.NONE
         end
     end
 
@@ -143,6 +180,12 @@ local function createState()
             else
                 graphics = Player.keys.shapeGraphics.WALK_LEFT
             end
+        elseif inner_state.action == Action.ATACK then
+            if inner_state.direction == Direction.RIGHT then
+                graphics = Player.keys.shapeGraphics.ATTACK_RIGHT
+            else
+                graphics = Player.keys.shapeGraphics.ATTACK_LEFT
+            end
         else
             if inner_state.direction == Direction.RIGHT then
                 graphics = Player.keys.shapeGraphics.IDLE_RIGHT
@@ -153,8 +196,15 @@ local function createState()
         if graphics and graphics ~= inner_state.current_graphics then
             player_main_shape:setCurrentGraphics(graphics)
             inner_state.current_graphics = graphics
+            if inner_state.action == Action.ATACK then
+                local gr = player_main_shape:getCurrentGraphicsPack()
+                if gr then
+                    inner_state.attack_start_iteration = gr:getCurrentAnimationIteration()
+                    print('Start Attack', inner_state.attack_start_iteration)
+                end
+            end
         end
-        inner_state.action = Action.NONE
+        resetAction()
     end
 
     return state;
@@ -163,13 +213,17 @@ end
 local state = createState()
 
 scene:subscribeToStep(function(time_passed)
-    local right_key, left_key, space_key = sol.keyboard:getState(
+    local right_key, left_key, space_key, left_ctrl = sol.keyboard:getState(
         sol.Scancode.RIGHT_ARROW,
         sol.Scancode.LEFT_ARROW,
-        sol.Scancode.SPACE
+        sol.Scancode.SPACE,
+        sol.Scancode.L_CTRL
     )
     if space_key then
         state.startJump()
+    end
+    if left_ctrl then
+        state.startAtack()
     end
     if right_key then
         state.applyHorizontalForce(Direction.RIGHT)

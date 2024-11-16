@@ -378,6 +378,8 @@ bool GraphicsPack::switchToNextVisibleFrame(bool _respect_iteration)
         }
     }
 
+    ++m_current_iteration;
+
     if(m_current_frame_index > 0)
     {
         if(_respect_iteration && ++m_current_iteration >= m_max_iterations)

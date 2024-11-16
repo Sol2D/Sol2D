@@ -125,7 +125,7 @@ end
 
 ---@param graphics_defs table<string, sol.GraphicsPackDefinition>
 local function addAttackAnimations(graphics_defs)
-    local frame_duration = 80
+    local frame_duration = 60
     ---@type sol.GraphicsPackFrameDefinition[]
     local frames = {}
     for _, sprite_key in ipairs(resources.keys.sprites.knight.attack) do
@@ -144,7 +144,6 @@ local function addAttackAnimations(graphics_defs)
     end
     graphics_defs[module.keys.shapeGraphics.ATTACK_LEFT] = {
         isFlippedHorizontally = true,
-        animationIterations = 1,
         position = {
             x = -(resources.keys.sprites.knight.attack.rect.w * SCALE_FACTOR) / 2 - 4,
             y = -resources.keys.sprites.knight.attack.rect.h * SCALE_FACTOR + 1
@@ -152,7 +151,6 @@ local function addAttackAnimations(graphics_defs)
         frames = frames
     }
     graphics_defs[module.keys.shapeGraphics.ATTACK_RIGHT] = {
-        animationIterations = 1,
         position = {
             x = -(resources.keys.sprites.knight.attack.rect.w * SCALE_FACTOR) / 2 + 4,
             y = -resources.keys.sprites.knight.attack.rect.h * SCALE_FACTOR + 1
