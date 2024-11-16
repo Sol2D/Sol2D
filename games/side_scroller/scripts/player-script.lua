@@ -69,7 +69,7 @@ local function createState()
     local Action = {
         NONE = 0,
         WALK = 1,
-        ATACK = 2
+        ATTACK = 2
     }
 
     local player_mass = player:getMass()
@@ -90,13 +90,13 @@ local function createState()
 
     local state = {}
 
-    local function activateAtack()
+    local function activateAttackSensor()
         attack_joint:enableSpring(false)
         attack_joint:enableMotor(true)
         attack_joint:setMotorSpeed(inner_state.direction * 100)
     end
 
-    local function deactivateAtack()
+    local function deactivateAttackSensor()
         attack_joint:enableSpring(true)
         attack_joint:enableMotor(false)
         attack_joint:setMotorSpeed(0)
@@ -126,7 +126,7 @@ local function createState()
         return
             inner_state.fly_state == FlyState.NONE and
             inner_state.jump_timeout == 0 and
-            inner_state.action ~= Action.ATACK
+            inner_state.action ~= Action.ATTACK
     end
 
     function state.startJump()
@@ -139,14 +139,14 @@ local function createState()
         inner_state.jump_timeout = JUMP_DELAY
     end
 
-    local function catAtack()
-        return inner_state.fly_state == FlyState.NONE
+    local function canAttack()
+        return inner_state.action ~= Action.ATTACK and inner_state.fly_state == FlyState.NONE
     end
 
-    function state.startAtack()
-        if catAtack() then
-            inner_state.action = Action.ATACK
-            activateAtack()
+    function state.startAttack()
+        if canAttack() then
+            inner_state.action = Action.ATTACK
+            activateAttackSensor()
         end
     end
 
@@ -163,7 +163,7 @@ local function createState()
     end
 
     local function canChangeDirection()
-        return inner_state.action ~= Action.ATACK
+        return inner_state.action ~= Action.ATTACK
     end
 
     function state.applyHorizontalForce(direction)
@@ -194,11 +194,11 @@ local function createState()
     end
 
     local function resetAction()
-        if inner_state.action == Action.ATACK then
+        if inner_state.action == Action.ATTACK then
             local graphics = player_main_shape:getCurrentGraphicsPack()
             if not graphics or graphics:getCurrentAnimationIteration() > inner_state.attack_start_iteration then
                 inner_state.action = Action.NONE
-                deactivateAtack()
+                deactivateAttackSensor()
             end
         else
             inner_state.action = Action.NONE
@@ -229,7 +229,7 @@ local function createState()
             else
                 graphics = Player.keys.shapeGraphics.WALK_LEFT
             end
-        elseif inner_state.action == Action.ATACK then
+        elseif inner_state.action == Action.ATTACK then
             if inner_state.direction == Direction.RIGHT then
                 graphics = Player.keys.shapeGraphics.ATTACK_RIGHT
             else
@@ -245,7 +245,7 @@ local function createState()
         if graphics and graphics ~= inner_state.current_graphics then
             player_main_shape:setCurrentGraphics(graphics)
             inner_state.current_graphics = graphics
-            if inner_state.action == Action.ATACK then
+            if inner_state.action == Action.ATTACK then
                 local gr = player_main_shape:getCurrentGraphicsPack()
                 if gr then
                     inner_state.attack_start_iteration = gr:getCurrentAnimationIteration()
@@ -271,7 +271,7 @@ scene:subscribeToStep(function(time_passed)
         state.startJump()
     end
     if left_ctrl then
-        state.startAtack()
+        state.startAttack()
     end
     if right_key then
         state.applyHorizontalForce(Direction.RIGHT)
