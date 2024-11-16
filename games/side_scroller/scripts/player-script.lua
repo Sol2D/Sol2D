@@ -1,91 +1,166 @@
-local resources = require 'resources'
 local Player = require 'player'
+local resources = require 'resources'
 local level_common = require 'level-common'
 
-local player = script.body
 local scene = script.scene
-
-local sound_effect_armor = resources.getSoundEffect(resources.keys.soundEffects.ARMOR)
-local sound_effect_swing = resources.getSoundEffect(resources.keys.soundEffects.SWING)
-
-local start_point = scene:getTileMapObjectByName('start-position')
-if not start_point then
-    error('Start position not found')
-end
+local player = script.body
+local METERS_PER_PIXEL = script.arg.metersPerPixel
 
 ---@type BodyContactObserver
 local contact_observer = script.arg.contactObserver
 
 local player_id = player:getId()
-local player_mass = player:getMass()
-local player_main_shape = player:getShape(Player.keys.shapes.MAIN)
-if not player_main_shape then
-    error("Player's main shape not found")
+local sound_effect_armor = resources.getSoundEffect(resources.keys.soundEffects.ARMOR)
+local sound_effect_swing = resources.getSoundEffect(resources.keys.soundEffects.SWING)
+local start_point = scene:getTileMapObjectByName('start-position')
+if not start_point then
+    error('Start position not found')
 end
 
-local METERS_PER_PIXEL = script.arg.metersPerPixel
-local WALK_VELOCITY = 5
-local JUMP_DELAY = 200
-
 local Direction = {
-    LEFT = 0,
+    LEFT = -1,
     RIGHT = 1
 }
 
-local Action = {
-    IDLE = 0,
-    WALK = 1,
-    JUMP = 2
-}
+local function createState()
+    local WALK_VELOCITY = 5
+    local JUMP_DELAY = 700
+    local FlyState = {
+        NONE = 0,
+        JUMP = 1,
+        FALL = 2,
+        LAND = 3
+    }
+    local Action = {
+        NONE = 0,
+        WALK = 1
+    }
 
-local state = {
-    inAir = false,
-    jumping = false,
-    footings = {},
-    jumpTimeout = 0,
-    direction = Direction.RIGHT,
-    action = Action.IDLE
-}
+    local player_mass = player:getMass()
+    local player_main_shape = player:getShape(Player.keys.shapes.MAIN)
+    if not player_main_shape then
+        error("Player's main shape not found")
+    end
 
-function state:setAction(direction, action)
-    if direction ~= self.direction or action ~= self.action then
-        local graphic
-        if action == Action.IDLE then
-            if direction == Direction.LEFT then
-                graphic = Player.keys.shapeGraphics.IDLE_LEFT
-            else
-                graphic = Player.keys.shapeGraphics.IDLE_RIGHT
-            end
-        elseif action == Action.WALK then
-            if direction == Direction.LEFT then
-                graphic = Player.keys.shapeGraphics.WALK_LEFT
-            else
-                graphic = Player.keys.shapeGraphics.WALK_RIGHT
-            end
-        elseif action == Action.JUMP then
-            if direction == Direction.LEFT then
-                graphic = Player.keys.shapeGraphics.JUMP_LEFT
-            else
-                graphic = Player.keys.shapeGraphics.JUMP_RIGHT
+    local inner_state = {
+        fly_state = FlyState.NONE,
+        direction = Direction.RIGHT,
+        action = Action.NONE,
+        footings = {},
+        current_graphics = Player.keys.shapeGraphics.IDLE_RIGHT,
+        jump_timeout = 0
+    }
+
+    local state = {}
+
+    function state.addFooting(footing)
+        if #inner_state.footings == 0 then
+            sound_effect_armor:play()
+        end
+        table.insert(inner_state.footings, footing)
+        inner_state.fly_state = FlyState.LAND
+    end
+
+    function state.removeFooting(body_id, shape_key)
+        for index, value in ipairs(inner_state.footings) do
+            if value.bodyId == body_id and value.shapeKey == shape_key then
+                table.remove(inner_state.footings, index)
+                break
             end
         end
-        self.action = action
-        self.direction = direction
-        player_main_shape:setCurrentGraphics(graphic)
+        if #inner_state.footings == 0 and inner_state.fly_state == FlyState.NONE then
+            inner_state.fly_state = FlyState.FALL
+        end
     end
+
+    function state.startJump()
+        if inner_state.fly_state ~= FlyState.NONE or inner_state.jump_timeout > 0 then
+            return
+        end
+        inner_state.fly_state = FlyState.JUMP
+        sound_effect_swing:play()
+        player:applyImpulseToCenter({ x = 0, y = -1300 })
+        inner_state.jump_timeout = JUMP_DELAY
+    end
+
+    local function getFootingVelocity()
+        if #inner_state.footings > 0 then
+            return inner_state.footings[1].body:getLinearVelocity()
+        end
+        return { x = 0, y = 0 }
+    end
+
+    local function getHorizontalForce(current_velocity, footing_velocity, desired_velocity)
+        local change = desired_velocity - (current_velocity - footing_velocity)
+        return player_mass * change / (1 / 60) -- TODO: frame rate
+    end
+
+    function state.applyHorizontalForce(direction)
+        inner_state.direction = direction
+        if inner_state.fly_state == FlyState.NONE then
+            inner_state.action = Action.WALK
+            player:applyForceToCenter({
+                x = getHorizontalForce(
+                    player:getLinearVelocity().x,
+                    getFootingVelocity().x,
+                    WALK_VELOCITY * direction
+                ),
+                y = 0
+            })
+        else
+            player:applyForceToCenter({
+                x = getHorizontalForce(
+                    player:getLinearVelocity().x,
+                    0,
+                    WALK_VELOCITY * direction
+                ),
+                y = 0
+            })
+        end
+    end
+
+    function state.applyStep(time_passed)
+        if inner_state.jump_timeout then
+            inner_state.jump_timeout = inner_state.jump_timeout - time_passed
+            if inner_state.jump_timeout < 0 then
+                inner_state.jump_timeout = 0
+            end
+        end
+        local graphics = nil
+        if inner_state.fly_state ~= FlyState.NONE then
+            if inner_state.fly_state == FlyState.LAND then
+                inner_state.fly_state = FlyState.NONE
+            elseif inner_state.fly_state == FlyState.JUMP then
+                if inner_state.direction == Direction.RIGHT then
+                    graphics = Player.keys.shapeGraphics.JUMP_RIGHT
+                else
+                    graphics = Player.keys.shapeGraphics.JUMP_LEFT
+                end
+            end
+        elseif inner_state.action == Action.WALK then
+            if inner_state.direction == Direction.RIGHT then
+                graphics = Player.keys.shapeGraphics.WALK_RIGHT
+            else
+                graphics = Player.keys.shapeGraphics.WALK_LEFT
+            end
+        else
+            if inner_state.direction == Direction.RIGHT then
+                graphics = Player.keys.shapeGraphics.IDLE_RIGHT
+            else
+                graphics = Player.keys.shapeGraphics.IDLE_LEFT
+            end
+        end
+        if graphics and graphics ~= inner_state.current_graphics then
+            player_main_shape:setCurrentGraphics(graphics)
+            inner_state.current_graphics = graphics
+        end
+        inner_state.action = Action.NONE
+    end
+
+    return state;
 end
 
-local function getFootingVelocity()
-    if #state.footings > 0 then
-        return state.footings[1].body:getLinearVelocity()
-    end
-    return { x = 0, y = 0 }
-end
-
-local function getHorizontalForce(current_velocity, footing_velocity, desired_velocity)
-    local change = desired_velocity - (current_velocity - footing_velocity)
-    return player_mass * change / (1 / 60) -- TODO: frame rate
-end
+local state = createState()
 
 scene:subscribeToStep(function(time_passed)
     local right_key, left_key, space_key = sol.keyboard:getState(
@@ -93,78 +168,26 @@ scene:subscribeToStep(function(time_passed)
         sol.Scancode.LEFT_ARROW,
         sol.Scancode.SPACE
     )
-
-    local action
-    if state.jumping then
-        action = Action.JUMP
-    else
-        action = Action.IDLE
+    if space_key then
+        state.startJump()
     end
-
-    local direction = state.direction
-
-    if not state.inAir then
-        if state.jumpTimeout > 0 then
-            state.jumpTimeout = state.jumpTimeout - time_passed
-        elseif space_key then
-            state.jumping = true
-            state.jumpTimeout = JUMP_DELAY
-            player:applyImpulseToCenter({ x = 0, y = -1300 })
-            action = Action.JUMP
-            sound_effect_swing:play()
-        end
-    end
-
     if right_key then
-        player:applyForceToCenter(
-            {
-                x = getHorizontalForce(
-                    player:getLinearVelocity().x,
-                    getFootingVelocity().x,
-                    WALK_VELOCITY
-                ),
-                y = 0
-            }
-        )
-        direction = Direction.RIGHT
-        if not state.jumping then
-            action = Action.WALK
-        end
+        state.applyHorizontalForce(Direction.RIGHT)
     elseif left_key then
-        player:applyForceToCenter(
-            {
-                x = getHorizontalForce(
-                    player:getLinearVelocity().x,
-                    getFootingVelocity().x,
-                    -WALK_VELOCITY
-                ),
-                y = 0
-            }
-        )
-        direction = Direction.LEFT
-        if not state.jumping then
-            action = Action.WALK
-        end
+        state.applyHorizontalForce(Direction.LEFT)
     end
-
-    state:setAction(direction, action)
+    state.applyStep(time_passed)
 end)
 
 contact_observer.setSensorBeginContactListener(player_id, function(sensor, visitor)
     if sensor.bodyId == player_id and sensor.shapeKey == Player.keys.shapes.BOTTOM_SENSOR then
         local visitor_body = scene:getBody(visitor.bodyId)
         if visitor_body then
-            table.insert(
-                state.footings, {
-                    bodyId = visitor.bodyId,
-                    body = visitor_body,
-                    shapeKey = visitor.shapeKey
-                })
-            if state.inAir then
-                sound_effect_armor:play()
-                state.inAir = false
-            end
-            state.jumping = false
+            state.addFooting({
+                bodyId = visitor.bodyId,
+                body = visitor_body,
+                shapeKey = visitor.shapeKey
+            })
         end
     elseif sensor.shapeKey == level_common.keys.shapes.WATER then
         player:setPosition({
@@ -176,12 +199,6 @@ end)
 
 contact_observer.setSensorEndContactListener(player_id, function(sensor, visitor)
     if sensor.bodyId == player_id and sensor.shapeKey == Player.keys.shapes.BOTTOM_SENSOR then
-        for index, footing in ipairs(state.footings) do
-            if footing.bodyId == visitor.bodyId and footing.shapeKey == visitor.shapeKey then
-                table.remove(state.footings, index)
-                break
-            end
-        end
-        state.inAir = #state.footings == 0
+        state.removeFooting(visitor.bodyId, visitor.shapeKey)
     end
 end)
