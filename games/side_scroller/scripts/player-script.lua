@@ -195,10 +195,6 @@ local function createState()
         sound_effect_armor:play()
     end
 
-    function fly.canLeave()
-        return #inner_state.footings > 0
-    end
-
     local jump = {}
 
     function jump.enter()
@@ -230,11 +226,9 @@ local function createState()
             { source = State.WALK,   target = State.FALL,   event = Event.FALL,    onEnter = nil,           onLeave = nil,          canEnter = nil,           canLeave = nil },
 
             { source = State.JUMP,   target = State.IDLE,   event = Event.LAND,    onEnter = idle.enter,    onLeave = fly.leave,    canEnter = nil,           canLeave = nil },
-            { source = State.JUMP,   target = State.WALK,   event = Event.H_FORCE, onEnter = walk.enter,    onLeave = fly.leave,    canEnter = nil,           canLeave = fly.canLeave }, -- FIXME: footing is still exists for a short time after the start of the jump
             { source = State.JUMP,   target = State.JUMP,   event = Event.H_FORCE, onEnter = fly.continue,  onLeave = nil,          canEnter = nil,           canLeave = nil },
 
             { source = State.FALL,   target = State.IDLE,   event = Event.LAND,    onEnter = idle.enter,    onLeave = fly.leave,    canEnter = nil,           canLeave = nil },
-            { source = State.FALL,   target = State.WALK,   event = Event.H_FORCE, onEnter = walk.enter,    onLeave = fly.leave,    canEnter = nil,           canLeave = fly.canLeave },
             { source = State.FALL,   target = State.FALL,   event = Event.H_FORCE, onEnter = fly.continue,  onLeave = nil,          canEnter = nil,           canLeave = nil },
 
             { source = State.ATTACK, target = State.IDLE,   event = Event.NOP,     onEnter = idle.enter,    onLeave = attack.leave, canEnter = nil,           canLeave = attack.canLeave },

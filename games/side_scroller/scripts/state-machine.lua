@@ -33,9 +33,6 @@ local function createStateMachine(initial_state, transitions)
                     transition.onEnter(args)
                 end
                 current_state = transition.target
-
-                print('State changed: ' .. transition.source .. ' -> ' .. transition.target)
-
                 return true
             end
         end
