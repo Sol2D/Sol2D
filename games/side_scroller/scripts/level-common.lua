@@ -194,11 +194,13 @@ function level:run(on_finish)
     main_view:bindFragment(main_fragment, scene)
     sol.window:setView(main_view)
 
-    local music = store:createMusic(self.name, self.music)
-    if music then
-        music:loop(-1)
-    else
-        error('An error occurred while loading the music from ' .. self.music)
+    if self.music then
+        local music = store:createMusic(self.name, self.music)
+        if music then
+            music:loop(-1)
+        else
+            error('An error occurred while loading the music from ' .. self.music)
+        end
     end
 
     local result = {}

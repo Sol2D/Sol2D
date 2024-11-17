@@ -1,6 +1,7 @@
 local Player = require 'player'
 local resources = require 'resources'
 local level_common = require 'level-common'
+local StateMachine = require 'state-machine'
 
 local scene = script.scene
 local player = script.body
@@ -60,16 +61,22 @@ local Direction = {
 local function createState()
     local WALK_VELOCITY = 5
     local JUMP_DELAY = 700
-    local FlyState = {
-        NONE = 0,
-        JUMP = 1,
-        FALL = 2,
-        LAND = 3
-    }
-    local Action = {
-        NONE = 0,
+
+    local State = {
+        IDLE = 0,
         WALK = 1,
-        ATTACK = 2
+        JUMP = 2,
+        FALL = 3,
+        ATTACK = 4
+    }
+
+    local Event = {
+        NOP = 0,
+        H_FORCE = 1,
+        FALL = 2,
+        JUMP = 3,
+        LAND = 4,
+        ATTACK = 5
     }
 
     local player_mass = player:getMass()
@@ -79,76 +86,12 @@ local function createState()
     end
 
     local inner_state = {
-        fly_state = FlyState.NONE,
         direction = Direction.RIGHT,
-        action = Action.NONE,
         footings = {},
-        current_graphics = Player.keys.shapeGraphics.IDLE_RIGHT,
         jump_timeout = 0,
-        attack_start_iteration = 0
+        attack_start_iteration = 0,
+        is_attack_in_progress = false
     }
-
-    local state = {}
-
-    local function activateAttackSensor()
-        attack_joint:enableSpring(false)
-        attack_joint:enableMotor(true)
-        attack_joint:setMotorSpeed(inner_state.direction * 100)
-    end
-
-    local function deactivateAttackSensor()
-        attack_joint:enableSpring(true)
-        attack_joint:enableMotor(false)
-        attack_joint:setMotorSpeed(0)
-    end
-
-    function state.addFooting(footing)
-        if #inner_state.footings == 0 then
-            sound_effect_armor:play()
-        end
-        table.insert(inner_state.footings, footing)
-        inner_state.fly_state = FlyState.LAND
-    end
-
-    function state.removeFooting(body_id, shape_key)
-        for index, value in ipairs(inner_state.footings) do
-            if value.bodyId == body_id and value.shapeKey == shape_key then
-                table.remove(inner_state.footings, index)
-                break
-            end
-        end
-        if #inner_state.footings == 0 and inner_state.fly_state == FlyState.NONE then
-            inner_state.fly_state = FlyState.FALL
-        end
-    end
-
-    local function canJump()
-        return
-            inner_state.fly_state == FlyState.NONE and
-            inner_state.jump_timeout == 0 and
-            inner_state.action ~= Action.ATTACK
-    end
-
-    function state.startJump()
-        if not canJump() then
-            return
-        end
-        inner_state.fly_state = FlyState.JUMP
-        sound_effect_swing:play()
-        player:applyImpulseToCenter({ x = 0, y = -1300 })
-        inner_state.jump_timeout = JUMP_DELAY
-    end
-
-    local function canAttack()
-        return inner_state.action ~= Action.ATTACK and inner_state.fly_state == FlyState.NONE
-    end
-
-    function state.startAttack()
-        if canAttack() then
-            inner_state.action = Action.ATTACK
-            activateAttackSensor()
-        end
-    end
 
     local function getFootingVelocity()
         if #inner_state.footings > 0 then
@@ -162,100 +105,231 @@ local function createState()
         return player_mass * change / (1 / 60) -- TODO: frame rate
     end
 
-    local function canChangeDirection()
-        return inner_state.action ~= Action.ATTACK
+    local function activateAttackSensor()
+        attack_joint:enableSpring(false)
+        attack_joint:enableMotor(true)
+        attack_joint:setMotorSpeed(inner_state.direction * 100)
     end
 
-    function state.applyHorizontalForce(direction)
-        if not canChangeDirection() then
-            return
-        end
-        inner_state.direction = direction
-        if inner_state.fly_state == FlyState.NONE then
-            inner_state.action = Action.WALK
-            player:applyForceToCenter({
-                x = getHorizontalForce(
-                    player:getLinearVelocity().x,
-                    getFootingVelocity().x,
-                    WALK_VELOCITY * direction
-                ),
-                y = 0
-            })
-        else
-            player:applyForceToCenter({
-                x = getHorizontalForce(
-                    player:getLinearVelocity().x,
-                    0,
-                    WALK_VELOCITY * direction
-                ),
-                y = 0
-            })
-        end
+    local function deactivateAttackSensor()
+        attack_joint:enableSpring(true)
+        attack_joint:enableMotor(false)
+        attack_joint:setMotorSpeed(0)
     end
 
-    local function resetAction()
-        if inner_state.action == Action.ATTACK then
-            local graphics = player_main_shape:getCurrentGraphicsPack()
-            if not graphics or graphics:getCurrentAnimationIteration() > inner_state.attack_start_iteration then
-                inner_state.action = Action.NONE
-                deactivateAttackSensor()
-            end
-        else
-            inner_state.action = Action.NONE
-        end
-    end
-
-    function state.applyStep(time_passed)
-        if inner_state.jump_timeout then
-            inner_state.jump_timeout = inner_state.jump_timeout - time_passed
-            if inner_state.jump_timeout < 0 then
-                inner_state.jump_timeout = 0
+    local idle = {
+        enter = function()
+            if inner_state.direction == Direction.RIGHT then
+                player_main_shape:setCurrentGraphics(Player.keys.shapeGraphics.IDLE_RIGHT)
+            else
+                player_main_shape:setCurrentGraphics(Player.keys.shapeGraphics.IDLE_LEFT)
             end
         end
-        local graphics = nil
-        if inner_state.fly_state ~= FlyState.NONE then
-            if inner_state.fly_state == FlyState.LAND then
-                inner_state.fly_state = FlyState.NONE
-            elseif inner_state.fly_state == FlyState.JUMP then
-                if inner_state.direction == Direction.RIGHT then
-                    graphics = Player.keys.shapeGraphics.JUMP_RIGHT
-                else
-                    graphics = Player.keys.shapeGraphics.JUMP_LEFT
+    }
+
+    local walk = {}
+
+    function walk._go()
+        local force = getHorizontalForce(
+            player:getLinearVelocity().x,
+            getFootingVelocity().x,
+            WALK_VELOCITY * inner_state.direction
+        )
+        player:applyForceToCenter({ x = force, y = 0 })
+    end
+
+    function walk.enter(args)
+        inner_state.direction = args.direction
+        if inner_state.direction == Direction.RIGHT then
+            player_main_shape:setCurrentGraphics(Player.keys.shapeGraphics.WALK_RIGHT)
+        else
+            player_main_shape:setCurrentGraphics(Player.keys.shapeGraphics.WALK_LEFT)
+        end
+        walk._go()
+    end
+
+    function walk.continue(args)
+        if inner_state.direction ~= args.direction then
+            walk.enter(args)
+        else
+            walk._go()
+        end
+    end
+
+    local attack = {}
+
+    function attack.enter()
+        if inner_state.direction == Direction.RIGHT then
+            player_main_shape:setCurrentGraphics(Player.keys.shapeGraphics.ATTACK_RIGHT)
+        else
+            player_main_shape:setCurrentGraphics(Player.keys.shapeGraphics.ATTACK_LEFT)
+        end
+        inner_state.is_attack_in_progress = true
+        local pack = player_main_shape:getCurrentGraphicsPack()
+        if pack then
+            inner_state.attack_start_iteration = pack:getCurrentAnimationIteration()
+        end
+        activateAttackSensor()
+    end
+
+    function attack.leave()
+        deactivateAttackSensor()
+    end
+
+    function attack.canLeave()
+        return not inner_state.is_attack_in_progress
+    end
+
+    local fly = {}
+
+    function fly.continue(args)
+        local force = getHorizontalForce(
+            player:getLinearVelocity().x,
+            0,
+            WALK_VELOCITY * args.direction
+        )
+        player:applyForceToCenter({ x = force, y = 0 })
+    end
+
+    function fly.leave()
+        sound_effect_armor:play()
+    end
+
+    function fly.canLeave()
+        return #inner_state.footings > 0
+    end
+
+    local jump = {}
+
+    function jump.enter()
+        if inner_state.direction == Direction.RIGHT then
+            player_main_shape:setCurrentGraphics(Player.keys.shapeGraphics.JUMP_RIGHT)
+        else
+            player_main_shape:setCurrentGraphics(Player.keys.shapeGraphics.JUMP_LEFT)
+        end
+        sound_effect_swing:play()
+        player:applyImpulseToCenter({ x = 0, y = -1300 })
+        inner_state.jump_timeout = JUMP_DELAY
+    end
+
+    function jump.canEnter()
+        return inner_state.jump_timeout == 0
+    end
+
+    local state_machine = StateMachine.new(
+        State.IDLE,
+        {
+            { source = State.IDLE,   target = State.WALK,   event = Event.H_FORCE, onEnter = walk.enter,    onLeave = nil,          canEnter = nil,           canLeave = nil },
+            { source = State.IDLE,   target = State.JUMP,   event = Event.JUMP,    onEnter = jump.enter,    onLeave = nil,          canEnter = jump.canEnter, canLeave = nil },
+            { source = State.IDLE,   target = State.ATTACK, event = Event.ATTACK,  onEnter = attack.enter,  onLeave = nil,          canEnter = nil,           canLeave = nil },
+            { source = State.IDLE,   target = State.FALL,   event = Event.FALL,    onEnter = nil,           onLeave = nil,          canEnter = nil,           canLeave = nil },
+
+            { source = State.WALK,   target = State.WALK,   event = Event.H_FORCE, onEnter = walk.continue, onLeave = nil,          canEnter = nil,           canLeave = nil },
+            { source = State.WALK,   target = State.JUMP,   event = Event.JUMP,    onEnter = jump.enter,    onLeave = nil,          canEnter = jump.canEnter, canLeave = nil },
+            { source = State.WALK,   target = State.IDLE,   event = Event.NOP,     onEnter = idle.enter,    onLeave = nil,          canEnter = nil,           canLeave = nil },
+            { source = State.WALK,   target = State.FALL,   event = Event.FALL,    onEnter = nil,           onLeave = nil,          canEnter = nil,           canLeave = nil },
+
+            { source = State.JUMP,   target = State.IDLE,   event = Event.LAND,    onEnter = idle.enter,    onLeave = fly.leave,    canEnter = nil,           canLeave = nil },
+            { source = State.JUMP,   target = State.WALK,   event = Event.H_FORCE, onEnter = walk.enter,    onLeave = fly.leave,    canEnter = nil,           canLeave = fly.canLeave }, -- FIXME: footing is still exists for a short time after the start of the jump
+            { source = State.JUMP,   target = State.JUMP,   event = Event.H_FORCE, onEnter = fly.continue,  onLeave = nil,          canEnter = nil,           canLeave = nil },
+
+            { source = State.FALL,   target = State.IDLE,   event = Event.LAND,    onEnter = idle.enter,    onLeave = fly.leave,    canEnter = nil,           canLeave = nil },
+            { source = State.FALL,   target = State.WALK,   event = Event.H_FORCE, onEnter = walk.enter,    onLeave = fly.leave,    canEnter = nil,           canLeave = fly.canLeave },
+            { source = State.FALL,   target = State.FALL,   event = Event.H_FORCE, onEnter = fly.continue,  onLeave = nil,          canEnter = nil,           canLeave = nil },
+
+            { source = State.ATTACK, target = State.IDLE,   event = Event.NOP,     onEnter = idle.enter,    onLeave = attack.leave, canEnter = nil,           canLeave = attack.canLeave },
+            { source = State.ATTACK, target = State.ATTACK, event = Event.ATTACK,  onEnter = attack.enter,  onLeave = attack.leave, canEnter = nil,           canLeave = attack.canLeave },
+            { source = State.ATTACK, target = State.WALK,   event = Event.H_FORCE, onEnter = walk.enter,    onLeave = attack.leave, canEnter = nil,           canLeave = attack.canLeave },
+            { source = State.ATTACK, target = State.FALL,   event = Event.FALL,    onEnter = nil,           onLeave = attack.leave, canEnter = nil,           canLeave = nil }
+        }
+    )
+
+    local prepared_events = {}
+
+    return {
+        addFooting = function(footing)
+            if #inner_state.footings == 0 then
+                table.insert(
+                    prepared_events, 1, { event = Event.LAND }
+                )
+            else
+                for _, f in ipairs(inner_state.footings) do
+                    if f.bodyId == footing.bodyId and f.shapeKey == footing.shapeKey then
+                        return
+                    end
                 end
             end
-        elseif inner_state.action == Action.WALK then
-            if inner_state.direction == Direction.RIGHT then
-                graphics = Player.keys.shapeGraphics.WALK_RIGHT
-            else
-                graphics = Player.keys.shapeGraphics.WALK_LEFT
-            end
-        elseif inner_state.action == Action.ATTACK then
-            if inner_state.direction == Direction.RIGHT then
-                graphics = Player.keys.shapeGraphics.ATTACK_RIGHT
-            else
-                graphics = Player.keys.shapeGraphics.ATTACK_LEFT
-            end
-        else
-            if inner_state.direction == Direction.RIGHT then
-                graphics = Player.keys.shapeGraphics.IDLE_RIGHT
-            else
-                graphics = Player.keys.shapeGraphics.IDLE_LEFT
-            end
-        end
-        if graphics and graphics ~= inner_state.current_graphics then
-            player_main_shape:setCurrentGraphics(graphics)
-            inner_state.current_graphics = graphics
-            if inner_state.action == Action.ATTACK then
-                local gr = player_main_shape:getCurrentGraphicsPack()
-                if gr then
-                    inner_state.attack_start_iteration = gr:getCurrentAnimationIteration()
+            table.insert(inner_state.footings, footing)
+        end,
+
+        removeFooting = function(body_id, shape_key)
+            for index, value in ipairs(inner_state.footings) do
+                if value.bodyId == body_id and value.shapeKey == shape_key then
+                    table.remove(inner_state.footings, index)
+                    break
                 end
             end
-        end
-        resetAction()
-    end
+            if #inner_state.footings == 0 then
+                table.insert(
+                    prepared_events, 1, { event = Event.FALL }
+                )
+            end
+        end,
 
-    return state;
+        applyHorizontalForce = function(direction)
+            table.insert(
+                prepared_events,
+                {
+                    event = Event.H_FORCE,
+                    args = {
+                        direction = direction
+                    }
+                }
+            )
+        end,
+
+        beginJump = function()
+            table.insert(
+                prepared_events,
+                { event = Event.JUMP }
+            )
+        end,
+
+        beginAttack = function()
+            table.insert(
+                prepared_events,
+                { event = Event.ATTACK }
+            )
+        end,
+
+        completeStep = function(time_passed)
+            local events = prepared_events
+            prepared_events = {}
+
+            if inner_state.jump_timeout > 0 then
+                inner_state.jump_timeout = inner_state.jump_timeout - time_passed
+                if inner_state.jump_timeout < 0 then
+                    inner_state.jump_timeout = 0
+                end
+            end
+            if inner_state.is_attack_in_progress then
+                local pack = player_main_shape:getCurrentGraphicsPack()
+                if pack then
+                    if inner_state.attack_start_iteration < pack:getCurrentAnimationIteration() then
+                        inner_state.is_attack_in_progress = false
+                    end
+                end
+            end
+
+            local processed = false
+            for _, e in ipairs(events) do
+                processed = state_machine.processEvent(e.event, e.args) or processed
+            end
+            if not processed then
+                state_machine.processEvent(Event.NOP)
+            end
+        end
+    }
 end
 
 local state = createState()
@@ -268,17 +342,17 @@ scene:subscribeToStep(function(time_passed)
         sol.Scancode.L_CTRL
     )
     if space_key then
-        state.startJump()
+        state.beginJump()
     end
     if left_ctrl then
-        state.startAttack()
+        state.beginAttack()
     end
     if right_key then
         state.applyHorizontalForce(Direction.RIGHT)
     elseif left_key then
         state.applyHorizontalForce(Direction.LEFT)
     end
-    state.applyStep(time_passed)
+    state.completeStep(time_passed)
 end)
 
 contact_observer.setSensorBeginContactListener(player_id, function(sensor, visitor)
