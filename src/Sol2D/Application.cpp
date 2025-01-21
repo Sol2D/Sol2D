@@ -97,7 +97,6 @@ Application::~Application()
     delete mp_lua;
     delete mp_window;
     delete mp_store_manager;
-    IMG_Quit();
     TTF_Quit();
     Mix_Quit();
     SDL_Quit();
@@ -117,11 +116,6 @@ bool Application::initialize()
     if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
     {
         mr_workspace.getMainLogger().critical("SDL initialization failed. {}", SDL_GetError());
-        return false;
-    }
-    if(IMG_Init(IMG_INIT_PNG) == 0)
-    {
-        mr_workspace.getMainLogger().critical("SDL_Image initialization failed. {}", SDL_GetError());
         return false;
     }
     if(!TTF_Init())

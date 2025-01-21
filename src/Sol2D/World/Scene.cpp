@@ -91,7 +91,7 @@ Scene::BodyShapeCreator::BodyShapeCreator(
 
 void Scene::BodyShapeCreator::operator ()(const BodyPolygonDefinition & _capsule)
 {
-    if(_capsule.points.size() < 3 || _capsule.points.size() > b2_maxPolygonVertices)
+    if(_capsule.points.size() < 3 || _capsule.points.size() > B2_MAX_POLYGON_VERTICES)
         return; // TODO: log
     std::vector<b2Vec2> shape_points(_capsule.points.size());
     for(size_t i = 0; i < _capsule.points.size(); ++i)
@@ -293,7 +293,7 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
         {
             const TileMapPolygon * polygon = static_cast<const TileMapPolygon *>(&__map_object);
             const std::vector<Point> & points = polygon->getPoints();
-            if(points.size() < 3 || points.size() > b2_maxPolygonVertices)
+            if(points.size() < 3 || points.size() > B2_MAX_POLYGON_VERTICES)
                 break;
             std::vector<b2Vec2> shape_points(points.size());
             for(size_t i = 0; i < points.size(); ++i)

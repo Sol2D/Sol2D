@@ -236,7 +236,7 @@ bool AStar::isDeadEnd(const b2Vec2 & _point) const
     b2World_OverlapAABB( // FIXME: Invalid when the world is locked
         m_world_id,
         aabb,
-        b2QueryFilter { .categoryBits = b2_defaultCategoryBits, .maskBits = b2_defaultMaskBits },
+        b2QueryFilter { .categoryBits = B2_DEFAULT_CATEGORY_BITS, .maskBits = B2_DEFAULT_MASK_BITS },
         &OverlapResult::callback,
         &result);
     return result.is_dead_end;
