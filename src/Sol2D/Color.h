@@ -1,5 +1,5 @@
 // Sol2D Game Engine
-// Copyright (C) 2023-2024 Sergey Smolyannikov aka brainstream
+// Copyright (C) 2023-2025 Sergey Smolyannikov aka brainstream
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -31,15 +31,49 @@ struct Color
     operator const SDL_Color & () const noexcept { return *reinterpret_cast<const SDL_Color *>(this); }
 };
 
-inline constexpr Color makeColor(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a = 0) noexcept
+struct ColorF
 {
-    return Color
+    ColorF() :
+        r(.0f),
+        g(.0f),
+        b(.0f),
+        a(.0f)
     {
-        .r = _r,
-        .g = _g,
-        .b = _b,
-        .a = _a
-    };
-}
+    }
+
+    ColorF(float _r, float _g, float _b, float _a = 1.0f) :
+        r(_r),
+        g(_g),
+        b(_b),
+        a(_a)
+    {
+    }
+
+    ColorF(const Color & _color) :
+        r(_color.r / 255.0f),
+        g(_color.g / 255.0f),
+        b(_color.b / 255.0f),
+        a(_color.a / 255.0f)
+    {
+    }
+
+    ColorF(const ColorF &) = default;
+
+    ColorF & operator = (const Color & _color)
+    {
+        r = _color.r / 255.0f;
+        g = _color.g / 255.0f;
+        b = _color.b / 255.0f;
+        a = _color.a / 255.0f;
+        return *this;
+    }
+
+    ColorF & operator = (const ColorF &) = default;
+
+    float r;
+    float g;
+    float b;
+    float a;
+};
 
 } // namespace Sol2D

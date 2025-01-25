@@ -1,5 +1,5 @@
 # Sol2D Game Engine
-# Copyright (C) 2023-2024 Sergey Smolyannikov aka brainstream
+# Copyright (C) 2023-2025 Sergey Smolyannikov aka brainstream
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.30)
 
 project(sol2d
     LANGUAGES CXX
@@ -48,6 +48,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 set(SOL2D_SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src/Sol2D)
+set(SOL2D_SHADERS_DIR ${SOL2D_SRC_DIR}/Shaders)
 set(THIRD_PATY_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
 
 file(GLOB_RECURSE SOL2D_SRC
@@ -55,17 +56,24 @@ file(GLOB_RECURSE SOL2D_SRC
     "${SOL2D_SRC_DIR}/*.cpp"
 )
 
+file(GLOB_RECURSE SOL2D_SHADERS_SRC
+    "${SOL2D_SHADERS_DIR}/*.vert"
+    "${SOL2D_SHADERS_DIR}/*.frag"
+)
+
 add_subdirectory(third_party/SDL)
 add_subdirectory(third_party/SDL_image)
 add_subdirectory(third_party/SDL_ttf)
 add_subdirectory(third_party/SDL_mixer)
 add_subdirectory(third_party/box2d)
+add_subdirectory(third_party/glm)
 
 find_package(ZLIB REQUIRED)
 find_package(tinyxml2 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(Vulkan COMPONENTS glslc REQUIRED)
 pkg_check_modules(LUA REQUIRED lua)
 pkg_check_modules(ZSTD REQUIRED libzstd)
 
@@ -106,6 +114,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL_ttf/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL_mixer/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/box2d/include
+    PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/glm
     PRIVATE ${ZSTD_INCLUDEDIR}
     PRIVATE ${SDL3_INCLUDE_DIR}
     PRIVATE ${LUA_INCLUDEDIR}
@@ -120,6 +129,7 @@ target_link_libraries(${PROJECT_NAME}
     SDL3_image::SDL3_image
     SDL3_ttf::SDL3_ttf
     SDL3_mixer::SDL3_mixer
+    glm::glm
     tinyxml2::tinyxml2
     box2d::box2d
     spdlog::spdlog
@@ -127,6 +137,49 @@ target_link_libraries(${PROJECT_NAME}
     ${LUA_LINK_LIBRARIES}
     ${ZSTD_LINK_LIBRARIES}
 )
+
+block() # Shaders
+    set(SHADER_OUTPUTS)
+    set(SHADER_OUTDIR "${CMAKE_CURRENT_BINARY_DIR}/Shaders")
+
+    foreach(SHADER_SRC IN LISTS SOL2D_SHADERS_SRC)
+        cmake_path(GET SHADER_SRC FILENAME SHADER_NAME)
+        set(SHADER_DEST "${SHADER_OUTDIR}/${SHADER_NAME}.spv")
+        file(RELATIVE_PATH SHADER_DEST_RELATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR} ${SHADER_DEST})
+
+        set(GLSLC_COMMAND)
+        list(APPEND GLSLC_COMMAND Vulkan::glslc)
+        list(APPEND GLSLC_COMMAND ${SHADER_SRC})
+        if(CMAKE_BUILD_TYPE STREQUAL "Release")
+            list(APPEND GLSLC_COMMAND "-O")
+        elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            list(APPEND GLSLC_COMMAND "-O0")
+            list(APPEND GLSLC_COMMAND "-g")
+        endif()
+        list(APPEND GLSLC_COMMAND "-o")
+        list(APPEND GLSLC_COMMAND ${SHADER_DEST})
+        list(APPEND SHADER_OUTPUTS ${SHADER_DEST})
+
+        add_custom_command(
+            OUTPUT ${SHADER_DEST}
+            COMMAND ${GLSLC_COMMAND}
+            DEPENDS ${SHADER_SRC}
+            COMMENT "Compiling SPIR-V ${SHADER_DEST_RELATIVE_PATH}"
+        )
+    endforeach()
+
+    add_custom_target(shader_out_dir ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${SHADER_OUTDIR}"
+        COMMENT "Creating a shader output directory ${SHADER_OUTDIR}"
+    )
+
+    add_custom_target(shaders ALL
+        SOURCES ${SHADERS}
+        DEPENDS shader_out_dir ${SHADER_OUTPUTS}
+    )
+
+    add_dependencies(${PROJECT_NAME} shaders)
+endblock()
 
 if(SOL2D_USE_GAMES)
     set(SOL2D_GAMES_DIR_NAME games)
