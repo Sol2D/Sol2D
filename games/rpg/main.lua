@@ -52,18 +52,19 @@ local score = {
 }
 
 local form = store:createForm('score')
+form:setBackgroundColor({ r = .24, g = .145, b = 0.1 })
 
 local function createScoreLabel()
     local label = form:createLabel(score:formatMessage())
-    local default_fg = { r = 200, g = 255, b = 255 }
-    local focused_fg = { r = 255, g = 100, b = 100 }
-    local activated_fg = { r = 100, g = 255, b = 100 }
+    local default_fg = { r = 0.78, g = 1.0, b = 1.0 }
+    local focused_fg = { r = 1.0, g = 0.39, b = 0.39 }
+    local activated_fg = { r = 0.39, g = 1.0, b = 0.39 }
     label:setFont(font_roboto)
     label:setX('40%')
     label:setY('8px')
     label:setWidth(300);
     label:setHeight(34);
-    label:setBackgroundColor({ r = 0, g = 100, b = 30 }, sol.WidgetState.FOCUSED)
+    label:setBackgroundColor({ r = 0, g = 0.39, b = 0.12 }, sol.WidgetState.FOCUSED)
     label:setForegroundColor(default_fg)
     label:setForegroundColor(focused_fg, sol.WidgetState.FOCUSED)
     label:setForegroundColor(activated_fg, sol.WidgetState.ACTIVATED)
@@ -81,15 +82,15 @@ local score_label = createScoreLabel()
 
 local function createSwitchViewButton()
     local button = form:createButton('Switch View')
-    local default_fg = { r = 200, g = 255, b = 255 }
-    local focused_fg = { r = 255, g = 100, b = 100 }
-    local activated_fg = { r = 100, g = 255, b = 100 }
+    local default_fg = { r = 0.78, g = 1.0, b = 1.0 }
+    local focused_fg = { r = 1.0, g = 0.39, b = 0.39 }
+    local activated_fg = { r = 0.39, g = 1.0, b = 0.39 }
     button:setFont(font_roboto)
     button:setX(5)
     button:setY(8)
     button:setWidth('39%');
     button:setHeight(34);
-    button:setBackgroundColor({ r = 0, g = 100, b = 30 }, sol.WidgetState.FOCUSED)
+    button:setBackgroundColor({ r = 0, g = 0.39, b = 0.12 }, sol.WidgetState.FOCUSED)
     button:setForegroundColor(default_fg)
     button:setForegroundColor(focused_fg, sol.WidgetState.FOCUSED)
     button:setForegroundColor(activated_fg, sol.WidgetState.ACTIVATED)

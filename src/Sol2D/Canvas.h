@@ -29,7 +29,7 @@ class Canvas : public Object
 public:
     Canvas() :
         m_rect{.0f, .0f, .0f, .0f},
-        m_clear_color(0.08235294117647059f, 0.4627450980392157f, 0.01568627450980392f, 1.0f)
+        m_clear_color{.0f, .0f, .0f, 1.0f}
     {
     }
 

@@ -275,6 +275,9 @@ function __view:bindFragment(fragment_id, target) end
 ---@class sol.Scene
 local __scene
 
+---@param color sol.Color
+function __scene:setBackgroundColor(color) end
+
 ---@param vector sol.Point
 function __scene:setGravity(vector) end
 
@@ -858,6 +861,9 @@ function __wheel_joint:getMotorTorque() end
 
 ---@class sol.Form
 local __form
+
+---@param color sol.Color
+function __form:setBackgroundColor(color) end
 
 ---@param text string?
 ---@return sol.Label

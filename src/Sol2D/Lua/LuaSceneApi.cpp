@@ -24,6 +24,7 @@
 #include <Sol2D/Lua/LuaJointApi.h>
 #include <Sol2D/Lua/LuaContactApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
+#include <Sol2D/Lua/LuaColorApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
@@ -224,6 +225,17 @@ void Self::unsubscribe(lua_State * _lua, uint16_t _event_id, uint64_t _companion
 }
 
 using UserData = LuaUserData<Self, LuaTypeName::scene>;
+
+// 1 self
+// 2 color
+int luaApi_SetBackgroundColor(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    SDL_FColor color;
+    luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
+    self->getScene(_lua)->setClearColor(color);
+    return 0;
+}
 
 // 1 self
 // 2 gravity
@@ -778,6 +790,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
         luaL_Reg funcs[] =
         {
             { "__gc", UserData::luaGC },
+            { "setBackgroundColor", luaApi_SetBackgroundColor },
             { "setGravity", luaApi_SetGravity },
             { "loadTileMap", luaApi_LoadTileMap },
             { "getTileMapObjectById", luaApi_GetTileMapObjectById },

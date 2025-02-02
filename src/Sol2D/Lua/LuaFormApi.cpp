@@ -17,6 +17,7 @@
 #include <Sol2D/Lua/LuaFormApi.h>
 #include <Sol2D/Lua/LuaFontApi.h>
 #include <Sol2D/Lua/LuaWidgetApi.h>
+#include <Sol2D/Lua/LuaColorApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
@@ -49,6 +50,17 @@ struct Self : LuaSelfBase
 using UserData = LuaUserData<Self, LuaTypeName::form>;
 
 // 1 self
+// 2 color
+int luaApi_SetBackgroundColor(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    SDL_FColor color;
+    luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
+    self->getForm(_lua)->setClearColor(color);
+    return 0;
+}
+
+// 1 self
 // 2 text
 int luaApi_CreateLabel(lua_State * _lua)
 {
@@ -79,6 +91,7 @@ void Sol2D::Lua::pushFormApi(lua_State * _lua, const Workspace & _workspace, std
     {
         luaL_Reg funcs[] = {
             { "__gc", UserData::luaGC },
+            { "setBackgroundColor", luaApi_SetBackgroundColor },
             { "createLabel", luaApi_CreateLabel },
             { "createButton", luaApi_CreateButton },
             { nullptr, nullptr }
