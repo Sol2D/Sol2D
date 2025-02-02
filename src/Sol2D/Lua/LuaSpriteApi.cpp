@@ -83,7 +83,7 @@ int luaApi_GetSourceRect(lua_State * _lua)
 int luaApi_GetDestinationSize(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    const Size & size = self->getSprite(_lua)->getDestinationSize();
+    const FSize & size = self->getSprite(_lua)->getDestinationSize();
     pushSize(_lua, size);
     return 1;
 }
@@ -93,7 +93,7 @@ int luaApi_GetDestinationSize(lua_State * _lua)
 int luaApi_SetDestinationSize(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    Size size;
+    FSize size;
     luaL_argexpected(_lua, tryGetSize(_lua, 2, size), 2, LuaTypeName::size);
     self->getSprite(_lua)->setDesinationSize(size);
     return 0;

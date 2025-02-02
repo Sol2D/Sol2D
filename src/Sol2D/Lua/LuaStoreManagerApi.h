@@ -26,7 +26,7 @@ namespace Sol2D::Lua {
 void pushStoreManagerApi(
     lua_State * _lua,
     const Workspace & _workspace,
-    SDL_Renderer & _renderer,
+    Renderer & _renderer,
     StoreManager & _store_manager);
 
 } // namespace Sol2D::Lua

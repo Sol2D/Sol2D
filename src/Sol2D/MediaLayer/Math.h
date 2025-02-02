@@ -16,33 +16,13 @@
 
 #pragma once
 
-#include <Sol2D/Workspace.h>
-#include <Sol2D/ResourceManager.h>
+#include <numbers>
 
 namespace Sol2D {
 
-class ApplicationContext final
+inline float degreesToRadians(float _degrees)
 {
-public:
-    ApplicationContext(const Workspace & _workspace, const ResourceManager & _resource_manager) :
-        mr_workspace(_workspace),
-        mr_resource_manager(_resource_manager)
-    {
-    }
-
-    const Workspace & getWorkspace() const
-    {
-        return mr_workspace;
-    }
-
-    const ResourceManager & getResourceManager() const
-    {
-        return mr_resource_manager;
-    }
-
-private:
-    const Workspace & mr_workspace;
-    const ResourceManager & mr_resource_manager;
-};
+    return _degrees * (std::numbers::pi_v<float> / 180.0f);
+}
 
 } // namespace Sol2D

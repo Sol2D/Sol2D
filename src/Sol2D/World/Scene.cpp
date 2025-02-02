@@ -19,13 +19,10 @@
 #include <Sol2D/World/AStar.h>
 #include <Sol2D/Tiles/Tmx.h>
 #include <Sol2D/Utils/Observable.h>
-#include <Sol2D/SDL/SDL.h>
-#include <box2d/box2d.h>
 #include <unordered_set>
 
 using namespace Sol2D;
 using namespace Sol2D::World;
-using namespace Sol2D::SDL;
 using namespace Sol2D::Tiles;
 using namespace Sol2D::Utils;
 
@@ -190,7 +187,7 @@ void Scene::BodyShapeCreator::operator ()(const BodyCapsuleShapeDefinition & _ca
     b2Shape_SetUserData(b2_shape_id, &body_shape);
 }
 
-Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Renderer & _renderer) :
+Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, Renderer & _renderer) :
     mr_workspace(_workspace),
     mr_renderer(_renderer),
     m_world_offset{.0f, .0f},
@@ -201,7 +198,7 @@ Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Re
     if(m_meters_per_pixel <= .0f)
         m_meters_per_pixel = SceneOptions::default_meters_per_pixel;
     b2WorldDef world_def = b2DefaultWorldDef();
-    world_def.gravity = _options.gravity;
+    world_def.gravity = toBox2D(_options.gravity);
     m_b2_world_id = b2CreateWorld(&world_def);
     b2World_SetPreSolveCallback(m_b2_world_id, &Scene::box2dPreSolveContact, this);
     if(_workspace.isDebugRenderingEnabled())
@@ -241,14 +238,14 @@ void Scene::deinitializeTileMap()
     m_followed_body_id = b2_nullBodyId;
 }
 
-void Scene::setGravity(const Point & _vector)
+void Scene::setGravity(const SDL_FPoint & _vector)
 {
     m_defers.getQueue().enqueueAction([this, _vector]() {
-        b2World_SetGravity(m_b2_world_id, *_vector.toBox2DPtr()); // TODO: scale factor?
+        b2World_SetGravity(m_b2_world_id, toBox2D(_vector)); // TODO: scale factor?
     });
 }
 
-uint64_t Scene::createBody(const Point & _position, const BodyDefinition & _definition)
+uint64_t Scene::createBody(const SDL_FPoint & _position, const BodyDefinition & _definition)
 {
     b2BodyDef b2_body_def = b2DefaultBodyDef();
     b2_body_def.type = mapBodyType(_definition.type);
@@ -276,8 +273,8 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
         initBodyPhysics(b2_body_def, _body_options.body_physics);
         b2_body_def.position =
         {
-            .x = graphicalToPhysical(__map_object.getX()),
-            .y = graphicalToPhysical(__map_object.getY())
+            .x = graphicalToPhysical(__map_object.getPosition().x),
+            .y = graphicalToPhysical(__map_object.getPosition().y)
         };
         b2BodyId b2_body_id = b2CreateBody(m_b2_world_id, &b2_body_def);
         Body * body = new Body(b2_body_id, m_defers.getQueue());
@@ -292,7 +289,7 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
         case TileMapObjectType::Polygon:
         {
             const TileMapPolygon * polygon = static_cast<const TileMapPolygon *>(&__map_object);
-            const std::vector<Point> & points = polygon->getPoints();
+            const std::vector<SDL_FPoint> & points = polygon->getPoints();
             if(points.size() < 3 || points.size() > B2_MAX_POLYGON_VERTICES)
                 break;
             std::vector<b2Vec2> shape_points(points.size());
@@ -784,6 +781,7 @@ bool Scene::loadTileMap(const std::filesystem::path & _file_path)
     m_tile_heap_ptr = std::move(tmx.tile_heap);
     m_tile_map_ptr = std::move(tmx.tile_map);
     m_object_heap_ptr = std::move(tmx.object_heap);
+    setClearColor(m_tile_map_ptr->getBackgroundColor());
     return m_tile_map_ptr != nullptr; // TODO: only exceptions
 }
 
@@ -797,9 +795,6 @@ void Scene::step(const StepState & _state)
     b2World_Step(m_b2_world_id, _state.time_passed.count() / 1000.0f, 4); // TODO: stable rate (1.0f / 60.0f), all from user settings
     handleBox2dContactEvents();
     syncWorldWithFollowedBody();
-    const Color & bg_color = m_tile_map_ptr->getBackgroundColor();
-    SDL_SetRenderDrawColor(&mr_renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
-    SDL_RenderClear(&mr_renderer);
 
     std::unordered_set<uint64_t> bodies_to_render(m_bodies.size());
     for(const auto & pair : m_bodies)
@@ -894,11 +889,10 @@ void Scene::syncWorldWithFollowedBody()
     {
         return;
     }
-    int output_width, output_height;
-    SDL_GetCurrentRenderOutputSize(&mr_renderer, &output_width, &output_height);
+    const FSize output_size = mr_renderer.getOutputSize();
     b2Vec2 followed_body_position = b2Body_GetPosition(m_followed_body_id);
-    m_world_offset.x = physicalToGraphical(followed_body_position.x) - static_cast<float>(output_width) / 2;
-    m_world_offset.y = physicalToGraphical(followed_body_position.y) - static_cast<float>(output_height) / 2;
+    m_world_offset.x = physicalToGraphical(followed_body_position.x) - output_size.w / 2;
+    m_world_offset.y = physicalToGraphical(followed_body_position.y) - output_size.h / 2;
     const int32_t map_x = m_tile_map_ptr->getX() * m_tile_map_ptr->getTileWidth();
     const int32_t map_y = m_tile_map_ptr->getY() * m_tile_map_ptr->getTileHeight();
     if(m_world_offset.x < map_x)
@@ -907,7 +901,7 @@ void Scene::syncWorldWithFollowedBody()
     }
     else
     {
-        int32_t max_offset_x = m_tile_map_ptr->getWidth() * m_tile_map_ptr->getTileWidth() - output_width;
+        const float max_offset_x = m_tile_map_ptr->getWidth() * m_tile_map_ptr->getTileWidth() - output_size.w;
         if(m_world_offset.x > max_offset_x)
             m_world_offset.x = max_offset_x;
     }
@@ -917,7 +911,7 @@ void Scene::syncWorldWithFollowedBody()
     }
     else
     {
-        int32_t max_offset_y = m_tile_map_ptr->getHeight() * m_tile_map_ptr->getTileHeight() - output_height;
+        const float max_offset_y = m_tile_map_ptr->getHeight() * m_tile_map_ptr->getTileHeight() - output_size.h;
         if(m_world_offset.y > max_offset_y)
             m_world_offset.y = max_offset_y;
     }
@@ -925,7 +919,7 @@ void Scene::syncWorldWithFollowedBody()
 
 void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
 {
-    Point body_position;
+    SDL_FPoint body_position;
     {
         b2Vec2 pos = b2Body_GetPosition(_body_id);
         body_position = toAbsoluteCoords(physicalToGraphical(pos.x), physicalToGraphical(pos.y));
@@ -945,13 +939,13 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
             graphics->render(body_position, rotation, _time_passed);
         }
     }
-    if(mp_box2d_debug_draw)
-    {
-        SDL_SetRenderDrawColor(&mr_renderer, 0, 128, 255, 255);
-        SDL::sdlRenderCircle(&mr_renderer, body_position, 8.0f);
-        SDL_RenderLine(&mr_renderer, body_position.x - 8, body_position.y, body_position.x + 8, body_position.y);
-        SDL_RenderLine(&mr_renderer, body_position.x, body_position.y - 8, body_position.x, body_position.y + 8);
-    }
+    // if(mp_box2d_debug_draw)
+    // {
+    //     SDL_SetRenderDrawColor(&mr_renderer, 0, 128, 255, 255);
+    //     SDL::sdlRenderCircle(&mr_renderer, body_position, 8.0f);
+    //     SDL_RenderLine(&mr_renderer, body_position.x - 8, body_position.y, body_position.x + 8, body_position.y);
+    //     SDL_RenderLine(&mr_renderer, body_position.x, body_position.y - 8, body_position.x, body_position.y + 8);
+    // }
 }
 
 void Scene::drawLayersAndBodies(
@@ -990,76 +984,75 @@ void Scene::drawLayersAndBodies(
     });
 }
 
-void Scene::drawObjectLayer(const TileMapObjectLayer & _layer)
+void Scene::drawObjectLayer(const TileMapObjectLayer & /*_layer*/)
 {
     // TODO: offset and parallax
 
-    SDL_SetRenderDrawColor(&mr_renderer, 255, 20, 0, 255);
-    _layer.forEachObject([this](const TileMapObject & __object) {
-        if(!__object.isVisible()) return;
-        // TODO: if in viewport
-        switch (__object.getObjectType())
-        {
-        case TileMapObjectType::Polygon:
-            drawPolyXObject(dynamic_cast<const TileMapPolygon &>(__object), true);
-            break;
-        case TileMapObjectType::Polyline:
-            drawPolyXObject(dynamic_cast<const TileMapPolyline &>(__object), false);
-            break;
-        case TileMapObjectType::Circle:
-            drawCircle(dynamic_cast<const TileMapCircle &>(__object));
-            break;
-        default:
-            // TODO: point
-            break;
-        }
-    });
+    // SDL_SetRenderDrawColor(&mr_renderer, 255, 20, 0, 255);
+    // _layer.forEachObject([this](const TileMapObject & __object) {
+    //     if(!__object.isVisible()) return;
+    //     // TODO: if in viewport
+    //     switch (__object.getObjectType())
+    //     {
+    //     case TileMapObjectType::Polygon:
+    //         drawPolyXObject(dynamic_cast<const TileMapPolygon &>(__object), true);
+    //         break;
+    //     case TileMapObjectType::Polyline:
+    //         drawPolyXObject(dynamic_cast<const TileMapPolyline &>(__object), false);
+    //         break;
+    //     case TileMapObjectType::Circle:
+    //         drawCircle(dynamic_cast<const TileMapCircle &>(__object));
+    //         break;
+    //     default:
+    //         // TODO: point
+    //         break;
+    //     }
+    // });
 }
 
-void Scene::drawPolyXObject(const TileMapPolyX & _poly, bool _close)
+void Scene::drawPolyXObject(const TileMapPolyX & /*_poly*/, bool /*_close*/)
 {
-    const std::vector<Point> & poly_points = _poly.getPoints();
-    size_t poly_points_count = poly_points.size();
-    if(poly_points_count < 2) return;
-    size_t total_points_count = _close ? poly_points_count + 1 : poly_points_count;
-    Point base_point = toAbsoluteCoords(_poly.getX(), _poly.getY());
-    std::vector<Point> points(total_points_count);
-    for(size_t i = 0; i < poly_points_count; ++i)
-    {
-        points[i].x = base_point.x + poly_points[i].x;
-        points[i].y = base_point.y + poly_points[i].y;
-    }
-    if(_close)
-    {
-        points[poly_points_count].x = points[0].x;
-        points[poly_points_count].y = points[0].y;
-    }
-    SDL_RenderLines(&mr_renderer, points.data()->toSdlPtr(), total_points_count);
+    // const std::vector<SDL_FPoint> & poly_points = _poly.getPoints();
+    // size_t poly_points_count = poly_points.size();
+    // if(poly_points_count < 2) return;
+    // size_t total_points_count = _close ? poly_points_count + 1 : poly_points_count;
+    // SDL_FPoint base_point = toAbsoluteCoords(_poly.getPosition().x, _poly.getPosition().y);
+    // std::vector<SDL_FPoint> points(total_points_count);
+    // for(size_t i = 0; i < poly_points_count; ++i)
+    // {
+    //     points[i].x = base_point.x + poly_points[i].x;
+    //     points[i].y = base_point.y + poly_points[i].y;
+    // }
+    // if(_close)
+    // {
+    //     points[poly_points_count].x = points[0].x;
+    //     points[poly_points_count].y = points[0].y;
+    // }
+    // SDL_RenderLines(&mr_renderer, points.data()->toSdlPtr(), total_points_count);
 }
 
-void Scene::drawCircle(const TileMapCircle & _circle)
+void Scene::drawCircle(const TileMapCircle & /*_circle*/)
 {
-    Point position = toAbsoluteCoords(_circle.getX(), _circle.getY());
-    sdlRenderCircle(&mr_renderer, position, _circle.getRadius());
+    // SDL_FPoint position = toAbsoluteCoords(_circle.getX(), _circle.getY());
+    // sdlRenderCircle(&mr_renderer, position, _circle.getRadius());
 }
 
 void Scene::drawTileLayer(const TileMapTileLayer & _layer)
 {
-    const Rect viewport = calculateViewport(_layer);
+    const SDL_FRect viewport = calculateViewport(_layer);
     const float first_col = std::floor(viewport.x / m_tile_map_ptr->getTileWidth());
     const float first_row = std::floor(viewport.y / m_tile_map_ptr->getTileHeight());
     const float last_col = std::ceil((viewport.x + viewport.w) / m_tile_map_ptr->getTileWidth());
     const float last_row = std::ceil((viewport.y + viewport.h) / m_tile_map_ptr->getTileHeight());
-    const Point start_position =
+    const SDL_FPoint start_position =
     {
         .x = first_col * m_tile_map_ptr->getTileWidth() - viewport.x,
         .y = first_row * m_tile_map_ptr->getTileHeight() - viewport.y
     };
-    const Size tile_map_cell_size =
-    {
-        .w = static_cast<float>(m_tile_map_ptr->getTileWidth()),
-        .h = static_cast<float>(m_tile_map_ptr->getTileHeight())
-    };
+    const FSize tile_map_cell_size(
+        static_cast<float>(m_tile_map_ptr->getTileWidth()),
+        static_cast<float>(m_tile_map_ptr->getTileHeight())
+    );
 
     std::unordered_set<const TileMapTileLayerCell *> extra_cells;
     SDL_FRect tile_rect;
@@ -1101,7 +1094,10 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
             else if(tile_rect.h > tile_map_cell_size.h)
                 dest_rect.y -= tile_rect.h - tile_map_cell_size.h;
 
-            SDL_RenderTexture(&mr_renderer, &cell->tile->getSource(), &tile_rect, &dest_rect);
+            mr_renderer.renderTexture(TextureRenderingData(
+                dest_rect,
+                cell->tile->getSource(),
+                tile_rect));
         }
     }
 
@@ -1125,15 +1121,18 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
         if(tile_rect.h > tile_map_cell_size.h)
             dest_rect.y -= tile_rect.h - tile_map_cell_size.h;
 
-        SDL_RenderTexture(&mr_renderer, &cell->tile->getSource(), &tile_rect, &dest_rect);
+        mr_renderer.renderTexture(TextureRenderingData(
+            dest_rect,
+            cell->tile->getSource(),
+            tile_rect));
     }
 }
 
-Rect Scene::calculateViewport(const TileMapTileLayer & _layer) const
+SDL_FRect Scene::calculateViewport(const TileMapTileLayer & _layer) const
 {
-    Rect viewport;
-    Point layer_offset = makePoint(_layer.getOffsetX(), _layer.getOffsetY());
-    Point layer_parallax = makePoint(_layer.getParallaxX(), _layer.getParallaxY());
+    SDL_FRect viewport;
+    SDL_FPoint layer_offset { .x = _layer.getOffsetX(), .y = _layer.getOffsetY() };
+    SDL_FPoint layer_parallax { .x = _layer.getParallaxX(), .y = _layer.getParallaxY() };
     for(const auto * parent_layer = _layer.getParent(); parent_layer; parent_layer = parent_layer->getParent())
     {
         layer_offset.x += parent_layer->getOffsetX();
@@ -1143,10 +1142,9 @@ Rect Scene::calculateViewport(const TileMapTileLayer & _layer) const
     }
     viewport.x = m_world_offset.x * layer_parallax.x - layer_offset.x;
     viewport.y = m_world_offset.y * layer_parallax.y - layer_offset.y;
-    int w, h;
-    SDL_GetCurrentRenderOutputSize(&mr_renderer, &w, &h);
-    viewport.w = static_cast<float>(w);
-    viewport.h = static_cast<float>(h);
+    const FSize & output_size = mr_renderer.getOutputSize();
+    viewport.w = output_size.w;
+    viewport.h = output_size.h;
     return viewport;
 }
 
@@ -1154,11 +1152,9 @@ void Scene::drawImageLayer(const TileMapImageLayer & _layer)
 {
     // TODO: offset and parallax
 
-    std::shared_ptr<SDL_Texture> image = _layer.getImage();
-    float width, height;
-    SDL_GetTextureSize(image.get(), &width, &height);
-    SDL_FRect dim { .0f, .0f, width, height };
-    SDL_RenderTexture(&mr_renderer, image.get(), nullptr, &dim);
+    const Texture & image = _layer.getImage();
+    SDL_FRect dim { .0f, .0f, image.getWidth(), image.getHeight() };
+    mr_renderer.renderTexture(TextureRenderingData(dim, image, std::nullopt));
 }
 
 bool Scene::doesBodyExist(uint64_t _body_id) const
@@ -1178,9 +1174,9 @@ bool Scene::doesBodyShapeExist(uint64_t _body_id, const PreHashedKey<std::string
     return false;
 }
 
-std::optional<std::vector<Point>> Scene::findPath(
+std::optional<std::vector<SDL_FPoint>> Scene::findPath(
     uint64_t _body_id,
-    const Point & _destination,
+    const SDL_FPoint & _destination,
     bool _allow_diagonal_steps,
     bool _avoid_sensors) const
 {
@@ -1190,12 +1186,12 @@ std::optional<std::vector<Point>> Scene::findPath(
     AStarOptions options;
     options.allow_diagonal_steps = _allow_diagonal_steps;
     options.avoid_sensors = _avoid_sensors;
-    auto b2_result = aStarFindPath(m_b2_world_id, b2_body_id, _destination, options);
+    auto b2_result = aStarFindPath(m_b2_world_id, b2_body_id, toBox2D(_destination), options);
     if(!b2_result.has_value())
         return std::nullopt;
-    std::vector<Point> result;
+    std::vector<SDL_FPoint> result;
     result.reserve(b2_result.value().size());
     for(size_t i = 0; i < b2_result.value().size(); ++i)
-        result.push_back(makePoint(b2_result.value()[i].x, b2_result.value()[i].y));
+        result.push_back(toSDL(b2_result.value()[i]));
     return result;
 }

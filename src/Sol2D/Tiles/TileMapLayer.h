@@ -16,11 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Color.h>
-#include <Sol2D/Def.h>
-#include <string>
-#include <optional>
-#include <cstdint>
+#include <Sol2D/MediaLayer.h>
 
 namespace Sol2D::Tiles {
 
@@ -70,9 +66,9 @@ public:
     float getParallaxX() const { return m_parallax_x; }
     void setParallaxY(float _parallax) { m_parallax_y = _parallax; }
     float getParallaxY() const { return m_parallax_y; }
-    void setTintColor(const Color & _color) { m_tint_color = _color; }
+    void setTintColor(const SDL_FColor & _color) { m_tint_color = _color; }
     void removeTintColor() { m_tint_color.reset(); }
-    const std::optional<Color> & getTintColor() const { return m_tint_color; }
+    const std::optional<SDL_FColor> & getTintColor() const { return m_tint_color; }
 
 private:
     const TileMapLayer * mp_parent;
@@ -86,7 +82,7 @@ private:
     float m_offset_y;
     float m_parallax_x; // TODO: To render parallax https://doc.mapeditor.org/en/stable/manual/layers/#parallax-factor
     float m_parallax_y;
-    std::optional<Color> m_tint_color; // TODO: To render tint color. https://doc.mapeditor.org/en/stable/manual/layers/#tint-color
+    std::optional<SDL_FColor> m_tint_color; // TODO: To render tint color. https://doc.mapeditor.org/en/stable/manual/layers/#tint-color
 };
 
 } // namespace Sol2D::Tiles

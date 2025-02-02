@@ -255,7 +255,7 @@ int luaApi_GetBodyB(lua_State * _lua)
 int luaApi_GetLocalAnchorA(lua_State * _lua)
 {
     BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
-    Point anchor = self->getJoint().getLocalAnchorA();
+    SDL_FPoint anchor = self->getJoint().getLocalAnchorA();
     pushPoint(_lua, anchor.x, anchor.y);
     return 1;
 }
@@ -264,7 +264,7 @@ int luaApi_GetLocalAnchorA(lua_State * _lua)
 int luaApi_GetLocalAnchorB(lua_State * _lua)
 {
     BasicSelf * self = getLuaUserData<BasicSelf>(_lua, 1, getAllJointTypes());
-    Point anchor = self->getJoint().getLocalAnchorB();
+    SDL_FPoint anchor = self->getJoint().getLocalAnchorB();
     pushPoint(_lua, anchor.x, anchor.y);
     return 1;
 }
@@ -497,7 +497,7 @@ namespace MotorJointApi {
 int luaApi_GetLinearOffset(lua_State * _lua)
 {
     MotorJointSelf * self = MotorJointUserData::getUserData(_lua, 1);
-    Point offsert = self->getMotorJoint().getLinearOffset();
+    SDL_FPoint offsert = self->getMotorJoint().getLinearOffset();
     pushPoint(_lua, offsert.x, offsert.y);
     return 1;
 }
@@ -507,7 +507,7 @@ int luaApi_GetLinearOffset(lua_State * _lua)
 int luaApi_SetLinearOffset(lua_State * _lua)
 {
     MotorJointSelf * self = MotorJointUserData::getUserData(_lua, 1);
-    Point offset;
+    SDL_FPoint offset;
     luaL_argexpected(_lua, tryGetPoint(_lua, 2, offset), 2, LuaTypeName::point);
     self->getMotorJoint().setLinearOffset(offset);
     self->getMotorJoint().wakeBodies();
@@ -598,7 +598,7 @@ namespace MouseJointApi {
 int luaApi_GetTarget(lua_State * _lua)
 {
     MouseJointSelf * self = MouseJointUserData::getUserData(_lua, 1);
-    Point target = self->getMouseJoint().getTarget();
+    SDL_FPoint target = self->getMouseJoint().getTarget();
     pushPoint(_lua, target.x, target.y);
     return 1;
 }
@@ -608,7 +608,7 @@ int luaApi_GetTarget(lua_State * _lua)
 int luaApi_SetTarget(lua_State * _lua)
 {
     MouseJointSelf * self = MouseJointUserData::getUserData(_lua, 1);
-    Point target;
+    SDL_FPoint target;
     luaL_argexpected(_lua, tryGetPoint(_lua, 2, target), 2, LuaTypeName::point);
     self->getMouseJoint().setTarget(target);
     self->getMouseJoint().wakeBodies();

@@ -23,8 +23,5 @@ void Window::step(const StepState & _state)
     if(m_view_list.empty())
         return;
     m_view_list.resize(1);
-    SDL_SetRenderDrawColor(&mr_renderer, 255, 165, 0, 255);
-    SDL_RenderClear(&mr_renderer);
     m_view_list.back()->step(_state);
-    SDL_RenderPresent(&mr_renderer);
 }

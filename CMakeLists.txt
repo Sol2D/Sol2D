@@ -123,6 +123,10 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE ${Boost_INCLUDE_DIRS}
 )
 
+target_precompile_headers(${PROJECT_NAME}
+    PRIVATE ${SOL2D_SRC_DIR}/MediaLayer.h
+)
+
 target_link_libraries(${PROJECT_NAME}
     ZLIB::ZLIB
     SDL3::SDL3
@@ -174,7 +178,7 @@ block() # Shaders
     )
 
     add_custom_target(shaders ALL
-        SOURCES ${SHADERS}
+        SOURCES ${SOL2D_SHADERS_SRC}
         DEPENDS shader_out_dir ${SHADER_OUTPUTS}
     )
 

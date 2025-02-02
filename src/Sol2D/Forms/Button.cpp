@@ -19,7 +19,7 @@
 using namespace Sol2D;
 using namespace Sol2D::Forms;
 
-Button::Button(const Canvas & _parent, const std::string & _text, SDL_Renderer & _renderer) :
+Button::Button(const Canvas & _parent, const std::string & _text, Renderer & _renderer) :
     Label(_parent, _text, _renderer)
 {
 }
@@ -32,11 +32,13 @@ void Button::step(const StepState & _state)
 
 void Button::handleState(const StepState & _state)
 {
-    Rect rect = makeRect(
-        m_x.getPixels(mr_parent.getWidth()),
-        m_y.getPixels(mr_parent.getHeight()),
-        m_width.getPixels(mr_parent.getWidth()),
-        m_height.getPixels(mr_parent.getHeight()));
+    SDL_FRect rect
+    {
+        .x = m_x.getPixels(mr_parent.getWidth()),
+        .y = m_y.getPixels(mr_parent.getHeight()),
+        .w = m_width.getPixels(mr_parent.getWidth()),
+        .h = m_height.getPixels(mr_parent.getHeight())
+    };
     if(!isPointIn(_state.mouse_state.position, rect))
     {
         setState(WidgetState::Default);
@@ -61,9 +63,9 @@ void Button::handleState(const StepState & _state)
     }
 }
 
-bool Button::isPointIn(const Point & _point, const Rect & _rect) const
+bool Button::isPointIn(const SDL_FPoint & _point, const SDL_FRect & _rect) const
 {
-    Point point = mr_parent.getTranslatedPoint(_point.x, _point.y);
+    SDL_FPoint point = mr_parent.getTranslatedPoint(_point.x, _point.y);
     return point.x >= _rect.x &&
            point.y >= _rect.y &&
            (point.x < _rect.x + _rect.w) &&

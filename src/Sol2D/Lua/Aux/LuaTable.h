@@ -17,9 +17,7 @@
 #pragma once
 
 #include <Sol2D/Lua/LuaDimensionApi.h>
-#include <Sol2D/Rect.h>
-#include <Sol2D/Color.h>
-#include <Sol2D/Def.h>
+#include <Sol2D/MediaLayer.h>
 #include <lua.hpp>
 #include <string>
 #include <optional>
@@ -74,21 +72,21 @@ public:
 
     bool tryGetString(const char * _key, std::optional<std::string> & _value) const;
 
-    bool tryGetPoint(const char * _key, Point & _value);
+    bool tryGetPoint(const char * _key, SDL_FPoint & _value);
 
-    bool tryGetPoint(const char * _key, std::optional<Point> & _value);
+    bool tryGetPoint(const char * _key, std::optional<SDL_FPoint> & _value);
 
-    bool tryGetSize(const char * _key, Size & _value);
+    bool tryGetSize(const char * _key, FSize & _value);
 
-    bool tryGetSize(const char * _key, std::optional<Size> & _value);
+    bool tryGetSize(const char * _key, std::optional<FSize> & _value);
 
-    bool tryGetRect(const char * _key, Rect & _value);
+    bool tryGetRect(const char * _key, SDL_FRect & _value);
 
-    bool tryGetRect(const char * _key, std::optional<Rect> & _value);
+    bool tryGetRect(const char * _key, std::optional<SDL_FRect> & _value);
 
-    bool tryGetColor(const char * _key, Color & _value);
+    bool tryGetColor(const char * _key, SDL_FColor & _value);
 
-    bool tryGetColor(const char * _key, std::optional<Color> & _value);
+    bool tryGetColor(const char * _key, std::optional<SDL_FColor> & _value);
 
     template<DimensionValueConcept Number>
     bool tryGetDimension(const char * _key, Dimension<Number> & _value);
@@ -112,7 +110,7 @@ public:
 
     void setStringValue(const char * _key, const std::string & _value);
 
-    void setPointValue(const char * _key, const Point & _point);
+    void setPointValue(const char * _key, const SDL_FPoint & _point);
 
 private:
     lua_State * mp_lua;

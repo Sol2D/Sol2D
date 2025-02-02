@@ -26,7 +26,7 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    explicit Self(StoreManager & _manager, const Workspace & _workspace, SDL_Renderer & _renderer) :
+    explicit Self(StoreManager & _manager, const Workspace & _workspace, Renderer & _renderer) :
         manager(_manager),
         workspace(_workspace),
         renderer(_renderer)
@@ -35,7 +35,7 @@ struct Self : LuaSelfBase
 
     StoreManager & manager;
     const Workspace & workspace;
-    SDL_Renderer & renderer;
+    Renderer & renderer;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::store_manager>;
@@ -83,7 +83,7 @@ int luaApi_DeleteStore(lua_State * _lua)
 void Sol2D::Lua::pushStoreManagerApi(
     lua_State * _lua,
     const Workspace & _workspace,
-    SDL_Renderer & _renderer,
+    Renderer & _renderer,
     StoreManager & _store_manager)
 {
     UserData::pushUserData(_lua, _store_manager, _workspace, _renderer);

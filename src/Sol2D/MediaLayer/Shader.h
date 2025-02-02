@@ -17,11 +17,11 @@
 #pragma once
 
 #include <Sol2D/ResourceManager.h>
-#include <SDL3/SDL.h>
+#include <Sol2D/MediaLayer.h>
 #include <memory>
 #include <filesystem>
 
-namespace Sol2D::Rendering::Impl {
+namespace Sol2D {
 
 class ShaderDeleter
 {
@@ -84,4 +84,4 @@ private:
     const ResourceManager & mr_resource_manager;
 };
 
-} // namespace Sol2D::Rendering::Impl
+} // namespace Sol2D

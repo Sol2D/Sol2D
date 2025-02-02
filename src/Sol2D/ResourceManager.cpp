@@ -16,12 +16,13 @@
 
 #include <Sol2D/ResourceManager.h>
 #include <Sol2D/Exception.h>
+#include <Sol2D/MediaLayer.h>
 #include <fstream>
 
 using namespace Sol2D;
 
-ResourceManager::ResourceManager(const std::filesystem::path & _root_path) :
-    m_root_path(_root_path)
+ResourceManager::ResourceManager() :
+    m_root_path(SDL_GetBasePath())
 {
 }
 

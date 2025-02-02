@@ -35,7 +35,7 @@ private:
 
 public:
     explicit GraphicsPack(
-        SDL_Renderer & _renderer,
+        Renderer & _renderer,
         const GraphicsPackDefinition & _definition = GraphicsPackDefinition());
     GraphicsPack(const GraphicsPack & _graphics_pack);
     GraphicsPack(GraphicsPack && _graphics_pack);
@@ -45,7 +45,7 @@ public:
 
     void setFilippedHorizontally(bool _flipped);
     void setFilippedVertically(bool _flipped);
-    void setCenter(const Point & _center);
+    void setCenter(const SDL_FPoint & _center);
     size_t addFrame(const GraphicsPackFrameDefinition & _definition);
     size_t insertFrame(size_t _index, const GraphicsPackFrameDefinition & _definition);
     bool removeFrame(size_t _index);
@@ -60,18 +60,17 @@ public:
     size_t getCurrentAnimationIteration() const;
     std::pair<bool, size_t> addSprite(size_t _frame, const GraphicsPackSpriteDefinition & _definition);
     bool removeSprite(size_t _frame, size_t _sprite);
-    void render(const Point & _position, const Utils::Rotation & _rotation, std::chrono::milliseconds _time_passed);
+    void render(const SDL_FPoint & _position, const Rotation & _rotation, std::chrono::milliseconds _time_passed);
 
 private:
     bool switchToNextVisibleFrame(bool _respect_iteration);
     void destroy();
-    void performRender(const Point & _position, const Utils::Rotation & _rotation);
+    void performRender(const SDL_FPoint & _position, const Rotation & _rotation);
 
 private:
-    SDL_Renderer * mp_renderer;
-    Point m_position;
+    Renderer * mp_renderer;
+    SDL_FPoint m_position;
     SDL_FlipMode m_flip_mode;
-    Point m_center;
     std::vector<Frame *> m_frames;
     int32_t m_max_iterations;
     int32_t m_current_iteration;
@@ -97,11 +96,6 @@ inline void GraphicsPack::setFilippedVertically(bool _flipped)
     m_flip_mode = _flipped
         ? static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) | SDL_FLIP_VERTICAL)
         : static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) & ~SDL_FLIP_VERTICAL);
-}
-
-inline void GraphicsPack::setCenter(const Point & _center)
-{
-    m_center = _center;
 }
 
 inline size_t GraphicsPack::getCurrentAnimationIteration() const

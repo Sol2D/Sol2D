@@ -119,7 +119,6 @@ script = nil
 ---@field position sol.Point?
 ---@field isFlippedHorizontally boolean?
 ---@field isFlippedVertically boolean?
----@field center sol.Point?
 ---@field animationIterations integer?
 ---@field frames sol.GraphicsPackFrameDefinition[]
 

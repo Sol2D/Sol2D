@@ -38,7 +38,7 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    explicit Self(const Workspace & _workspace, SDL_Renderer & _renderer, std::shared_ptr<Store> & _store) :
+    explicit Self(const Workspace & _workspace, Renderer & _renderer, std::shared_ptr<Store> & _store) :
         workspace(_workspace),
         renderer(_renderer),
         store(_store)
@@ -54,7 +54,7 @@ struct Self : LuaSelfBase
     }
 
     const Workspace & workspace;
-    SDL_Renderer & renderer;
+    Renderer & renderer;
     std::weak_ptr<Store> store;
 };
 
@@ -305,7 +305,7 @@ int luaApi_FreeObject(lua_State * _lua)
 void Sol2D::Lua::pushStoreApi(
     lua_State * _lua,
     const Workspace & _workspace,
-    SDL_Renderer & _renderer,
+    Renderer & _renderer,
     std::shared_ptr<Store> _store)
 {
     UserData::pushUserData(_lua, _workspace, _renderer, _store);

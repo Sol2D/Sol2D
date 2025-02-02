@@ -15,21 +15,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/SpriteSheet.h>
-#include <Sol2D/SDL/SDL.h>
-#include <SDL3_image/SDL_image.h>
 
 using namespace Sol2D;
-using namespace Sol2D::SDL;
 
-SpriteSheet::SpriteSheet(SDL_Renderer & _renderer) :
-    mp_renderer(&_renderer),
-    m_texture_ptr(nullptr)
+SpriteSheet::SpriteSheet(Renderer & _renderer) :
+    mp_renderer(&_renderer)
 {
 }
 
 bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const SpriteSheetOptions & _options)
 {
-    m_texture_ptr.reset();
     if(!_options.row_count || !_options.col_count || !_options.sprite_width || !_options.sprite_height)
         return false;
     SDL_Surface * surface = IMG_Load(_path.c_str());
@@ -37,7 +32,7 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
         return false;
     if(_options.color_to_alpha.has_value())
     {
-        Color color = _options.color_to_alpha.value();
+        SDL_Color color = toR8G8B8A8_UINT(_options.color_to_alpha.value());
         const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
         SDL_SetSurfaceColorKey(
             surface,
@@ -45,13 +40,15 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
             SDL_MapRGBA(pixel_format, nullptr, color.r, color.g, color.b, color.a)
         );
     }
-    m_texture_ptr = wrapTexture(SDL_CreateTextureFromSurface(mp_renderer, surface));
+    m_texture = mp_renderer->createTexture(*surface, "Sprite Sheet");
     SDL_DestroySurface(surface);
-    Rect rect = makeRect(
-        .0f,
-        .0f,
-        static_cast<float>(_options.sprite_width),
-        static_cast<float>(_options.sprite_height));
+    SDL_FRect rect =
+    {
+        .x = .0f,
+        .y = .0f,
+        .w = static_cast<float>(_options.sprite_width),
+        .h = static_cast<float>(_options.sprite_height)
+    };
     for(uint16_t row = 0; row < _options.row_count; ++row)
     {
         rect.y = _options.margin_top + row * _options.sprite_height + row * _options.vertical_spacing;

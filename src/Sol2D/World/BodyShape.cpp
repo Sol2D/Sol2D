@@ -44,7 +44,7 @@ const std::optional<uint32_t> BodyShape::getTileMapObjectId() const
 }
 
 void BodyShape::addGraphics(
-    SDL_Renderer & _renderer,
+    Renderer & _renderer,
     const PreHashedKey<std::string> & _key,
     const GraphicsPackDefinition & _definition)
 {

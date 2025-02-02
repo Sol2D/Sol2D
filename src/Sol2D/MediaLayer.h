@@ -16,19 +16,17 @@
 
 #pragma once
 
+//
+// Note: It is pre-compiled header
+//
+
+#include <Sol2D/MediaLayer/Renderer.h>
+#include <Sol2D/MediaLayer/Rect.h>
+#include <Sol2D/MediaLayer/Texture.h>
+#include <Sol2D/MediaLayer/Color.h>
+#include <Sol2D/MediaLayer/Math.h>
+#include <Sol2D/MediaLayer/Utils.h>
+#include <Sol2D/MediaLayer/Types.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3_mixer/SDL_mixer.h>
-#include <memory>
-
-namespace Sol2D::SDL {
-
-inline std::shared_ptr<Mix_Chunk> wrapSoundChunk(Mix_Chunk * _chunk)
-{
-    return std::shared_ptr<Mix_Chunk>(_chunk, Mix_FreeChunk);
-}
-
-inline std::shared_ptr<Mix_Music> wrapMusic(Mix_Music * _music)
-{
-    return std::shared_ptr<Mix_Music>(_music, Mix_FreeMusic);
-}
-
-} // namespace Sol2D::SDL
+#include <SDL3_image/SDL_image.h>

@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <Sol2D/Rect.h>
 #include <Sol2D/SpriteSheet.h>
 #include <cstdint>
 #include <chrono>
@@ -66,8 +65,8 @@ struct GraphicsPackSpriteDefinition
 
     std::variant<std::shared_ptr<Sprite>, GraphicsPackSpriteSheetSpriteDefinition> sprite;
     bool is_visible;
-    Point position;
-    Point scale_factor;
+    SDL_FPoint position;
+    SDL_FPoint scale_factor;
 };
 
 struct GraphicsPackFrameDefinition
@@ -97,9 +96,8 @@ struct GraphicsPackDefinition
     {
     }
 
-    Point position;
+    SDL_FPoint position;
     std::vector<GraphicsPackFrameDefinition> frames;
-    std::optional<Point> center;
     bool is_flipped_horizontally;
     bool is_flipped_vertically;
     int32_t animation_iterations;

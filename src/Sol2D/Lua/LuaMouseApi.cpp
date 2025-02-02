@@ -34,7 +34,7 @@ using UserData = LuaUserData<Self, LuaTypeName::mouse>;
 int luaApi_GetState(lua_State * _lua)
 {
     UserData::validateUserData(_lua, 1);
-    Point point;
+    SDL_FPoint point;
     SDL_MouseButtonFlags flags = SDL_GetMouseState(&point.x, &point.y);
     LuaTable table = LuaTable::pushNew(_lua);
     table.setBooleanValue("left", SDL_BUTTON_LMASK & flags);

@@ -30,12 +30,12 @@ public:
 class Button : public Label, public Utils::Observable<ButtonClickObserver>
 {
 public:
-    Button(const Canvas & _parent, const std::string & _text, SDL_Renderer & _renderer);
+    Button(const Canvas & _parent, const std::string & _text, Renderer & _renderer);
     void step(const StepState & _state) override;
 
 private:
     void handleState(const StepState & _state);
-    bool isPointIn(const Point & _point, const Rect & _rect) const;
+    bool isPointIn(const SDL_FPoint & _point, const SDL_FRect & _rect) const;
 };
 
 } // namespace Sol2D::Forms

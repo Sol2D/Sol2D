@@ -15,12 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Outlet.h>
-#include <Sol2D/SDL/SDL.h>
 
 using namespace Sol2D;
-using namespace Sol2D::SDL;
 
-Outlet::Outlet(const Fragment & _fragmet, SDL_Renderer & _renderer) :
+Outlet::Outlet(const Fragment & _fragmet, Renderer & _renderer) :
     m_fragment(_fragmet),
     mr_renderer(_renderer),
     m_rect{.0f, .0f, .0f, .0f}
@@ -32,55 +30,39 @@ void Outlet::resize()
     if(!m_canvas || !m_fragment.is_visible)
         return;
 
-    int viewport_w, viewport_h;
-    SDL_GetRenderOutputSize(&mr_renderer, &viewport_w, &viewport_h);
-    m_rect.x = m_fragment.left.has_value() ? m_fragment.left.value().getPixels(viewport_w) : .0f;
-    m_rect.y = m_fragment.top.has_value() ? m_fragment.top.value().getPixels(viewport_h): .0f;
+    const FSize output_size = mr_renderer.getOutputSize();
+    m_rect.x = m_fragment.left.has_value() ? m_fragment.left.value().getPixels(output_size.w) : .0f;
+    m_rect.y = m_fragment.top.has_value() ? m_fragment.top.value().getPixels(output_size.h): .0f;
 
     if(m_fragment.width.has_value())
     {
-        m_rect.w = m_fragment.width.value().getPixels(viewport_w);
+        m_rect.w = m_fragment.width.value().getPixels(output_size.w);
     }
     else if(m_fragment.right.has_value())
     {
-        float right_margin = m_fragment.right.value().getPixels(viewport_w);
-        m_rect.w = viewport_w - (m_rect.x + right_margin);
+        float right_margin = m_fragment.right.value().getPixels(output_size.w);
+        m_rect.w = output_size.w - (m_rect.x + right_margin);
     }
     else
     {
-        m_rect.w = viewport_w - m_rect.x;
+        m_rect.w = output_size.w - m_rect.x;
     }
 
     if(m_fragment.height.has_value())
     {
-        m_rect.h = m_fragment.height.value().getPixels(viewport_h);
+        m_rect.h = m_fragment.height.value().getPixels(output_size.h);
     }
     else if(m_fragment.bottom.has_value())
     {
-        float bottom_margin = m_fragment.bottom.value().getPixels(viewport_h);
-        m_rect.h = viewport_h - (m_rect.y + bottom_margin);
+        float bottom_margin = m_fragment.bottom.value().getPixels(output_size.h);
+        m_rect.h = output_size.h - (m_rect.y + bottom_margin);
     }
     else
     {
-        m_rect.h = viewport_h - m_rect.y;
-    }
-
-    if(m_rect.h < 1.0f || m_rect.w < 1.0f)
-    {
-        m_texture = nullptr;
-    }
-    else
-    {
-        SDL_Texture * texture = SDL_CreateTexture(
-            &mr_renderer,
-            SDL_PIXELFORMAT_RGBA32,
-            SDL_TEXTUREACCESS_TARGET,
-            m_rect.w,
-            m_rect.h
-        );
-        m_texture = wrapTexture(texture);
+        m_rect.h = output_size.h - m_rect.y;
     }
     m_canvas->reconfigure(m_rect);
+    m_texture = mr_renderer.createTexture(m_rect.w, m_rect.h, "Outlet");
 }
 
 void Outlet::bind(std::shared_ptr<Canvas> _canvas)
@@ -91,18 +73,14 @@ void Outlet::bind(std::shared_ptr<Canvas> _canvas)
 
 void Outlet::reconfigure(const Fragment & _fragment)
 {
-    if(!_fragment.is_visible && m_fragment.is_visible)
-        m_texture.reset();
     m_fragment = _fragment;
     resize();
 }
 
 void Outlet::step(const StepState & _state)
 {
-    if(!m_canvas || !m_texture)
-        return;
-    SDL_SetRenderTarget(&mr_renderer, m_texture.get());
+    if(!m_canvas) return;
+    mr_renderer.beginRenderPass(m_texture, m_canvas->getClearColor());
     m_canvas->step(_state);
-    SDL_SetRenderTarget(&mr_renderer, nullptr);
-    SDL_RenderTexture(&mr_renderer, m_texture.get(), nullptr, m_rect.toSdlPtr());
+    mr_renderer.endRenderPass(m_texture, m_rect);
 }

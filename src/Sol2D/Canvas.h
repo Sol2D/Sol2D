@@ -28,21 +28,36 @@ class Canvas : public Object
 
 public:
     Canvas() :
-        m_rect{.0f, .0f, .0f, .0f}
+        m_rect{.0f, .0f, .0f, .0f},
+        m_clear_color(0.08235294117647059f, 0.4627450980392157f, 0.01568627450980392f, 1.0f)
     {
     }
-    void reconfigure(const Rect & _rect);
+
+    void setClearColor(const SDL_FColor & _color);
+    const SDL_FColor & getClearColor() const;
+    void reconfigure(const SDL_FRect & _rect);
     float getWidth() const;
     float getHeight() const;
     virtual void step(const StepState & _state) = 0;
-    Point getTranslatedPoint(float _x, float _y) const;
+    SDL_FPoint getTranslatedPoint(float _x, float _y) const;
     void translatePoint(float * _x, float * _y) const;
 
 private:
-    Rect m_rect;
+    SDL_FRect m_rect;
+    SDL_FColor m_clear_color;
 };
 
-inline void Canvas::reconfigure(const Rect & _rect)
+inline void Canvas::setClearColor(const SDL_FColor & _color)
+{
+    m_clear_color = _color;
+}
+
+inline const SDL_FColor & Canvas::getClearColor() const
+{
+    return m_clear_color;
+}
+
+inline void Canvas::reconfigure(const SDL_FRect & _rect)
 {
     m_rect = _rect;
 }
@@ -57,9 +72,9 @@ inline float Canvas::getHeight() const
     return m_rect.h;
 }
 
-inline Point Canvas::getTranslatedPoint(float _x, float _y) const
+inline SDL_FPoint Canvas::getTranslatedPoint(float _x, float _y) const
 {
-    return makePoint(_x - m_rect.x, _y - m_rect.y);
+    return { .x = _x - m_rect.x, .y = _y - m_rect.y };
 }
 
 inline void Canvas::translatePoint(float * _x, float * _y) const

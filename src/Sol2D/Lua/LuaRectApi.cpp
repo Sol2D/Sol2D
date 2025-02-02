@@ -28,7 +28,7 @@ static constexpr char gc_key_h[] = "h";
 
 } // namespace name
 
-bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, Rect & _rect)
+bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, SDL_FRect & _rect)
 {
     LuaTable table(_lua, _idx);
     if(!table.isValid())
@@ -50,7 +50,7 @@ bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, Rect & _rect)
     return false;
 }
 
-void Sol2D::Lua::pushRect(lua_State * _lua, const Rect & _rect)
+void Sol2D::Lua::pushRect(lua_State * _lua, const SDL_FRect & _rect)
 {
     LuaTable table = LuaTable::pushNew(_lua);
     table.setNumberValue(gc_key_x, _rect.x);

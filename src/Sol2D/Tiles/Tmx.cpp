@@ -19,19 +19,14 @@
 #include <Sol2D/Utils/Zstd.h>
 #include <Sol2D/Utils/Base64.h>
 #include <Sol2D/Utils/String.h>
-#include <Sol2D/SDL/SDL.h>
 #include <Sol2D/Def.h>
-#include <SDL3_image/SDL_image.h>
 #include <tinyxml2.h>
 #include <list>
 
 using namespace Sol2D;
-using namespace Sol2D::SDL;
 using namespace Sol2D::Tiles;
 using namespace Sol2D::Utils;
 using namespace tinyxml2;
-
-namespace fs = std::filesystem;
 
 namespace {
 
@@ -76,39 +71,39 @@ class XmlLoader
 
 protected:
     XmlLoader(
-        SDL_Renderer & _renderer,
+        Renderer & _renderer,
         TileHeap & _heap,
         ObjectHeap & _object_heap,
         TileMap & _map,
-        const fs::path & _path);
+        const std::filesystem::path & _path);
     uint32_t readRequiredUintAttribute(const XMLElement & _xml_element, const char * _attr);
     uint32_t readRequiredPositiveUintAttribute(const XMLElement & _xml_element, const char * _attr);
     int32_t readRequiredIntAttribute(const XMLElement & _xml_element, const char * _attr);
     const char * readRequiredAttribute(const XMLElement & _xml_element, const char * _attr);
     std::string formatFileReadErrorMessage() const;
-    std::string formatFileReadErrorMessage(const fs::path & _path) const;
+    std::string formatFileReadErrorMessage(const std::filesystem::path & _path) const;
     std::string formatXmlRootElemetErrorMessage(const char * _expected) const;
-    bool tryParseColor(const char * _value, Color & _color) const;
-    std::shared_ptr<SDL_Texture> parseImage(const XMLElement & _xml);
+    bool tryParseColor(const char * _value, SDL_Color & _color) const;
+    Texture parseImage(const XMLElement & _xml);
 
 protected:
-    SDL_Renderer & mr_renderer;
+    Renderer & mr_renderer;
     TileHeap & mr_tile_heap;
     ObjectHeap & mr_object_heap;
     TileMap & mr_map;
-    const fs::path & mr_path;
+    const std::filesystem::path & mr_path;
 };
 
 class TileMapXmlLoader : private XmlLoader
 {
 public:
     TileMapXmlLoader(
-        SDL_Renderer & _renderer,
+        Renderer & _renderer,
         TileHeap & _tile_heap,
         ObjectHeap & _object_heap,
         TileMap & _map,
         const Workspace & _workspace,
-        const fs::path & _path);
+        const std::filesystem::path & _path);
     void loadFromFile();
 
 private:
@@ -168,16 +163,16 @@ class TileSetXmlLoader : private XmlLoader
 {
 public:
     TileSetXmlLoader(
-        SDL_Renderer & _renderer,
+        Renderer & _renderer,
         TileHeap & _tile_heap,
-         ObjectHeap & _object_heap,
-         TileMap & _map,
-         const fs::path & _path);
+        ObjectHeap & _object_heap,
+        TileMap & _map,
+        const std::filesystem::path & _path);
     void loadFromFile(uint32_t _first_gid);
     void loadFromXml(const XMLElement & _xml, uint32_t _first_gid);
 
 private:
-    void makeTiles(std::shared_ptr<SDL_Texture> _texture,
+    void makeTiles(const Texture & _texture,
                    const TileSet & _set,
                    uint32_t _first_gid,
                    uint32_t _tile_width,
@@ -254,11 +249,11 @@ TileMapTileLayer * TileMapLayerData::createLayer(
 }
 
 inline XmlLoader::XmlLoader(
-    SDL_Renderer & _renderer,
+    Renderer & _renderer,
     TileHeap & _tile_heap,
     ObjectHeap & _object_heap,
     TileMap &_map,
-    const fs::path & _path
+    const std::filesystem::path & _path
 ) :
     mr_renderer(_renderer),
     mr_tile_heap(_tile_heap),
@@ -325,24 +320,20 @@ const char * XmlLoader::readRequiredAttribute(const XMLElement & _xml_element, c
 
 inline std::string XmlLoader::formatFileReadErrorMessage() const
 {
-    return formatFileReadErrorMessage(mr_path.c_str());
+    return formatFileReadErrorMessage(mr_path);
 }
 
-std::string XmlLoader::formatFileReadErrorMessage(const fs::path & _path) const
+inline std::string XmlLoader::formatFileReadErrorMessage(const std::filesystem::path & _path) const
 {
-    std::stringstream ss;
-    ss << "Unable to read file: " << _path;
-    return ss.str();
+    return std::format("Unable to read file: {}", _path.string());
 }
 
 std::string XmlLoader::formatXmlRootElemetErrorMessage(const char * _expected) const
 {
-    std::stringstream ss;
-    ss << "The root element of the XML file " << mr_path << ": " << " must be \"" << _expected << "\"";
-    return ss.str();
+    return std::format("The root element of the XML file {}: must be \"{}\"", mr_path.string(), _expected);
 }
 
-bool XmlLoader::tryParseColor(const char * _value, Color & _color) const
+bool XmlLoader::tryParseColor(const char * _value, SDL_Color & _color) const
 {
     if(_value == nullptr)
         return false;
@@ -394,12 +385,12 @@ bool XmlLoader::tryParseColor(const char * _value, Color & _color) const
     return true;
 }
 
-std::shared_ptr<SDL_Texture> XmlLoader::parseImage(const XMLElement & _xml)
+Texture XmlLoader::parseImage(const XMLElement & _xml)
 {
     SDL_Surface * surface = nullptr;
     if(const char * source = _xml.Attribute("source"))
     {
-        fs::path path(source);
+        std::filesystem::path path(source);
         if(path.is_relative())
             path = mr_path.parent_path() / path;
         surface = IMG_Load(path.c_str());
@@ -413,7 +404,7 @@ std::shared_ptr<SDL_Texture> XmlLoader::parseImage(const XMLElement & _xml)
     }
     if(const char * trans = _xml.Attribute("trans"))
     {
-        Color color;
+        SDL_Color color;
         if(tryParseColor(trans, color))
         {
             const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
@@ -424,18 +415,18 @@ std::shared_ptr<SDL_Texture> XmlLoader::parseImage(const XMLElement & _xml)
             );
         }
     }
-    SDL_Texture * texture = SDL_CreateTextureFromSurface(&mr_renderer, surface);
+    Texture texture = mr_renderer.createTexture(*surface, "Tile");
     SDL_DestroySurface(surface);
-    return wrapTexture(texture);
+    return texture;
 }
 
 inline TileMapXmlLoader::TileMapXmlLoader(
-    SDL_Renderer & _renderer,
+    Renderer & _renderer,
     TileHeap & _tile_heap,
     ObjectHeap & _object_heap,
     TileMap & _map,
     const Workspace & _workspace,
-    const fs::path & _path
+    const std::filesystem::path & _path
 ) :
     XmlLoader(_renderer, _tile_heap, _object_heap, _map, _path),
     mr_workspace(_workspace),
@@ -492,9 +483,9 @@ void TileMapXmlLoader::loadFromXml(const XMLDocument & _xml)
             mr_map.setStaggerIndex(TileMap::StaggerIndex::Odd);
     }
     {
-        Color color;
+        SDL_Color color;
         if(tryParseColor(xmap->Attribute("backgroundcolor"), color))
-            mr_map.setBackgroundColor(color);
+            mr_map.setBackgroundColor(toR32G32B32A32_SFLOAT(color));
     }
     for(const XMLElement * xts = xmap->FirstChildElement("tileset"); xts; xts = xts->NextSiblingElement(xts->Name()))
     {
@@ -506,10 +497,9 @@ void TileMapXmlLoader::loadFromXml(const XMLDocument & _xml)
 void TileMapXmlLoader::loadTileSet(const XMLElement & _xml)
 {
     uint32_t first_gid = readRequiredUintAttribute(_xml, "firstgid");
-    const char * source = _xml.Attribute("source");
-    if(source)
+    if(const char * source = _xml.Attribute("source"))
     {
-        fs::path source_path(source);
+        std::filesystem::path source_path(source);
         if(!source_path.is_absolute())
             source_path = mr_path.parent_path() / source_path;
         TileSetXmlLoader loader(mr_renderer, mr_tile_heap, mr_object_heap, mr_map, source_path);
@@ -588,7 +578,8 @@ void TileMapXmlLoader::loadTileLayer(
 
 inline TileMapLayerDefinition TileMapXmlLoader::readLayerDefinition(const XMLElement & _xml)
 {
-    return {
+    return
+    {
         .id = readRequiredUintAttribute(_xml, "id"),
         .name = readRequiredAttribute(_xml, "name")
     };
@@ -610,9 +601,9 @@ void TileMapXmlLoader::readLayer(const XMLElement & _xml, TileMapLayer & _layer)
         _layer.setOffsetX(offset_x);
     if(float offset_y = _xml.FloatAttribute("offsety", 0))
         _layer.setOffsetY(offset_y);
-    Color tint_color;
+    SDL_Color tint_color;
     if(tryParseColor(_xml.Attribute("tintcolor"), tint_color))
-        _layer.setTintColor(tint_color);
+        _layer.setTintColor(toR32G32B32A32_SFLOAT(tint_color));
 }
 
 void TileMapXmlLoader::loadTileLayerChunk(
@@ -863,9 +854,11 @@ void TileMapXmlLoader::loadPoints(const XMLElement & _xml, TileMapPolyX & _poly)
         size_t del_pos = point_str.find(',', 0); // TODO: remove "find", use the 2nd arg of "strtol" (see loadTileLayerDataCsv)
         if(del_pos != std::string::npos)
         {
-            _poly.addPoint(makePoint(
-                std::strtof(point_str.c_str(), nullptr),
-                std::strtof(&point_str.c_str()[del_pos + 1], nullptr)));
+            _poly.addPoint(
+            {
+                .x = std::strtof(point_str.c_str(), nullptr),
+                .y = std::strtof(&point_str.c_str()[del_pos + 1], nullptr)
+            });
         }
     }
 }
@@ -878,9 +871,9 @@ void TileMapXmlLoader::loadText(const XMLElement & _xml, TileMapText & _text)
         _text.setFontSize(static_cast<uint16_t>(font_size));
     if(const char * color_str = _xml.Attribute("color"))
     {
-        Color color;
+        SDL_Color color;
         if(tryParseColor(color_str, color))
-            _text.setColor(color);
+            _text.setColor(toR32G32B32A32_SFLOAT(color));
     }
     _text.setBold(_xml.BoolAttribute("bold", false));
     _text.setItalic(_xml.BoolAttribute("italic", false));
@@ -936,11 +929,11 @@ void TileMapXmlLoader::loadGroupLayer(
 const char * TileSetXmlLoader::sc_root_tag_name = "tileset";
 
 inline TileSetXmlLoader::TileSetXmlLoader(
-    SDL_Renderer & _renderer,
+    Renderer & _renderer,
     TileHeap & _tile_heap,
     ObjectHeap & _object_heap,
     TileMap & _map,
-    const fs::path & _path
+    const std::filesystem::path & _path
 ) :
     XmlLoader(_renderer, _tile_heap, _object_heap, _map, _path)
 {
@@ -1009,7 +1002,7 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
 
     if(const XMLElement * xml_image = _xml.FirstChildElement("image"))
     {
-        std::shared_ptr<SDL_Texture> texture = parseImage(*xml_image);
+        Texture texture = parseImage(*xml_image);
         makeTiles(texture, set, _first_gid, tile_width, tile_height, spacing, margin);
     }
     else
@@ -1031,7 +1024,7 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
 }
 
 void TileSetXmlLoader::makeTiles(
-    std::shared_ptr<SDL_Texture> _texture,
+    const Texture & _texture,
     const TileSet & _set,
     uint32_t _first_gid,
     uint32_t _tile_width,
@@ -1039,10 +1032,8 @@ void TileSetXmlLoader::makeTiles(
     uint32_t _spacing,
     uint32_t _margin)
 {
-    float width, height;
-    SDL_GetTextureSize(_texture.get(), &width, &height);
-    int max_x = width - _margin - _tile_width;
-    int max_y = height - _margin - _tile_height;
+    int max_x = _texture.getWidth() - _margin - _tile_width;
+    int max_y = _texture.getHeight() - _margin - _tile_height;
     uint32_t gid = _first_gid;
     for(int y = _margin; y <= max_y; y += _spacing + _tile_height)
     {
@@ -1062,13 +1053,11 @@ void TileSetXmlLoader::makeTile(const XMLElement & _xml_tile, const TileSet & _s
     uint32_t height = _xml_tile.UnsignedAttribute("height");
     if(const XMLElement * xml_image = _xml_tile.FirstChildElement("image"))
     {
-        std::shared_ptr<SDL_Texture> texture = parseImage(*xml_image);
+        Texture texture = parseImage(*xml_image);
         if(!width || !height)
         {
-            float w, h;
-            SDL_GetTextureSize(texture.get(), &w, &h);
-            width = static_cast<uint32_t>(w);
-            height = static_cast<uint32_t>(h);
+            width = static_cast<uint32_t>(texture.getWidth());
+            height = static_cast<uint32_t>(texture.getHeight());
         }
         mr_tile_heap.createTile(gid, _set, texture, x, y, width, height);
     }
@@ -1086,7 +1075,7 @@ void TileSetXmlLoader::makeTile(const XMLElement & _xml_tile, const TileSet & _s
     // TODO: <animation>
 }
 
-Tmx Sol2D::Tiles::loadTmx(SDL_Renderer & _renderer, const Workspace & _workspace, const std::filesystem::path & _path)
+Tmx Sol2D::Tiles::loadTmx(Renderer & _renderer, const Workspace & _workspace, const std::filesystem::path & _path)
 {
     std::unique_ptr<TileHeap> tile_heap(new TileHeap);
     std::unique_ptr<ObjectHeap> object_heap(new ObjectHeap);

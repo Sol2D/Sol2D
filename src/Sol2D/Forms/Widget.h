@@ -20,9 +20,7 @@
 #include <Sol2D/Forms/WidgetPadding.h>
 #include <Sol2D/Canvas.h>
 #include <Sol2D/Object.h>
-#include <Sol2D/Color.h>
-#include <Sol2D/SDL/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
+#include <Sol2D/MediaLayer.h>
 
 namespace Sol2D::Forms {
 
@@ -46,14 +44,14 @@ public:
 
 public:
     WidgetProperty<std::shared_ptr<TTF_Font>> font;
-    WidgetProperty<Color> foreground_color;
-    WidgetProperty<Color> background_color;
+    WidgetProperty<SDL_FColor> foreground_color;
+    WidgetProperty<SDL_FColor> background_color;
     WidgetProperty<float> border_width;
-    WidgetProperty<Color> border_color;
+    WidgetProperty<SDL_FColor> border_color;
     WidgetProperty<WidgetPadding> padding;
 
 protected:
-    Widget(const Canvas & _parent, SDL_Renderer & _renderer);
+    Widget(const Canvas & _parent, Renderer & _renderer);
     const Canvas & getParent() const;
 
 private:
@@ -61,19 +59,19 @@ private:
 
 protected:
     const Canvas & mr_parent;
-    SDL_Renderer & mr_renderer;
+    Renderer & mr_renderer;
     WidgetState m_state;
     Dimension<float> m_x;
     Dimension<float> m_y;
     Dimension<float> m_width;
     Dimension<float> m_height;
 
-    static constexpr Color sc_default_foreground_color{255, 255, 255, 255};
-    static constexpr Color sc_default_background_color{0, 0, 0, 0};
-    static constexpr Color sc_default_border_color = sc_default_foreground_color;
+    static constexpr SDL_FColor sc_default_foreground_color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    static constexpr SDL_FColor sc_default_background_color = { .0f, .0f, .0f, .0f };
+    static constexpr SDL_FColor sc_default_border_color = sc_default_foreground_color;
 };
 
-inline Widget::Widget(const Canvas & _parent, SDL_Renderer & _renderer):
+inline Widget::Widget(const Canvas & _parent, Renderer & _renderer):
     font(nullptr),
     foreground_color(sc_default_foreground_color),
     background_color(sc_default_background_color),

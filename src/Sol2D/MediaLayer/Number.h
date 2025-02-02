@@ -16,18 +16,11 @@
 
 #pragma once
 
-#include <Sol2D/Rect.h>
-#include <Sol2D/Color.h>
-#include <Sol2D/Rotation.h>
-#include <optional>
+#include <concepts>
 
-namespace Sol2D::Rendering {
+namespace Sol2D {
 
-struct RectRenderingData
-{
-    Rect rect;
-    ColorF color;
-    std::optional<Rotation> rotation;
-};
+template<typename T>
+concept Number = std::integral<T> || std::floating_point<T>;
 
-} // namespace Sol2D::Rendering
+} // namespace Sol2D

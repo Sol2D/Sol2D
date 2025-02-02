@@ -16,14 +16,33 @@
 
 #pragma once
 
-#include <SDL3_ttf/SDL_ttf.h>
-#include <memory>
+#include <Sol2D/Exception.h>
+#include <Sol2D/MediaLayer.h>
+#include <sstream>
+#include <cstring>
 
-namespace Sol2D::SDL {
+namespace Sol2D {
 
-inline std::shared_ptr<TTF_Font> wrapFont(TTF_Font * _font)
+class SDLException : public Exception
 {
-    return std::shared_ptr<TTF_Font>(_font, TTF_CloseFont);
-}
+public:
+    SDLException(const std::string & _message) :
+        Exception(makeFullMessage(_message))
+    {
+    }
 
-} // namespace Sol2D::SDL
+private:
+    std::string makeFullMessage(const std::string & _base_message)
+    {
+        const char * sdl_error = SDL_GetError();
+        if(sdl_error && std::strlen(sdl_error) > 0)
+        {
+            std::stringstream stream;
+            stream << _base_message << std::endl << "SDL error message: " << sdl_error;
+            return stream.str();
+        }
+        return _base_message;
+    }
+};
+
+} // namespace Sol2D

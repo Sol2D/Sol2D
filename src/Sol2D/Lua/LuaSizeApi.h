@@ -17,15 +17,15 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Rect.h>
+#include <Sol2D/MediaLayer.h>
 
 namespace Sol2D::Lua {
 
-bool tryGetSize(lua_State * _lua, int _idx, Size & _size);
+bool tryGetSize(lua_State * _lua, int _idx, FSize & _size);
 
 void pushSize(lua_State * _lua, float _w, float _h);
 
-inline void pushSize(lua_State * _lua, const Size & _size)
+inline void pushSize(lua_State * _lua, const FSize & _size)
 {
     pushSize(_lua, _size.w, _size.h);
 }

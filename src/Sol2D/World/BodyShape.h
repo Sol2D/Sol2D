@@ -31,7 +31,7 @@ public:
     const std::string & getKey() const;
     const std::optional<uint32_t> getTileMapObjectId() const;
     void addGraphics(
-        SDL_Renderer & _renderer,
+        Renderer & _renderer,
         const Utils::PreHashedKey<std::string> & _key,
         const GraphicsPackDefinition & _definition);
     bool setCurrentGraphics(const Utils::PreHashedKey<std::string> & _key);

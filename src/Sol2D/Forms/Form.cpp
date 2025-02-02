@@ -18,16 +18,13 @@
 
 using namespace Sol2D::Forms;
 
-Form::Form(SDL_Renderer & _renderer) :
-    mr_renderer(_renderer),
-    m_bg_color{0, 0, 0, 255}
+Form::Form(Renderer & _renderer) :
+    mr_renderer(_renderer)
 {
 }
 
 void Form::step(const StepState & _state)
 {
-    SDL_SetRenderDrawColor(&mr_renderer, m_bg_color.r, m_bg_color.g, m_bg_color.b, m_bg_color.a);
-    SDL_RenderClear(&mr_renderer);
     for(auto & widget : m_widgets)
         widget->step(_state);
 }

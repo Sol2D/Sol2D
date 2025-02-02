@@ -14,16 +14,23 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Forms/Menu.h>
+#pragma once
 
-using namespace Sol2D::Forms;
+#include <SDL3/SDL.h>
+#include <box2d/box2d.h>
 
-Menu::Menu(const Canvas & _parent, SDL_Renderer & _renderer) :
-    Widget(_parent, _renderer)
+namespace Sol2D {
+
+void detectContentRect(const SDL_Surface & _surface, SDL_Rect & _rect);
+
+inline const b2Vec2 & toBox2D(const SDL_FPoint & _sdl_point)
 {
+    return *reinterpret_cast<const b2Vec2 *>(&_sdl_point);
 }
 
-void Menu::step(const StepState & /*_state*/)
+inline const SDL_FPoint & toSDL(const b2Vec2 & _b2_vec)
 {
-
+    return *reinterpret_cast<const SDL_FPoint *>(&_b2_vec);
 }
+
+} // namespace Sol2D

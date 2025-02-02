@@ -63,9 +63,9 @@ bool LuaTable::tryGetString(const char * _key, std::string & _value) const
     return result;
 }
 
-bool LuaTable::tryGetPoint(const char * _key, std::optional<Point> & _value)
+bool LuaTable::tryGetPoint(const char * _key, std::optional<SDL_FPoint> & _value)
 {
-    Point point;
+    SDL_FPoint point;
     if(tryGetPoint(_key, point))
     {
         _value = point;
@@ -74,7 +74,7 @@ bool LuaTable::tryGetPoint(const char * _key, std::optional<Point> & _value)
     return false;
 }
 
-bool LuaTable::tryGetPoint(const char * _key, Point & _value)
+bool LuaTable::tryGetPoint(const char * _key, SDL_FPoint & _value)
 {
     if(!tryGetValue(_key))
         return false;
@@ -83,9 +83,9 @@ bool LuaTable::tryGetPoint(const char * _key, Point & _value)
     return result;
 }
 
-bool LuaTable::tryGetSize(const char * _key, std::optional<Size> & _value)
+bool LuaTable::tryGetSize(const char * _key, std::optional<FSize> & _value)
 {
-    Size size;
+    FSize size;
     if(tryGetSize(_key, size))
     {
         _value = size;
@@ -94,7 +94,7 @@ bool LuaTable::tryGetSize(const char * _key, std::optional<Size> & _value)
     return false;
 }
 
-bool LuaTable::tryGetSize(const char * _key, Size & _value)
+bool LuaTable::tryGetSize(const char * _key, FSize & _value)
 {
     if(!tryGetValue(_key))
         return false;
@@ -103,9 +103,9 @@ bool LuaTable::tryGetSize(const char * _key, Size & _value)
     return result;
 }
 
-bool LuaTable::tryGetRect(const char * _key, std::optional<Rect> & _value)
+bool LuaTable::tryGetRect(const char * _key, std::optional<SDL_FRect> & _value)
 {
-    Rect rect;
+    SDL_FRect rect;
     if(tryGetRect(_key, rect))
     {
         _value = rect;
@@ -114,7 +114,7 @@ bool LuaTable::tryGetRect(const char * _key, std::optional<Rect> & _value)
     return false;
 }
 
-bool LuaTable::tryGetRect(const char * _key, Rect & _value)
+bool LuaTable::tryGetRect(const char * _key, SDL_FRect & _value)
 {
     if(!tryGetValue(_key))
         return false;
@@ -123,9 +123,9 @@ bool LuaTable::tryGetRect(const char * _key, Rect & _value)
     return result;
 }
 
-bool LuaTable::tryGetColor(const char * _key, std::optional<Color> & _value)
+bool LuaTable::tryGetColor(const char * _key, std::optional<SDL_FColor> & _value)
 {
-    Color color;
+    SDL_FColor color;
     if(tryGetColor(_key, color))
     {
         _value = color;
@@ -134,7 +134,7 @@ bool LuaTable::tryGetColor(const char * _key, std::optional<Color> & _value)
     return false;
 }
 
-bool LuaTable::tryGetColor(const char * _key, Color & _value)
+bool LuaTable::tryGetColor(const char * _key, SDL_FColor & _value)
 {
     if(!tryGetValue(_key))
         return false;
@@ -182,7 +182,7 @@ void LuaTable::setStringValue(const char * _key, const char * _value)
     lua_setfield(mp_lua, m_idx, _key);
 }
 
-void LuaTable::setPointValue(const char * _key, const Point & _point)
+void LuaTable::setPointValue(const char * _key, const SDL_FPoint & _point)
 {
     pushPoint(mp_lua, _point.x, _point.y);
     lua_setfield(mp_lua, m_idx, _key);

@@ -230,7 +230,7 @@ template<typename UserDataT>
 int luaApi_SetForegroundColor(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    Color color;
+    SDL_FColor color;
     luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
     self->getWidget(_lua)->foreground_color.setValue(getWidgetState(_lua, 3), color);
     return 0;
@@ -243,7 +243,7 @@ template<typename UserDataT>
 int luaApi_SetBackgroundColor(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    Color color;
+    SDL_FColor color;
     luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
     self->getWidget(_lua)->background_color.setValue(getWidgetState(_lua, 3), color);
     return 0;
@@ -256,7 +256,7 @@ template<typename UserDataT>
 int luaApi_SetBorderColor(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    Color color;
+    SDL_FColor color;
     luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
     self->getWidget(_lua)->border_color.setValue(getWidgetState(_lua, 3), color);
     return 0;

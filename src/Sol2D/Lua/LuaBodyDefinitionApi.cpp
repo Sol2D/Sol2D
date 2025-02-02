@@ -32,7 +32,7 @@ namespace {
 template<BodyShapeType shape_type>
 void readBasicShape(LuaTable & _table, BodyBasicShapeDefinition<shape_type> & _shape);
 
-bool tryGetPoints(lua_State * _lua, int _idx, std::vector<Point> & _points);
+bool tryGetPoints(lua_State * _lua, int _idx, std::vector<SDL_FPoint> & _points);
 
 void addPolygon(
     LuaTable & _table,
@@ -153,11 +153,11 @@ void readBasicShape(LuaTable & _table, BodyBasicShapeDefinition<shape_type> & _s
     }
 }
 
-bool tryGetPoints(lua_State * _lua, int _idx, std::vector<Point> & _points)
+bool tryGetPoints(lua_State * _lua, int _idx, std::vector<SDL_FPoint> & _points)
 {
     if(!lua_istable(_lua, _idx))
         return false;
-    Point point;
+    SDL_FPoint point;
     lua_Unsigned len = lua_rawlen(_lua, _idx);
     for(lua_Unsigned i = 1; i <= len; ++i)
     {

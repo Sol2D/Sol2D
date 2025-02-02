@@ -17,12 +17,10 @@
 #include <Sol2D/Forms/Label.h>
 
 using namespace Sol2D::Forms;
-using namespace Sol2D::SDL;
 
-Label::Label(const Canvas & _parent, const std::string & _text, SDL_Renderer & _renderer) :
+Label::Label(const Canvas & _parent, const std::string & _text, Renderer & _renderer) :
     Widget(_parent, _renderer),
     m_text(_text),
-    mp_texture(nullptr),
     m_texture_width(.0f),
     m_texture_height(.0f),
     horizontal_text_alignment(HorizontalTextAlignment::None),
@@ -34,26 +32,12 @@ Label::Label(const Canvas & _parent, const std::string & _text, SDL_Renderer & _
     vertical_text_alignment.addObserver(*m_vertical_text_alignment_side_effect);
 }
 
-Label::~Label()
-{
-    resetTexture();
-}
-
-void Label::resetTexture()
-{
-    if(mp_texture)
-    {
-        SDL_DestroyTexture(mp_texture);
-        mp_texture = nullptr;
-    }
-}
-
 bool Label::setText(const std::string & _text)
 {
     if(_text != m_text)
     {
         m_text = _text;
-        resetTexture();
+        m_texture.reset();
         return true;
     }
     return false;
@@ -63,7 +47,7 @@ bool Label::setState(WidgetState _state)
 {
     if(Widget::setState(_state))
     {
-        resetTexture();
+        m_texture.reset();;
         return true;
     }
     return false;
@@ -74,7 +58,7 @@ void Label::step(const StepState & _state)
     std::shared_ptr<TTF_Font> font = this->font[m_state];
     if(!font)
         return;
-    if(mp_texture == nullptr)
+    if(!m_texture)
         createTexture(font.get());
 
     const float canvas_width = getParent().getWidth();
@@ -86,7 +70,7 @@ void Label::step(const StepState & _state)
     const float padding_right = padding.right.getPixels(canvas_width);
     const float padding_top = padding.top.getPixels(canvas_height);
     const float padding_bottom = padding.bottom.getPixels(canvas_height);
-    const SDL_FRect control_rect =
+    const SDL_FRect control_rect
     {
         .x = m_x.getPixels(getParent().getWidth()),
         .y = m_y.getPixels(getParent().getHeight()),
@@ -103,7 +87,13 @@ void Label::step(const StepState & _state)
     SDL_FRect dest_rect;
     dest_rect.w = draw_area_width > m_texture_width ? m_texture_width : draw_area_width;
     dest_rect.h = draw_area_height > m_texture_height ? m_texture_height : draw_area_height;
-    SDL_FRect src_rect = { .x = .0f, .y = .0f, .w = dest_rect.w, .h = dest_rect.h };
+    SDL_FRect src_rect
+    {
+        .x = .0f,
+        .y = .0f,
+        .w = dest_rect.w,
+        .h = dest_rect.h
+    };
 
     // TODO: RTL
     switch(htext_alignment)
@@ -147,15 +137,11 @@ void Label::step(const StepState & _state)
     if(dest_rect.y < draw_area_y)
         dest_rect.y = draw_area_y;
 
-    Color bg_color = background_color[m_state];
-    if (bg_color.a != 0)
-    {
-        SDL_SetRenderDrawColor(&mr_renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
-        SDL_RenderFillRect(&mr_renderer, &control_rect);
-    }
+    SDL_FColor bg_color = background_color[m_state];
+    if(bg_color.a != 0)
+        mr_renderer.renderRect(SolidRectRenderingData(control_rect, bg_color));
 
-    SDL_RenderTexture(&mr_renderer, mp_texture, &src_rect, &dest_rect);
-
+    mr_renderer.renderTexture(TextureRenderingData(dest_rect, m_texture, src_rect));
     Widget::step(_state);
 }
 
@@ -165,10 +151,10 @@ void Label::createTexture(TTF_Font * _font)
         _font,
         m_text.c_str(),
         m_text.size(),
-        foreground_color[m_state],
-        background_color[m_state]
+        toR8G8B8A8_UINT(foreground_color[m_state]),
+        toR8G8B8A8_UINT(background_color[m_state])
     );
-    mp_texture = SDL_CreateTextureFromSurface(&mr_renderer, surface);
+    m_texture = mr_renderer.createTexture(*surface, "Label Text");
     m_texture_width = static_cast<float>(surface->w);
     m_texture_height = static_cast<float>(surface->h);
     SDL_DestroySurface(surface);

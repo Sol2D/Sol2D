@@ -15,10 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/GraphicsPack.h>
-#include <Sol2D/Utils/Math.h>
 
 using namespace Sol2D;
-using namespace Sol2D::Utils;
 
 struct GraphicsPack::Graphics
 {
@@ -29,7 +27,7 @@ public:
 public:
     std::optional<Sprite> sprite;
     bool is_visible;
-    Point position;
+    SDL_FPoint position;
 
 private:
     static std::optional<Sprite> getSprite(const GraphicsPackSpriteDefinition & _definition);
@@ -83,13 +81,12 @@ GraphicsPack::Frame::Frame(const GraphicsPackFrameDefinition & _definition) :
 }
 
 GraphicsPack::GraphicsPack(
-    SDL_Renderer & _renderer,
+    Renderer & _renderer,
     const GraphicsPackDefinition & _definition /*= GraphicsPackDefinition()*/
 ) :
     mp_renderer(&_renderer),
     m_position(_definition.position),
     m_flip_mode(SDL_FLIP_NONE),
-    m_center(_definition.center.value_or(makePoint(.0f, .0f))),
     m_max_iterations(_definition.animation_iterations),
     m_current_iteration(0),
     m_current_frame_index(0),
@@ -307,7 +304,10 @@ bool GraphicsPack::removeSprite(size_t _frame, size_t _sprite)
     return true;
 }
 
-void GraphicsPack::render(const Point & _position, const Rotation & _rotation, std::chrono::milliseconds _time_passed)
+void GraphicsPack::render(
+    const SDL_FPoint & _position,
+    const Rotation & _rotation,
+    std::chrono::milliseconds _time_passed)
 {
     if(m_max_iterations == 0 || m_total_duration == std::chrono::milliseconds::zero())
     {
@@ -398,7 +398,7 @@ bool GraphicsPack::switchToNextVisibleFrame(bool _respect_iteration)
     return m_frames[m_current_frame_index]->is_visible;
 }
 
-void GraphicsPack::performRender(const Point & _position, const Rotation & _rotation)
+void GraphicsPack::performRender(const SDL_FPoint & _position, const Rotation & _rotation)
 {
     if(m_frames.empty())
     {
@@ -409,19 +409,24 @@ void GraphicsPack::performRender(const Point & _position, const Rotation & _rota
     {
         return;
     }
-    std::optional<VectorRotator> rotator;
     for(Graphics & graphics : frame->graphics)
     {
         if(graphics.sprite.has_value() && graphics.is_visible)
         {
-            Point graphics_position = m_position + graphics.position;
-            if(_rotation.isRotated() && (graphics_position.x || graphics_position.y))
+            SDL_FPoint graphics_position
             {
-                if(!rotator.has_value())
-                    rotator.emplace(_rotation);
-                graphics_position = rotator->rotate(graphics_position);
-            }
-            graphics.sprite->render(graphics_position + _position, _rotation, m_flip_mode, m_center);
+                .x = m_position.x + graphics.position.x,
+                .y = m_position.y + graphics.position.y
+            };
+            if(!_rotation.isZero() && (graphics_position.x || graphics_position.y))
+                graphics_position = _rotation.rotateVector(graphics_position);
+            graphics.sprite->render(
+                {
+                    .x = graphics_position.x + _position.x,
+                    .y = graphics_position.y + _position.y,
+                },
+                _rotation,
+                m_flip_mode);
         }
     }
 }

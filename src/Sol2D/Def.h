@@ -17,14 +17,15 @@
 #pragma once
 
 #define S2_DISABLE_COPY(classname) \
-    classname(const classname &) = delete; \
+classname(const classname &) = delete; \
     classname & operator = (const classname &) = delete;
 
 #define S2_DISABLE_MOVE(classname) \
     classname(classname &&) = delete; \
     classname & operator = (classname &&) = delete;
 
-#define S2_DISABLE_COPY_AND_MOVE(classname) S2_DISABLE_COPY(classname) \
+#define S2_DISABLE_COPY_AND_MOVE(classname) \
+    S2_DISABLE_COPY(classname) \
     S2_DISABLE_MOVE(classname)
 
 #define S2_DEFAULT_COPY(classname) \

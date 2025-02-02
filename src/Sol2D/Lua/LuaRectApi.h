@@ -17,12 +17,12 @@
 #pragma once
 
 #include <Sol2D/Lua/Aux/LuaForward.h>
-#include <Sol2D/Rect.h>
+#include <Sol2D/MediaLayer.h>
 
 namespace Sol2D::Lua {
 
-bool tryGetRect(lua_State * _lua, int _idx, Rect & _rect);
+bool tryGetRect(lua_State * _lua, int _idx, SDL_FRect & _rect);
 
-void pushRect(lua_State * _lua, const Rect & _rect);
+void pushRect(lua_State * _lua, const SDL_FRect & _rect);
 
 } // namespace Sol2D::Lua

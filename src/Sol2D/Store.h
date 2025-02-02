@@ -19,8 +19,6 @@
 #include <Sol2D/View.h>
 #include <Sol2D/World/Scene.h>
 #include <Sol2D/Forms/Form.h>
-#include <Sol2D/SDL/TTF.h>
-#include <Sol2D/SDL/Mixer.h>
 #include <Sol2D/Utils/ObjectStore.h>
 #include <filesystem>
 
@@ -29,7 +27,7 @@ namespace Sol2D {
 template<>
 struct Utils::ObjectFactory<View>
 {
-    std::shared_ptr<View> produce(SDL_Renderer & _renderer) const
+    std::shared_ptr<View> produce(Renderer & _renderer) const
     {
         return std::make_shared<View>(_renderer);
     }
@@ -38,7 +36,7 @@ struct Utils::ObjectFactory<View>
 template<>
 struct Utils::ObjectFactory<Sprite>
 {
-    std::shared_ptr<Sprite> produce(SDL_Renderer & _renderer) const
+    std::shared_ptr<Sprite> produce(Renderer & _renderer) const
     {
         return std::make_shared<Sprite>(_renderer);
     }
@@ -47,7 +45,7 @@ struct Utils::ObjectFactory<Sprite>
 template<>
 struct Utils::ObjectFactory<SpriteSheet>
 {
-    std::shared_ptr<SpriteSheet> produce(SDL_Renderer & _renderer) const
+    std::shared_ptr<SpriteSheet> produce(Renderer & _renderer) const
     {
         return std::make_shared<SpriteSheet>(_renderer);
     }
@@ -59,7 +57,7 @@ struct Utils::ObjectFactory<World::Scene>
     std::shared_ptr<World::Scene> produce(
         const World::SceneOptions & _options,
         const Workspace & _workspace,
-        SDL_Renderer & _renderer) const
+        Renderer & _renderer) const
     {
         return std::make_shared<World::Scene>(_options, _workspace, _renderer);
     }
@@ -68,7 +66,7 @@ struct Utils::ObjectFactory<World::Scene>
 template<>
 struct Utils::ObjectFactory<Forms::Form>
 {
-    std::shared_ptr<Forms::Form> produce(SDL_Renderer & _renderer) const
+    std::shared_ptr<Forms::Form> produce(Renderer & _renderer) const
     {
         return std::make_shared<Forms::Form>(_renderer);
     }
@@ -79,7 +77,7 @@ struct Utils::ObjectFactory<TTF_Font>
 {
     std::shared_ptr<TTF_Font> produce(const std::filesystem::path & _file_path, uint16_t _size) const
     {
-        return SDL::wrapFont(TTF_OpenFont(_file_path.c_str(), _size));
+        return SDLPtr::make(TTF_OpenFont(_file_path.c_str(), _size));
     }
 };
 
@@ -88,7 +86,7 @@ struct Utils::ObjectFactory<Mix_Chunk>
 {
     std::shared_ptr<Mix_Chunk> produce(const std::filesystem::path & _file_path) const
     {
-        return SDL::wrapSoundChunk(Mix_LoadWAV(_file_path.c_str()));
+        return SDLPtr::make(Mix_LoadWAV(_file_path.c_str()));
     }
 };
 
@@ -97,7 +95,7 @@ struct Utils::ObjectFactory<Mix_Music>
 {
     std::shared_ptr<Mix_Music> produce(const std::filesystem::path & _file_path) const
     {
-        return SDL::wrapMusic(Mix_LoadMUS(_file_path.c_str()));
+        return SDLPtr::make(Mix_LoadMUS(_file_path.c_str()));
     }
 };
 

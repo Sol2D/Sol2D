@@ -27,7 +27,7 @@ class ResourceManager final
     S2_DISABLE_COPY_AND_MOVE(ResourceManager)
 
 public:
-    explicit ResourceManager(const std::filesystem::path & _root_path);
+    explicit ResourceManager();
     [[nodiscard]] std::vector<uint8_t> loadFileContent(const std::filesystem::path _resource_path) const;
 
 private:

@@ -28,17 +28,17 @@ public:
 
 } // namespace Sol2D
 
-#define DEFINE_EXCEPTION(classname) \
-    class classname : public Sol2D::Exception \
-    { \
+#define S2_DEFINE_EXCEPTION(classname) \
+class classname : public Sol2D::Exception \
+{ \
     public: \
-        explicit classname(const std::string & _message) : Sol2D::Exception(_message) { } \
-    };
+    explicit classname(const std::string & _message) : Sol2D::Exception(_message) { } \
+};
 
 namespace Sol2D {
 
-DEFINE_EXCEPTION(IOException)
+S2_DEFINE_EXCEPTION(IOException)
 
-DEFINE_EXCEPTION(NotSupportedException)
+S2_DEFINE_EXCEPTION(NotSupportedException)
 
 } // namespace Sol2D

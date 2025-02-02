@@ -16,11 +16,9 @@
 
 #pragma once
 
-#include <Sol2D/Forms/Widget.h>
 #include <Sol2D/Forms/Label.h>
 #include <Sol2D/Forms/Button.h>
 #include <Sol2D/Canvas.h>
-#include <SDL3/SDL.h>
 #include <vector>
 
 namespace Sol2D::Forms {
@@ -28,21 +26,14 @@ namespace Sol2D::Forms {
 class Form final : public Canvas
 {
 public:
-    explicit Form(SDL_Renderer & _renderer);
+    explicit Form(Renderer & _renderer);
     void step(const StepState & _state) override;
-    void setBackgroundColor(const Color & _color);
     std::shared_ptr<Label> createLabel(const std::string & _text);
     std::shared_ptr<Button> createButton(const std::string & _text);
 
 private:
-    SDL_Renderer & mr_renderer;
-    Color m_bg_color;
+    Renderer & mr_renderer;
     std::vector<std::shared_ptr<Widget>> m_widgets;
 };
-
-inline void Form::setBackgroundColor(const Color & _color)
-{
-    m_bg_color = _color;
-}
 
 } // namespace Sol2D::Forms

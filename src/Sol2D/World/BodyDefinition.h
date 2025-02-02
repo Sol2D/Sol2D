@@ -29,10 +29,10 @@ namespace Sol2D::World {
 
 struct PolygonShapeDefinition
 {
-    std::vector<Point> points;
+    std::vector<SDL_FPoint> points;
 };
 
-using RectShapeDefinition = Rect;
+using RectShapeDefinition = SDL_FRect;
 
 struct CircleShapeDefinition
 {
@@ -42,14 +42,14 @@ struct CircleShapeDefinition
     {
     }
 
-    Point center;
+    SDL_FPoint center;
     float radius;
 };
 
 struct CapsuleShapeDefinition
 {
-    Point center1;
-    Point center2;
+    SDL_FPoint center1;
+    SDL_FPoint center2;
     float radius;
 };
 

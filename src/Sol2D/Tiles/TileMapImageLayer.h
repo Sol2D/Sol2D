@@ -28,11 +28,11 @@ public:
     {
     }
 
-    void setImage(std::shared_ptr<SDL_Texture> _image) { m_image = _image; }
-    const std::shared_ptr<SDL_Texture> getImage() const { return m_image; }
+    void setImage(const Texture _image) { m_image = _image; }
+    const Texture & getImage() const { return m_image; }
 
 private:
-    std::shared_ptr<SDL_Texture> m_image;
+    Texture m_image;
 };
 
 } // namespace Tiles::Sol2D

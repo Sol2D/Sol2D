@@ -16,9 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Def.h>
-#include <Sol2D/Rect.h>
-#include <SDL3/SDL_render.h>
+#include <Sol2D/MediaLayer.h>
 #include <box2d/types.h>
 #include <functional>
 
@@ -30,9 +28,9 @@ public:
     S2_DEFAULT_COPY_AND_MOVE(Box2dDebugDraw)
 
     Box2dDebugDraw(
-        SDL_Renderer & _renderer,
+        Renderer & _renderer,
         b2WorldId _world_id,
-        std::function<Point(float, float)> _translate_point,
+        std::function<SDL_FPoint(float, float)> _translate_point,
         std::function<float(float)> _translate_length);
     void draw();
 
@@ -54,9 +52,9 @@ private:
 
 private:
     b2DebugDraw m_b2_debug_draw;
-    SDL_Renderer * mp_renderer;
+    Renderer * mp_renderer;
     b2WorldId m_world_id;
-    std::function<Point(float, float)> m_translate_point;
+    std::function<SDL_FPoint(float, float)> m_translate_point;
     std::function<float(float)> m_translate_length;
 };
 

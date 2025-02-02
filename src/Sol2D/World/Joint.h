@@ -19,8 +19,6 @@
 #include <Sol2D/World/UserData.h>
 #include <Sol2D/World/Body.h>
 #include <Sol2D/Utils/SequentialId.h>
-#include <Sol2D/Def.h>
-#include <box2d/box2d.h>
 
 namespace Sol2D::World {
 
@@ -60,14 +58,14 @@ public:
         return B2_IS_NULL(m_b2_body_id) ? 0 : getUserData(m_b2_body_id)->getGid();
     }
 
-    Point getLocalAnchorA() const
+    SDL_FPoint getLocalAnchorA() const
     {
-        return asPoint(b2Joint_GetLocalAnchorA(m_b2_joint_id));
+        return toSDL(b2Joint_GetLocalAnchorA(m_b2_joint_id));
     }
 
-    Point getLocalAnchorB() const
+    SDL_FPoint getLocalAnchorB() const
     {
-        return asPoint(b2Joint_GetLocalAnchorB(m_b2_joint_id));
+        return toSDL(b2Joint_GetLocalAnchorB(m_b2_joint_id));
     }
 
     bool isCollideConnectedEnabled() const
@@ -218,14 +216,14 @@ public:
     {
     }
 
-    Point getLinearOffset() const
+    SDL_FPoint getLinearOffset() const
     {
-        return asPoint(b2MotorJoint_GetLinearOffset(m_b2_joint_id));
+        return toSDL(b2MotorJoint_GetLinearOffset(m_b2_joint_id));
     }
 
-    void setLinearOffset(Point _offset)
+    void setLinearOffset(SDL_FPoint _offset)
     {
-        b2MotorJoint_SetLinearOffset(m_b2_joint_id, asBox2dVec2(_offset));
+        b2MotorJoint_SetLinearOffset(m_b2_joint_id, toBox2D(_offset));
     }
 
     float getAngularOffset() const
@@ -279,14 +277,14 @@ public:
     {
     }
 
-    Point getTarget() const
+    SDL_FPoint getTarget() const
     {
-        return asPoint(b2MouseJoint_GetTarget(m_b2_joint_id));
+        return toSDL(b2MouseJoint_GetTarget(m_b2_joint_id));
     }
 
-    void setTarget(Point _target)
+    void setTarget(SDL_FPoint _target)
     {
-        b2MouseJoint_SetTarget(m_b2_joint_id, asBox2dVec2(_target));
+        b2MouseJoint_SetTarget(m_b2_joint_id, toBox2D(_target));
     }
 
     float getSpringHertz() const

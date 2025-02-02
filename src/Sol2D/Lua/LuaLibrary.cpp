@@ -73,7 +73,7 @@ LuaLibrary::LuaLibrary(
     const Workspace & _workspace,
     StoreManager & _store_manager,
     Window & _window,
-    SDL_Renderer & _renderer
+    Renderer & _renderer
 ) :
     mp_lua(luaL_newstate()),
     mr_workspace(_workspace)

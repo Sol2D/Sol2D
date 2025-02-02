@@ -33,6 +33,7 @@ template<WidgetPropertyValueConcept PropertyType>
 class WidgetPropertyObserver
 {
 public:
+    virtual ~WidgetPropertyObserver() {}
     virtual void onPropertyChanged(const WidgetProperty<PropertyType> & _property, WidgetState _state) = 0;
 };
 
@@ -62,12 +63,12 @@ public:
 
     void operator = (T && _value)
     {
-        setValue(std::forward(_value));
+        setValue(std::forward<T>(_value));
     }
 
     void setValue(T && _value)
     {
-        m_values[WidgetState::Default] = std::forward(_value);
+        m_values[WidgetState::Default] = std::forward<T>(_value);
         raisePropertyChanged(WidgetState::Default);
     }
 
@@ -79,7 +80,7 @@ public:
 
     void setValue(WidgetState _state, T && _value)
     {
-        m_values[_state] = std::move(_value);
+        m_values[_state] = std::forward<T>(_value);
         raisePropertyChanged(_state);
     }
 

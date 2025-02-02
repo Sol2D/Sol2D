@@ -24,7 +24,7 @@
 
 namespace Sol2D::Tiles {
 
-DEFINE_EXCEPTION(TiledXmlException)
+S2_DEFINE_EXCEPTION(TiledXmlException)
 
 struct Tmx
 {
@@ -63,6 +63,6 @@ struct Tmx
     std::unique_ptr<TileMap> tile_map;
 };
 
-Tmx loadTmx(SDL_Renderer & _renderer, const Workspace & _workspace, const std::filesystem::path & _path);
+Tmx loadTmx(Renderer & _renderer, const Workspace & _workspace, const std::filesystem::path & _path);
 
 } // namespace Sol2D::Tiles

@@ -33,7 +33,7 @@ struct SpriteSheetOptions
     uint32_t margin_left;
     uint32_t horizontal_spacing;
     uint32_t vertical_spacing;
-    std::optional<Color> color_to_alpha;
+    std::optional<SDL_FColor> color_to_alpha;
 };
 
 class SpriteSheet final
@@ -42,23 +42,23 @@ public:
     S2_DISABLE_COPY(SpriteSheet)
     S2_DEFAULT_MOVE(SpriteSheet)
 
-    explicit SpriteSheet(SDL_Renderer & _renderer);
+    explicit SpriteSheet(Renderer & _renderer);
     bool loadFromFile(const std::filesystem::path & _path, const SpriteSheetOptions & _options);
     bool isValid() const;
     size_t getSpriteCount() const;
     Sprite toSprite(size_t _idx) const;
-    const std::vector<Rect> & getRects() const; // TODO: delete
-    std::shared_ptr<SDL_Texture> getTexture() const; // TODO: delete
+    const std::vector<SDL_FRect> & getRects() const; // TODO: delete
+    const Texture & getTexture() const; // TODO: delete
 
 private:
-    SDL_Renderer * mp_renderer;
-    std::shared_ptr<SDL_Texture> m_texture_ptr;
-    std::vector<Rect> m_rects;
+    Renderer * mp_renderer;
+    Texture m_texture;
+    std::vector<SDL_FRect> m_rects;
 };
 
 inline bool SpriteSheet::isValid() const
 {
-    return m_texture_ptr && !m_rects.empty();
+    return m_texture && !m_rects.empty();
 }
 
 inline size_t SpriteSheet::getSpriteCount() const
@@ -68,17 +68,17 @@ inline size_t SpriteSheet::getSpriteCount() const
 
 inline Sprite SpriteSheet::toSprite(size_t _idx) const
 {
-    return _idx >= m_rects.size() ? Sprite(*mp_renderer) : Sprite(*mp_renderer, m_texture_ptr, m_rects[_idx]);
+    return _idx >= m_rects.size() ? Sprite(*mp_renderer) : Sprite(*mp_renderer, m_texture, m_rects[_idx]);
 }
 
-inline const std::vector<Rect> & SpriteSheet::getRects() const
+inline const std::vector<SDL_FRect> & SpriteSheet::getRects() const
 {
     return m_rects;
 }
 
-inline std::shared_ptr<SDL_Texture> SpriteSheet::getTexture() const
+inline const Texture & SpriteSheet::getTexture() const
 {
-    return m_texture_ptr;
+    return m_texture;
 }
 
 } // namespace Sol2D

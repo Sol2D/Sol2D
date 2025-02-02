@@ -16,10 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Rect.h>
-#include <Sol2D/Def.h>
-#include <box2d/types.h>
-#include <cstdint>
+#include <Sol2D/MediaLayer.h>
 #include <string>
 #include <optional>
 

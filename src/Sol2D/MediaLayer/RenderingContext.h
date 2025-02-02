@@ -16,8 +16,20 @@
 
 #pragma once
 
-class Renderer
+#include <Sol2D/MediaLayer.h>
+#include <glm/glm.hpp>
+
+namespace Sol2D {
+
+struct RenderingContext
 {
-public:
-    Renderer();
+    SDL_Window * window;
+    SDL_GPUDevice * device;
+    SDL_GPUCommandBuffer * command_buffer;
+    SDL_GPURenderPass * render_pass;
+    SDL_GPUTexture * texture;
+    USize window_size;
+    FSize texture_size;
 };
+
+} // namespace Sol2D

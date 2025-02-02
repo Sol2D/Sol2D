@@ -17,9 +17,7 @@
 #pragma once
 
 #include <Sol2D/Tiles/TileSet.h>
-#include <Sol2D/Def.h>
-#include <SDL3/SDL.h>
-#include <memory>
+#include <Sol2D/MediaLayer.h>
 
 namespace Sol2D::Tiles {
 
@@ -30,7 +28,7 @@ public:
 
     Tile(
         const TileSet & _set,
-        std::shared_ptr<SDL_Texture> _source,
+        const Texture & _source,
         int32_t _src_x,
         int32_t _src_y,
         uint32_t _width,
@@ -51,13 +49,13 @@ public:
     int32_t getSourceY() const { return m_y; }
     uint32_t getWidth() const { return m_width; }
     uint32_t getHeight() const { return m_height; }
-    SDL_Texture & getSource() const { return *m_source_ptr; }
+    const Texture & getSource() const { return m_source_ptr; }
 
 private:
     const TileSet * mp_set;
     int32_t m_x, m_y;
     uint32_t m_width, m_height;
-    std::shared_ptr<SDL_Texture> m_source_ptr;
+    Texture m_source_ptr;
 };
 
 } // namespace Sol2D::Tiles

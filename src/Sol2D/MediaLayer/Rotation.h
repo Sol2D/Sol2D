@@ -17,6 +17,7 @@
 #pragma once
 
 #include <Sol2D/Def.h>
+#include <SDL3/SDL_rect.h>
 #include <cmath>
 #include <numbers>
 
@@ -67,6 +68,15 @@ struct Rotation
     bool isZero() const
     {
         return sine == 0.0f && cosine == 1.0f;
+    }
+
+    SDL_FPoint rotateVector(const SDL_FPoint & _vector) const
+    {
+        return
+        {
+            .x = _vector.x * cosine - _vector.y * sine,
+            .y = _vector.x * sine + _vector.y * cosine,
+        };
     }
 
     float sine;

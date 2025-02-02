@@ -124,7 +124,7 @@ int luaApi_SetLayer(lua_State * _lua)
 int luaApi_GetPosition(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    std::optional<Point> position = self->getData(_lua).body->getPosition();
+    std::optional<SDL_FPoint> position = self->getData(_lua).body->getPosition();
     ensureResult(_lua, position);
     pushPoint(_lua, position.value().x, position.value().y);
     return 1;
@@ -135,7 +135,7 @@ int luaApi_GetPosition(lua_State * _lua)
 int luaApi_SetPosition(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    Point position;
+    SDL_FPoint position;
     luaL_argexpected(_lua, tryGetPoint(_lua, 2, position), 2, LuaTypeName::point);
     self->getData(_lua).body->setPosition(position);
     return 0;
@@ -146,7 +146,7 @@ int luaApi_SetPosition(lua_State * _lua)
 int luaApi_ApplyForceToCenter(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    Point force;
+    SDL_FPoint force;
     luaL_argexpected(_lua, tryGetPoint(_lua, 2, force), 2, LuaTypeName::point);
     self->getData(_lua).body->applyForceToCenter(force);
     return 0;
@@ -157,7 +157,7 @@ int luaApi_ApplyForceToCenter(lua_State * _lua)
 int luaApi_ApplyImpulseToCenter(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    Point impulse;
+    SDL_FPoint impulse;
     luaL_argexpected(_lua, tryGetPoint(_lua, 2, impulse), 2, LuaTypeName::point);
     self->getData(_lua).body->applyImpulseToCenter(impulse);
     return 0;
@@ -167,7 +167,7 @@ int luaApi_ApplyImpulseToCenter(lua_State * _lua)
 int luaApi_GetLinearVelocity(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    std::optional<Point> velocity = self->getData(_lua).body->getLinearVelocity();
+    std::optional<SDL_FPoint> velocity = self->getData(_lua).body->getLinearVelocity();
     ensureResult(_lua, velocity);
     pushPoint(_lua, velocity.value().x, velocity.value().y);
     return 1;
@@ -178,7 +178,7 @@ int luaApi_GetLinearVelocity(lua_State * _lua)
 int luaApi_SetLinearVelocity(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    Point velocity;
+    SDL_FPoint velocity;
     luaL_argexpected(_lua, tryGetPoint(_lua, 2, velocity), 2, LuaTypeName::point);
     lua_pushboolean(_lua, self->getData(_lua).body->setLinearVelocity(velocity));
     return 1;

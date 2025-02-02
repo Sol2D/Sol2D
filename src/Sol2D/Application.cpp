@@ -15,161 +15,168 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Workspace.h>
+#include <Sol2D/StepState.h>
+#include <Sol2D/Window.h>
+#include <Sol2D/MediaLayer.h>
 #include <Sol2D/Lua/LuaLibrary.h>
-#include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
-#include <SDL3_ttf/SDL_ttf.h>
-#include <SDL3_mixer/SDL_mixer.h>
-#include <box2d/base.h>
-#include <memory>
 #include <iostream>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 
-namespace fs = std::filesystem;
-
 namespace {
+
+class SDLAssertionHandler final
+{
+    S2_DISABLE_COPY_AND_MOVE(SDLAssertionHandler)
+
+public:
+    explicit SDLAssertionHandler(const Workspace & _workspace) :
+        mr_workspace(_workspace)
+    {
+    }
+
+    void handle(const SDL_AssertData * _data) const
+    {
+        mr_workspace.getMainLogger().critical(
+            "SDL assertion failed: {} at {}:{}",
+            _data->condition,
+            _data->filename,
+            _data->linenum);
+    }
+
+private:
+    const Workspace & mr_workspace;
+};
 
 class Application final
 {
-private:
-    explicit Application(const Workspace & _workspace);
+    S2_DISABLE_COPY_AND_MOVE(Application)
 
 public:
-    ~Application();
-    static bool run(const Workspace & _workspace);
-    void step();
+    explicit Application(const Workspace & _workspace);
+    int exec();
 
 private:
-    bool initialize();
-    void initializeLibTmx();
-    void runMainLoop();
+    void runMainLoop(SDL_Window * _window, SDL_GPUDevice * _device);
     bool handleEvent(const SDL_Event & _event);
     void onWindowResized(const SDL_WindowEvent & _event);
     void onMouseButtonDown(const SDL_MouseButtonEvent & _event);
     void onMouseButtonUp(const SDL_MouseButtonEvent & _event);
+    void step();
 
 private:
-    SDL_Window * mp_sdl_window;
-    SDL_Renderer * mp_sdl_renderer;
     const Workspace & mr_workspace;
+    SDLAssertionHandler m_sdl_assertion_handler;
     StepState m_step_state;
-    Window * mp_window;
-    StoreManager * mp_store_manager;
-    LuaLibrary * mp_lua;
+    Window m_window;
 };
 
-SDL_AssertState SDLCALL sdlAssertionHandler(const SDL_AssertData * _data, void * /*_userdata*/)
+SDL_AssertState SDLCALL sdlAssertionHandler(const SDL_AssertData * _data, void * _userdata)
 {
-    std::cerr << "SDL assertion failed: \"" << _data->condition <<
-        "\" at " << _data->filename << ":" << _data->linenum << std::endl;
+    static_cast<const SDLAssertionHandler *>(_userdata)->handle(_data);
     return SDL_ASSERTION_BREAK;
-}
-
-int box2dAssertionHandler(const char * _condition, const char * _file_name, int _line_number)
-{
-    std::cerr << "Box2D assertion failed: \"" << _condition <<
-        "\" at " << _file_name << ":" << _line_number << std::endl;
-    return 1;
 }
 
 } // namespace
 
-
 Application::Application(const Workspace & _workspace) :
-    mp_sdl_window(nullptr),
-    mp_sdl_renderer(nullptr),
     mr_workspace(_workspace),
-    m_step_state{},
-    mp_window(nullptr),
-    mp_store_manager(nullptr),
-    mp_lua(nullptr)
+    m_sdl_assertion_handler(_workspace),
+    m_step_state{}
 {
 }
 
-Application::~Application()
+int Application::exec()
 {
-    if(mp_sdl_renderer)
-        SDL_DestroyRenderer(mp_sdl_renderer);
-    if(mp_sdl_window)
-        SDL_DestroyWindow(mp_sdl_window);
-    delete mp_lua;
-    delete mp_window;
-    delete mp_store_manager;
-    TTF_Quit();
-    Mix_Quit();
-    SDL_Quit();
-}
-
-bool Application::run(const Workspace & _workspace)
-{
-    std::unique_ptr<Application> app(new Application(_workspace));
-    if(!app->initialize())
-        return false;
-    app->runMainLoop();
-    return true;
-}
-
-bool Application::initialize()
-{
+    SDL_Window * sdl_window = nullptr;
+    SDL_GPUDevice * device = nullptr;
+    int result = 0;
     if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
     {
-        mr_workspace.getMainLogger().critical("SDL initialization failed. {}", SDL_GetError());
-        return false;
+        mr_workspace.getMainLogger().critical("Unable to initialize SDL: {}", SDL_GetError());
+        goto FAIL_APP;
     }
     if(!TTF_Init())
     {
         mr_workspace.getMainLogger().critical("SDL_TTF initialization failed. {}", SDL_GetError());
-        return false;
+        goto FAIL_APP;
     }
     if(!Mix_OpenAudio(0, nullptr)) // TODO: allow user to select a device
     {
         mr_workspace.getMainLogger().critical("SDL_Mixer initialization failed. {}", SDL_GetError());
-        return false;
+        goto FAIL_APP;
     }
-    SDL_SetAssertionHandler(sdlAssertionHandler, nullptr);
-    b2SetAssertFcn(box2dAssertionHandler);
-    // TODO: SDL_WINDOW_VULKAN from manifest
-    mp_sdl_window = SDL_CreateWindow(
+    SDL_SetAssertionHandler(sdlAssertionHandler, &m_sdl_assertion_handler);
+    sdl_window = SDL_CreateWindow(
         mr_workspace.getApplicationName().c_str(),
-        800,
-        600,
-        SDL_WINDOW_RESIZABLE
-        // SDL_WINDOW_FULLSCREEN
-        // | SDL_WINDOW_HIGH_PIXEL_DENSITY
-        | SDL_WINDOW_VULKAN
-        // TODO: "vulkan" renderer cannot be created with SDL_WINDOW_HIGH_PIXEL_DENSITY
-    );
-    if(!mp_sdl_window)
+        1024,
+        768,
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
+    if(sdl_window == nullptr)
     {
-        mr_workspace.getMainLogger().critical("Unable to create window. {}", SDL_GetError());
-        return false;
+        mr_workspace.getMainLogger().critical("Unable to create window: {}", SDL_GetError());
+        goto FAIL_APP;
     }
-    mp_sdl_renderer = SDL_CreateRenderer(mp_sdl_window, nullptr); // TODO: select driver
-    if(!mp_sdl_renderer)
+    device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
+    if(device == nullptr)
     {
-        mr_workspace.getMainLogger().critical("Unable to create renderer. {}", SDL_GetError());
-        return false;
+        mr_workspace.getMainLogger().critical("Unable to create GPU device: {}");
+        goto FAIL_APP;
     }
-    mp_window = new Window(*mp_sdl_renderer);
-    mp_store_manager = new StoreManager();
-    mp_lua = new LuaLibrary(mr_workspace, *mp_store_manager, *mp_window, *mp_sdl_renderer);
-    mp_lua->executeMainScript();
-    return true;
+    if(!SDL_ClaimWindowForGPUDevice(device, sdl_window))
+    {
+        mr_workspace.getMainLogger().critical("Unable to claim window for GPU device: {}", SDL_GetError());
+        goto FAIL_APP;
+    }
+    if(!SDL_ShowWindow(sdl_window))
+    {
+        mr_workspace.getMainLogger().critical("Unable to show window: {}", SDL_GetError());
+        result = 1;
+        goto FAIL_APP;
+    }
+    try
+    {
+        runMainLoop(sdl_window, device);
+    }
+    catch(const std::runtime_error & error)
+    {
+        mr_workspace.getMainLogger().critical(error.what());
+        goto FAIL_APP;
+    }
+    catch(...)
+    {
+        mr_workspace.getMainLogger().critical("An unknown error has occurred");
+        goto FAIL_APP;
+    }
+    goto EXIT_APP;
+FAIL_APP:
+    result = 1;
+EXIT_APP:
+    if(device) SDL_DestroyGPUDevice(device);
+    if(sdl_window) SDL_DestroyWindow(sdl_window);
+    TTF_Quit();
+    Mix_Quit();
+    SDL_Quit();
+    return result;
 }
 
-void Application::runMainLoop()
+void Application::runMainLoop(SDL_Window * _window, SDL_GPUDevice * _device)
 {
-    const Uint32 render_frame_delay = floor(1000 / mr_workspace.getFrameRate());
-    Uint32 last_rendering_ticks = SDL_GetTicks();
+    ResourceManager resource_manager; // TODO: create in place
+    Renderer renderer(resource_manager, _window, _device);
+    StoreManager store_manager;
+    std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(mr_workspace, store_manager, m_window, renderer);
+    lua->executeMainScript();
+    const uint32_t render_frame_delay = floor(1000 / mr_workspace.getFrameRate());
+    uint32_t last_rendering_ticks = SDL_GetTicks();
     SDL_Event event;
     for(;;)
     {
         while(SDL_PollEvent(&event))
             if(handleEvent(event)) return;
-        const Uint32 now_ticks = SDL_GetTicks();
-        const Uint32 passed_ticks = now_ticks - last_rendering_ticks;
+        const uint32_t now_ticks = SDL_GetTicks();
+        const uint32_t passed_ticks = now_ticks - last_rendering_ticks;
         if(passed_ticks >= render_frame_delay)
         {
             last_rendering_ticks = now_ticks;
@@ -177,7 +184,9 @@ void Application::runMainLoop()
             m_step_state.mouse_state.buttons = SDL_GetMouseState(
                 &m_step_state.mouse_state.position.x,
                 &m_step_state.mouse_state.position.y);
+            renderer.beginStep();
             step();
+            renderer.submitStep();
             if(m_step_state.mouse_state.lb_click.state == MouseClickState::Finished)
                 m_step_state.mouse_state.lb_click.state = MouseClickState::None;
             if(m_step_state.mouse_state.rb_click.state == MouseClickState::Finished)
@@ -185,10 +194,8 @@ void Application::runMainLoop()
             if(m_step_state.mouse_state.mb_click.state == MouseClickState::Finished)
                 m_step_state.mouse_state.mb_click.state = MouseClickState::None;
         }
-        if(render_frame_delay - passed_ticks > 5)
-        {
-            SDL_Delay(5); // Reduce CPU usage
-        }
+        int32_t delay = render_frame_delay - passed_ticks;
+        if(delay > 5) SDL_Delay(delay);
     }
 }
 
@@ -215,7 +222,7 @@ bool Application::handleEvent(const SDL_Event & _event)
 
 inline void Application::onWindowResized(const SDL_WindowEvent & /*_event*/)
 {
-    mp_window->resize();
+    m_window.resize();
 }
 
 inline void Application::onMouseButtonDown(const SDL_MouseButtonEvent & _event)
@@ -224,15 +231,18 @@ inline void Application::onMouseButtonDown(const SDL_MouseButtonEvent & _event)
     {
     case SDL_BUTTON_LEFT:
         m_step_state.mouse_state.lb_click.state = MouseClickState::Started;
-        m_step_state.mouse_state.lb_click.start = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.lb_click.start.x = _event.x;
+        m_step_state.mouse_state.lb_click.start.y = _event.y;
         break;
     case SDL_BUTTON_RIGHT:
         m_step_state.mouse_state.rb_click.state = MouseClickState::Started;
-        m_step_state.mouse_state.rb_click.start = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.rb_click.start.x = _event.x;
+        m_step_state.mouse_state.rb_click.start.y = _event.y;
         break;
     case SDL_BUTTON_MIDDLE:
         m_step_state.mouse_state.mb_click.state = MouseClickState::Started;
-        m_step_state.mouse_state.mb_click.start = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.mb_click.start.x = _event.x;
+        m_step_state.mouse_state.mb_click.start.y = _event.y;
         break;
     }
 }
@@ -243,41 +253,42 @@ inline void Application::onMouseButtonUp(const SDL_MouseButtonEvent & _event)
     {
     case SDL_BUTTON_LEFT:
         m_step_state.mouse_state.lb_click.state = MouseClickState::Finished;
-        m_step_state.mouse_state.lb_click.finish = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.lb_click.finish.x = _event.x;
+        m_step_state.mouse_state.lb_click.finish.y = _event.y;
         break;
     case SDL_BUTTON_RIGHT:
         m_step_state.mouse_state.rb_click.state = MouseClickState::Finished;
-        m_step_state.mouse_state.rb_click.finish = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.rb_click.finish.x = _event.x;
+        m_step_state.mouse_state.rb_click.finish.y = _event.y;
         break;
     case SDL_BUTTON_MIDDLE:
         m_step_state.mouse_state.mb_click.state = MouseClickState::Finished;
-        m_step_state.mouse_state.mb_click.finish = makePoint(_event.x, _event.y);
+        m_step_state.mouse_state.mb_click.finish.x = _event.x;
+        m_step_state.mouse_state.mb_click.finish.y = _event.y;
         break;
     }
 }
 
 void Application::step()
 {
-    int width, height;
-    SDL_GetCurrentRenderOutputSize(mp_sdl_renderer, &width, &height);
-    mp_window->step(m_step_state);
+    m_window.step(m_step_state);
 }
 
 int main(int _argc, const char ** _argv)
 {
-    if(_argc == 0)
+    std::unique_ptr<Workspace> workspace;
+    std::unique_ptr<Application> app;
     {
-        std::cerr << "Executable path not set" << std::endl;
-        return 1;
+        std::filesystem::path config(_argc > 1 ? _argv[1] : "game.xml");
+        if(config.is_relative())
+            config = std::filesystem::path(SDL_GetBasePath()) / config;
+        workspace = Workspace::load(config);
+        if(!workspace)
+        {
+            std::cerr << "Unable to load manifest file" << std::endl;
+            return 2;
+        }
+        app = std::make_unique<Application>(std::ref(*workspace));
     }
-    auto workspace = Workspace::load(
-        fs::absolute(fs::path(_argv[0]))
-            .parent_path()
-            .append(_argc > 1 ? _argv[1] : "game.xml"));
-    if(!workspace)
-    {
-        std::cerr << "Unable to load manifest file" << std::endl;
-        return 2;
-    }
-    return Application::run(*workspace) ? 0 : 255;
+    return app->exec();
 }

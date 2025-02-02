@@ -26,7 +26,7 @@ static constexpr char gc_key_h[] = "h";
 
 } // namespace name
 
-bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, Size & _size)
+bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, FSize & _size)
 {
     LuaTable table(_lua, _idx);
     if(!table.isValid())

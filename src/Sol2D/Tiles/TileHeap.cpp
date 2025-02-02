@@ -36,7 +36,7 @@ TileSet & TileHeap::createTileSet()
 Tile * TileHeap::createTile(
     uint32_t _gid,
     const TileSet & _set,
-    std::shared_ptr<SDL_Texture> _source,
+    const Texture & _source,
     int32_t _src_x,
     int32_t _src_y,
     uint32_t _width,

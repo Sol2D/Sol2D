@@ -63,7 +63,6 @@ bool Sol2D::Lua::tryGetGraphicsPackDefinition(
     if(!table.isValid())
         return false;
     table.tryGetPoint("position", _result.position);
-    table.tryGetPoint("center", _result.center);
     table.tryGetBoolean("isFlippedHorizontally", &_result.is_flipped_horizontally);
     table.tryGetBoolean("isFlippedVertically", &_result.is_flipped_vertically);
     table.tryGetInteger("animationIterations", &_result.animation_iterations);
@@ -104,13 +103,15 @@ bool Sol2D::Lua::tryGetGraphicsPackSpriteDefinition(lua_State * _lua, int _idx, 
     else if(lua_istable(_lua, -1))
     {
         LuaTable sprite_definition_table(_lua, -1);
-        if(sprite_definition_table.tryGetValue("spriteSheet"))
-        {
-            std::shared_ptr<SpriteSheet> sprite_sheet = tryGetSpriteSheet(_lua, -1);
+        if (sprite_definition_table.tryGetValue("spriteSheet")) {
+            std::shared_ptr<SpriteSheet> sprite_sheet =
+                tryGetSpriteSheet(_lua, -1);
             lua_pop(_lua, 1); // spriteSheet
             lua_Integer sprite_index;
-            if(sprite_sheet && sprite_definition_table.tryGetInteger("spriteIndex", &sprite_index))
-                _result.sprite = GraphicsPackSpriteSheetSpriteDefinition(sprite_sheet, static_cast<size_t>(sprite_index));
+            if (sprite_sheet && sprite_definition_table.tryGetInteger(
+                    "spriteIndex", &sprite_index))
+                _result.sprite = GraphicsPackSpriteSheetSpriteDefinition(
+                    sprite_sheet, static_cast<size_t>(sprite_index));
             else
                 is_there_sprite = false;
         }

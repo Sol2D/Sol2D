@@ -16,10 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Utils/Math.h>
-#include <Sol2D/Rect.h>
-#include <Sol2D/Color.h>
-#include <Sol2D/Def.h>
+#include <Sol2D/MediaLayer.h>
 #include <string>
 #include <cstdint>
 #include <optional>
@@ -55,8 +52,7 @@ protected:
         m_layer_id(_def.layer_id),
         m_type(_type),
         m_id(_def.id),
-        m_x(0),
-        m_y(0),
+        m_position(.0f, .0f),
         m_is_visible(true)
     {
     }
@@ -76,10 +72,10 @@ public:
     void setName(const char * _name) { setName(_name ? _name : std::string()); }
     virtual void setName(const std::string & _name) = 0;
     const std::string & getName() const { return m_name; }
-    float getX() const { return m_x; }
-    void setX(float _x) { m_x = _x; }
-    float getY() const { return m_y; }
-    void setY(float _y) { m_y = _y; }
+    const SDL_FPoint & getPosition() const { return m_position; }
+    void setPosition(const SDL_FPoint & _position) { m_position = _position; }
+    void setX(float _x) { m_position.x = _x; }
+    void setY(float _y) { m_position.y = _y; }
     void setVisibility(bool _visible) { m_is_visible = _visible; }
     bool isVisible() const { return m_is_visible; }
     bool hasTileGid() const { return m_tile_gid.has_value(); }
@@ -95,8 +91,7 @@ protected:
 private:
     TileMapObjectType m_type;
     uint32_t m_id;
-    float m_x;
-    float m_y;
+    SDL_FPoint m_position;
     bool m_is_visible;
     std::optional<uint32_t> m_tile_gid;
 };
@@ -107,8 +102,8 @@ class TileMapObjectWithWidthAndHeight : public TileMapObject
 public:
     TileMapObjectWithWidthAndHeight(TileMapObjectType _type, const TileMapObjectDef & _def):
         TileMapObject(_type, _def),
-        m_width(0),
-        m_height(0)
+        m_width(.0f),
+        m_height(.0f)
     {
     }
 
@@ -156,28 +151,38 @@ protected:
     }
 
 public:
-    const std::vector<Point> & getPoints() const
+    const std::vector<SDL_FPoint> & getPoints() const
     {
         return m_points;
     }
 
-    std::vector<Point> & getPoints()
+    std::vector<SDL_FPoint> & getPoints()
     {
         return m_points;
     }
 
-    void addPoint(const Point & _point)
+    void addPoint(const SDL_FPoint & _point)
     {
         m_points.push_back(_point);
     }
 
     void rotate(float _angle_rad)
     {
-        Utils::rotateVectors(m_points, Utils::Rotation(_angle_rad, Utils::Rotation::Radian));
+        Rotation rotation(_angle_rad, Rotation::AngleUnit::Radian);
+        for(size_t i = 0; i < m_points.size(); ++i)
+        {
+            SDL_FPoint point = rotation.rotateVector(
+            {
+                .x = m_points[i].x - getPosition().x,
+                .y = m_points[i].y - getPosition().y
+            });
+            m_points[i].x = point.x + getPosition().x;
+            m_points[i].x = point.y + getPosition().y;
+        }
     }
 
 private:
-    std::vector<Point> m_points;
+    std::vector<SDL_FPoint> m_points;
 };
 
 
@@ -190,7 +195,7 @@ public:
     }
 
 private:
-    std::vector<SDL_Point> m_points;
+    std::vector<SDL_FPoint> m_points;
 };
 
 
@@ -226,9 +231,9 @@ public:
     explicit TileMapText(const TileMapObjectDef & _def) :
         TileMapObjectWithWidthAndHeight(TileMapObjectType::Text, _def),
         m_font_family("sans-serif"),
-        m_font_size(16),
+        m_font_size(16u),
         m_is_word_wrap_enabled(false),
-        m_color({ 0, 0, 0, 0 }),
+        m_color{},
         m_is_bold(false),
         m_is_italic(false),
         m_is_underlined(false),
@@ -245,8 +250,8 @@ public:
     void setFontSize(uint16_t _size) { m_font_size = _size; }
     bool isWordWraEnabled() const { return m_is_word_wrap_enabled; }
     void ebableWordWrap(bool _enabled) { m_is_word_wrap_enabled = _enabled; }
-    const Color & getColor() const { return m_color; }
-    void setColor(const Color & _color) { m_color = _color; }
+    const SDL_FColor & getColor() const { return m_color; }
+    void setColor(const SDL_FColor  & _color) { m_color = _color; }
     bool isBold() const { return m_is_bold; }
     void setBold(bool _bold) { m_is_bold = _bold; }
     bool isItalic() const { return m_is_italic; }
@@ -266,7 +271,7 @@ private:
     std::string m_font_family;
     uint16_t m_font_size;
     bool m_is_word_wrap_enabled;
-    Color m_color;
+    SDL_FColor m_color;
     bool m_is_bold;
     bool m_is_italic;
     bool m_is_underlined;

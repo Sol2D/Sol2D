@@ -14,30 +14,32 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 #pragma once
 
-#include <Sol2D/ResourceManager.h>
-#include <Sol2D/Rendering/Impl/RectRenderingQueue.h>
-#include <Sol2D/Rect.h>
-#include <Sol2D/Def.h>
-#include <SDL3/SDL_gpu.h>
+#include <SDL3/SDL.h>
 
-namespace Sol2D::Rendering {
+namespace Sol2D {
 
-class Renderer final
+inline SDL_Color toR8G8B8A8_UINT(const SDL_FColor & _color)
 {
-    S2_DISABLE_COPY_AND_MOVE(Renderer)
+    return
+    {
+        .r = static_cast<uint8_t>(_color.r * 255.0f),
+        .g = static_cast<uint8_t>(_color.g * 255.0f),
+        .b = static_cast<uint8_t>(_color.b * 255.0f),
+        .a = static_cast<uint8_t>(_color.a * 255.0f)
+    };
+}
 
-public:
-    Renderer(const ResourceManager & _resource_manager, SDL_Window * _window, SDL_GPUDevice * _device);
-    ~Renderer();
-    void renderRect(const RectRenderingData _data);
-    void submit();
+inline SDL_FColor toR32G32B32A32_SFLOAT(const SDL_Color & _color)
+{
+    return
+    {
+        .r = _color.r / 255.0f,
+        .g = _color.g / 255.0f,
+        .b = _color.b / 255.0f,
+        .a = _color.a / 255.0f
+    };
+}
 
-private:
-    Impl::RectRenderingQueue * mp_rect_rendering_queue;
-    Impl::RenderingContext m_rendering_context;
-};
-
-} // namespace Sol2D::Rendering
+} // namespace Sol2D

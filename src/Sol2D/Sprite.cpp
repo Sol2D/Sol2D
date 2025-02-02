@@ -15,22 +15,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Sprite.h>
-#include <Sol2D/SDL/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
 using namespace Sol2D;
-using namespace Sol2D::SDL;
-using namespace Sol2D::Utils;
 
 bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options /*= SpriteOptions()*/)
 {
-    m_texture_ptr.reset();
     SDL_Surface * surface = IMG_Load(_path.c_str());
     if(!surface)
         return false;
     if(_options.color_to_alpha.has_value())
     {
-        Color color = _options.color_to_alpha.value();
+        SDL_Color color = toR8G8B8A8_UINT(_options.color_to_alpha.value());
         const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
         SDL_SetSurfaceColorKey(
             surface,
@@ -41,7 +37,7 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     if(_options.autodetect_rect)
     {
         SDL_Rect content_rect;
-        sdlDetectContentRect(*surface, content_rect);
+        detectContentRect(*surface, content_rect);
         if(content_rect.w != surface->w || content_rect.h != surface->h)
         {
             m_source_rect.x = static_cast<float>(content_rect.x);
@@ -63,12 +59,15 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     }
     m_desination_size.w = m_source_rect.w;
     m_desination_size.h = m_source_rect.h;
-    m_texture_ptr = wrapTexture(SDL_CreateTextureFromSurface(mp_renderer, surface));
+    m_texture = mp_renderer->createTexture(*surface, "Sprite");
     SDL_DestroySurface(surface);
     return true;
 }
 
-void Sprite::render(const Point & _point, const Rotation & _rotation, SDL_FlipMode _flip_mode, const Point & _center)
+void Sprite::render(
+    const SDL_FPoint & _point,
+    const Rotation & _rotation,
+    SDL_FlipMode _flip_mode)
 {
     if(!isValid())
         return;
@@ -79,13 +78,6 @@ void Sprite::render(const Point & _point, const Rotation & _rotation, SDL_FlipMo
         .w = m_desination_size.w,
         .h = m_desination_size.h
     };
-    SDL_RenderTextureRotated(
-        mp_renderer,
-        m_texture_ptr.get(),
-        m_source_rect.toSdlPtr(),
-        &dest_rect,
-        _rotation.getDegrees(),
-        _center.toSdlPtr(),
-        _flip_mode
-    );
+    mp_renderer->renderTexture(
+        TextureRenderingData(dest_rect, m_texture, m_source_rect, _rotation, _flip_mode));
 }

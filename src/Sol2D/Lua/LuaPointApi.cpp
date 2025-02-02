@@ -26,7 +26,7 @@ static constexpr char gc_key_y[] = "y";
 
 } // namespace name
 
-bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, Point & _point)
+bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point)
 {
     LuaTable table(_lua, _idx);
     if(!table.isValid())

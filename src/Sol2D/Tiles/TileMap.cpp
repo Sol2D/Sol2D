@@ -17,7 +17,7 @@ TileMap::TileMap(const TileHeap & _tile_heap, const ObjectHeap & _object_heap) :
     m_stagger_index(StaggerIndex::Odd),
     m_parallax_origin_x(0),
     m_parallax_origin_y(0),
-    m_background_color{ 0, 0, 0, 0 }
+    m_background_color{}
 {
 }
 

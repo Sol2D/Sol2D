@@ -16,11 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Def.h>
-#include <Sol2D/Color.h>
-#include <Sol2D/Rect.h>
-#include <Sol2D/Utils/Math.h>
-#include <SDL3/SDL.h>
+#include <Sol2D/MediaLayer.h>
 #include <filesystem>
 #include <optional>
 
@@ -34,8 +30,8 @@ struct SpriteOptions
     }
 
     bool autodetect_rect;
-    std::optional<Rect> rect;
-    std::optional<Color> color_to_alpha;
+    std::optional<SDL_FRect> rect;
+    std::optional<SDL_FColor> color_to_alpha;
 };
 
 class Sprite final
@@ -43,61 +39,64 @@ class Sprite final
 public:
     S2_DEFAULT_COPY_AND_MOVE(Sprite)
 
-    explicit Sprite(SDL_Renderer & _renderer);
-    Sprite(SDL_Renderer & _renderer, std::shared_ptr<SDL_Texture> _texture, const Rect & _rect);
+    explicit Sprite(Renderer & _renderer);
+    Sprite(Renderer & _renderer, const Texture & _texture, const SDL_FRect & _rect);
     bool loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options = SpriteOptions());
     bool isValid() const;
-    std::shared_ptr<SDL_Texture> getTexture() const;
-    const Rect & getSourceRect() const;
-    const Size & getDestinationSize() const;
-    void setDesinationSize(const Size & _size);
+    const Texture & getTexture() const;
+    const SDL_FRect & getSourceRect() const;
+    const FSize & getDestinationSize() const;
+    void setDesinationSize(const FSize & _size);
     void scale(float _scale_factor);
     void scale(float _scale_factor_x, float _scale_factor_y);
-    void render(const Point & _point, const Utils::Rotation & _rotation, SDL_FlipMode _flip_mode, const Point & _center);
+    void render(
+        const SDL_FPoint & _point,
+        const Rotation & _rotation,
+        SDL_FlipMode _flip_mode);
 
 private:
-    SDL_Renderer * mp_renderer;
-    std::shared_ptr<SDL_Texture> m_texture_ptr;
-    Rect m_source_rect;
-    Size m_desination_size;
+    Renderer * mp_renderer;
+    Texture m_texture;
+    SDL_FRect m_source_rect;
+    FSize m_desination_size;
 };
 
-inline Sprite::Sprite(SDL_Renderer & _renderer) :
+inline Sprite::Sprite(Renderer & _renderer) :
     mp_renderer(&_renderer),
-    m_source_rect({ .0f, .0f, .0f, .0f }),
-    m_desination_size({ .0f, .0f })
+    m_source_rect(.0f, .0f, .0f, .0f),
+    m_desination_size(.0f, .0f)
 {
 }
 
-inline Sprite::Sprite(SDL_Renderer & _renderer, std::shared_ptr<SDL_Texture> _texture, const Rect & _rect) :
+inline Sprite::Sprite(Renderer & _renderer, const Texture & _texture, const SDL_FRect & _rect) :
     mp_renderer(&_renderer),
-    m_texture_ptr(_texture),
+    m_texture(_texture),
     m_source_rect(_rect),
-    m_desination_size(_rect.getSize())
+    m_desination_size(_rect.w, _rect.h)
 {
 }
 
 inline bool Sprite::isValid() const
 {
-    return m_texture_ptr != nullptr;
+    return m_texture != nullptr;
 }
 
-inline std::shared_ptr<SDL_Texture> Sprite::getTexture() const
+inline const Texture & Sprite::getTexture() const
 {
-    return m_texture_ptr;
+    return m_texture;
 }
 
-inline const Rect & Sprite::getSourceRect() const
+inline const SDL_FRect & Sprite::getSourceRect() const
 {
     return m_source_rect;
 }
 
-inline const Size & Sprite::getDestinationSize() const
+inline const FSize & Sprite::getDestinationSize() const
 {
     return m_desination_size;
 }
 
-inline void Sprite::setDesinationSize(const Size & _size)
+inline void Sprite::setDesinationSize(const FSize & _size)
 {
     m_desination_size = _size;
 }

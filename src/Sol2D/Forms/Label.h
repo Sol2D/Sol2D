@@ -18,7 +18,6 @@
 
 #include <Sol2D/Forms/Widget.h>
 #include <Sol2D/Forms/TextAlignment.h>
-#include <Sol2D/SDL/SDL.h>
 #include <string>
 
 namespace Sol2D::Forms {
@@ -38,7 +37,7 @@ private:
         void onPropertyChanged(const WidgetProperty<PropertyType> &, WidgetState _state) override
         {
             if(mp_label->m_state == _state)
-                mp_label->resetTexture();
+                mp_label->m_texture.reset();
         }
 
     private:
@@ -46,8 +45,7 @@ private:
     };
 
 public:
-    explicit Label(const Canvas & _parent, const std::string & _text, SDL_Renderer & _renderer);
-    ~Label() override;
+    Label(const Canvas & _parent, const std::string & _text, Renderer & _renderer);
     bool setText(const std::string & _text);
     const std::string & getText() const;
     bool setState(WidgetState _state) override;
@@ -57,7 +55,7 @@ private:
     std::unique_ptr<SideEffect<HorizontalTextAlignment>> m_horizontal_text_alignment_side_effect;
     std::unique_ptr<SideEffect<VerticalTextAlignment>> m_vertical_text_alignment_side_effect;
     std::string m_text;
-    SDL_Texture * mp_texture;
+    Texture m_texture;
     float m_texture_width;
     float m_texture_height;
 
@@ -66,7 +64,6 @@ public:
     WidgetProperty<VerticalTextAlignment> vertical_text_alignment;
 
 private:
-    void resetTexture();
     void createTexture(TTF_Font * _font);
 };
 

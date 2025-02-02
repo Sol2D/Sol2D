@@ -16,9 +16,8 @@
 
 #pragma once
 
-#include <Sol2D/Rect.h>
+#include <Sol2D/MediaLayer.h>
 #include <optional>
-#include <cstdint>
 
 namespace Sol2D::World {
 
@@ -48,8 +47,8 @@ struct DistanceJointDefenition : JointDefinition
     bool is_spring_enabled;
     bool is_motor_enabled;
     bool is_limit_enabled;
-    std::optional<Point> local_anchor_a;
-    std::optional<Point> local_anchor_b;
+    std::optional<SDL_FPoint> local_anchor_a;
+    std::optional<SDL_FPoint> local_anchor_b;
     std::optional<float> min_length;
     std::optional<float> max_length;
     std::optional<float> hertz;
@@ -61,7 +60,7 @@ struct DistanceJointDefenition : JointDefinition
 
 struct MotorJointDefinition : JointDefinition
 {
-    std::optional<Point> linear_offset;
+    std::optional<SDL_FPoint> linear_offset;
     std::optional<float> angular_offset;
     std::optional<float> max_force;
     std::optional<float> max_torque;
@@ -70,7 +69,7 @@ struct MotorJointDefinition : JointDefinition
 
 struct MouseJointDefinition : JointDefinition
 {
-    std::optional<Point> target;
+    std::optional<SDL_FPoint> target;
     std::optional<float> hertz;
     std::optional<float> damping_ratio;
     std::optional<float> max_force;
@@ -88,9 +87,9 @@ struct PrismaticJointDefinition : JointDefinition
     bool is_spring_enabled;
     bool is_motor_enabled;
     bool is_limit_enabled;
-    std::optional<Point> local_anchor_a;
-    std::optional<Point> local_anchor_b;
-    std::optional<Point> local_axis_a;
+    std::optional<SDL_FPoint> local_anchor_a;
+    std::optional<SDL_FPoint> local_anchor_b;
+    std::optional<SDL_FPoint> local_axis_a;
     std::optional<float> reference_angle;
     std::optional<float> hertz;
     std::optional<float> damping_ratio;
@@ -102,8 +101,8 @@ struct PrismaticJointDefinition : JointDefinition
 
 struct WeldJointDefinition : JointDefinition
 {
-    std::optional<Point> local_anchor_a;
-    std::optional<Point> local_anchor_b;
+    std::optional<SDL_FPoint> local_anchor_a;
+    std::optional<SDL_FPoint> local_anchor_b;
     std::optional<float> reference_angle;
     std::optional<float> linear_hertz;
     std::optional<float> angular_hertz;
@@ -123,9 +122,9 @@ struct WheelJointDefinition : JointDefinition
     bool is_spring_enabled;
     bool is_motor_enabled;
     bool is_limit_enabled;
-    std::optional<Point> local_anchor_a;
-    std::optional<Point> local_anchor_b;
-    std::optional<Point> local_axis_a;
+    std::optional<SDL_FPoint> local_anchor_a;
+    std::optional<SDL_FPoint> local_anchor_b;
+    std::optional<SDL_FPoint> local_axis_a;
     std::optional<float> hertz;
     std::optional<float> damping_ratio;
     std::optional<float> lower_translation;

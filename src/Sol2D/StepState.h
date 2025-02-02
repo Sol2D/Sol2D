@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <Sol2D/Rect.h>
-#include <SDL3/SDL_events.h>
+#include <Sol2D/MediaLayer.h>
+#include <glm/glm.hpp>
 #include <chrono>
 
 namespace Sol2D {
@@ -32,14 +32,14 @@ enum class MouseClickState
 struct MouseClick
 {
     MouseClickState state;
-    Point start;
-    Point finish;
+    SDL_FPoint start;
+    SDL_FPoint finish;
 };
 
 struct MouseState
 {
-    Point position;
-    Uint32 buttons;
+    SDL_FPoint position;
+    uint32_t buttons;
     MouseClick lb_click;
     MouseClick rb_click;
     MouseClick mb_click;

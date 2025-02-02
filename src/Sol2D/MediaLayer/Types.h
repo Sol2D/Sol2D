@@ -13,3 +13,36 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+#pragma once
+
+#include <cstdint>
+
+namespace Sol2D {
+
+struct GPUBool
+{
+    GPUBool() :
+        value(0u)
+    {
+    }
+
+    GPUBool(bool _value) :
+        value(_value ? 1u : 0u)
+    {
+    }
+
+    void operator = (bool _value)
+    {
+        value = _value ? 1u : 0u;
+    }
+
+    operator bool () const
+    {
+        return value != 0u;
+    }
+
+    uint32_t value;
+};
+
+} // namespace Sol2D

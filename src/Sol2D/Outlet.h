@@ -18,7 +18,7 @@
 
 #include <Sol2D/Fragment.h>
 #include <Sol2D/Canvas.h>
-#include <SDL3/SDL.h>
+#include <Sol2D/MediaLayer.h>
 
 namespace Sol2D {
 
@@ -27,7 +27,7 @@ class Outlet final
     S2_DISABLE_COPY_AND_MOVE(Outlet)
 
 public:
-    Outlet(const Fragment & _fragmet, SDL_Renderer & _renderer);
+    Outlet(const Fragment & _fragmet, Renderer & _renderer);
     void resize();
     void bind(std::shared_ptr<Canvas> _canvas);
     void reconfigure(const Fragment & _fragment);
@@ -36,10 +36,10 @@ public:
 
 private:
     Fragment m_fragment;
-    SDL_Renderer & mr_renderer;
-    Rect m_rect;
+    Renderer & mr_renderer;
+    Texture m_texture;
+    SDL_FRect m_rect;
     std::shared_ptr<Canvas> m_canvas;
-    std::shared_ptr<SDL_Texture> m_texture;
 };
 
 inline const Fragment & Outlet::getFragment() const

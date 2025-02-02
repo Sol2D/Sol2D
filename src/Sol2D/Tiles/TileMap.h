@@ -17,8 +17,6 @@
 #pragma once
 
 #include <Sol2D/Tiles/TileMapLayerContainer.h>
-#include <Sol2D/Color.h>
-#include <Sol2D/Def.h>
 
 namespace Sol2D::Tiles {
 
@@ -84,8 +82,8 @@ public:
     int32_t getParallaxOriginX() const { return m_parallax_origin_x; }
     void setParallaxOriginY(int32_t _value) { m_parallax_origin_y = _value; }
     int32_t getParallaxOriginY() const { return m_parallax_origin_y; }
-    void setBackgroundColor(const Color & _color) { m_background_color = _color; }
-    const Color & getBackgroundColor() const { return m_background_color; }
+    void setBackgroundColor(const SDL_FColor & _color) { m_background_color = _color; }
+    const SDL_FColor & getBackgroundColor() const { return m_background_color; }
 
 private:
     std::string m_class;
@@ -102,7 +100,7 @@ private:
     StaggerIndex m_stagger_index;
     int32_t m_parallax_origin_x;
     int32_t m_parallax_origin_y;
-    Color m_background_color;
+    SDL_FColor m_background_color;
 };
 
 } // namespace Sol2D::Tiles

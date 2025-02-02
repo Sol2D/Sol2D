@@ -28,7 +28,7 @@ class View final
     S2_DISABLE_COPY_AND_MOVE(View)
 
 public:
-    explicit View(SDL_Renderer & _renderer);
+    explicit View(Renderer & _renderer);
     uint16_t createFragment(const Fragment & _fragment);
     const Fragment * getFragment(uint16_t _id) const;
     bool updateFragment(uint16_t _id, const Fragment & _fragment);
@@ -42,13 +42,13 @@ private:
     void eraseOrderedOutlet(Outlet * _outlet);
 
 private:
-    SDL_Renderer & mr_renderer;
+    Renderer & mr_renderer;
     std::unordered_map<uint16_t, std::unique_ptr<Outlet>> m_outlets;
     uint16_t m_next_fragment_id;
     std::list<Outlet *> m_ordered_outlets;
 };
 
-inline View::View(SDL_Renderer & _renderer) :
+inline View::View(Renderer & _renderer) :
     mr_renderer(_renderer),
     m_next_fragment_id(1)
 {

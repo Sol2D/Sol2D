@@ -230,7 +230,7 @@ using UserData = LuaUserData<Self, LuaTypeName::scene>;
 int luaApi_SetGravity(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    Point gravity;
+    SDL_FPoint gravity;
     luaL_argexpected(_lua, tryGetPoint(_lua, 2, gravity), 2, LuaTypeName::point);
     self->getScene(_lua)->setGravity(gravity);
     return 1;
@@ -307,7 +307,7 @@ int luaApi_CreateBody(lua_State * _lua)
     bool has_script_argument = lua_gettop(_lua) >= 5;
     const Self * self = UserData::getUserData(_lua, 1);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
-    Point position = { .0f, .0f };
+    SDL_FPoint position = { .0f, .0f };
     if(!lua_isnil(_lua, 2))
         luaL_argexpected(_lua, tryGetPoint(_lua, 2, position), 2, LuaTypeName::point);
     uint64_t body_id = 0;
@@ -749,7 +749,7 @@ int luaApi_FindPath(lua_State * _lua)
         body_id = static_cast<uint64_t>(lua_tointeger(_lua, 2));
     else if(!tryGetBodyId(_lua, 2, &body_id))
         luaL_argexpected(_lua, false, 2, LuaTypeName::joinTypes(LuaTypeName::body, LuaTypeName::integer).c_str());
-    Point destination;
+    SDL_FPoint destination;
     luaL_argexpected(_lua, tryGetPoint(_lua, 3, destination), 3, LuaTypeName::string);
     auto result = self->getScene(_lua)->findPath(body_id, destination, false, false);
     if(result.has_value())

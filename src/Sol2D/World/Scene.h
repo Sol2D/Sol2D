@@ -45,7 +45,7 @@ struct SceneOptions
     static constexpr float default_meters_per_pixel = 0.01f;
 
     float meters_per_pixel;
-    Point gravity;
+    SDL_FPoint gravity;
 };
 
 class StepObserver
@@ -71,10 +71,10 @@ public:
     using Utils::Observable<StepObserver>::removeObserver;
 
 public:
-    Scene(const SceneOptions & _options, const Workspace & _workspace, SDL_Renderer & _renderer);
+    Scene(const SceneOptions & _options, const Workspace & _workspace, Renderer & _renderer);
     ~Scene() override;
-    void setGravity(const Point & _vector);
-    uint64_t createBody(const Point & _position, const BodyDefinition & _definition);
+    void setGravity(const SDL_FPoint & _vector);
+    uint64_t createBody(const SDL_FPoint & _position, const BodyDefinition & _definition);
     void createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options);
     Body * getBody(uint64_t _body_id);
     bool destroyBody(uint64_t _body_id);
@@ -114,9 +114,9 @@ public:
     void step(const StepState & _state) override;
     bool doesBodyExist(uint64_t _body_id) const;
     bool doesBodyShapeExist(uint64_t _body_id, const Utils::PreHashedKey<std::string> & _shape_key) const;
-    std::optional<std::vector<Point> > findPath(
+    std::optional<std::vector<SDL_FPoint> > findPath(
         uint64_t _body_id,
-        const Point & _destination,
+        const SDL_FPoint & _destination,
         bool _allow_diagonal_steps,
         bool _avoid_sensors) const;
 
@@ -144,14 +144,14 @@ private:
     void drawPolyXObject(const Tiles::TileMapPolyX & _poly, bool _close);
     void drawCircle(const Tiles::TileMapCircle & _circle);
     void drawTileLayer(const Tiles::TileMapTileLayer & _layer);
-    Rect calculateViewport(const Tiles::TileMapTileLayer & _layer) const;
+    SDL_FRect calculateViewport(const Tiles::TileMapTileLayer & _layer) const;
     void drawImageLayer(const Tiles::TileMapImageLayer & _layer);
-    Point toAbsoluteCoords(float _world_x, float _world_y) const;
+    SDL_FPoint toAbsoluteCoords(float _world_x, float _world_y) const;
 
 private:
     const Workspace & mr_workspace;
-    SDL_Renderer & mr_renderer;
-    Point m_world_offset;
+    Renderer & mr_renderer;
+    SDL_FPoint m_world_offset;
     b2WorldId m_b2_world_id;
     float m_meters_per_pixel;
     std::unordered_map<uint64_t, b2BodyId> m_bodies;
@@ -174,7 +174,7 @@ inline float Scene::graphicalToPhysical(float _value)
     return _value * m_meters_per_pixel;
 }
 
-inline Point Scene::toAbsoluteCoords(float _world_x, float _world_y) const
+inline SDL_FPoint Scene::toAbsoluteCoords(float _world_x, float _world_y) const
 {
     return { .x = _world_x - m_world_offset.x, .y = _world_y - m_world_offset.y };
 }

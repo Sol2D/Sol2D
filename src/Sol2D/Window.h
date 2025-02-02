@@ -17,7 +17,6 @@
 #pragma once
 
 #include <Sol2D/View.h>
-#include <SDL3/SDL_render.h>
 #include <memory>
 #include <list>
 
@@ -28,15 +27,13 @@ class Window final
     S2_DISABLE_COPY_AND_MOVE(Window)
 
 public:
-    explicit Window(SDL_Renderer & _renderer);
+    Window();
     void step(const StepState & _state);
     void setView(std::shared_ptr<View> _view);
     std::shared_ptr<View> getView() const;
     void resize();
 
 private:
-    SDL_Renderer & mr_renderer;
-
     // The list is used to allow a new view to be set during step processing.
     // If the view is replaced during the step, the application will crash.
     // Instead, we add the new view to the list and continue using the old view until the next step.
@@ -44,8 +41,7 @@ private:
     std::list<std::shared_ptr<View>> m_view_list;
 };
 
-inline Window:: Window(SDL_Renderer & _renderer) :
-    mr_renderer(_renderer)
+inline Window:: Window()
 {
 }
 

@@ -20,8 +20,6 @@
 #include <Sol2D/World/ActionQueue.h>
 #include <Sol2D/Utils/PreHashedMap.h>
 #include <Sol2D/Utils/SequentialId.h>
-#include <Sol2D/Rect.h>
-#include <box2d/box2d.h>
 #include <optional>
 
 namespace Sol2D::World {
@@ -49,18 +47,18 @@ public:
         return m_gid;
     }
 
-    void setPosition(const Point & _position)
+    void setPosition(const SDL_FPoint & _position)
     {
         mr_action_queue.enqueueAction([this, _position]() {
             if(B2_IS_NON_NULL(m_b2_body_id))
-                b2Body_SetTransform(m_b2_body_id, _position, b2Body_GetRotation(m_b2_body_id));
+                b2Body_SetTransform(m_b2_body_id, toBox2D(_position), b2Body_GetRotation(m_b2_body_id));
         });
     }
 
-    std::optional<Point> getPosition() const
+    std::optional<SDL_FPoint> getPosition() const
     {
         if(B2_IS_NON_NULL(m_b2_body_id))
-            return asPoint(b2Body_GetPosition(m_b2_body_id));
+            return toSDL(b2Body_GetPosition(m_b2_body_id));
         return std::nullopt;
     }
 
@@ -71,32 +69,32 @@ public:
         return b2Body_GetMass(m_b2_body_id);
     }
 
-    Point getLinearVelocity() const
+    SDL_FPoint getLinearVelocity() const
     {
-        return asPoint(b2Body_GetLinearVelocity(m_b2_body_id));
+        return toSDL(b2Body_GetLinearVelocity(m_b2_body_id));
     }
 
-    bool setLinearVelocity(const Point & _velocity) const
+    bool setLinearVelocity(const SDL_FPoint & _velocity) const
     {
         if(B2_IS_NULL(m_b2_body_id))
             return false;
-        b2Body_SetLinearVelocity(m_b2_body_id, asBox2dVec2(_velocity));
+        b2Body_SetLinearVelocity(m_b2_body_id, toBox2D(_velocity));
         return true;
     }
 
-    void applyForceToCenter(const Point & _force)
+    void applyForceToCenter(const SDL_FPoint & _force)
     {
         mr_action_queue.enqueueAction([this, _force]() {
             if(B2_IS_NON_NULL(m_b2_body_id))
-                b2Body_ApplyForceToCenter(m_b2_body_id, _force, true); // TODO: what is wake?
+                b2Body_ApplyForceToCenter(m_b2_body_id, toBox2D(_force), true); // TODO: what is wake?
         });
     }
 
-    void applyImpulseToCenter(const Point & _impulse)
+    void applyImpulseToCenter(const SDL_FPoint & _impulse)
     {
         mr_action_queue.enqueueAction([this, _impulse]() {
             if(B2_IS_NON_NULL(m_b2_body_id))
-                b2Body_ApplyLinearImpulseToCenter(m_b2_body_id, _impulse, true); // TODO: what is wake?
+                b2Body_ApplyLinearImpulseToCenter(m_b2_body_id, toBox2D(_impulse), true); // TODO: what is wake?
         });
     }
 
