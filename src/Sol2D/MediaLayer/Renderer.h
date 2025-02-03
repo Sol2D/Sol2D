@@ -23,7 +23,6 @@
 #include <Sol2D/MediaLayer/Primitive.h>
 #include <Sol2D/Def.h>
 #include <Sol2D/MediaLayer.h>
-#include <glm/glm.hpp>
 #include <queue>
 
 namespace Sol2D {

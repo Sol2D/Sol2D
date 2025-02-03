@@ -17,7 +17,6 @@
 #pragma once
 
 #include <Sol2D/MediaLayer/Rotation.h>
-#include <Sol2D/MediaLayer/Rect.h>
 #include <Sol2D/MediaLayer/Texture.h>
 #include <SDL3/SDL_pixels.h>
 #include <optional>

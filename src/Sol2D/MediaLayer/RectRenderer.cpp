@@ -17,10 +17,6 @@
 #include <Sol2D/MediaLayer/RectRenderer.h>
 #include <Sol2D/MediaLayer/Shader.h>
 #include <Sol2D/MediaLayer/SDLException.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/integer.hpp>
 
 using namespace Sol2D;
 
@@ -29,10 +25,27 @@ namespace {
 constexpr int g_vertex_count = 4;
 constexpr int g_index_count = 6;
 
+struct MVP
+{
+    Bool32 use_translate_to_center;
+    Bool32 use_rotate;
+    uint32_t padding0;
+    uint32_t padding1;
+    Matrix4x4 mat_translate_to_center;
+    Matrix4x4 mat_rotate;
+    Matrix4x4 mat_translate_to_final_position;
+    Matrix4x4 mat_scale;
+    Matrix4x4 mat_projection;
+};
 struct RectVertex
 {
-    glm::vec3 position;
+    FPoint3 position;
     SDL_FPoint tex_coords;
+};
+
+struct RectVertexUniform
+{
+    MVP mvp;
 };
 
 struct RectFragmentUniform
@@ -45,43 +58,77 @@ struct RectFragmentUniform
 
 struct TextureVertexUniform
 {
-    glm::mat4x4 projection_matrix;
     SDL_FRect texture_region;
+    MVP mvp;
 };
 
 struct TextureFragmentUniform
 {
-    GPUBool flip_h;
-    GPUBool flip_v;
+    Bool32 flip_h;
+    Bool32 flip_v;
 };
 
-glm::mat4x4 calculateProjectionMatrix(const FSize & _viewport_size, const RectRenderingDataBase & _data)
+MVP getModelViewProjection(const FSize & _viewport_size, const RectRenderingDataBase & _data)
 {
-    const float ratio = static_cast<float>(_viewport_size.w) / _viewport_size.h;
     const float scale_factor = 2.0f / _viewport_size.h;
 
-    glm::mat4x4 m = glm::translate(
-        glm::mat4x4(1.0f),
-        {
-            scale_factor * (_data.rect.x - (_viewport_size.w - _data.rect.w) / 2),
-            scale_factor * ((_viewport_size.h - _data.rect.h) / 2 - _data.rect.y),
-            0.0f
-        });
-
-    if(_data.rotation.has_value() && !_data.rotation->isZero())
+    MVP mvp = {};
+    mvp.use_translate_to_center = false;
+    mvp.use_rotate = _data.rotation.has_value() && !_data.rotation->isZero();;
+    mvp.mat_translate_to_center = Matrix4x4
     {
-        glm::mat4x4 r(
-            {_data.rotation->cosine, -_data.rotation->sine, .0f, .0f},
-            {_data.rotation->sine, _data.rotation->cosine, .0f, .0f},
-            {.0f, .0f, 1.0f, .0f},
-            {.0f, .0f, .0f, 1.0f});
-        m = m * r;
+        Vector4 {1.0f,   .0f,  .0f,  .0f},
+        Vector4 { .0f,  1.0f,  .0f,  .0f},
+        Vector4 { .0f,   .0f, 1.0f,  .0f},
+        Vector4 { .0f,   .0f,  .0f, 1.0f}
+    };
+    if(mvp.use_rotate)
+    {
+        const float s = _data.rotation->sine;
+        const float c = _data.rotation->cosine;
+        mvp.mat_rotate = Matrix4x4
+        {
+            Vector4 {  c,   s,  .0f,  .0f},
+            Vector4 { -s,   c,  .0f,  .0f},
+            Vector4 {.0f, .0f, 1.0f,  .0f},
+            Vector4 {.0f, .0f,  .0f, 1.0f}
+        };
     }
-
-    glm::mat4x4 p = glm::ortho(-ratio, ratio, -1.0f, 1.0f);
-
-    return glm::scale(p * m, {scale_factor * _data.rect.w, scale_factor * _data.rect.h, 1.0f});
- }
+    {
+        const float a = scale_factor * (_data.rect.x - (_viewport_size.w - _data.rect.w) / 2);
+        const float b = scale_factor * ((_viewport_size.h - _data.rect.h) / 2 - _data.rect.y);
+        mvp.mat_translate_to_final_position = Matrix4x4
+        {
+            Vector4 {1.0f,  .0f,  .0f,  .0f},
+            Vector4 { .0f, 1.0f,  .0f,  .0f},
+            Vector4 { .0f,  .0f, 1.0f,  .0f},
+            Vector4 {   a,    b,  .0f, 1.0f}
+        };
+    }
+    {
+        const float a = scale_factor * _data.rect.w;
+        const float b = scale_factor * _data.rect.h;
+        mvp.mat_scale = Matrix4x4
+        {
+            Vector4 {   a,  .0f,  .0f,  .0f},
+            Vector4 { .0f,    b,  .0f,  .0f},
+            Vector4 { .0f,  .0f, 1.0f,  .0f},
+            Vector4 { .0f,  .0f,  .0f, 1.0f}
+        };
+    }
+    {
+        const float ratio = static_cast<float>(_viewport_size.w) / _viewport_size.h;
+        // ortho
+        mvp.mat_projection = Matrix4x4
+        {
+            Vector4 { 1.0f / ratio,   .0f, .0f,   .0f},
+            Vector4 { .0f,           1.0f,  .0f,  .0f},
+            Vector4 { .0f,            .0f, 1.0f,  .0f},
+            Vector4 { .0f,            .0f,  .0f, 1.0f}
+        };
+    }
+    return mvp;
+}
 
 SDL_FRect calculateNormalTextureFragmentRect(const FSize & _full_texture_size, const SDL_FRect & _clip_rect)
 {
@@ -360,8 +407,11 @@ void RectRenderer::renderRect(
 {
     SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_rect_pipeline);
     bindBuffers(_ctx);
-    glm::mat4x4 projection_matrix = calculateProjectionMatrix(_ctx.texture_size, _data);
-    SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, glm::value_ptr(projection_matrix), sizeof(glm::mat4x4));
+    RectVertexUniform uniform
+    {
+        .mvp = getModelViewProjection(_ctx.texture_size, _data)
+    };
+    SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &uniform, sizeof(RectVertexUniform));
     SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, _uniform, sizeof(RectFragmentUniform));
     SDL_DrawGPUIndexedPrimitives(_ctx.render_pass, g_index_count, 1, 0, 0, 0);
 }
@@ -382,10 +432,10 @@ void RectRenderer::renderTexture(const RenderingContext & _ctx, const TextureRen
     {
         TextureVertexUniform uniform
         {
-            .projection_matrix = calculateProjectionMatrix(_ctx.texture_size, _data),
             .texture_region = _data.texture_rect.has_value()
                 ? calculateNormalTextureFragmentRect(_data.texture.getSize(), _data.texture_rect.value())
-                : SDL_FRect { .x = .0f, .y = .0f, .w = 1.0f, .h = 1.0f }
+                : SDL_FRect { .x = .0f, .y = .0f, .w = 1.0f, .h = 1.0f },
+            .mvp = getModelViewProjection(_ctx.texture_size, _data)
         };
         SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &uniform, sizeof(TextureVertexUniform));
     }

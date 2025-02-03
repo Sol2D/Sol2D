@@ -21,7 +21,7 @@
 //
 
 #include <Sol2D/MediaLayer/Renderer.h>
-#include <Sol2D/MediaLayer/Rect.h>
+#include <Sol2D/MediaLayer/Size.h>
 #include <Sol2D/MediaLayer/Texture.h>
 #include <Sol2D/MediaLayer/Color.h>
 #include <Sol2D/MediaLayer/Math.h>

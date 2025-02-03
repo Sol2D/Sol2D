@@ -16,18 +16,18 @@
 
 #pragma once
 
-#include <cstdint>
+#include <array>
 
 namespace Sol2D {
 
-struct GPUBool
+struct Bool32
 {
-    GPUBool() :
+    Bool32() :
         value(0u)
     {
     }
 
-    GPUBool(bool _value) :
+    Bool32(bool _value) :
         value(_value ? 1u : 0u)
     {
     }
@@ -44,5 +44,13 @@ struct GPUBool
 
     uint32_t value;
 };
+
+struct FPoint3
+{
+    float x, y, z;
+};
+
+using Vector4 = std::array<float, 4>;
+using Matrix4x4 = std::array<Vector4, 4>;
 
 } // namespace Sol2D

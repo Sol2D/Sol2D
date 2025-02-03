@@ -17,7 +17,6 @@
 #pragma once
 
 #include <Sol2D/MediaLayer.h>
-#include <glm/glm.hpp>
 
 namespace Sol2D {
 

@@ -67,7 +67,7 @@ struct Rotation
 
     bool isZero() const
     {
-        return sine == 0.0f && cosine == 1.0f;
+        return sine == 0.0f;
     }
 
     SDL_FPoint rotateVector(const SDL_FPoint & _vector) const
