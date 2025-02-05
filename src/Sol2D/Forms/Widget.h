@@ -20,7 +20,7 @@
 #include <Sol2D/Forms/WidgetPadding.h>
 #include <Sol2D/Canvas.h>
 #include <Sol2D/Object.h>
-#include <Sol2D/MediaLayer.h>
+#include <Sol2D/MediaLayer/MediaLayer.h>
 
 namespace Sol2D::Forms {
 

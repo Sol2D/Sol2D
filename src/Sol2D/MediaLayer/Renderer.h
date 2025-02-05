@@ -44,6 +44,8 @@ public:
     void renderLine(const SDL_FPoint & _point1, const SDL_FPoint & _point2, const SDL_FColor & _color);
     void renderLines(const std::vector<SDL_FPoint> & _points, const SDL_FColor & _color);
     void renderPolyline(const std::vector<SDL_FPoint> & _points, const SDL_FColor & _color, bool _close = false);
+    void renderCircle(CircleRenderingData && _data);
+    void renderCircle(SolidCircleRenderingData && _data);
 
 private:
     const ResourceManager & mr_resource_manager;

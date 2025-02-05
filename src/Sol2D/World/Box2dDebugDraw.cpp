@@ -104,35 +104,27 @@ void Box2dDebugDraw::drawSolidPolygon(
     self->mp_renderer->renderPolyline(sdl_points, b2ColorToSDL(_color), true);
 }
 
-void Box2dDebugDraw::drawCircle(b2Vec2 /*_center*/, float /*_radius*/, b2HexColor /*_color*/, void * /*_context*/)
+void Box2dDebugDraw::drawCircle(b2Vec2 _center, float _radius, b2HexColor _color, void * _context)
 {
-    // Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    // self->setRendererDrawColor(_color);
-    // Sol2D::SDL::sdlRenderCircle(
-    //     self->mp_renderer,
-    //     self->m_translate_point(_center.x, _center.y),
-    //     self->m_translate_length(_radius));
+    Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
+    self->mp_renderer->renderCircle(CircleRenderingData(
+        self->m_translate_point(_center.x, _center.y),
+        self->m_translate_length(_radius),
+        b2ColorToSDL(_color)));
 }
 
-inline void Box2dDebugDraw::drawSolidCircle(b2Transform /*_transform*/, float /*_radius*/, b2HexColor /*_color*/, void * /*_context*/)
+inline void Box2dDebugDraw::drawSolidCircle(b2Transform _transform, float _radius, b2HexColor _color, void * _context)
 {
-    // drawCircle(_transform.p, _radius, _color, _context);
+    drawCircle(_transform.p, _radius, _color, _context);
 }
 
-void Box2dDebugDraw::drawPoint(b2Vec2 /*_point*/, float /*_size*/, b2HexColor /*_color*/, void * /*_context*/)
+void Box2dDebugDraw::drawPoint(b2Vec2 _point, float _size, b2HexColor _color, void * _context)
 {
-    // Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    // self->setRendererDrawColor(_color);
-    // const Point point = self->m_translate_point(_point.x, _point.y);
-    // const float half_size = _size / 2;
-    // const SDL_FRect rect =
-    // {
-    //     .x = point.x - half_size,
-    //     .y = point.y - half_size,
-    //     .w = _size,
-    //     .h = _size
-    // };
-    // SDL_RenderFillRect(self->mp_renderer, &rect);
+    Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
+    self->mp_renderer->renderCircle(SolidCircleRenderingData(
+        self->m_translate_point(_point.x, _point.y),
+        _size,
+        b2ColorToSDL(_color)));
 }
 
 void Box2dDebugDraw::drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void * _context)

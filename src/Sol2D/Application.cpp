@@ -17,7 +17,7 @@
 #include <Sol2D/Workspace.h>
 #include <Sol2D/StepState.h>
 #include <Sol2D/Window.h>
-#include <Sol2D/MediaLayer.h>
+#include <Sol2D/MediaLayer/MediaLayer.h>
 #include <Sol2D/Lua/LuaLibrary.h>
 #include <iostream>
 

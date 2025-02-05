@@ -1027,10 +1027,12 @@ void Scene::drawPolyXObject(const TileMapPolyX & _poly, bool _close)
     mr_renderer.renderPolyline(points, gc_object_debug_color, _close);
 }
 
-void Scene::drawCircle(const TileMapCircle & /*_circle*/)
+void Scene::drawCircle(const TileMapCircle & _circle)
 {
-    // SDL_FPoint position = toAbsoluteCoords(_circle.getX(), _circle.getY());
-    // sdlRenderCircle(&mr_renderer, position, _circle.getRadius());
+    mr_renderer.renderCircle(CircleRenderingData(
+        toAbsoluteCoords(_circle.getPosition().x, _circle.getPosition().y),
+        _circle.getRadius(),
+        gc_object_debug_color));
 }
 
 void Scene::drawTileLayer(const TileMapTileLayer & _layer)

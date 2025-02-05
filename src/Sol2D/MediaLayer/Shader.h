@@ -17,7 +17,7 @@
 #pragma once
 
 #include <Sol2D/ResourceManager.h>
-#include <Sol2D/MediaLayer.h>
+#include <Sol2D/MediaLayer/MediaLayer.h>
 #include <memory>
 #include <filesystem>
 

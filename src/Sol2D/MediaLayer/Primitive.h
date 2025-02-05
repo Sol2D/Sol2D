@@ -112,4 +112,42 @@ private:
     const LineRenderer::ChunkID m_id;
 };
 
+class CirclePrimitive : public Primitive
+{
+public:
+    CirclePrimitive(const RectRenderer & _renderer, const CircleRenderingData & data) :
+        mr_renderer(_renderer),
+        m_data(data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderCircle(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const CircleRenderingData m_data;
+};
+
+class SolidCirclePrimitive : public Primitive
+{
+public:
+    SolidCirclePrimitive(const RectRenderer & _renderer, const SolidCircleRenderingData & data) :
+        mr_renderer(_renderer),
+        m_data(data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderCircle(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const SolidCircleRenderingData m_data;
+};
+
 } // namespace Sol2D

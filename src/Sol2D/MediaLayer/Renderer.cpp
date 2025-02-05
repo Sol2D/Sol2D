@@ -268,3 +268,13 @@ void Renderer::renderPolyline(const std::vector<SDL_FPoint> & _points, const SDL
 {
     m_queue.push(new LinePrimitive(m_line_renderer, m_line_renderer.enqueuePolyline(_points, _close), _color));
 }
+
+void Renderer::renderCircle(CircleRenderingData && _data)
+{
+    m_queue.push(new CirclePrimitive(m_rect_renderer, std::forward<CircleRenderingData>(_data)));
+}
+
+void Renderer::renderCircle(SolidCircleRenderingData && _data)
+{
+    m_queue.push(new SolidCirclePrimitive(m_rect_renderer, std::forward<SolidCircleRenderingData>(_data)));
+}

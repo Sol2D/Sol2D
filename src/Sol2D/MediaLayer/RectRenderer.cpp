@@ -25,7 +25,7 @@ namespace {
 constexpr int g_vertex_count = 4;
 constexpr int g_index_count = 6;
 
-struct MVP
+struct RectMVP
 {
     Bool32 use_translate_to_center;
     Bool32 use_rotate;
@@ -37,6 +37,14 @@ struct MVP
     Matrix4x4 mat_scale;
     Matrix4x4 mat_projection;
 };
+
+struct CircleMVP
+{
+    Matrix4x4 mat_translate_to_final_position;
+    Matrix4x4 mat_scale;
+    Matrix4x4 mat_projection;
+};
+
 struct RectVertex
 {
     FPoint3 position;
@@ -45,7 +53,7 @@ struct RectVertex
 
 struct RectVertexUniform
 {
-    MVP mvp;
+    RectMVP mvp;
 };
 
 struct RectFragmentUniform
@@ -59,7 +67,7 @@ struct RectFragmentUniform
 struct TextureVertexUniform
 {
     SDL_FRect texture_region;
-    MVP mvp;
+    RectMVP mvp;
 };
 
 struct TextureFragmentUniform
@@ -68,57 +76,47 @@ struct TextureFragmentUniform
     Bool32 flip_v;
 };
 
-MVP getModelViewProjection(const FSize & _viewport_size, const RectRenderingDataBase & _data)
+struct CircleVertexUniform
+{
+    CircleMVP mvp;
+};
+
+struct CircleFragmentUniform
+{
+    SDL_FColor color;
+    SDL_FColor border_color;
+    float border_width;
+    float radius;
+};
+
+RectMVP getModelViewProjection(const FSize & _viewport_size, const RectRenderingDataBase & _data)
 {
     const float scale_factor = 2.0f / _viewport_size.h;
-
-    MVP mvp = {};
+    RectMVP mvp = {};
     if(_data.rotation.has_value() && !_data.rotation->isZero())
     {
         mvp.use_rotate = true;
-        const float s = _data.rotation->sine;
-        const float c = _data.rotation->cosine;
-        mvp.mat_rotate = Matrix4x4
-        {
-            Vector4 {  c,   s,  .0f,  .0f},
-            Vector4 { -s,   c,  .0f,  .0f},
-            Vector4 {.0f, .0f, 1.0f,  .0f},
-            Vector4 {.0f, .0f,  .0f, 1.0f}
-        };
+        mvp.mat_rotate = Transform::createRotation(_data.rotation.value());
     }
-    {
-        const float a = scale_factor * (_data.rect.x - (_viewport_size.w - _data.rect.w) / 2);
-        const float b = scale_factor * ((_viewport_size.h - _data.rect.h) / 2 - _data.rect.y);
-        mvp.mat_translate_to_final_position = Matrix4x4
-        {
-            Vector4 {1.0f,  .0f,  .0f,  .0f},
-            Vector4 { .0f, 1.0f,  .0f,  .0f},
-            Vector4 { .0f,  .0f, 1.0f,  .0f},
-            Vector4 {   a,    b,  .0f, 1.0f}
-        };
-    }
-    {
-        const float a = scale_factor * _data.rect.w;
-        const float b = scale_factor * _data.rect.h;
-        mvp.mat_scale = Matrix4x4
-        {
-            Vector4 {   a,  .0f,  .0f,  .0f},
-            Vector4 { .0f,    b,  .0f,  .0f},
-            Vector4 { .0f,  .0f, 1.0f,  .0f},
-            Vector4 { .0f,  .0f,  .0f, 1.0f}
-        };
-    }
-    {
-        const float ratio = static_cast<float>(_viewport_size.w) / _viewport_size.h;
-        // ortho
-        mvp.mat_projection = Matrix4x4
-        {
-            Vector4 { 1.0f / ratio,   .0f, .0f,   .0f},
-            Vector4 { .0f,           1.0f,  .0f,  .0f},
-            Vector4 { .0f,            .0f, 1.0f,  .0f},
-            Vector4 { .0f,            .0f,  .0f, 1.0f}
-        };
-    }
+    mvp.mat_translate_to_final_position = Transform::createTranslation(
+        scale_factor * (_data.rect.x - (_viewport_size.w - _data.rect.w) / 2),
+        scale_factor * ((_viewport_size.h - _data.rect.h) / 2 - _data.rect.y));
+    mvp.mat_scale = Transform::createScale(
+        scale_factor * _data.rect.w,
+        scale_factor * _data.rect.h);
+    mvp.mat_projection = Transform::createOrtho(static_cast<float>(_viewport_size.w) / _viewport_size.h);
+    return mvp;
+}
+
+CircleMVP getModelViewProjection(const FSize & _viewport_size, const CircleRenderingDataBase & _data)
+{
+    const float scale_factor = 2.0f / _viewport_size.h;
+    CircleMVP mvp = {};
+    mvp.mat_translate_to_final_position = Transform::createTranslation(
+        scale_factor * (_data.center.x - _viewport_size.w / 2),
+        scale_factor * (_viewport_size.h / 2 - _data.center.y));
+    mvp.mat_scale = Transform::createScale(scale_factor * _data.radius * 2);
+    mvp.mat_projection = Transform::createOrtho(static_cast<float>(_viewport_size.w) / _viewport_size.h);
     return mvp;
 }
 
@@ -144,6 +142,7 @@ RectRenderer::RectRenderer(const ResourceManager & _resource_manager, SDL_Window
     mr_resource_manager(_resource_manager),
     mp_rect_pipeline(createRectPipeline(_window)),
     mp_texture_pipeline(createTexturePipeline(_window)),
+    mp_circle_pipeline(createCirclePipeline(_window)),
     mp_vertex_buffer(nullptr),
     mp_index_buffer(nullptr),
     mp_texture_sampler(nullptr)
@@ -253,6 +252,8 @@ RectRenderer::~RectRenderer()
         SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_rect_pipeline);
     if(mp_texture_pipeline)
         SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_texture_pipeline);
+    if(mp_circle_pipeline)
+        SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_circle_pipeline);
     if(mp_index_buffer)
         SDL_ReleaseGPUBuffer(mp_device, mp_index_buffer);
     if(mp_vertex_buffer)
@@ -300,6 +301,28 @@ SDL_GPUGraphicsPipeline * RectRenderer::createTexturePipeline(SDL_Window * _wind
         "Texture.frag",
         {
             .num_samplers = 1,
+            .num_uniform_buffers = 1
+        });
+    return createPipeline(_window, vert_shader.get(), frag_shader.get());
+}
+
+SDL_GPUGraphicsPipeline * RectRenderer::createCirclePipeline(SDL_Window * _window) const
+{
+    ShaderLoader loader(mp_device, mr_resource_manager);
+    ShaderPtr vert_shader = loader.loadStandard(
+        SDL_GPU_SHADERSTAGE_VERTEX,
+        SDL_GPU_SHADERFORMAT_SPIRV,
+        "Circle.vert",
+        {
+            .num_samplers = 0,
+            .num_uniform_buffers = 1
+        });
+    ShaderPtr frag_shader = loader.loadStandard(
+        SDL_GPU_SHADERSTAGE_FRAGMENT,
+        SDL_GPU_SHADERFORMAT_SPIRV,
+        "Circle.frag",
+        {
+            .num_samplers = 0,
             .num_uniform_buffers = 1
         });
     return createPipeline(_window, vert_shader.get(), frag_shader.get());
@@ -370,41 +393,41 @@ SDL_GPUGraphicsPipeline * RectRenderer::createPipeline(
 
 void RectRenderer::renderRect(const RenderingContext & _ctx, const SolidRectRenderingData & _data) const
 {
-    RectFragmentUniform uniform
+    RectFragmentUniform frag_uniform
     {
         .color = _data.color,
         .border_color = _data.color,
         .resolution = FSize(_data.rect.w, _data.rect.h),
         .border_width = .0f
     };
-    renderRect(_ctx, _data, &uniform);
+    renderRect(_ctx, _data, &frag_uniform);
 }
 
 void RectRenderer::renderRect(const RenderingContext & _ctx, const RectRenderingData & _data) const
 {
-    RectFragmentUniform uniform
+    RectFragmentUniform frag_uniform
     {
         .color = _data.color,
         .border_color = _data.border_color,
         .resolution = FSize(_data.rect.w, _data.rect.h),
         .border_width = _data.border_width / _data.rect.w
     };
-    renderRect(_ctx, _data, &uniform);
+    renderRect(_ctx, _data, &frag_uniform);
 }
 
 void RectRenderer::renderRect(
     const RenderingContext & _ctx,
     const RectRenderingDataBase & _data,
-    const void * _uniform) const
+    const void * _frag_uniform) const
 {
     SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_rect_pipeline);
     bindBuffers(_ctx);
-    RectVertexUniform uniform
+    RectVertexUniform vert_uniform
     {
         .mvp = getModelViewProjection(_ctx.texture_size, _data)
     };
-    SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &uniform, sizeof(RectVertexUniform));
-    SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, _uniform, sizeof(RectFragmentUniform));
+    SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(RectVertexUniform));
+    SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, _frag_uniform, sizeof(RectFragmentUniform));
     SDL_DrawGPUIndexedPrimitives(_ctx.render_pass, g_index_count, 1, 0, 0, 0);
 }
 
@@ -422,14 +445,14 @@ void RectRenderer::renderTexture(const RenderingContext & _ctx, const TextureRen
     SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_texture_pipeline);
     bindBuffers(_ctx);
     {
-        TextureVertexUniform uniform
+        TextureVertexUniform vert_uniform
         {
             .texture_region = _data.texture_rect.has_value()
                 ? calculateNormalTextureFragmentRect(_data.texture.getSize(), _data.texture_rect.value())
                 : SDL_FRect { .x = .0f, .y = .0f, .w = 1.0f, .h = 1.0f },
             .mvp = getModelViewProjection(_ctx.texture_size, _data)
         };
-        SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &uniform, sizeof(TextureVertexUniform));
+        SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(TextureVertexUniform));
     }
     {
         SDL_GPUTextureSamplerBinding sampler_binding
@@ -440,10 +463,46 @@ void RectRenderer::renderTexture(const RenderingContext & _ctx, const TextureRen
         SDL_BindGPUFragmentSamplers(_ctx.render_pass, 0, &sampler_binding, 1);
     }
     {
-        TextureFragmentUniform uniform = { };
-        uniform.flip_h = (_data.flip_mode & SDL_FLIP_HORIZONTAL) == SDL_FLIP_HORIZONTAL;
-        uniform.flip_v = (_data.flip_mode & SDL_FLIP_VERTICAL) == SDL_FLIP_VERTICAL;
-        SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, &uniform, sizeof(TextureFragmentUniform));
+        TextureFragmentUniform frag_uniform = { };
+        frag_uniform.flip_h = (_data.flip_mode & SDL_FLIP_HORIZONTAL) == SDL_FLIP_HORIZONTAL;
+        frag_uniform.flip_v = (_data.flip_mode & SDL_FLIP_VERTICAL) == SDL_FLIP_VERTICAL;
+        SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, &frag_uniform, sizeof(TextureFragmentUniform));
     }
+    SDL_DrawGPUIndexedPrimitives(_ctx.render_pass, g_index_count, 1, 0, 0, 0);
+}
+
+void RectRenderer::renderCircle(const RenderingContext & _ctx, const SolidCircleRenderingData & _data) const
+{
+    CircleFragmentUniform frag_uniform = {};
+    frag_uniform.color = _data.color;
+    frag_uniform.radius = _data.radius;
+    renderCircle(_ctx, _data, &frag_uniform);
+}
+
+void RectRenderer::renderCircle(const RenderingContext & _ctx, const CircleRenderingData & _data) const
+{
+    CircleFragmentUniform frag_uniform
+    {
+        .color = _data.color,
+        .border_color = _data.border_color,
+        .border_width = _data.border_width / (_data.radius * 2),
+        .radius = _data.radius
+    };
+    renderCircle(_ctx, _data, &frag_uniform);
+}
+
+void RectRenderer::renderCircle(
+    const RenderingContext & _ctx,
+    const CircleRenderingDataBase & _data,
+    const void * _frag_uniform) const
+{
+    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_circle_pipeline);
+    bindBuffers(_ctx);
+    CircleVertexUniform vert_uniform
+    {
+        .mvp = getModelViewProjection(_ctx.texture_size, _data)
+    };
+    SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(CircleVertexUniform));
+    SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, _frag_uniform, sizeof(CircleFragmentUniform));
     SDL_DrawGPUIndexedPrimitives(_ctx.render_pass, g_index_count, 1, 0, 0, 0);
 }

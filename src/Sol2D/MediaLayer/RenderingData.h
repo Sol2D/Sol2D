@@ -94,4 +94,43 @@ struct TextureRenderingData : RectRenderingDataBase
     SDL_FlipMode flip_mode;
 };
 
+struct CircleRenderingDataBase
+{
+    CircleRenderingDataBase(
+        const SDL_FPoint & _center,
+        float _radius,
+        const SDL_FColor & _color
+    ) :
+        center(_center),
+        radius(_radius),
+        color(_color)
+    {
+    }
+
+    SDL_FPoint center;
+    float radius;
+    SDL_FColor color;
+};
+
+using SolidCircleRenderingData = CircleRenderingDataBase;
+
+struct CircleRenderingData : CircleRenderingDataBase
+{
+    CircleRenderingData(
+        const SDL_FPoint & _center,
+        float _radius,
+        const SDL_FColor & _border_color,
+        float _border_width = 1.0f,
+        const SDL_FColor & _color = { .0f, .0f, .0f, .0f }
+    ) :
+        CircleRenderingDataBase(_center, _radius, _color),
+        border_width(_border_width),
+        border_color(_border_color)
+    {
+    }
+
+    float border_width;
+    SDL_FColor border_color;
+};
+
 } // namespace Sol2D

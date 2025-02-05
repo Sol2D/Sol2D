@@ -32,15 +32,25 @@ public:
     void renderRect(const RenderingContext & _ctx, const SolidRectRenderingData & _data) const;
     void renderRect(const RenderingContext & _ctx, const RectRenderingData & _data) const;
     void renderTexture(const RenderingContext & _ctx, const TextureRenderingData & _data) const;
+    void renderCircle(const RenderingContext & _ctx, const SolidCircleRenderingData & _data) const;
+    void renderCircle(const RenderingContext & _ctx, const CircleRenderingData & _data) const;
 
 private:
     SDL_GPUGraphicsPipeline * createRectPipeline(SDL_Window * _window) const;
+    SDL_GPUGraphicsPipeline * createCirclePipeline(SDL_Window * _window) const;
     SDL_GPUGraphicsPipeline * createTexturePipeline(SDL_Window * _window) const;
     SDL_GPUGraphicsPipeline * createPipeline(
         SDL_Window * _window,
         SDL_GPUShader * _vert_shader,
         SDL_GPUShader * _frag_shader) const;
-    void renderRect(const RenderingContext & _ctx, const RectRenderingDataBase & _data, const void * _uniform) const;
+    void renderRect(
+        const RenderingContext & _ctx,
+        const RectRenderingDataBase & _data,
+        const void * _frag_uniform) const;
+    void renderCircle(
+        const RenderingContext & _ctx,
+        const CircleRenderingDataBase & _data,
+        const void * _frag_uniform) const;
     void bindBuffers(const RenderingContext & _ctx) const;
 
 private:
@@ -48,6 +58,7 @@ private:
     const ResourceManager & mr_resource_manager;
     SDL_GPUGraphicsPipeline * mp_rect_pipeline;
     SDL_GPUGraphicsPipeline * mp_texture_pipeline;
+    SDL_GPUGraphicsPipeline * mp_circle_pipeline;
     SDL_GPUBuffer * mp_vertex_buffer;
     SDL_GPUBuffer * mp_index_buffer;
     SDL_GPUSampler * mp_texture_sampler;

@@ -17,7 +17,7 @@
 #pragma once
 
 #include <Sol2D/Exception.h>
-#include <Sol2D/MediaLayer.h>
+#include <Sol2D/MediaLayer/MediaLayer.h>
 #include <sstream>
 #include <cstring>
 

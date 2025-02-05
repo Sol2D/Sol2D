@@ -17,7 +17,7 @@
 #pragma once
 
 #include <Sol2D/Lua/LuaDimensionApi.h>
-#include <Sol2D/MediaLayer.h>
+#include <Sol2D/MediaLayer/MediaLayer.h>
 #include <lua.hpp>
 #include <string>
 #include <optional>

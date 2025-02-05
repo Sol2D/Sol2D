@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/MediaLayer.h>
+#include <Sol2D/MediaLayer/MediaLayer.h>
 #include <string>
 #include <cstdint>
 #include <optional>

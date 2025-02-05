@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <array>
-
 namespace Sol2D {
 
 struct Bool32
@@ -49,8 +47,5 @@ struct FPoint3
 {
     float x, y, z;
 };
-
-using Vector4 = std::array<float, 4>;
-using Matrix4x4 = std::array<Vector4, 4>;
 
 } // namespace Sol2D

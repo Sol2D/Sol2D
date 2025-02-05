@@ -16,7 +16,7 @@
 
 #include <Sol2D/ResourceManager.h>
 #include <Sol2D/Exception.h>
-#include <Sol2D/MediaLayer.h>
+#include <Sol2D/MediaLayer/MediaLayer.h>
 #include <fstream>
 
 using namespace Sol2D;

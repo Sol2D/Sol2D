@@ -122,7 +122,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_precompile_headers(${PROJECT_NAME}
-    PRIVATE ${SOL2D_SRC_DIR}/MediaLayer.h
+    PRIVATE ${SOL2D_SRC_DIR}/MediaLayer/MediaLayer.h
 )
 
 target_link_libraries(${PROJECT_NAME}
