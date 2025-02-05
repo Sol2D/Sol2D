@@ -35,7 +35,6 @@ public:
     void draw();
 
 private:
-    void setRendererDrawColor(b2HexColor _color);
     static void drawPolygon(const b2Vec2 * _vertices, int _vertex_count, b2HexColor _color, void * _context);
     static void drawSolidPolygon(
         b2Transform _transform,

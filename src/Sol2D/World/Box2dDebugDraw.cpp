@@ -19,89 +19,89 @@
 
 using namespace Sol2D::World;
 
-Box2dDebugDraw::Box2dDebugDraw(
-    Renderer & /*_renderer*/,
-    b2WorldId /*_world_id*/,
-    std::function<SDL_FPoint (float, float)> /*_translate_point*/,
-    std::function<float(float)> /*_translate_length*/
-    ) //:
-    // m_b2_debug_draw(b2DefaultDebugDraw()),
-    // mp_renderer(&_renderer),
-    // m_world_id(_world_id),
-    // m_translate_point(_translate_point),
-    // m_translate_length(_translate_length)
+namespace {
+
+inline SDL_FColor b2ColorToSDL(const b2HexColor & _color)
 {
-    // m_b2_debug_draw.context = this;
-    // m_b2_debug_draw.drawShapes = true; // TODO: from user config
-    // m_b2_debug_draw.drawAABBs = false; // TODO: from user config
-    // m_b2_debug_draw.drawJoints = true; // TODO: from user config
-    // m_b2_debug_draw.drawContacts = true; // TODO: from user config
-    // m_b2_debug_draw.DrawPolygon = &Box2dDebugDraw::drawPolygon;
-    // m_b2_debug_draw.DrawSolidPolygon = &Box2dDebugDraw::drawSolidPolygon;
-    // m_b2_debug_draw.DrawCircle = &Box2dDebugDraw::drawCircle;
-    // m_b2_debug_draw.DrawSolidCircle = &Box2dDebugDraw::drawSolidCircle;
-    // m_b2_debug_draw.DrawPoint = &Box2dDebugDraw::drawPoint;
-    // m_b2_debug_draw.DrawSegment = &Box2dDebugDraw::drawSegment;
-    // m_b2_debug_draw.DrawSolidCapsule = &Box2dDebugDraw::drawSolidCapsule;
+    return Sol2D::toR32G32B32A32_SFLOAT({
+        .r = static_cast<uint8_t>((_color & 0xff0000) >> 16),
+        .g = static_cast<uint8_t>((_color & 0x00ff00) >> 8),
+        .b = static_cast<uint8_t>((_color & 0x0000ff)),
+        .a = 255
+    });
+}
+
+} // namespace
+
+Box2dDebugDraw::Box2dDebugDraw(
+    Renderer & _renderer,
+    b2WorldId _world_id,
+    std::function<SDL_FPoint (float, float)> _translate_point,
+    std::function<float(float)> _translate_length
+) :
+    m_b2_debug_draw(b2DefaultDebugDraw()),
+    mp_renderer(&_renderer),
+    m_world_id(_world_id),
+    m_translate_point(_translate_point),
+    m_translate_length(_translate_length)
+{
+    m_b2_debug_draw.context = this;
+    m_b2_debug_draw.drawShapes = true; // TODO: from user config
+    m_b2_debug_draw.drawAABBs = false; // TODO: from user config
+    m_b2_debug_draw.drawJoints = true; // TODO: from user config
+    m_b2_debug_draw.drawContacts = true; // TODO: from user config
+    m_b2_debug_draw.DrawPolygon = &Box2dDebugDraw::drawPolygon;
+    m_b2_debug_draw.DrawSolidPolygon = &Box2dDebugDraw::drawSolidPolygon;
+    m_b2_debug_draw.DrawCircle = &Box2dDebugDraw::drawCircle;
+    m_b2_debug_draw.DrawSolidCircle = &Box2dDebugDraw::drawSolidCircle;
+    m_b2_debug_draw.DrawPoint = &Box2dDebugDraw::drawPoint;
+    m_b2_debug_draw.DrawSegment = &Box2dDebugDraw::drawSegment;
+    m_b2_debug_draw.DrawSolidCapsule = &Box2dDebugDraw::drawSolidCapsule;
 }
 
 void Box2dDebugDraw::draw()
 {
-    // b2World_Draw(m_world_id, &m_b2_debug_draw);
+    b2World_Draw(m_world_id, &m_b2_debug_draw);
 }
 
-void Box2dDebugDraw::drawPolygon(const b2Vec2 * /*_vertices*/, int /*_vertex_count*/, b2HexColor /*_color*/, void * /*_context*/)
+void Box2dDebugDraw::drawPolygon(const b2Vec2 * _vertices, int _vertex_count, b2HexColor _color, void * _context)
 {
-    // Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    // std::vector<SDL_FPoint> sdl_points;
-    // sdl_points.reserve(_vertex_count + 1);
-    // for(int i = 0; i < _vertex_count; ++i)
-    //     sdl_points.push_back(self->m_translate_point(_vertices[i].x, _vertices[i].y));
-    // sdl_points.push_back(sdl_points[0]);
-    // self->setRendererDrawColor(_color);
-    // SDL_RenderLines(self->mp_renderer, sdl_points.data(), sdl_points.size());
-}
-
-void Box2dDebugDraw::setRendererDrawColor(b2HexColor /*_color*/)
-{
-    // SDL_SetRenderDrawColor(
-    //     mp_renderer,
-    //     (_color & 0xff0000) >> 16,
-    //     (_color & 0x00ff00) >> 8,
-    //     (_color & 0x0000ff),
-    //     255);
+    Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
+    std::vector<SDL_FPoint> sdl_points;
+    sdl_points.reserve(_vertex_count + 1);
+    for(int i = 0; i < _vertex_count; ++i)
+        sdl_points.push_back(self->m_translate_point(_vertices[i].x, _vertices[i].y));
+    self->mp_renderer->renderPolyline(sdl_points, b2ColorToSDL(_color), true);
 }
 
 void Box2dDebugDraw::drawSolidPolygon(
-    b2Transform /*_transform*/,
-    const b2Vec2 * /*_vertices*/,
-    int /*_vertex_count*/,
-    float /*_radius*/,
-    b2HexColor /*_color*/,
-    void * /*_context */)
+    b2Transform _transform,
+    const b2Vec2 * _vertices,
+    int _vertex_count,
+    float _radius,
+    b2HexColor _color,
+    void * _context)
 {
-    // S2_UNUSED(_radius)
-    // Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    // std::vector<SDL_FPoint> sdl_points;
-    // sdl_points.reserve(_vertex_count + 1);
-    // float x, y;
-    // for(int i = 0; i < _vertex_count; ++i)
-    // {
-    //     if(_transform.q.s)
-    //     {
-    //         x = static_cast<float>(_transform.q.c * _vertices[i].x - _transform.q.s * _vertices[i].y) + _transform.p.x;
-    //         y = static_cast<float>(_transform.q.s * _vertices[i].x + _transform.q.c  * _vertices[i].y) + _transform.p.y;
-    //     }
-    //     else
-    //     {
-    //         x = _vertices[i].x + _transform.p.x;
-    //         y = _vertices[i].y + _transform.p.y;
-    //     }
-    //     sdl_points.push_back(self->m_translate_point(x, y));
-    // }
-    // sdl_points.push_back(sdl_points[0]);
-    // self->setRendererDrawColor(_color);
-    // SDL_RenderLines(self->mp_renderer, sdl_points.data(), sdl_points.size());
+    S2_UNUSED(_radius)
+    Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
+    std::vector<SDL_FPoint> sdl_points;
+    sdl_points.reserve(_vertex_count + 1);
+    float x, y;
+    for(int i = 0; i < _vertex_count; ++i)
+    {
+        if(_transform.q.s)
+        {
+            x = static_cast<float>(_transform.q.c * _vertices[i].x - _transform.q.s * _vertices[i].y) + _transform.p.x;
+            y = static_cast<float>(_transform.q.s * _vertices[i].x + _transform.q.c  * _vertices[i].y) + _transform.p.y;
+        }
+        else
+        {
+            x = _vertices[i].x + _transform.p.x;
+            y = _vertices[i].y + _transform.p.y;
+        }
+        sdl_points.push_back(self->m_translate_point(x, y));
+    }
+    self->mp_renderer->renderPolyline(sdl_points, b2ColorToSDL(_color), true);
 }
 
 void Box2dDebugDraw::drawCircle(b2Vec2 /*_center*/, float /*_radius*/, b2HexColor /*_color*/, void * /*_context*/)
@@ -135,16 +135,13 @@ void Box2dDebugDraw::drawPoint(b2Vec2 /*_point*/, float /*_size*/, b2HexColor /*
     // SDL_RenderFillRect(self->mp_renderer, &rect);
 }
 
-void Box2dDebugDraw::drawSegment(b2Vec2 /*_p1*/, b2Vec2 /*_p2*/, b2HexColor /*_color*/, void * /*_context*/)
+void Box2dDebugDraw::drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void * _context)
 {
-    // Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    // self->setRendererDrawColor(_color);
-    // const Point points[] =
-    // {
-    //     self->m_translate_point(_p1.x, _p1.y),
-    //     self->m_translate_point(_p2.x, _p2.y),
-    // };
-    // SDL_RenderLine(self->mp_renderer, points[0].x, points[0].y, points[1].x, points[1].y);
+    Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
+    self->mp_renderer->renderLine(
+        self->m_translate_point(_p1.x, _p1.y),
+        self->m_translate_point(_p2.x, _p2.y),
+        b2ColorToSDL(_color));
 }
 
 void Box2dDebugDraw:: drawSolidCapsule(b2Vec2 /*_p1*/, b2Vec2 /*_p2*/, float /*_radius*/, b2HexColor /*_color*/, void * /*_context*/)
