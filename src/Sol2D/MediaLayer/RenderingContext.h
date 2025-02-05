@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include <Sol2D/MediaLayer.h>
+#include <Sol2D/MediaLayer/Size.h>
+#include <SDL3/SDL_gpu.h>
 
 namespace Sol2D {
 

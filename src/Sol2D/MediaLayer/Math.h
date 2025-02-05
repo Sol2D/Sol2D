@@ -22,7 +22,7 @@ namespace Sol2D {
 
 inline float degreesToRadians(float _degrees)
 {
-    return _degrees * (std::numbers::pi_v<float> / 180.0f);
+    return _degrees / 180.0f * std::numbers::pi_v<float>;
 }
 
 } // namespace Sol2D

@@ -41,4 +41,6 @@ S2_DEFINE_EXCEPTION(IOException)
 
 S2_DEFINE_EXCEPTION(NotSupportedException)
 
+S2_DEFINE_EXCEPTION(InvalidOperationException)
+
 } // namespace Sol2D

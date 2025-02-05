@@ -18,6 +18,7 @@
 
 #include <Sol2D/MediaLayer/RenderingContext.h>
 #include <Sol2D/MediaLayer/RectRenderer.h>
+#include <Sol2D/MediaLayer/LineRenderer.h>
 #include <Sol2D/MediaLayer/RenderingData.h>
 #include <Sol2D/Def.h>
 
@@ -36,8 +37,8 @@ public:
 class RectPrimitive : public Primitive
 {
 public:
-    RectPrimitive(const RectRenderer & mr_renderer, const RectRenderingData & data) :
-        mr_renderer(mr_renderer),
+    RectPrimitive(const RectRenderer & _renderer, const RectRenderingData & data) :
+        mr_renderer(_renderer),
         m_data(data)
     {
     }
@@ -49,14 +50,14 @@ public:
 
 private:
     const RectRenderer & mr_renderer;
-    RectRenderingData m_data;
+    const RectRenderingData m_data;
 };
 
 class SolidRectPrimitive : public Primitive
 {
 public:
-    SolidRectPrimitive(const RectRenderer & mr_renderer, const SolidRectRenderingData & data) :
-        mr_renderer(mr_renderer),
+    SolidRectPrimitive(const RectRenderer & _renderer, const SolidRectRenderingData & data) :
+        mr_renderer(_renderer),
         m_data(data)
     {
     }
@@ -68,14 +69,14 @@ public:
 
 private:
     const RectRenderer & mr_renderer;
-    SolidRectRenderingData m_data;
+    const SolidRectRenderingData m_data;
 };
 
 class TexturePrimitive : public Primitive
 {
 public:
-    TexturePrimitive(const RectRenderer & mr_renderer, const TextureRenderingData & data) :
-        mr_renderer(mr_renderer),
+    TexturePrimitive(const RectRenderer & _renderer, const TextureRenderingData & data) :
+        mr_renderer(_renderer),
         m_data(data)
     {
     }
@@ -87,8 +88,28 @@ public:
 
 private:
     const RectRenderer & mr_renderer;
-    TextureRenderingData m_data;
+    const TextureRenderingData m_data;
 };
 
+class LinePrimitive : public Primitive
+{
+public:
+    LinePrimitive(const LineRenderer & _renderer, const LineRenderer::ChunkID & _id, const SDL_FColor & _color) :
+        mr_renderer(_renderer),
+        m_color(_color),
+        m_id(_id)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.render(_context, m_id, m_color);
+    }
+
+private:
+    const LineRenderer & mr_renderer;
+    const SDL_FColor m_color;
+    const LineRenderer::ChunkID m_id;
+};
 
 } // namespace Sol2D

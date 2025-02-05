@@ -17,12 +17,7 @@
 #pragma once
 
 #include <Sol2D/ResourceManager.h>
-#include <Sol2D/MediaLayer/RenderingData.h>
-#include <Sol2D/MediaLayer/RectRenderer.h>
-#include <Sol2D/MediaLayer/RenderingContext.h>
 #include <Sol2D/MediaLayer/Primitive.h>
-#include <Sol2D/Def.h>
-#include <Sol2D/MediaLayer.h>
 #include <queue>
 
 namespace Sol2D {
@@ -46,12 +41,16 @@ public:
     void renderRect(RectRenderingData && _data);
     void renderRect(SolidRectRenderingData && _data);
     void renderTexture(TextureRenderingData && _data);
+    void renderLine(const SDL_FPoint & _point1, const SDL_FPoint & _point2, const SDL_FColor & _color);
+    void renderLines(const std::vector<SDL_FPoint> & _points, const SDL_FColor & _color);
+    void renderPolyline(const std::vector<SDL_FPoint> & _points, const SDL_FColor & _color, bool _close = false);
 
 private:
     const ResourceManager & mr_resource_manager;
     RenderingContext m_rendering_context;
     SDL_GPUTexture * mp_swapchain_texture;
     RectRenderer m_rect_renderer;
+    LineRenderer m_line_renderer;
     std::queue<Primitive *> m_queue;
 };
 

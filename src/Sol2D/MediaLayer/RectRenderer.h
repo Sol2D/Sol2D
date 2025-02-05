@@ -19,7 +19,6 @@
 #include <Sol2D/MediaLayer/RenderingData.h>
 #include <Sol2D/MediaLayer/RenderingContext.h>
 #include <Sol2D/ResourceManager.h>
-#include <Sol2D/MediaLayer.h>
 
 namespace Sol2D {
 

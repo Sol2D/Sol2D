@@ -73,17 +73,9 @@ MVP getModelViewProjection(const FSize & _viewport_size, const RectRenderingData
     const float scale_factor = 2.0f / _viewport_size.h;
 
     MVP mvp = {};
-    mvp.use_translate_to_center = false;
-    mvp.use_rotate = _data.rotation.has_value() && !_data.rotation->isZero();;
-    mvp.mat_translate_to_center = Matrix4x4
+    if(_data.rotation.has_value() && !_data.rotation->isZero())
     {
-        Vector4 {1.0f,   .0f,  .0f,  .0f},
-        Vector4 { .0f,  1.0f,  .0f,  .0f},
-        Vector4 { .0f,   .0f, 1.0f,  .0f},
-        Vector4 { .0f,   .0f,  .0f, 1.0f}
-    };
-    if(mvp.use_rotate)
-    {
+        mvp.use_rotate = true;
         const float s = _data.rotation->sine;
         const float c = _data.rotation->cosine;
         mvp.mat_rotate = Matrix4x4
@@ -350,7 +342,7 @@ SDL_GPUGraphicsPipeline * RectRenderer::createPipeline(
 
     SDL_GPUColorTargetDescription color_target_description = {};
     color_target_description.format = SDL_GetGPUSwapchainTextureFormat(mp_device, _window);
-    color_target_description.blend_state = {};
+    color_target_description.blend_state = {}; // TODO: use common blending in all renderings
     color_target_description.blend_state.src_color_blendfactor = SDL_GPU_BLENDFACTOR_SRC_ALPHA;
     color_target_description.blend_state.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
     color_target_description.blend_state.color_blend_op = SDL_GPU_BLENDOP_ADD;

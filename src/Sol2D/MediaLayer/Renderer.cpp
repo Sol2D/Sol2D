@@ -33,7 +33,8 @@ Renderer::Renderer(const ResourceManager & _resource_manager, SDL_Window * _wind
         .texture_size = FSize()
     },
     mp_swapchain_texture(nullptr),
-    m_rect_renderer(_resource_manager, _window, _device)
+    m_rect_renderer(_resource_manager, _window, _device),
+    m_line_renderer(_resource_manager, _window, _device)
 {
 }
 
@@ -144,7 +145,10 @@ Texture Renderer::createTexture(float _width, float _height, const char * _name)
 void Renderer::beginStep()
 {
     if(m_rendering_context.command_buffer)
-        throw Exception("It is not possible to start a new rendering step until the previous one has completed");
+    {
+        throw InvalidOperationException(
+            "It is not possible to start a new rendering step until the previous one has completed");
+    }
 
     m_rendering_context.command_buffer = SDL_AcquireGPUCommandBuffer(m_rendering_context.device);
     if(!m_rendering_context.command_buffer)
@@ -165,9 +169,15 @@ void Renderer::beginStep()
 void Renderer::beginRenderPass(Texture & _texture, const SDL_FColor & _clear_color)
 {
     if(!m_rendering_context.command_buffer)
-        throw Exception("A new rendering step cannot be started because the rendering step has not started");
+    {
+        throw InvalidOperationException(
+            "A new rendering step cannot be started because the rendering step has not started");
+    }
     if(m_rendering_context.render_pass)
-        throw Exception("It is not possible to start a new rendering pass until the previous one has completed");
+    {
+        throw InvalidOperationException(
+            "It is not possible to start a new rendering pass until the previous one has completed");
+    }
 
     // FIXME: sometimes a generic render pass cannot be used (MSAA, Stencil test)
     SDL_GPUColorTargetInfo color_target_info = {};
@@ -186,8 +196,9 @@ void Renderer::beginRenderPass(Texture & _texture, const SDL_FColor & _clear_col
 void Renderer::endRenderPass(const Texture & _texture, const SDL_FRect & _output_rect)
 {
     if(!m_rendering_context.render_pass)
-        throw Exception("Render pass not running");
+        throw InvalidOperationException("Render pass not running");
 
+    m_line_renderer.beginRendering();
     while(!m_queue.empty())
     {
         Primitive * primitive = m_queue.front();
@@ -195,6 +206,7 @@ void Renderer::endRenderPass(const Texture & _texture, const SDL_FRect & _output
         delete primitive;
         m_queue.pop();
     }
+    m_line_renderer.endRendering();
     SDL_EndGPURenderPass(m_rendering_context.render_pass);
     m_rendering_context.render_pass = nullptr;
 
@@ -219,7 +231,7 @@ void Renderer::endRenderPass(const Texture & _texture, const SDL_FRect & _output
 void Renderer::submitStep()
 {
     if(!m_rendering_context.command_buffer)
-        throw Exception("Rendering step not running");
+        throw InvalidOperationException("Rendering step not running");
 
     SDL_SubmitGPUCommandBuffer(m_rendering_context.command_buffer);
     m_rendering_context.command_buffer = nullptr;
@@ -240,4 +252,19 @@ void Renderer::renderRect(SolidRectRenderingData && _data)
 void Renderer::renderTexture(TextureRenderingData && _data)
 {
     m_queue.push(new TexturePrimitive(m_rect_renderer, std::forward<TextureRenderingData>(_data)));
+}
+
+void Renderer::renderLine(const SDL_FPoint & _point1, const SDL_FPoint & _point2, const SDL_FColor & _color)
+{
+    m_queue.push(new LinePrimitive(m_line_renderer, m_line_renderer.enqueueLine(_point1, _point2), _color));
+}
+
+void Renderer::renderLines(const std::vector<SDL_FPoint> & _points, const SDL_FColor & _color)
+{
+    m_queue.push(new LinePrimitive(m_line_renderer, m_line_renderer.enqueueLines(_points), _color));
+}
+
+void Renderer::renderPolyline(const std::vector<SDL_FPoint> & _points, const SDL_FColor & _color, bool _close)
+{
+    m_queue.push(new LinePrimitive(m_line_renderer, m_line_renderer.enqueuePolyline(_points, _close), _color));
 }

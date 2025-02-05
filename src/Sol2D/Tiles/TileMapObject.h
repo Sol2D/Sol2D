@@ -170,15 +170,7 @@ public:
     {
         Rotation rotation(_angle_rad, Rotation::AngleUnit::Radian);
         for(size_t i = 0; i < m_points.size(); ++i)
-        {
-            SDL_FPoint point = rotation.rotateVector(
-            {
-                .x = m_points[i].x - getPosition().x,
-                .y = m_points[i].y - getPosition().y
-            });
-            m_points[i].x = point.x + getPosition().x;
-            m_points[i].x = point.y + getPosition().y;
-        }
+            m_points[i] = rotation.rotateVector(m_points[i]);
     }
 
 private:
@@ -193,9 +185,6 @@ public:
         TileMapPolyX(TileMapObjectType::Polygon, _def)
     {
     }
-
-private:
-    std::vector<SDL_FPoint> m_points;
 };
 
 

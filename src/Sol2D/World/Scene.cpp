@@ -49,6 +49,8 @@ void initShapePhysics(b2ShapeDef & _b2_shape_def, const BodyShapePhysicsDefiniti
         _b2_shape_def.friction = _physics.friction.value();
 }
 
+constexpr SDL_FColor gc_object_debug_color = { .r = 1.0f, .g = .08f, .b = .0f, .a = 1.0f }; // TODO: from config
+
 } // namespace
 
 class Scene::BodyShapeCreator
@@ -984,51 +986,45 @@ void Scene::drawLayersAndBodies(
     });
 }
 
-void Scene::drawObjectLayer(const TileMapObjectLayer & /*_layer*/)
+void Scene::drawObjectLayer(const TileMapObjectLayer & _layer)
 {
     // TODO: offset and parallax
 
-    // SDL_SetRenderDrawColor(&mr_renderer, 255, 20, 0, 255);
-    // _layer.forEachObject([this](const TileMapObject & __object) {
-    //     if(!__object.isVisible()) return;
-    //     // TODO: if in viewport
-    //     switch (__object.getObjectType())
-    //     {
-    //     case TileMapObjectType::Polygon:
-    //         drawPolyXObject(dynamic_cast<const TileMapPolygon &>(__object), true);
-    //         break;
-    //     case TileMapObjectType::Polyline:
-    //         drawPolyXObject(dynamic_cast<const TileMapPolyline &>(__object), false);
-    //         break;
-    //     case TileMapObjectType::Circle:
-    //         drawCircle(dynamic_cast<const TileMapCircle &>(__object));
-    //         break;
-    //     default:
-    //         // TODO: point
-    //         break;
-    //     }
-    // });
+
+    _layer.forEachObject([this](const TileMapObject & __object) {
+        if(!__object.isVisible()) return;
+        // TODO: if in viewport
+        switch(__object.getObjectType())
+        {
+        case TileMapObjectType::Polygon:
+            drawPolyXObject(dynamic_cast<const TileMapPolygon &>(__object), true);
+            break;
+        case TileMapObjectType::Polyline:
+            drawPolyXObject(dynamic_cast<const TileMapPolyline &>(__object), false);
+            break;
+        case TileMapObjectType::Circle:
+            drawCircle(dynamic_cast<const TileMapCircle &>(__object));
+            break;
+        default:
+            // TODO: point
+            break;
+        }
+    });
 }
 
-void Scene::drawPolyXObject(const TileMapPolyX & /*_poly*/, bool /*_close*/)
+void Scene::drawPolyXObject(const TileMapPolyX & _poly, bool _close)
 {
-    // const std::vector<SDL_FPoint> & poly_points = _poly.getPoints();
-    // size_t poly_points_count = poly_points.size();
-    // if(poly_points_count < 2) return;
-    // size_t total_points_count = _close ? poly_points_count + 1 : poly_points_count;
-    // SDL_FPoint base_point = toAbsoluteCoords(_poly.getPosition().x, _poly.getPosition().y);
-    // std::vector<SDL_FPoint> points(total_points_count);
-    // for(size_t i = 0; i < poly_points_count; ++i)
-    // {
-    //     points[i].x = base_point.x + poly_points[i].x;
-    //     points[i].y = base_point.y + poly_points[i].y;
-    // }
-    // if(_close)
-    // {
-    //     points[poly_points_count].x = points[0].x;
-    //     points[poly_points_count].y = points[0].y;
-    // }
-    // SDL_RenderLines(&mr_renderer, points.data()->toSdlPtr(), total_points_count);
+    const std::vector<SDL_FPoint> & poly_points = _poly.getPoints();
+    size_t poly_points_count = poly_points.size();
+    if(poly_points_count < 2) return;
+    SDL_FPoint base_point = toAbsoluteCoords(_poly.getPosition().x, _poly.getPosition().y);
+    std::vector<SDL_FPoint> points(poly_points.size());
+    for(size_t i = 0; i < poly_points_count; ++i)
+    {
+        points[i].x = base_point.x + poly_points[i].x;
+        points[i].y = base_point.y + poly_points[i].y;
+    }
+    mr_renderer.renderPolyline(points, gc_object_debug_color, _close);
 }
 
 void Scene::drawCircle(const TileMapCircle & /*_circle*/)
