@@ -56,6 +56,8 @@ struct RectVertexUniform
     RectMVP mvp;
 };
 
+using CapsuleVertexUniform = RectVertexUniform;
+
 struct RectFragmentUniform
 {
     SDL_FColor color;
@@ -89,21 +91,33 @@ struct CircleFragmentUniform
     float radius;
 };
 
-RectMVP getModelViewProjection(const FSize & _viewport_size, const RectRenderingDataBase & _data)
+struct CapsuleFragmentUniform
+{
+    SDL_FColor color;
+    SDL_FColor border_color;
+    FSize resolution;
+    float border_width;
+    float radius;
+};
+
+RectMVP getModelViewProjection(
+    const FSize & _viewport_size,
+    const SDL_FRect & _rect,
+    const std::optional<Rotation> & _rotation)
 {
     const float scale_factor = 2.0f / _viewport_size.h;
     RectMVP mvp = {};
-    if(_data.rotation.has_value() && !_data.rotation->isZero())
+    if(_rotation.has_value() && !_rotation->isZero())
     {
         mvp.use_rotate = true;
-        mvp.mat_rotate = Transform::createRotation(_data.rotation.value());
+        mvp.mat_rotate = Transform::createRotation(_rotation.value());
     }
     mvp.mat_translate_to_final_position = Transform::createTranslation(
-        scale_factor * (_data.rect.x - (_viewport_size.w - _data.rect.w) / 2),
-        scale_factor * ((_viewport_size.h - _data.rect.h) / 2 - _data.rect.y));
+        scale_factor * (_rect.x - (_viewport_size.w - _rect.w) / 2),
+        scale_factor * ((_viewport_size.h - _rect.h) / 2 - _rect.y));
     mvp.mat_scale = Transform::createScale(
-        scale_factor * _data.rect.w,
-        scale_factor * _data.rect.h);
+        scale_factor * _rect.w,
+        scale_factor * _rect.h);
     mvp.mat_projection = Transform::createOrtho(static_cast<float>(_viewport_size.w) / _viewport_size.h);
     return mvp;
 }
@@ -143,6 +157,7 @@ RectRenderer::RectRenderer(const ResourceManager & _resource_manager, SDL_Window
     mp_rect_pipeline(createRectPipeline(_window)),
     mp_texture_pipeline(createTexturePipeline(_window)),
     mp_circle_pipeline(createCirclePipeline(_window)),
+    mp_capsule_pipeline(createCapsulePipeline(_window)),
     mp_vertex_buffer(nullptr),
     mp_index_buffer(nullptr),
     mp_texture_sampler(nullptr)
@@ -254,6 +269,8 @@ RectRenderer::~RectRenderer()
         SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_texture_pipeline);
     if(mp_circle_pipeline)
         SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_circle_pipeline);
+    if(mp_capsule_pipeline)
+        SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_capsule_pipeline);
     if(mp_index_buffer)
         SDL_ReleaseGPUBuffer(mp_device, mp_index_buffer);
     if(mp_vertex_buffer)
@@ -321,6 +338,28 @@ SDL_GPUGraphicsPipeline * RectRenderer::createCirclePipeline(SDL_Window * _windo
         SDL_GPU_SHADERSTAGE_FRAGMENT,
         SDL_GPU_SHADERFORMAT_SPIRV,
         "Circle.frag",
+        {
+            .num_samplers = 0,
+            .num_uniform_buffers = 1
+        });
+    return createPipeline(_window, vert_shader.get(), frag_shader.get());
+}
+
+SDL_GPUGraphicsPipeline * RectRenderer::createCapsulePipeline(SDL_Window * _window) const
+{
+    ShaderLoader loader(mp_device, mr_resource_manager);
+    ShaderPtr vert_shader = loader.loadStandard(
+        SDL_GPU_SHADERSTAGE_VERTEX,
+        SDL_GPU_SHADERFORMAT_SPIRV,
+        "Rectangle.vert",
+        {
+            .num_samplers = 0,
+            .num_uniform_buffers = 1
+        });
+    ShaderPtr frag_shader = loader.loadStandard(
+        SDL_GPU_SHADERSTAGE_FRAGMENT,
+        SDL_GPU_SHADERFORMAT_SPIRV,
+        "Capsule.frag",
         {
             .num_samplers = 0,
             .num_uniform_buffers = 1
@@ -424,7 +463,7 @@ void RectRenderer::renderRect(
     bindBuffers(_ctx);
     RectVertexUniform vert_uniform
     {
-        .mvp = getModelViewProjection(_ctx.texture_size, _data)
+        .mvp = getModelViewProjection(_ctx.texture_size, _data.rect, _data.rotation)
     };
     SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(RectVertexUniform));
     SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, _frag_uniform, sizeof(RectFragmentUniform));
@@ -450,7 +489,7 @@ void RectRenderer::renderTexture(const RenderingContext & _ctx, const TextureRen
             .texture_region = _data.texture_rect.has_value()
                 ? calculateNormalTextureFragmentRect(_data.texture.getSize(), _data.texture_rect.value())
                 : SDL_FRect { .x = .0f, .y = .0f, .w = 1.0f, .h = 1.0f },
-            .mvp = getModelViewProjection(_ctx.texture_size, _data)
+            .mvp = getModelViewProjection(_ctx.texture_size, _data.rect, _data.rotation)
         };
         SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(TextureVertexUniform));
     }
@@ -504,5 +543,47 @@ void RectRenderer::renderCircle(
     };
     SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(CircleVertexUniform));
     SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, _frag_uniform, sizeof(CircleFragmentUniform));
+    SDL_DrawGPUIndexedPrimitives(_ctx.render_pass, g_index_count, 1, 0, 0, 0);
+}
+
+void RectRenderer::renderCapsule(const RenderingContext & _ctx, const SolidCapsuleRenderingData & _data) const
+{
+    CapsuleFragmentUniform frag_uniform
+    {
+        .color = _data.color,
+        .border_color = {},
+        .resolution = FSize(_data.capsule.getRect().w, _data.capsule.getRect().h),
+        .border_width = .0f,
+        .radius = _data.capsule.getRadius()
+    };
+    renderCapsule(_ctx, _data, &frag_uniform);
+}
+
+void RectRenderer::renderCapsule(const RenderingContext & _ctx, const CapsuleRenderingData & _data) const
+{
+    CapsuleFragmentUniform frag_uniform
+    {
+        .color = _data.color,
+        .border_color = _data.border_color,
+        .resolution = FSize(_data.capsule.getRect().w, _data.capsule.getRect().h),
+        .border_width = _data.border_width / _data.capsule.getRect().w,
+        .radius = _data.capsule.getRadius()
+    };
+    renderCapsule(_ctx, _data, &frag_uniform);
+}
+
+void RectRenderer::renderCapsule(
+    const RenderingContext & _ctx,
+    const CapsuleRenderingDataBase & _data,
+    const void * _frag_uniform) const
+{
+    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_capsule_pipeline);
+    bindBuffers(_ctx);
+    CapsuleVertexUniform vert_uniform
+    {
+        .mvp = getModelViewProjection(_ctx.texture_size, _data.capsule.getRect(), _data.capsule.getRotation())
+    };
+    SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(CapsuleVertexUniform));
+    SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, _frag_uniform, sizeof(CapsuleFragmentUniform));
     SDL_DrawGPUIndexedPrimitives(_ctx.render_pass, g_index_count, 1, 0, 0, 0);
 }

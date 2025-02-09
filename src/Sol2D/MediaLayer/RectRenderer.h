@@ -34,10 +34,13 @@ public:
     void renderTexture(const RenderingContext & _ctx, const TextureRenderingData & _data) const;
     void renderCircle(const RenderingContext & _ctx, const SolidCircleRenderingData & _data) const;
     void renderCircle(const RenderingContext & _ctx, const CircleRenderingData & _data) const;
+    void renderCapsule(const RenderingContext & _ctx, const SolidCapsuleRenderingData & _data) const;
+    void renderCapsule(const RenderingContext & _ctx, const CapsuleRenderingData & _data) const;
 
 private:
     SDL_GPUGraphicsPipeline * createRectPipeline(SDL_Window * _window) const;
     SDL_GPUGraphicsPipeline * createCirclePipeline(SDL_Window * _window) const;
+    SDL_GPUGraphicsPipeline * createCapsulePipeline(SDL_Window * _window) const;
     SDL_GPUGraphicsPipeline * createTexturePipeline(SDL_Window * _window) const;
     SDL_GPUGraphicsPipeline * createPipeline(
         SDL_Window * _window,
@@ -51,6 +54,10 @@ private:
         const RenderingContext & _ctx,
         const CircleRenderingDataBase & _data,
         const void * _frag_uniform) const;
+    void renderCapsule(
+        const RenderingContext & _ctx,
+        const CapsuleRenderingDataBase & _data,
+        const void * _frag_uniform) const;
     void bindBuffers(const RenderingContext & _ctx) const;
 
 private:
@@ -59,6 +66,7 @@ private:
     SDL_GPUGraphicsPipeline * mp_rect_pipeline;
     SDL_GPUGraphicsPipeline * mp_texture_pipeline;
     SDL_GPUGraphicsPipeline * mp_circle_pipeline;
+    SDL_GPUGraphicsPipeline * mp_capsule_pipeline;
     SDL_GPUBuffer * mp_vertex_buffer;
     SDL_GPUBuffer * mp_index_buffer;
     SDL_GPUSampler * mp_texture_sampler;

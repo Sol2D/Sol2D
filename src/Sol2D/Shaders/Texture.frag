@@ -11,7 +11,7 @@ layout (set = 3, binding = 0) uniform Uniforms
    bool flip_v;
 } u;
 
-void main(void)
+void main()
 {
     frag_color = texture(
         tex,

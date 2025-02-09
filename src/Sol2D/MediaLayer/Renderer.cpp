@@ -278,3 +278,14 @@ void Renderer::renderCircle(SolidCircleRenderingData && _data)
 {
     m_queue.push(new SolidCirclePrimitive(m_rect_renderer, std::forward<SolidCircleRenderingData>(_data)));
 }
+
+void Renderer::renderCapsule(CapsuleRenderingData && _data)
+{
+    m_queue.push(new CapsulePrimitive(m_rect_renderer, std::forward<CapsuleRenderingData>(_data)));
+
+}
+
+void Renderer::renderCapsule(SolidCapsuleRenderingData && _data)
+{
+    m_queue.push(new SolidCapsulePrimitive(m_rect_renderer, std::forward<SolidCapsuleRenderingData>(_data)));
+}

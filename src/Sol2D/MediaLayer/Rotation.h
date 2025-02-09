@@ -47,6 +47,28 @@ struct Rotation
 
     explicit Rotation(float _angle, AngleUnit _unit = AngleUnit::Radian)
     {
+        reset(_angle, _unit);
+    }
+
+    bool isZero() const
+    {
+        return sine == 0.0f;
+    }
+
+    void reset()
+    {
+        sine = 0.0f;
+        cosine = 1.0f;
+    }
+
+    void reset(float _sine, float _cosine)
+    {
+        sine = _sine;
+        cosine = _cosine;
+    }
+
+    void reset(float _angle, AngleUnit _unit = AngleUnit::Radian)
+    {
         if(_angle == 0.0f)
         {
             sine = 0.0f;
@@ -65,17 +87,21 @@ struct Rotation
         }
     }
 
-    bool isZero() const
-    {
-        return sine == 0.0f;
-    }
-
-    SDL_FPoint rotateVector(const SDL_FPoint & _vector) const
+    SDL_FPoint rotateVectorCCW(const SDL_FPoint & _vector) const
     {
         return
         {
             .x = _vector.x * cosine - _vector.y * sine,
             .y = _vector.x * sine + _vector.y * cosine,
+        };
+    }
+
+    SDL_FPoint rotateVectorCW(const SDL_FPoint & _vector) const
+    {
+        return
+        {
+            .x = _vector.x * cosine + _vector.y * sine,
+            .y = _vector.y * cosine - _vector.x * sine,
         };
     }
 

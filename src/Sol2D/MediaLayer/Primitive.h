@@ -37,7 +37,7 @@ public:
 class RectPrimitive : public Primitive
 {
 public:
-    RectPrimitive(const RectRenderer & _renderer, const RectRenderingData & data) :
+    RectPrimitive(const RectRenderer & _renderer, RectRenderingData && data) :
         mr_renderer(_renderer),
         m_data(data)
     {
@@ -56,7 +56,7 @@ private:
 class SolidRectPrimitive : public Primitive
 {
 public:
-    SolidRectPrimitive(const RectRenderer & _renderer, const SolidRectRenderingData & data) :
+    SolidRectPrimitive(const RectRenderer & _renderer, SolidRectRenderingData && data) :
         mr_renderer(_renderer),
         m_data(data)
     {
@@ -75,7 +75,7 @@ private:
 class TexturePrimitive : public Primitive
 {
 public:
-    TexturePrimitive(const RectRenderer & _renderer, const TextureRenderingData & data) :
+    TexturePrimitive(const RectRenderer & _renderer, TextureRenderingData && data) :
         mr_renderer(_renderer),
         m_data(data)
     {
@@ -115,7 +115,7 @@ private:
 class CirclePrimitive : public Primitive
 {
 public:
-    CirclePrimitive(const RectRenderer & _renderer, const CircleRenderingData & data) :
+    CirclePrimitive(const RectRenderer & _renderer, CircleRenderingData && data) :
         mr_renderer(_renderer),
         m_data(data)
     {
@@ -134,7 +134,7 @@ private:
 class SolidCirclePrimitive : public Primitive
 {
 public:
-    SolidCirclePrimitive(const RectRenderer & _renderer, const SolidCircleRenderingData & data) :
+    SolidCirclePrimitive(const RectRenderer & _renderer, SolidCircleRenderingData && data) :
         mr_renderer(_renderer),
         m_data(data)
     {
@@ -148,6 +148,44 @@ public:
 private:
     const RectRenderer & mr_renderer;
     const SolidCircleRenderingData m_data;
+};
+
+class CapsulePrimitive: public Primitive
+{
+public:
+    CapsulePrimitive(const RectRenderer & _renderer, CapsuleRenderingData && data) :
+        mr_renderer(_renderer),
+        m_data(data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderCapsule(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const CapsuleRenderingData m_data;
+};
+
+class SolidCapsulePrimitive: public Primitive
+{
+public:
+    SolidCapsulePrimitive(const RectRenderer & _renderer, SolidCapsuleRenderingData && data) :
+        mr_renderer(_renderer),
+        m_data(data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderCapsule(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const SolidCapsuleRenderingData m_data;
 };
 
 } // namespace Sol2D

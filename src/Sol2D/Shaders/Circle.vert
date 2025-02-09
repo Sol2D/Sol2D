@@ -14,9 +14,9 @@ layout (location = 0) out vec2 texture_coordinates_out;
 void main()
 {
     gl_Position =
-            u.mat_projection *
-            u.mat_translate_to_final_position *
-            u.mat_scale *
-            vec4(vertex_position, 1.0f);
+        u.mat_projection *
+        u.mat_translate_to_final_position *
+        u.mat_scale *
+        vec4(vertex_position, 1.0f);
     texture_coordinates_out = texture_coordinates;
 }

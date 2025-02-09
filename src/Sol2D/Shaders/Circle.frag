@@ -45,7 +45,6 @@ void renderBordererd()
     const float inner_stop_aa = radius - u.border_width;
     const float outer_start_aa = radius - aa;
     const float outer_stop_aa = radius;
-
     const float dist = distance(coords, center);
 
     if(dist < inner_start_aa)
@@ -72,7 +71,8 @@ void renderBordererd()
     }
 }
 
-void main() {
+void main()
+{
     if(u.border_width == 0.0f)
         renderSolid();
     else

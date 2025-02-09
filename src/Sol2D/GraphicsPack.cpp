@@ -419,7 +419,7 @@ void GraphicsPack::performRender(const SDL_FPoint & _position, const Rotation & 
                 .y = m_position.y + graphics.position.y
             };
             if(!_rotation.isZero() && (graphics_position.x || graphics_position.y))
-                graphics_position = _rotation.rotateVector(graphics_position);
+                graphics_position = _rotation.rotateVectorCCW(graphics_position);
             graphics.sprite->render(
                 {
                     .x = graphics_position.x + _position.x,

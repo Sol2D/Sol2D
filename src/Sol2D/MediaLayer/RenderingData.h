@@ -18,6 +18,7 @@
 
 #include <Sol2D/MediaLayer/Rotation.h>
 #include <Sol2D/MediaLayer/Texture.h>
+#include <Sol2D/MediaLayer/Capsule.h>
 #include <SDL3/SDL_pixels.h>
 #include <optional>
 
@@ -124,6 +125,45 @@ struct CircleRenderingData : CircleRenderingDataBase
         const SDL_FColor & _color = { .0f, .0f, .0f, .0f }
     ) :
         CircleRenderingDataBase(_center, _radius, _color),
+        border_width(_border_width),
+        border_color(_border_color)
+    {
+    }
+
+    float border_width;
+    SDL_FColor border_color;
+};
+
+struct CapsuleRenderingDataBase
+{
+    CapsuleRenderingDataBase(
+        float _radius,
+        const SDL_FPoint & _center1,
+        const SDL_FPoint & _center2,
+        const SDL_FColor & _color
+    ) :
+        capsule(_radius, _center1, _center2),
+        color(_color)
+    {
+    }
+
+    Capsule capsule;
+    SDL_FColor color;
+};
+
+using SolidCapsuleRenderingData = CapsuleRenderingDataBase;
+
+struct CapsuleRenderingData : CapsuleRenderingDataBase
+{
+    CapsuleRenderingData(
+        float _radius,
+        const SDL_FPoint & _center1,
+        const SDL_FPoint & _center2,
+        const SDL_FColor & _border_color,
+        float _border_width = 1.0f,
+        const SDL_FColor & _color = { .0f, .0f, .0f, .0f }
+    ) :
+        CapsuleRenderingDataBase(_radius, _center1, _center2, _color),
         border_width(_border_width),
         border_color(_border_color)
     {

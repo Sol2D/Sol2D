@@ -136,13 +136,12 @@ void Box2dDebugDraw::drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void
         b2ColorToSDL(_color));
 }
 
-void Box2dDebugDraw:: drawSolidCapsule(b2Vec2 /*_p1*/, b2Vec2 /*_p2*/, float /*_radius*/, b2HexColor /*_color*/, void * /*_context*/)
+void Box2dDebugDraw:: drawSolidCapsule(b2Vec2 _p1, b2Vec2 _p2, float _radius, b2HexColor _color, void * _context)
 {
-    // Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    // self->setRendererDrawColor(_color);
-    // Sol2D::SDL::sdlRenderCapsule(
-    //     self->mp_renderer,
-    //     self->m_translate_point(_p1.x, _p1.y),
-    //     self->m_translate_point(_p2.x, _p2.y),
-    //     self->m_translate_length(_radius));
+    Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
+    self->mp_renderer->renderCapsule(CapsuleRenderingData(
+        self->m_translate_length(_radius),
+        self->m_translate_point(_p1.x, _p1.y),
+        self->m_translate_point(_p2.x, _p2.y),
+        b2ColorToSDL(_color)));
 }

@@ -170,7 +170,7 @@ public:
     {
         Rotation rotation(_angle_rad, Rotation::AngleUnit::Radian);
         for(size_t i = 0; i < m_points.size(); ++i)
-            m_points[i] = rotation.rotateVector(m_points[i]);
+            m_points[i] = rotation.rotateVectorCCW(m_points[i]);
     }
 
 private:
