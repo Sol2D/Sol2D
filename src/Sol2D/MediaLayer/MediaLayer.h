@@ -28,6 +28,7 @@
 #include <Sol2D/MediaLayer/Utils.h>
 #include <Sol2D/MediaLayer/Types.h>
 #include <Sol2D/MediaLayer/Transform.h>
+#include <Sol2D/MediaLayer/SDLException.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3_mixer/SDL_mixer.h>
 #include <SDL3_image/SDL_image.h>

@@ -19,7 +19,6 @@
 #include <Sol2D/Window.h>
 #include <Sol2D/MediaLayer/MediaLayer.h>
 #include <Sol2D/Lua/LuaLibrary.h>
-#include <iostream>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -55,10 +54,10 @@ class Application final
 
 public:
     explicit Application(const Workspace & _workspace);
-    int exec();
+    ~Application();
+    void exec();
 
 private:
-    void runMainLoop(SDL_Window * _window, SDL_GPUDevice * _device);
     bool handleEvent(const SDL_Event & _event);
     void onWindowResized(const SDL_WindowEvent & _event);
     void onMouseButtonDown(const SDL_MouseButtonEvent & _event);
@@ -69,7 +68,9 @@ private:
     const Workspace & mr_workspace;
     SDLAssertionHandler m_sdl_assertion_handler;
     StepState m_step_state;
-    Window m_window;
+    SDL_Window * mp_sdl_window;
+    SDL_GPUDevice * mp_device;
+    Window * mp_window;
 };
 
 SDL_AssertState SDLCALL sdlAssertionHandler(const SDL_AssertData * _data, void * _userdata)
@@ -83,90 +84,50 @@ SDL_AssertState SDLCALL sdlAssertionHandler(const SDL_AssertData * _data, void *
 Application::Application(const Workspace & _workspace) :
     mr_workspace(_workspace),
     m_sdl_assertion_handler(_workspace),
-    m_step_state{}
+    m_step_state{},
+    mp_sdl_window(nullptr),
+    mp_device(nullptr),
+    mp_window(new Window)
 {
-}
-
-int Application::exec()
-{
-    SDL_Window * sdl_window = nullptr;
-    SDL_GPUDevice * device = nullptr;
-    int result = 0;
     if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
-    {
-        mr_workspace.getMainLogger().critical("Unable to initialize SDL: {}", SDL_GetError());
-        goto FAIL_APP;
-    }
+        throw SDLException("Unable to initialize SDL.");
     if(!TTF_Init())
-    {
-        mr_workspace.getMainLogger().critical("SDL_TTF initialization failed. {}", SDL_GetError());
-        goto FAIL_APP;
-    }
+        throw SDLException("SDL_TTF initialization failed.");
     if(!Mix_OpenAudio(0, nullptr)) // TODO: allow user to select a device
-    {
-        mr_workspace.getMainLogger().critical("SDL_Mixer initialization failed. {}", SDL_GetError());
-        goto FAIL_APP;
-    }
+        throw SDLException("SDL_Mixer initialization failed.");
     SDL_SetAssertionHandler(sdlAssertionHandler, &m_sdl_assertion_handler);
-    sdl_window = SDL_CreateWindow(
+    mp_sdl_window = SDL_CreateWindow(
         mr_workspace.getApplicationName().c_str(),
         1024,
         768,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
-    if(sdl_window == nullptr)
-    {
-        mr_workspace.getMainLogger().critical("Unable to create window: {}", SDL_GetError());
-        goto FAIL_APP;
-    }
-    device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
-    if(device == nullptr)
-    {
-        mr_workspace.getMainLogger().critical("Unable to create GPU device: {}");
-        goto FAIL_APP;
-    }
-    if(!SDL_ClaimWindowForGPUDevice(device, sdl_window))
-    {
-        mr_workspace.getMainLogger().critical("Unable to claim window for GPU device: {}", SDL_GetError());
-        goto FAIL_APP;
-    }
-    if(!SDL_ShowWindow(sdl_window))
-    {
-        mr_workspace.getMainLogger().critical("Unable to show window: {}", SDL_GetError());
-        result = 1;
-        goto FAIL_APP;
-    }
-    try
-    {
-        runMainLoop(sdl_window, device);
-    }
-    catch(const std::runtime_error & error)
-    {
-        mr_workspace.getMainLogger().critical(error.what());
-        goto FAIL_APP;
-    }
-    catch(...)
-    {
-        mr_workspace.getMainLogger().critical("An unknown error has occurred");
-        goto FAIL_APP;
-    }
-    goto EXIT_APP;
-FAIL_APP:
-    result = 1;
-EXIT_APP:
-    if(device) SDL_DestroyGPUDevice(device);
-    if(sdl_window) SDL_DestroyWindow(sdl_window);
+    if(!mp_sdl_window)
+        throw SDLException("Unable to create window");
+    mp_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
+    if(!mp_device)
+        throw SDLException("Unable to create GPU device.");
+    if(!SDL_ClaimWindowForGPUDevice(mp_device, mp_sdl_window))
+        throw SDLException("Unable to claim window for GPU device.");
+    if(!SDL_ShowWindow(mp_sdl_window))
+        throw SDLException("Unable to show window.");
+}
+
+Application::~Application()
+{
+    delete mp_window;
+    if(mp_device) SDL_DestroyGPUDevice(mp_device);
+    if(mp_sdl_window) SDL_DestroyWindow(mp_sdl_window);
     TTF_Quit();
     Mix_Quit();
     SDL_Quit();
-    return result;
 }
 
-void Application::runMainLoop(SDL_Window * _window, SDL_GPUDevice * _device)
+void Application::exec()
 {
     ResourceManager resource_manager; // TODO: create in place
-    Renderer renderer(resource_manager, _window, _device);
+    Renderer renderer(resource_manager, mp_sdl_window, mp_device);
     StoreManager store_manager;
-    std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(mr_workspace, store_manager, m_window, renderer);
+    std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(mr_workspace, store_manager, *mp_window, renderer);
     lua->executeMainScript();
     const uint32_t render_frame_delay = floor(1000 / mr_workspace.getFrameRate());
     uint32_t last_rendering_ticks = SDL_GetTicks();
@@ -222,7 +183,7 @@ bool Application::handleEvent(const SDL_Event & _event)
 
 inline void Application::onWindowResized(const SDL_WindowEvent & /*_event*/)
 {
-    m_window.resize();
+    mp_window->resize();
 }
 
 inline void Application::onMouseButtonDown(const SDL_MouseButtonEvent & _event)
@@ -271,13 +232,12 @@ inline void Application::onMouseButtonUp(const SDL_MouseButtonEvent & _event)
 
 void Application::step()
 {
-    m_window.step(m_step_state);
+    mp_window->step(m_step_state);
 }
 
 int main(int _argc, const char ** _argv)
 {
     std::unique_ptr<Workspace> workspace;
-    std::unique_ptr<Application> app;
     {
         std::filesystem::path config(_argc > 1 ? _argv[1] : "game.xml");
         if(config.is_relative())
@@ -285,10 +245,27 @@ int main(int _argc, const char ** _argv)
         workspace = Workspace::load(config);
         if(!workspace)
         {
-            std::cerr << "Unable to load manifest file" << std::endl;
-            return 2;
-        }
-        app = std::make_unique<Application>(std::ref(*workspace));
+            SDL_MessageBoxData data = {};
+            data.flags = SDL_MESSAGEBOX_ERROR;
+            data.message = "Unable to load manifest file";
+            data.title = "Critical error";
+            SDL_ShowMessageBox(&data, nullptr);
+            return -1;
+        }        
     }
-    return app->exec();
+    try
+    {
+        Application(*workspace).exec();
+        return 0;
+    }
+    catch(const std::exception & error)
+    {
+        workspace->getMainLogger().critical(error.what());
+        return -2;
+    }
+    catch(...)
+    {
+        workspace->getMainLogger().critical("An unknown critical error has occurred");
+        return -3;
+    }
 }

@@ -426,7 +426,7 @@ SDL_GPUGraphicsPipeline * RectRenderer::createPipeline(
 
     SDL_GPUGraphicsPipeline * pipeline = SDL_CreateGPUGraphicsPipeline(mp_device, &pipeline_create_info);
     if(!pipeline)
-        throw SDLException("Unable to create GPU graphics pipeline");
+        throw SDLException("Unable to create GPU graphics pipeline.");
     return pipeline;
 }
 

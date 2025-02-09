@@ -76,7 +76,7 @@ ShaderPtr ShaderLoader::loadFromFile(
     shader = SDL_CreateGPUShader(mp_device, &shader_create_info);
     if(!shader)
     {
-        throw SDLException(std::format("Unable to create shader from file \"{}\"", _path.string()));
+        throw SDLException(std::format("Unable to create shader from file \"{}\".", _path.string()));
     }
     return makeUniquePtr(mp_device, shader);
 }

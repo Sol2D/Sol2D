@@ -89,7 +89,7 @@ LineRenderer::LineRenderer(const ResourceManager & _resource_manager, SDL_Window
 
     mp_pipeline = SDL_CreateGPUGraphicsPipeline(mp_device, &pipeline_create_info);
     if(!mp_pipeline)
-        throw SDLException("Unable to create GPU graphics pipeline");
+        throw SDLException("Unable to create GPU graphics pipeline.");
 }
 
 LineRenderer::~LineRenderer()
@@ -128,16 +128,16 @@ void LineRenderer::beginRendering()
     {
         copy_pass = SDL_BeginGPUCopyPass(upload_cmd_buffer);
         if(!copy_pass)
-            throw SDLException("Unable to create a copy pass for line rendering");
+            throw SDLException("Unable to create a copy pass for line rendering.");
         SDL_GPUTransferBufferCreateInfo transfer_buffer_create_info = {};
         transfer_buffer_create_info.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
         transfer_buffer_create_info.size = vertex_buffer_create_info.size;
         transfer_buffer = SDL_CreateGPUTransferBuffer(mp_device, &transfer_buffer_create_info);
         if(!transfer_buffer)
-            throw SDLException("Unable to create a transfer buffer for line rendering");
+            throw SDLException("Unable to create a transfer buffer for line rendering.");
         void * data = SDL_MapGPUTransferBuffer(mp_device, transfer_buffer, false);
         if(!data)
-            throw SDLException("Unable to map a vertex buffer for line rendering");
+            throw SDLException("Unable to map a vertex buffer for line rendering.");
         memcpy(data, m_vertices.data(), vertex_buffer_create_info.size);
         SDL_UnmapGPUTransferBuffer(mp_device, transfer_buffer);
     }

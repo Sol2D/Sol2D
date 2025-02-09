@@ -76,7 +76,7 @@ Texture Renderer::createTexture(SDL_Surface & _surface, const char * _name) cons
     if(!texture)
     {
         if(surface != &_surface) SDL_DestroySurface(surface);
-        throw SDLException("Unable to create texture for transform from surface");
+        throw SDLException("Unable to create texture for transform from surface.");
     }
 
     if(_name)
@@ -136,7 +136,7 @@ Texture Renderer::createTexture(float _width, float _height, const char * _name)
     texture_create_info.num_levels = 1;
     SDL_GPUTexture * texture = SDL_CreateGPUTexture(m_rendering_context.device, &texture_create_info);
     if(!texture)
-        throw SDLException("Unable to create texture");
+        throw SDLException("Unable to create texture.");
     if(_name)
         SDL_SetGPUTextureName(m_rendering_context.device, texture, _name);
     return Texture(SDLPtr::make(m_rendering_context.device, texture), Size(_width, _height));
@@ -152,7 +152,7 @@ void Renderer::beginStep()
 
     m_rendering_context.command_buffer = SDL_AcquireGPUCommandBuffer(m_rendering_context.device);
     if(!m_rendering_context.command_buffer)
-        throw SDLException("Unable to acquire a command buffer");
+        throw SDLException("Unable to acquire a command buffer.");
 
     if(!SDL_WaitAndAcquireGPUSwapchainTexture(
             m_rendering_context.command_buffer,
@@ -162,7 +162,7 @@ void Renderer::beginStep()
             &m_rendering_context.window_size.h) ||
         !mp_swapchain_texture)
     {
-        throw SDLException("Unable to acquire a swapchain texture");
+        throw SDLException("Unable to acquire a swapchain texture.");
     }
 }
 
