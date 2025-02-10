@@ -29,6 +29,7 @@ struct LuaSelfBase
 {
 public:
     virtual ~LuaSelfBase() { }
+    virtual void beforeDelete(lua_State *) { }
 };
 
 template<std::derived_from<LuaSelfBase> LuaSelf, const char metatable[]>
@@ -65,6 +66,7 @@ struct LuaUserData
     static int luaGC(lua_State * _lua)
     {
         LuaSelf * self = getUserData(_lua, 1);
+        self->beforeDelete(_lua);
         self->~LuaSelf();
         return 0;
     }
