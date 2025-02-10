@@ -149,14 +149,13 @@ local function load(store)
 end
 
 local function construct()
-    local STORE_KEY = 'global-rsc'
-    local store = sol.stores:getStore(STORE_KEY)
+    local resources_store = nil
 
     local function getStore()
-        if not store then
+        if not resources_store then
             error('Global store is not initialized')
         end
-        return store
+        return resources_store
     end
 
     local resources = {
@@ -164,12 +163,13 @@ local function construct()
     }
     resources.__index = resources
 
-    function resources.initialize()
-        if store then
-            return
+    ---@param store sol.Store
+    function resources.initialize(store)
+        if resources_store then
+            error('Global resources already initialized')
         else
-            store = sol.stores:createStore(STORE_KEY)
-            load(store)
+            resources_store = store
+            load(resources_store)
         end
     end
 
@@ -181,13 +181,6 @@ local function construct()
             error('Sprite ' .. key .. ' not found')
         end
         return sprite
-    end
-
-    function resources.destroy()
-        if store then
-            sol.stores:deleteStore(STORE_KEY)
-            store = nil
-        end
     end
 
     ---@param key string

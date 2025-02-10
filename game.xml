@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <game directory="games/side_scroller">
     <engine>
-        <graphics fps="120" />
+        <graphics fps="60" />
         <debug rendering="true" />
         <logging level="trace" />
     </engine>

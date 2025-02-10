@@ -1,51 +1,60 @@
+local StateMachine = {}
+StateMachine.__index = StateMachine
+
+---@alias StateMachineStateKey string
+---@alias StateMachineEvent integer
+
+---@class StateMachineState
+---@field canEnter? fun(): boolean
+---@field enter? fun(event: StateMachineEvent)
+---@field update? fun(dt?: integer)
+---@field canLeave? fun(): boolean
+---@field leave? fun()
+
 ---@class StateMachineTransition
----@field source any
----@field target any
----@field event any
----@field canEnter fun(args: any | nil)?: boolean
----@field canLeave fun()?: boolean
----@field onEnter fun(args: any | nil)?
----@field onLeave function?
+---@field from StateMachineStateKey
+---@field event StateMachineEvent
+---@field to StateMachineStateKey
 
-local module = {}
-module.__index = module
+---@param states { [StateMachineStateKey]: StateMachineState }
+---@param initial_state StateMachineStateKey
+---@param transitions  StateMachineTransition[]
+function StateMachine.new(states, initial_state, transitions)
+    local current = {
+        key = initial_state,
+        state = states[initial_state]
+    }
 
----@param initial_state any
----@param transitions StateMachineTransition[]
-local function createStateMachine(initial_state, transitions)
-    local current_state = initial_state
-    local machine = {}
+    local sm = {}
 
-    ---@param event any
-    ---@param args any?
-    function machine.processEvent(event, args)
-        for _, transition in ipairs(transitions) do
-            if
-                transition.event == event and
-                transition.source == current_state and
-                (not transition.canLeave or transition.canLeave()) and
-                (not transition.canEnter or transition.canEnter(args))
-            then
-                if transition.onLeave then
-                    transition.onLeave()
+    ---@param event StateMachineEvent
+    function sm.processEvent(event)
+        if current.state.canLeave and not current.state.canLeave() then
+            return
+        end
+        for _, tran in ipairs(transitions) do
+            if tran.event == event and tran.from == current.key then
+                local target = states[tran.to]
+                if target and (not target.canEnter or target.canEnter()) then
+                    current.key = tran.to
+                    current.state = target
+                    if target.enter then
+                        target.enter(event)
+                    end
+                    break
                 end
-                if transition.onEnter then
-                    transition.onEnter(args)
-                end
-                current_state = transition.target
-                return true
             end
         end
-        return false
     end
 
-    return machine
+    ---@param dt integer
+    function sm.update(dt)
+        if current.state.update then
+            current.state.update(dt)
+        end
+    end
+
+    return sm
 end
 
----@param initial_state any
----@param transitions StateMachineTransition[]
-function module.new(initial_state, transitions)
-    return createStateMachine(initial_state, transitions)
-end
-
-return setmetatable({}, module)
+return setmetatable({}, StateMachine)

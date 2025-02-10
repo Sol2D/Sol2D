@@ -136,10 +136,10 @@ private:
     void drawLayersAndBodies(
         const Tiles::TileMapLayerContainer & _container,
         std::unordered_set<uint64_t> & _bodies_to_render,
-        std::chrono::milliseconds _time_passed);
+        std::chrono::milliseconds _delta_time);
     b2BodyId findBox2dBody(uint64_t _body_id) const;
     b2JointId findJoint(uint64_t _joint_id) const;
-    void drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed);
+    void drawBody(b2BodyId _body_id, std::chrono::milliseconds _delta_time);
     void drawObjectLayer(const Tiles::TileMapObjectLayer & _layer);
     void drawPolyXObject(const Tiles::TileMapPolyX & _poly, bool _close);
     void drawCircle(const Tiles::TileMapCircle & _circle);

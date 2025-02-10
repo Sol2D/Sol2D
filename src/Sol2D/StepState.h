@@ -50,7 +50,7 @@ struct MouseState
 
 struct StepState
 {
-    std::chrono::milliseconds time_passed;
+    std::chrono::milliseconds delta_time;
     MouseState mouse_state;
 };
 

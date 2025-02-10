@@ -182,7 +182,7 @@ local function getDefinition()
                     density = 80
                 },
                 radius = radius,
-                center1 = { x = hit_box.x + radius , y = hit_box.y + radius },
+                center1 = { x = hit_box.x + radius, y = hit_box.y + radius },
                 center2 = { x = hit_box.x + radius, y = hit_box.y + hit_box.h - radius },
                 graphics = {}
             },

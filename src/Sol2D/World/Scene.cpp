@@ -794,16 +794,16 @@ void Scene::step(const StepState & _state)
         return;
     }
     m_defers.executeActions();
-    b2World_Step(m_b2_world_id, _state.time_passed.count() / 1000.0f, 4); // TODO: stable rate (1.0f / 60.0f), all from user settings
+    b2World_Step(m_b2_world_id, _state.delta_time.count() / 1000.0f, 4); // TODO: stable rate (1.0f / 60.0f), all from user settings
     handleBox2dContactEvents();
     syncWorldWithFollowedBody();
 
     std::unordered_set<uint64_t> bodies_to_render(m_bodies.size());
     for(const auto & pair : m_bodies)
         bodies_to_render.insert(pair.first);
-    drawLayersAndBodies(*m_tile_map_ptr, bodies_to_render, _state.time_passed);
+    drawLayersAndBodies(*m_tile_map_ptr, bodies_to_render, _state.delta_time);
     for(const uint64_t body_id : bodies_to_render)
-        drawBody(m_bodies[body_id], _state.time_passed);
+        drawBody(m_bodies[body_id], _state.delta_time);
 
     if(mp_box2d_debug_draw)
         mp_box2d_debug_draw->draw();
@@ -919,7 +919,7 @@ void Scene::syncWorldWithFollowedBody()
     }
 }
 
-void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
+void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _delta_time)
 {
     SDL_FPoint body_position;
     {
@@ -938,7 +938,7 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
         if(graphics)
         {
             // TODO: How to rotate multiple shapes?
-            graphics->render(body_position, rotation, _time_passed);
+            graphics->render(body_position, rotation, _delta_time);
         }
     }
     // if(mp_box2d_debug_draw)
@@ -953,9 +953,9 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _time_passed)
 void Scene::drawLayersAndBodies(
     const TileMapLayerContainer & _container,
     std::unordered_set<uint64_t> & _bodies_to_render,
-    std::chrono::milliseconds _time_passed)
+    std::chrono::milliseconds _delta_time)
 {
-    _container.forEachLayer([&_bodies_to_render, _time_passed, this](const TileMapLayer & __layer) {
+    _container.forEachLayer([&_bodies_to_render, _delta_time, this](const TileMapLayer & __layer) {
         if(!__layer.isVisible()) return;
         switch(__layer.getType())
         {
@@ -973,7 +973,7 @@ void Scene::drawLayersAndBodies(
         {
             const TileMapGroupLayer & group = dynamic_cast<const TileMapGroupLayer &>(__layer);
             if(group.isVisible())
-                drawLayersAndBodies(group, _bodies_to_render, _time_passed);
+                drawLayersAndBodies(group, _bodies_to_render, _delta_time);
             break;
         }}
         for(const auto & pair : m_bodies)
@@ -981,7 +981,7 @@ void Scene::drawLayersAndBodies(
             b2BodyId box2d_body_id = pair.second;
             const Body * body = getUserData(box2d_body_id);
             if(body->getLayer() == __layer.getName() && _bodies_to_render.erase(pair.first))
-                drawBody(box2d_body_id, _time_passed);
+                drawBody(box2d_body_id, _delta_time);
         }
     });
 }

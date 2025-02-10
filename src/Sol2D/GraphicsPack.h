@@ -60,7 +60,7 @@ public:
     size_t getCurrentAnimationIteration() const;
     std::pair<bool, size_t> addSprite(size_t _frame, const GraphicsPackSpriteDefinition & _definition);
     bool removeSprite(size_t _frame, size_t _sprite);
-    void render(const SDL_FPoint & _position, const Rotation & _rotation, std::chrono::milliseconds _time_passed);
+    void render(const SDL_FPoint & _position, const Rotation & _rotation, std::chrono::milliseconds _delta_time);
 
 private:
     bool switchToNextVisibleFrame(bool _respect_iteration);

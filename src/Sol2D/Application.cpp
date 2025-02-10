@@ -141,7 +141,7 @@ void Application::exec()
         if(passed_ticks >= render_frame_delay)
         {
             last_rendering_ticks = now_ticks;
-            m_step_state.time_passed = std::chrono::milliseconds(passed_ticks);
+            m_step_state.delta_time = std::chrono::milliseconds(passed_ticks);
             m_step_state.mouse_state.buttons = SDL_GetMouseState(
                 &m_step_state.mouse_state.position.x,
                 &m_step_state.mouse_state.position.y);

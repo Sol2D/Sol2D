@@ -1,17 +1,32 @@
-local level_common = require 'level-common'
+local createBaseLevel = require 'level'
 
-local level_01 = {
-    name = 'level-01',
-    tileMap = 'tilemaps/level-01.tmx',
-    music = 'sounds/level-01/level-01.wav'
-}
 
-local module = {}
-module.__index = module
+local STORE_KEY = 'level-01'
 
----@param on_finish function
-function module.run(on_finish)
-    return level_common.run(level_01, on_finish)
+local function createLevel01()
+    local store = sol.stores:createStore(STORE_KEY)
+    local level = {}
+
+    ---@return sol.Scene
+    function level:createScene()
+        local scene = store:createScene(
+            'level-01',
+            {
+                gravity = { x = 0, y = 80 },
+                metersPerPixel = self.METERS_PER_PIXEL
+            }
+        )
+        if not scene:loadTileMap('tilemaps/level-01.tmx') then
+            error('Unable to load level-01.tmx')
+        end
+        return scene
+    end
+
+    function level:destroy()
+        sol.stores:deleteStore(STORE_KEY)
+    end
+
+    return setmetatable(level, createBaseLevel())
 end
 
-return setmetatable({}, module)
+return createLevel01

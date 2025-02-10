@@ -118,7 +118,7 @@ public:
 
     void onStepComplete(const StepState & _state) override
     {
-        lua_pushinteger(mp_lua, _state.time_passed.count());
+        lua_pushinteger(mp_lua, _state.delta_time.count());
         LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_step, 1);
     }
 

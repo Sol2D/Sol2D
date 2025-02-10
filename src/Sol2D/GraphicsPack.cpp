@@ -307,21 +307,21 @@ bool GraphicsPack::removeSprite(size_t _frame, size_t _sprite)
 void GraphicsPack::render(
     const SDL_FPoint & _position,
     const Rotation & _rotation,
-    std::chrono::milliseconds _time_passed)
+    std::chrono::milliseconds _delta_time)
 {
     if(m_max_iterations == 0 || m_total_duration == std::chrono::milliseconds::zero())
     {
         performRender(_position, _rotation);
         return;
     }
-    m_current_frame_duration += _time_passed;
+    m_current_frame_duration += _delta_time;
     const Frame * frame = m_frames[m_current_frame_index];
     bool respect_iterations = m_max_iterations > 0;
     if(!frame->is_visible)
     {
         if(switchToNextVisibleFrame(respect_iterations))
         {
-            m_current_frame_duration = _time_passed;
+            m_current_frame_duration = _delta_time;
         }
         else
         {
