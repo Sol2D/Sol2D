@@ -18,6 +18,7 @@
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaUtils.h>
 #include <cstring>
 
 using namespace Sol2D;
@@ -92,9 +93,9 @@ bool Sol2D::Lua::tryGetDimensionD(lua_State * _lua, int _idx, double * _value, D
         *_unit = DimensionUnit::Pixel;
         return true;
     }
-    if(lua_isstring(_lua, _idx))
+    if(const char * str = argToString(_lua, _idx))
     {
-        return parseDimension(lua_tostring(_lua, _idx), _value, _unit, &std::strtod);
+        return parseDimension(str, _value, _unit, &std::strtod);
     }
     LuaTable table(_lua, _idx);
     if(table.isValid())
@@ -115,9 +116,9 @@ bool Sol2D::Lua::tryGetDimensionI(lua_State * _lua, int _idx, long long * _value
         *_unit = DimensionUnit::Pixel;
         return true;
     }
-    if(lua_isstring(_lua, _idx))
+    if(const char * str = argToString(_lua, _idx))
     {
-        return parseDimension(lua_tostring(_lua, _idx), _value, _unit, &strToLL);
+        return parseDimension(str, _value, _unit, &strToLL);
     }
     LuaTable table(_lua, _idx);
     if(table.isValid())

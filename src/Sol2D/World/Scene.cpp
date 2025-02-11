@@ -930,7 +930,7 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _delta_time)
     std::vector<b2ShapeId> shapes(shape_count);
     b2Body_GetShapes(_body_id, shapes.data(), shape_count);
     b2Rot b2_rotation = b2Body_GetRotation(_body_id);
-    Rotation rotation(b2_rotation.s, b2_rotation.c); // TODO: https://github.com/libsdl-org/SDL/issues/11279
+    Rotation rotation(b2_rotation.s, b2_rotation.c);
     for(const b2ShapeId & shape_id : shapes)
     {
         BodyShape * shape = getUserData(shape_id);
@@ -941,13 +941,6 @@ void Scene::drawBody(b2BodyId _body_id, std::chrono::milliseconds _delta_time)
             graphics->render(body_position, rotation, _delta_time);
         }
     }
-    // if(mp_box2d_debug_draw)
-    // {
-    //     SDL_SetRenderDrawColor(&mr_renderer, 0, 128, 255, 255);
-    //     SDL::sdlRenderCircle(&mr_renderer, body_position, 8.0f);
-    //     SDL_RenderLine(&mr_renderer, body_position.x - 8, body_position.y, body_position.x + 8, body_position.y);
-    //     SDL_RenderLine(&mr_renderer, body_position.x, body_position.y - 8, body_position.x, body_position.y + 8);
-    // }
 }
 
 void Scene::drawLayersAndBodies(

@@ -28,6 +28,7 @@
 #include <Sol2D/Lua/LuaMusicApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
+#include <Sol2D/Lua/Aux/LuaUtils.h>
 #include <Sol2D/Lua/Aux/LuaReferenceHolder.h>
 
 using namespace Sol2D;
@@ -85,8 +86,7 @@ using UserData = LuaUserData<Self, LuaTypeName::store>;
 int luaApi_CreateView(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * key = lua_tostring(_lua, 2);
+    const char * key = argToStringOrError(_lua, 2);
     std::shared_ptr<View> view = self->getStore(_lua)->createObject<View>(key, self->renderer);
     pushViewApi(_lua, view);
     self->holdReference(_lua, LuaTypeName::view, key);
@@ -98,8 +98,7 @@ int luaApi_CreateView(lua_State * _lua)
 int luaApi_GetView(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    if(std::shared_ptr<View> view = self->getStore(_lua)->getObject<View>(lua_tostring(_lua, 2)))
+    if(std::shared_ptr<View> view = self->getStore(_lua)->getObject<View>(argToStringOrError(_lua, 2)))
         pushViewApi(_lua, view);
     else
         lua_pushnil(_lua);
@@ -112,10 +111,9 @@ int luaApi_GetView(lua_State * _lua)
 int luaApi_CreateScene(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
     SceneOptions options;
     tryGetSceneOptions(_lua, 3, options);
-    const char * key = lua_tostring(_lua, 2);
+    const char * key = argToStringOrError(_lua, 2);
     std::shared_ptr<Scene> scene = self->getStore(_lua)->createObject<Scene>(
         key,
         options,
@@ -131,8 +129,7 @@ int luaApi_CreateScene(lua_State * _lua)
 int luaApi_GetScene(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    if(std::shared_ptr<Scene> scene = self->getStore(_lua)->getObject<Scene>(lua_tostring(_lua, 2)))
+    if(std::shared_ptr<Scene> scene = self->getStore(_lua)->getObject<Scene>(argToStringOrError(_lua, 2)))
         pushSceneApi(_lua, self->workspace, scene);
     else
         lua_pushnil(_lua);
@@ -144,8 +141,7 @@ int luaApi_GetScene(lua_State * _lua)
 int luaApi_CreateForm(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * key = lua_tostring(_lua, 2);
+    const char * key = argToStringOrError(_lua, 2);
     std::shared_ptr<Form> form = self->getStore(_lua)->createObject<Form>(key, self->renderer);
     pushFormApi(_lua, self->workspace, form);
     self->holdReference(_lua, LuaTypeName::form, key);
@@ -157,8 +153,7 @@ int luaApi_CreateForm(lua_State * _lua)
 int luaApi_GetForm(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    if(std::shared_ptr<Form> form = self->getStore(_lua)->getObject<Form>(lua_tostring(_lua, 2)))
+    if(std::shared_ptr<Form> form = self->getStore(_lua)->getObject<Form>(argToStringOrError(_lua, 2)))
         pushFormApi(_lua, self->workspace, form);
     else
         lua_pushnil(_lua);
@@ -170,8 +165,7 @@ int luaApi_GetForm(lua_State * _lua)
 int luaApi_CreateSprite(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * key = lua_tostring(_lua, 2);
+    const char * key = argToStringOrError(_lua, 2);
     std::shared_ptr<Sprite> sprite = self->getStore(_lua)->createObject<Sprite>(key, self->renderer);
     pushSpriteApi(_lua, self->workspace, sprite);
     self->holdReference(_lua, LuaTypeName::sprite, key);
@@ -183,8 +177,7 @@ int luaApi_CreateSprite(lua_State * _lua)
 int luaApi_GetSprite(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    if(std::shared_ptr<Sprite> sprite = self->getStore(_lua)->getObject<Sprite>(lua_tostring(_lua, 2)))
+    if(std::shared_ptr<Sprite> sprite = self->getStore(_lua)->getObject<Sprite>(argToStringOrError(_lua, 2)))
         pushSpriteApi(_lua, self->workspace, sprite);
     else
         lua_pushnil(_lua);
@@ -196,8 +189,7 @@ int luaApi_GetSprite(lua_State * _lua)
 int luaApi_CreateSpriteSheet(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * key = lua_tostring(_lua, 2);
+    const char * key = argToStringOrError(_lua, 2);
     std::shared_ptr<SpriteSheet> sprite_sheet =
         self->getStore(_lua)->createObject<SpriteSheet>(key, self->renderer);
     pushSpriteSheetApi(_lua, self->workspace, sprite_sheet);
@@ -210,8 +202,7 @@ int luaApi_CreateSpriteSheet(lua_State * _lua)
 int luaApi_GetSpriteSheet(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    if(std::shared_ptr<SpriteSheet> sprite_sheet = self->getStore(_lua)->getObject<SpriteSheet>(lua_tostring(_lua, 2)))
+    if(std::shared_ptr<SpriteSheet> sprite_sheet = self->getStore(_lua)->getObject<SpriteSheet>(argToStringOrError(_lua, 2)))
         pushSpriteSheetApi(_lua, self->workspace, sprite_sheet);
     else
         lua_pushnil(_lua);
@@ -225,11 +216,9 @@ int luaApi_GetSpriteSheet(lua_State * _lua)
 int luaApi_CreateFont(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    luaL_argexpected(_lua, lua_isstring(_lua, 3), 3, LuaTypeName::string);
-    const char * path = lua_tostring(_lua, 3);
+    const char * path = argToStringOrError(_lua, 3);
     luaL_argexpected(_lua, lua_isinteger(_lua, 4), 4, LuaTypeName::integer);
-    const char * key = lua_tostring(_lua, 2);
+    const char * key = argToStringOrError(_lua, 2);
     std::shared_ptr<TTF_Font> font = self->getStore(_lua)->createObject<TTF_Font>(
         key,
         self->workspace.getResourceFullPath(std::filesystem::path(path)),
@@ -251,8 +240,7 @@ int luaApi_CreateFont(lua_State * _lua)
 int luaApi_GetFont(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    if(std::shared_ptr<TTF_Font> font = self->getStore(_lua)->getObject<TTF_Font>(lua_tostring(_lua, 2)))
+    if(std::shared_ptr<TTF_Font> font = self->getStore(_lua)->getObject<TTF_Font>(argToStringOrError(_lua, 2)))
         pushFontApi(_lua, font);
     else
         lua_pushnil(_lua);
@@ -265,10 +253,8 @@ int luaApi_GetFont(lua_State * _lua)
 int luaApi_CreateSoundEffect(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    luaL_argexpected(_lua, lua_isstring(_lua, 3), 3, LuaTypeName::string);
-    const char * key = lua_tostring(_lua, 2);
-    const char * path = lua_tostring(_lua, 3);
+    const char * key = argToStringOrError(_lua, 2);
+    const char * path = argToStringOrError(_lua, 3);
     std::shared_ptr<Mix_Chunk> chunk = self->getStore(_lua)->createObject<Mix_Chunk>(
         key,
         self->workspace.getResourceFullPath(std::filesystem::path(path)));
@@ -289,8 +275,7 @@ int luaApi_CreateSoundEffect(lua_State * _lua)
 int luaApi_GetSoundEffect(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    if(std::shared_ptr<Mix_Chunk> chunk = self->getStore(_lua)->getObject<Mix_Chunk>(lua_tostring(_lua, 2)))
+    if(std::shared_ptr<Mix_Chunk> chunk = self->getStore(_lua)->getObject<Mix_Chunk>(argToStringOrError(_lua, 2)))
         pushSoundEffectApi(_lua, chunk);
     else
         lua_pushnil(_lua);
@@ -303,10 +288,8 @@ int luaApi_GetSoundEffect(lua_State * _lua)
 int luaApi_CreateMusic(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    luaL_argexpected(_lua, lua_isstring(_lua, 3), 3, LuaTypeName::string);
-    const char * key = lua_tostring(_lua, 2);
-    const char * path = lua_tostring(_lua, 3);
+    const char * key = argToStringOrError(_lua, 2);
+    const char * path = argToStringOrError(_lua, 3);
     std::shared_ptr<Mix_Music> music = self->getStore(_lua)->createObject<Mix_Music>(
         key,
         self->workspace.getResourceFullPath(std::filesystem::path(path)));
@@ -327,8 +310,7 @@ int luaApi_CreateMusic(lua_State * _lua)
 int luaApi_GetMusic(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    if(std::shared_ptr<Mix_Music> music = self->getStore(_lua)->getObject<Mix_Music>(lua_tostring(_lua, 2)))
+    if(std::shared_ptr<Mix_Music> music = self->getStore(_lua)->getObject<Mix_Music>(argToStringOrError(_lua, 2)))
         pushMusicApi(_lua, music);
     else
         lua_pushnil(_lua);
@@ -341,8 +323,7 @@ template<typename T, const char type[]>
 int luaApi_FreeObject(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * key = lua_tostring(_lua, 2);
+    const char * key = argToStringOrError(_lua, 2);
     bool result = self->getStore(_lua)->freeObject<T>(key);
     if(result) self->releaseReference(_lua, type, key);
     lua_pushboolean(_lua, result);

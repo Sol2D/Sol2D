@@ -22,6 +22,7 @@
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
+#include <Sol2D/Lua/Aux/LuaUtils.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 #include <Sol2D/Object.h>
 #include <Sol2D/Utils/Array.h>
@@ -205,8 +206,8 @@ int luaApi_SetText(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     const char * text = nullptr;
-    if(lua_gettop(_lua) >= 2 && lua_isstring(_lua, 2))
-        text = lua_tostring(_lua, 2);
+    if(lua_gettop(_lua) >= 2)
+        text = argToString(_lua, 2);
     self->getWidget(_lua)->setText(text ? std::string(text) : std::string());
     return 0;
 }

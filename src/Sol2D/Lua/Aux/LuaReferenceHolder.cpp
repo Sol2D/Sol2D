@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/Aux/LuaReferenceHolder.h>
+#include <Sol2D/Lua/Aux/LuaUtils.h>
 #include <lua.hpp>
 #include <format>
 
@@ -76,12 +77,9 @@ void LuaReferenceHolder::releaseAll(const void * _owner) const
     lua_pushnil(mp_lua);
     for(bool exit = false; !exit && lua_next(mp_lua, registry_idx);)
     {
-        if(lua_isstring(mp_lua, -2))
-        {
-            const char * key = lua_tostring(mp_lua, -2);
-            if(std::strncmp(key_prefix.c_str(), key, key_prefix.size()) == 0)
-                keys_to_delete.push_back(key);
-        }
+        const char * key = argToString(mp_lua, -2);
+        if(key && std::strncmp(key_prefix.c_str(), key, key_prefix.size()) == 0)
+            keys_to_delete.push_back(key);
         lua_pop(mp_lua, 1); // value
     }
     lua_pop(mp_lua, 1); // index

@@ -7,9 +7,9 @@ StateMachine.__index = StateMachine
 ---@class StateMachineState
 ---@field canEnter? fun(): boolean
 ---@field enter? fun(event: StateMachineEvent)
----@field update? fun(dt?: integer)
 ---@field canLeave? fun(): boolean
 ---@field leave? fun()
+---@field update? fun(dt: integer)
 
 ---@class StateMachineTransition
 ---@field from StateMachineStateKey
@@ -26,6 +26,7 @@ function StateMachine.new(states, initial_state, transitions)
     }
 
     local sm = {}
+    sm.__index = sm
 
     ---@param event StateMachineEvent
     function sm.processEvent(event)
@@ -47,9 +48,12 @@ function StateMachine.new(states, initial_state, transitions)
         end
     end
 
-    ---@param dt integer
+    function sm.getCurrentState()
+        return current.key
+    end
+
     function sm.update(dt)
-        if current.state.update then
+        if current.state and current.state.update then
             current.state.update(dt)
         end
     end

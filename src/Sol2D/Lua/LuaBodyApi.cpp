@@ -19,6 +19,7 @@
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
+#include <Sol2D/Lua/Aux/LuaUtils.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Utils;
@@ -98,8 +99,7 @@ int luaApi_GetId(lua_State * _lua)
 int luaApi_GetShape(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * shape_key = lua_tostring(_lua, 2);
+    const char * shape_key = argToStringOrError(_lua, 2);
     PreHashedKey<std::string> shape_pre_hashed_key = makePreHashedKey(std::string(shape_key));
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     if(scene->doesBodyShapeExist(self->body_id, shape_pre_hashed_key))
@@ -114,8 +114,7 @@ int luaApi_GetShape(lua_State * _lua)
 int luaApi_SetLayer(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * layer = lua_tostring(_lua, 2);
+    const char * layer = argToStringOrError(_lua, 2);
     ensureResult(_lua, self->getScene(_lua)->setBodyLayer(self->body_id, layer));
     return 0;
 }

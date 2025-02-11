@@ -30,6 +30,7 @@
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaScript.h>
+#include <Sol2D/Lua/Aux/LuaUtils.h>
 #include <sstream>
 
 using namespace Sol2D;
@@ -253,8 +254,7 @@ int luaApi_SetGravity(lua_State * _lua)
 int luaApi_LoadTileMap(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * path = lua_tostring(_lua, 2);
+    const char * path = argToStringOrError(_lua, 2);
     bool result = self->getScene(_lua)->loadTileMap(self->workspace.getResourceFullPath(path));
     lua_pushboolean(_lua, result);
     return 1;
@@ -281,8 +281,7 @@ int luaApi_GetTileMapObjectById(lua_State * _lua)
 int luaApi_GetTileMapObjectByName(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * name = lua_tostring(_lua, 2);
+    const char * name = argToStringOrError(_lua, 2);
     const Tiles::TileMapObject * object = self->getScene(_lua)->getTileMapObjectByName(name);
     if(object)
         pushTileMapObject(_lua, *object);
@@ -296,8 +295,7 @@ int luaApi_GetTileMapObjectByName(lua_State * _lua)
 int luaApi_GetTileMapObjectsByClass(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * class_name = lua_tostring(_lua, 2);
+    const char * class_name = argToStringOrError(_lua, 2);
     auto objects = self->getScene(_lua)->getTileMapObjectsByClass(class_name);
     lua_newtable(_lua);
     int i = 0;
@@ -327,9 +325,8 @@ int luaApi_CreateBody(lua_State * _lua)
     std::unique_ptr<BodyDefinition> definition = tryGetBodyDefinition(_lua, 3);
     luaL_argexpected(_lua, definition, 3, LuaTypeName::body_definition);
     body_id = scene->createBody(position, *definition);
-    if(lua_isstring(_lua, 4))
+    if(const char * script_path = argToString(_lua, 4))
     {
-        const char * script_path = lua_tostring(_lua, 4);
         LuaTable table = LuaTable::pushNew(_lua);
         pushBodyApi(_lua, scene, body_id);
         table.setValueFromTop("body");
@@ -380,8 +377,7 @@ int luaApi_GetBody(lua_State * _lua)
 int luaApi_CreateBodiesFromMapObjects(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * class_name = lua_tostring(_lua, 2);    
+    const char * class_name = argToStringOrError(_lua, 2);
     BodyOptions options;
     if(lua_gettop(_lua) >= 3)
         luaL_argexpected(_lua, tryGetBodyOptions(_lua, 3, options), 3, LuaTypeName::body_options);

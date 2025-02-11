@@ -21,6 +21,7 @@
 #include <Sol2D/Lua/LuaBodyPhysicsDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyShapePhysicsDefinitionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaUtils.h>
 
 using namespace Sol2D;
 using namespace Sol2D::World;
@@ -66,8 +67,8 @@ void getShapes(lua_State * _lua, int _idx, std::vector<std::pair<std::string, Bo
     lua_pushnil(_lua);
     while(lua_next(_lua, dictionary_index))
     {
-        if(lua_isstring(_lua, -2))
-            addShape(_lua, -1, lua_tostring(_lua, -2), _shapes);
+        if(const char * key = argToString(_lua, -2))
+            addShape(_lua, -1, key, _shapes);
         lua_pop(_lua, 1);
     }
 }
@@ -141,11 +142,11 @@ void readBasicShape(LuaTable & _table, BodyBasicShapeDefinition<shape_type> & _s
         lua_pushnil(_table.getLua());
         while(lua_next(_table.getLua(), graphics_table_idx))
         {
-            if(lua_isstring(_table.getLua(), -2))
+            if(const char * key = argToString(_table.getLua(), -2))
             {
                 GraphicsPackDefinition graphics;
                 if(tryGetGraphicsPackDefinition(_table.getLua(), -1, graphics))
-                    _shape.graphics.emplace_back(lua_tostring(_table.getLua(), -2), std::move(graphics));
+                    _shape.graphics.emplace_back(key, std::move(graphics));
             }
             lua_pop(_table.getLua(), 1);
         }

@@ -20,6 +20,7 @@
 #include <Sol2D/Lua/LuaSizeApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
+#include <Sol2D/Lua/Aux/LuaUtils.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -54,8 +55,7 @@ using UserData = LuaUserData<Self, LuaTypeName::sprite>;
 int luaApi_LoadFromFile(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isstring(_lua, 2), 2, LuaTypeName::string);
-    const char * path = lua_tostring(_lua, 2);    
+    const char * path = argToStringOrError(_lua, 2);
     SpriteOptions options;
     tryGetSpriteOptions(_lua, 3, options);
     bool result = self->getSprite(_lua)->loadFromFile(self->workspace.getResourceFullPath(path), options);
