@@ -178,6 +178,18 @@ local function createStateMachine()
                 player.setAnimation(State.FALL)
             end,
             update = function(data)
+                if data.isMoving then
+                    player.move()
+                end
+            end,
+            canLeave = function()
+                return not player.isInAir()
+            end,
+            leave = function()
+                -- The direction changed in the air does not change the facing direction.
+                -- Therefore, we restore the direction to prevent an unexpected change.
+                player.direction = player.animation.direction
+                sound_effect_armor:play()
             end
         },
         [State.ATTACK] = {
@@ -204,13 +216,16 @@ local function createStateMachine()
             { from = State.IDLE,   event = Event.ATTACK, to = State.ATTACK },
             { from = State.IDLE,   event = Event.JUMP,   to = State.JUMP },
             { from = State.FALL,   event = Event.NOP,    to = State.IDLE },
+            { from = State.FALL,   event = Event.MOVE,   to = State.WALK },
             { from = State.JUMP,   event = Event.NOP,    to = State.IDLE },
             { from = State.JUMP,   event = Event.MOVE,   to = State.WALK },
             { from = State.WALK,   event = Event.ATTACK, to = State.ATTACK },
             { from = State.WALK,   event = Event.JUMP,   to = State.JUMP },
             { from = State.WALK,   event = Event.NOP,    to = State.IDLE },
+            { from = State.WALK,   event = Event.FALL,   to = State.FALL },
             { from = State.ATTACK, event = Event.MOVE,   to = State.WALK },
-            { from = State.ATTACK, event = Event.NOP,    to = State.IDLE }
+            { from = State.ATTACK, event = Event.NOP,    to = State.IDLE },
+            { from = State.ATTACK, event = Event.FALL,   to = State.FALL },
         }
     )
 
@@ -229,8 +244,9 @@ local function createStateMachine()
         if not body then
             error('Body ' .. tostring(body_id) .. ' not found')
         end
+        local was_in_air = player.isInAir()
         table.insert(player.footings, { body = body, bodyId = body_id, shapeKey = shape_key })
-        if player.isJumping then
+        if was_in_air then
             player.isJumping = false
             sm.processEvent(Event.NOP)
         end

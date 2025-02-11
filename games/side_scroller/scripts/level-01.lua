@@ -1,6 +1,5 @@
 local createBaseLevel = require 'level'
 
-
 local STORE_KEY = 'level-01'
 
 local function createLevel01()
@@ -20,6 +19,10 @@ local function createLevel01()
             error('Unable to load level-01.tmx')
         end
         return scene
+    end
+
+    function level:createMusic()
+        return store:createMusic('level-01', 'sounds/level-01/level-01.wav')
     end
 
     function level:destroy()

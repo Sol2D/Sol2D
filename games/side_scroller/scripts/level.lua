@@ -110,15 +110,20 @@ local function createLevel()
             }
         )
         createFlyingPlatforms(level.scene)
-
-        local pre_solve_subscription = level.scene:subscribeToPreSolveContact(preSolveContact) -- TODO: unsubscribe
-
+        level.scene:subscribeToPreSolveContact(preSolveContact)
         view:bindFragment(fragmet_id, level.scene)
         level.player = Player.new(
             level.scene,
             getPlayerStartPosition(level.scene)
         )
         level.scene:setFollowedBody(level.player)
+
+        if self.createMusic then
+            local music = self:createMusic()
+            if music then
+                music:loop(-1)
+            end
+        end
     end
 
     return level
