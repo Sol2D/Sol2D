@@ -9,7 +9,7 @@ StateMachine.__index = StateMachine
 ---@field enter? fun(event: StateMachineEvent)
 ---@field canLeave? fun(): boolean
 ---@field leave? fun()
----@field update? fun(dt: integer)
+---@field update? fun(data: any)
 
 ---@class StateMachineTransition
 ---@field from StateMachineStateKey
@@ -37,6 +37,9 @@ function StateMachine.new(states, initial_state, transitions)
             if tran.event == event and tran.from == current.key then
                 local target = states[tran.to]
                 if target and (not target.canEnter or target.canEnter()) then
+                    if current.state.leave then
+                        current.state.leave()
+                    end
                     current.key = tran.to
                     current.state = target
                     if target.enter then
@@ -52,9 +55,10 @@ function StateMachine.new(states, initial_state, transitions)
         return current.key
     end
 
-    function sm.update(dt)
+    ---@param data any
+    function sm.update(data)
         if current.state and current.state.update then
-            current.state.update(dt)
+            current.state.update(data)
         end
     end
 

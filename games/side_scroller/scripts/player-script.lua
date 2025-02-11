@@ -1,8 +1,11 @@
 local Player = require 'player'
 local StateMachine = require 'state-machine'
+local resources = require 'resources'
 
 local scene = script.scene
 local player_body_id = script.body:getId()
+local sound_effect_armor = resources.getSoundEffect(resources.keys.soundEffects.ARMOR)
+local sound_effect_swing = resources.getSoundEffect(resources.keys.soundEffects.SWING)
 
 local State = {
     IDLE = 'idel',
@@ -14,7 +17,7 @@ local State = {
 
 local Event = {
     NOP = 0,
-    H_FORCE = 1,
+    MOVE = 1,
     FALL = 2,
     JUMP = 3,
     ATTACK = 4
@@ -24,6 +27,10 @@ local Direction = {
     LEFT = -1,
     RIGHT = 1
 }
+
+---@class UpdateData
+---@field dt integer
+---@field isMoving boolean
 
 local function createStateMachine()
     local WALK_VELOCITY = 5
@@ -103,6 +110,19 @@ local function createStateMachine()
         return player.mass * change / (1 / 60) -- FIXME: depends on FPS
     end
 
+    function player.move()
+        local desired_velocity = WALK_VELOCITY
+        if player.direction == Direction.LEFT then
+            desired_velocity = -desired_velocity
+        end
+        local footing_velocity = 0
+        if not player.isInAir() then
+            footing_velocity = player.getFootingVelocity().x
+        end
+        local force = player.getHorizontalForce(player.body:getLinearVelocity().x, footing_velocity, desired_velocity)
+        player.body:applyForceToCenter({ x = force, y = 0 })
+    end
+
     player.setAnimation(State.IDLE)
 
     local states = {
@@ -110,7 +130,7 @@ local function createStateMachine()
             enter = function(event)
                 player.setAnimation(State.IDLE)
             end,
-            update = function(dt)
+            update = function(data)
                 player.syncAnimationDirection()
             end
         },
@@ -118,18 +138,9 @@ local function createStateMachine()
             enter = function(event)
                 player.setAnimation(State.WALK)
             end,
-            update = function(dt)
+            update = function(data)
                 player.syncAnimationDirection();
-                local desired_velocity = WALK_VELOCITY
-                if player.direction == Direction.LEFT then
-                    desired_velocity = -desired_velocity
-                end
-                local force = player.getHorizontalForce(
-                    player.body:getLinearVelocity().x,
-                    player.getFootingVelocity().x,
-                    desired_velocity
-                )
-                player.body:applyForceToCenter({ x = force, y = 0 })
+                player.move()
             end
         },
         [State.JUMP] = {
@@ -141,22 +152,32 @@ local function createStateMachine()
                 player.isJumping = true
                 player.body:applyImpulseToCenter(JUMP_IMPULSE)
                 player.jumpTimeout = JUMP_DELAY
+                sound_effect_swing:play()
             end,
-            update = function(dt)
+            update = function(data)
                 if not player.isJumping and player.jumpTimeout == 0 then
                     player.body:applyImpulseToCenter(JUMP_IMPULSE)
                     player.jumpTimeout = JUMP_DELAY
                 end
+                if data.isMoving then
+                    player.move()
+                end
             end,
             canLeave = function()
                 return not player.isJumping
+            end,
+            leave = function()
+                -- The direction changed in the air does not change the facing direction.
+                -- Therefore, we restore the direction to prevent an unexpected change.
+                player.direction = player.animation.direction
+                sound_effect_armor:play()
             end
         },
         [State.FALL] = {
             enter = function(event)
                 player.setAnimation(State.FALL)
             end,
-            update = function(dt)
+            update = function(data)
             end
         },
         [State.ATTACK] = {
@@ -164,7 +185,7 @@ local function createStateMachine()
                 player.setAnimation(State.ATTACK)
                 -- TODO: enable sensor
             end,
-            update = function(dt)
+            update = function(data)
             end,
             onLeave = function()
                 -- TODO: disable sensor
@@ -178,18 +199,18 @@ local function createStateMachine()
         states,
         State.IDLE,
         {
-            { from = State.IDLE,   event = Event.H_FORCE, to = State.WALK },
-            { from = State.IDLE,   event = Event.FALL,    to = State.FALL },
-            { from = State.IDLE,   event = Event.ATTACK,  to = State.ATTACK },
-            { from = State.IDLE,   event = Event.JUMP,    to = State.JUMP },
-            { from = State.FALL,   event = Event.NOP,     to = State.IDLE },
-            { from = State.JUMP,   event = Event.NOP,     to = State.IDLE },
-            { from = State.JUMP,   event = Event.H_FORCE, to = State.WALK },
-            { from = State.WALK,   event = Event.ATTACK,  to = State.ATTACK },
-            { from = State.WALK,   event = Event.JUMP,    to = State.JUMP },
-            { from = State.WALK,   event = Event.NOP,     to = State.IDLE },
-            { from = State.ATTACK, event = Event.H_FORCE, to = State.WALK },
-            { from = State.ATTACK, event = Event.NOP,     to = State.IDLE }
+            { from = State.IDLE,   event = Event.MOVE,   to = State.WALK },
+            { from = State.IDLE,   event = Event.FALL,   to = State.FALL },
+            { from = State.IDLE,   event = Event.ATTACK, to = State.ATTACK },
+            { from = State.IDLE,   event = Event.JUMP,   to = State.JUMP },
+            { from = State.FALL,   event = Event.NOP,    to = State.IDLE },
+            { from = State.JUMP,   event = Event.NOP,    to = State.IDLE },
+            { from = State.JUMP,   event = Event.MOVE,   to = State.WALK },
+            { from = State.WALK,   event = Event.ATTACK, to = State.ATTACK },
+            { from = State.WALK,   event = Event.JUMP,   to = State.JUMP },
+            { from = State.WALK,   event = Event.NOP,    to = State.IDLE },
+            { from = State.ATTACK, event = Event.MOVE,   to = State.WALK },
+            { from = State.ATTACK, event = Event.NOP,    to = State.IDLE }
         }
     )
 
@@ -229,10 +250,11 @@ local function createStateMachine()
         end
     end
 
-    function facade.update(dt)
-        sm.update(dt)
+    ---@param data UpdateData
+    function facade.update(data)
+        sm.update(data)
         if not player.isJumping and player.jumpTimeout > 0 then
-            player.jumpTimeout = player.jumpTimeout - dt
+            player.jumpTimeout = player.jumpTimeout - data.dt
             if player.jumpTimeout < 0 then
                 player.jumpTimeout = 0
             end
@@ -257,20 +279,29 @@ scene:subscribeToStep(function(dt)
             sol.Scancode.L_CTRL
         )
 
+    local direction = nil
+    if right_key then
+        direction = Direction.RIGHT
+        sm.setDirection(Direction.RIGHT)
+    elseif left_key then
+        direction = Direction.LEFT
+        sm.setDirection(Direction.LEFT)
+    end
+
     if left_ctrl then
         sm.processEvent(Event.ATTACK)
     elseif space_key then
         sm.processEvent(Event.JUMP)
-    elseif right_key then
-        sm.setDirection(Direction.RIGHT)
-        sm.processEvent(Event.H_FORCE)
-    elseif left_key then
-        sm.setDirection(Direction.LEFT)
-        sm.processEvent(Event.H_FORCE)
+    elseif direction then
+        sm.processEvent(Event.MOVE)
     else
         sm.processEvent(Event.NOP)
     end
-    sm.update(dt)
+
+    sm.update({
+        dt = dt,
+        isMoving = direction ~= nil
+    })
 end)
 
 scene:subscribeToSensorBeginContact(function(contact)
