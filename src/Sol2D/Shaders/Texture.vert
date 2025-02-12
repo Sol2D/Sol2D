@@ -17,12 +17,17 @@ layout (location = 0) in vec3 vertex_position;
 layout (location = 1) in vec2 texture_coordinates;
 
 layout (location = 0) out vec2 texture_coordinates_out;
+layout (location = 1) out vec2 texture_coordinates_inverted_out;
 
 void main()
 {
     texture_coordinates_out = vec2(
         u.texture_region.x + texture_coordinates.x * u.texture_region.z,
         u.texture_region.y + texture_coordinates.y * u.texture_region.w
+    );
+    texture_coordinates_inverted_out = vec2(
+        u.texture_region.x + (1.0f - texture_coordinates.x) * u.texture_region.z,
+        u.texture_region.y + (1.0f - texture_coordinates.y) * u.texture_region.w
     );
     mat4 mat_model = u.mat_scale;
     if(u.use_translate_to_center)
