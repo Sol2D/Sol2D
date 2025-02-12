@@ -10,39 +10,10 @@ local layers = {
 local keys = {
     shapes = {
         ONE_WAY_PLATFORM = 'one-way-platform',
-        WATER = 'water'
+        WATER = 'water',
+        FINISH = 'finish'
     }
 }
-
-local function preSolveContact(contact)
-    local player_side = nil
-    local platform_side = nil
-    local sign = 0
-    if contact.sideA.shapeKey == Player.keys.shapes.MAIN then
-        player_side = contact.sideA
-        platform_side = contact.sideB
-        sign = 1
-    elseif contact.sideB.shapeKey == Player.keys.shapes.MAIN then
-        player_side = contact.sideB
-        platform_side = contact.sideA
-        sign = -1
-    end
-    if player_side == nil or platform_side == nil or platform_side.shapeKey ~= keys.shapes.ONE_WAY_PLATFORM then
-        return true
-    end
-
-    if contact.manifold.normal.y * sign < 0.95 then
-        return false;
-    end
-
-    for _, point in ipairs(contact.manifold.points) do
-        if point.separation > -0.2 then
-            return true
-        end
-    end
-
-    return false
-end
 
 local function createLevel()
     local level = {}
@@ -58,12 +29,58 @@ local function createLevel()
         }
     end
 
-    local function getPlayerStartPosition(scene)
-        local start_point = scene:getTileMapObjectByName('start-position')
+    local function getPlayerStartPosition()
+        local start_point = level.scene:getTileMapObjectByName('start-position')
         if not start_point then
             error('There is no object named start-position on the fragment map')
         end
         return pixelPontToMeters(start_point.position)
+    end
+
+    ---@param contact sol.PreSolveContact
+    local function preSolveContact(contact)
+        local player_side = nil
+        local platform_side = nil
+        local sign = 0
+        if contact.sideA.bodyId == level.player.id then
+            player_side = contact.sideA
+            platform_side = contact.sideB
+            sign = 1
+        elseif contact.sideB.bodyId == level.player.id then
+            player_side = contact.sideB
+            platform_side = contact.sideA
+            sign = -1
+        end
+        if player_side == nil or platform_side == nil or platform_side.shapeKey ~= keys.shapes.ONE_WAY_PLATFORM then
+            return true
+        end
+
+        if contact.manifold.normal.y * sign < 0.95 then
+            return false;
+        end
+
+        for _, point in ipairs(contact.manifold.points) do
+            if point.separation > -0.2 then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    ---@param on_finish function
+    local function createSensorContactListener(on_finish)
+        ---@param contact sol.SensorContact
+        local function listener(contact)
+            if contact.visitor.bodyId == level.player.id then
+                if contact.sensor.shapeKey == keys.shapes.WATER then
+                    level.player.body:setPosition(getPlayerStartPosition())
+                elseif contact.sensor.shapeKey == keys.shapes.FINISH then
+                    on_finish()
+                end
+            end
+        end
+        return listener
     end
 
     local function createFlyingPlatforms(scene)
@@ -95,7 +112,8 @@ local function createLevel()
 
     ---@param view sol.View
     ---@param fragmet_id integer
-    function level:run(view, fragmet_id)
+    ---@param on_finish function
+    function level:run(view, fragmet_id, on_finish)
         ---@type sol.Scene
         level.scene = self:createScene()
         level.scene:createBodiesFromMapObjects('obstacle')
@@ -109,14 +127,28 @@ local function createLevel()
                 }
             }
         )
-        createFlyingPlatforms(level.scene)
-        level.scene:subscribeToPreSolveContact(preSolveContact)
-        view:bindFragment(fragmet_id, level.scene)
-        level.player = Player.new(
-            level.scene,
-            getPlayerStartPosition(level.scene)
+        level.scene:createBodiesFromMapObjects(
+            'water',
+            {
+                shapeKey = keys.shapes.WATER,
+                shapePhysics = {
+                    isSensor = true
+                }
+            }
         )
-        level.scene:setFollowedBody(level.player)
+        createFlyingPlatforms(level.scene)
+        view:bindFragment(fragmet_id, level.scene)
+
+        level.player = {
+            body = Player.new(
+                level.scene,
+                getPlayerStartPosition()
+            )
+        }
+        level.player.id = level.player.body:getId()
+        level.scene:setFollowedBody(level.player.body)
+        level.scene:subscribeToPreSolveContact(preSolveContact)
+        level.scene:subscribeToSensorBeginContact(createSensorContactListener(on_finish))
 
         if self.createMusic then
             local music = self:createMusic()

@@ -286,6 +286,8 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
         b2ShapeDef b2_shape_def = b2DefaultShapeDef();
         initShapePhysics(b2_shape_def, _body_options.shape_physics);
 
+        const std::string shape_key = _body_options.shape_key.value_or(
+            __map_object.getName().empty() ? _class : __map_object.getName());
         switch(__map_object.getObjectType())
         {
         case TileMapObjectType::Polygon:
@@ -303,7 +305,7 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
             b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
             b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
             b2ShapeId b2_shape_id = b2CreatePolygonShape(b2_body_id, &b2_shape_def, &b2_polygon);
-            BodyShape * body_shape = &body->createShape(_body_options.shape_key.value_or(_class), polygon->getId());
+            BodyShape * body_shape = &body->createShape(shape_key, polygon->getId());
             b2Shape_SetUserData(b2_shape_id, body_shape);
         }
         break;
@@ -319,7 +321,7 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
                 .radius = radius
             };
             b2ShapeId b2_shape_id = b2CreateCircleShape(b2_body_id, &b2_shape_def, &b2_circle);
-            BodyShape * body_shape = &body->createShape(_body_options.shape_key.value_or(_class), circle->getId());
+            BodyShape * body_shape = &body->createShape(shape_key, circle->getId());
             b2Shape_SetUserData(b2_shape_id, body_shape);
         }
         break;

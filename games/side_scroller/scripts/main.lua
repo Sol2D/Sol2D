@@ -1,4 +1,5 @@
 local createLevel01 = require 'level-01'
+local createLevel02 = require 'level-02'
 local resources = require 'resources'
 
 local global_store = sol.stores:createStore('global')
@@ -7,12 +8,25 @@ local level_view = global_store:createView('level')
 local scene_fragment = level_view:createFragment({}) -- TODO: optional parameter
 sol.window:setView(level_view)
 
-local level_01 = createLevel01()
-
-level_01.__gc = function ()
-    print('level destroyed')
+local function runLevel02()
+    local level_02 = createLevel02()
+    level_02:run(level_view, scene_fragment, function()
+        level_02:destroy()
+        -- TODO: finish
+    end)
 end
 
-level_01:run(level_view, scene_fragment)
+local function runLevel01()
+    local level_01 = createLevel01()
+    level_01.__gc = function()
+        print('level destroyed')
+    end
+    level_01:run(level_view, scene_fragment, function()
+        -- level_01:destroy()
+        runLevel02()
+    end)
+end
+
+runLevel01()
 
 -- TODO: destroy global_store
