@@ -41,6 +41,7 @@ void initShapePhysics(b2ShapeDef & _b2_shape_def, const BodyShapePhysicsDefiniti
 {
     _b2_shape_def.isSensor = _physics.is_sensor;
     _b2_shape_def.enablePreSolveEvents = _physics.is_pre_solve_enabled;
+    _b2_shape_def.enableContactEvents = true; // TODO: from definition
     if(_physics.density.has_value())
         _b2_shape_def.density = _physics.density.value();
     if(_physics.restitution.has_value())

@@ -514,7 +514,12 @@ scene:subscribeToEndContact(function(contact)
 end)
 
 scene:subscribeToSensorBeginContact(function(contact)
-    if player_body_id == contact.visitor.bodyId and contact.sensor.shapeKey == 'Sensor' then
+    if
+        player_body_id == contact.visitor.bodyId and (
+            contact.sensor.shapeKey == 'Teleport_1' or
+            contact.sensor.shapeKey == 'Teleport_2'
+        )
+    then
         teleport_sound_effect:play()
         player:setPosition(getStartPosition())
     end
