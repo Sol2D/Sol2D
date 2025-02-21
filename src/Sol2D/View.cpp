@@ -19,28 +19,28 @@
 
 using namespace Sol2D;
 
-uint16_t View::createFragment(const Fragment & _fragment)
+uint16_t View::createFragment(const Area & _area)
 {
     uint16_t id = m_next_fragment_id++;
-    Outlet * outlet = new Outlet(_fragment, mr_renderer);
+    Outlet * outlet = new Outlet(_area, mr_renderer);
     m_outlets[id] = std::unique_ptr<Outlet>(outlet);
     emplaceOrderedOutlet(outlet);
     return id;
 }
 
-const Fragment * View::getFragment(uint16_t _id) const
+const Area * View::getFragmentArea(uint16_t _id) const
 {
     auto it = m_outlets.find(_id);
-    return it == m_outlets.cend() ? nullptr : &it->second->getFragment();
+    return it == m_outlets.cend() ? nullptr : &it->second->getFragmentArea();
 }
 
-bool View::updateFragment(uint16_t _id, const Fragment & _fragment)
+bool View::updateFragment(uint16_t _id, const Area & _area)
 {
     auto it = m_outlets.find(_id);
     if(it == m_outlets.end() )
         return false;
-    bool need_to_reorder = _fragment.z_index != it->second->getFragment().z_index;
-    it->second->reconfigure(_fragment);
+    bool need_to_reorder = _area.z_index != it->second->getFragmentArea().z_index;
+    it->second->reconfigure(_area);
     if(need_to_reorder)
     {
         eraseOrderedOutlet(it->second.get());
@@ -51,11 +51,11 @@ bool View::updateFragment(uint16_t _id, const Fragment & _fragment)
 
 void View::emplaceOrderedOutlet(Outlet * _outlet)
 {
-    uint16_t z_index = _outlet->getFragment().z_index;
+    uint16_t z_index = _outlet->getFragmentArea().z_index;
     auto it = std::find_if(
         m_ordered_outlets.begin(),
         m_ordered_outlets.end(),
-        [z_index](const Outlet * __outlet) { return z_index < __outlet->getFragment().z_index; });
+        [z_index](const Outlet * __outlet) { return z_index < __outlet->getFragmentArea().z_index; });
     m_ordered_outlets.insert(it, _outlet);
 }
 

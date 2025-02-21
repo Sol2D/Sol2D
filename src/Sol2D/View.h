@@ -29,9 +29,9 @@ class View final
 
 public:
     explicit View(Renderer & _renderer);
-    uint16_t createFragment(const Fragment & _fragment);
-    const Fragment * getFragment(uint16_t _id) const;
-    bool updateFragment(uint16_t _id, const Fragment & _fragment);
+    uint16_t createFragment(const Area & _aria);
+    const Area * getFragmentArea(uint16_t _id) const;
+    bool updateFragment(uint16_t _id, const Area & _aria);
     bool deleteFragment(uint16_t _id);
     bool bindFragment(uint16_t _fragment_id, std::shared_ptr<Canvas> _canvas);
     void resize();

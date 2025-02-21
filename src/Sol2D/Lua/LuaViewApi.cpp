@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaViewApi.h>
-#include <Sol2D/Lua/LuaFragmentApi.h>
+#include <Sol2D/Lua/LuaAreaApi.h>
 #include <Sol2D/Lua/LuaFormApi.h>
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
@@ -48,13 +48,13 @@ struct Self : LuaSelfBase
 using UserData = LuaUserData<Self, LuaTypeName::view>;
 
 // 1 self
-// 2 fragment
+// 2 area
 int luaApi_CreateFragment(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    Fragment fragment;
-    luaL_argexpected(_lua, tryGetFragment(_lua, 2, fragment), 2, LuaTypeName::fragment);
-    lua_pushinteger(_lua, self->getView(_lua)->createFragment(fragment));
+    Area area;
+    luaL_argexpected(_lua, tryGetArea(_lua, 2, area), 2, LuaTypeName::area);
+    lua_pushinteger(_lua, self->getView(_lua)->createFragment(area));
     return 1;
 }
 
@@ -66,21 +66,21 @@ int luaApi_UpdateFragment(lua_State * _lua)
     const Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint16_t fragment_id = static_cast<uint16_t>(lua_tointeger(_lua, 2));
-    Fragment fragment;
-    luaL_argexpected(_lua, tryGetFragment(_lua, 3, fragment), 3, LuaTypeName::fragment);
-    lua_pushboolean(_lua, self->getView(_lua)->updateFragment(fragment_id, fragment));
+    Area area;
+    luaL_argexpected(_lua, tryGetArea(_lua, 3, area), 3, LuaTypeName::area);
+    lua_pushboolean(_lua, self->getView(_lua)->updateFragment(fragment_id, area));
     return 1;
 }
 
 // 1 self
 // 2 fragment ID
-int luaApi_GetFragment(lua_State * _lua)
+int luaApi_GetFragmentArea(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint16_t fragment_id = static_cast<uint16_t>(lua_tointeger(_lua, 2));
-    if(const Fragment * fragment = self->getView(_lua)->getFragment(fragment_id))
-        pushFragment(_lua, *fragment);
+    if(const Area * area = self->getView(_lua)->getFragmentArea(fragment_id))
+        pushArea(_lua, *area);
     else
         lua_pushnil(_lua);
     return 1;
@@ -149,7 +149,7 @@ void Sol2D::Lua::pushViewApi(lua_State * _lua, std::shared_ptr<View> _view)
             { "__gc", UserData::luaGC },
             { "createFragment", luaApi_CreateFragment },
             { "updateFragment", luaApi_UpdateFragment },
-            { "getFragment", luaApi_GetFragment },
+            { "getFragmentArea", luaApi_GetFragmentArea },
             { "deleteFragment", luaApi_DeleteFragment },
             { "bindFragment", luaApi_BindFragment },
             { nullptr, nullptr }

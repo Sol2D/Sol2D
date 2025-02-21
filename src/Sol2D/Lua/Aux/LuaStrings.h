@@ -35,7 +35,7 @@ struct LuaTypeName
     static const char color[];
     static const char store_manager[];
     static const char window[];
-    static const char fragment[];
+    static const char area[];
     static const char view[];
     static const char scene[];
     static const char body[];

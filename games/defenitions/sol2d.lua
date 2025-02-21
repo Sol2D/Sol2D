@@ -203,7 +203,7 @@ script = nil
 ---@field lowerTranslation number?
 ---@field upperTranslation number?
 
----@class sol.Fragment
+---@class sol.Area
 ---@field top sol.Dimension?
 ---@field right sol.Dimension?
 ---@field left sol.Dimension?
@@ -250,18 +250,18 @@ function __window:getView() end
 ---@class sol.View
 local __view
 
----@param fragment sol.Fragment
+---@param area sol.Area
 ---@return integer
-function __view:createFragment(fragment) end
+function __view:createFragment(area) end
 
 ---@param fragment_id integer
----@param fragment sol.Fragment
+---@param area sol.Area
 ---@return boolean
-function __view:updateFragment(fragment_id, fragment) end
+function __view:updateFragment(fragment_id, area) end
 
 ---@param fragment_id integer
----@return sol.Fragment?
-function __view:getFragment(fragment_id) end
+---@return sol.Area?
+function __view:getFragmentArea(fragment_id) end
 
 ---@param fragment_id integer
 ---@return boolean

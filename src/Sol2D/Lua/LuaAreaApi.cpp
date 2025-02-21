@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/LuaFragmentApi.h>
+#include <Sol2D/Lua/LuaAreaApi.h>
 #include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 
@@ -44,31 +44,31 @@ void setDimension(LuaTable & table, const char * _key, const std::optional<Dimen
 
 } // namespace
 
-void Sol2D::Lua::pushFragment(lua_State * _lua, const Fragment & _fragment)
+void Sol2D::Lua::pushArea(lua_State * _lua, const Area & _area)
 {
     LuaTable table = LuaTable::pushNew(_lua);
-    setDimension(table, gc_key_top, _fragment.top);
-    setDimension(table, gc_key_right, _fragment.right);
-    setDimension(table, gc_key_bottom, _fragment.bottom);
-    setDimension(table, gc_key_left, _fragment.left);
-    setDimension(table, gc_key_width, _fragment.width);
-    setDimension(table, gc_key_height, _fragment.height);
-    table.setIntegerValue(gc_key_z_index, _fragment.z_index);
-    table.setBooleanValue(gc_key_is_visible, _fragment.is_visible);
+    setDimension(table, gc_key_top, _area.top);
+    setDimension(table, gc_key_right, _area.right);
+    setDimension(table, gc_key_bottom, _area.bottom);
+    setDimension(table, gc_key_left, _area.left);
+    setDimension(table, gc_key_width, _area.width);
+    setDimension(table, gc_key_height, _area.height);
+    table.setIntegerValue(gc_key_z_index, _area.z_index);
+    table.setBooleanValue(gc_key_is_visible, _area.is_visible);
 }
 
-bool Sol2D::Lua::tryGetFragment(lua_State * _lua, int _idx, Fragment & _fragment)
+bool Sol2D::Lua::tryGetArea(lua_State * _lua, int _idx, Area & _area)
 {
     LuaTable table(_lua, _idx);
     if(!table.isValid())
         return false;
-    table.tryGetDimension(gc_key_top, _fragment.top);
-    table.tryGetDimension(gc_key_right, _fragment.right);
-    table.tryGetDimension(gc_key_left, _fragment.left);
-    table.tryGetDimension(gc_key_bottom, _fragment.bottom);
-    table.tryGetDimension(gc_key_width, _fragment.width);
-    table.tryGetDimension(gc_key_height, _fragment.height);
-    table.tryGetBoolean(gc_key_is_visible, &_fragment.is_visible);
-    table.tryGetInteger(gc_key_z_index, &_fragment.z_index);
+    table.tryGetDimension(gc_key_top, _area.top);
+    table.tryGetDimension(gc_key_right, _area.right);
+    table.tryGetDimension(gc_key_left, _area.left);
+    table.tryGetDimension(gc_key_bottom, _area.bottom);
+    table.tryGetDimension(gc_key_width, _area.width);
+    table.tryGetDimension(gc_key_height, _area.height);
+    table.tryGetBoolean(gc_key_is_visible, &_area.is_visible);
+    table.tryGetInteger(gc_key_z_index, &_area.z_index);
     return true;
 }

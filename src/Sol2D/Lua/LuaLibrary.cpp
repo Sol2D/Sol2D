@@ -23,7 +23,7 @@
 #include <Sol2D/Lua/LuaKeyboardApi.h>
 #include <Sol2D/Lua/LuaMouseApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
-#include <Sol2D/Lua/LuaFragmentApi.h>
+#include <Sol2D/Lua/LuaAreaApi.h>
 #include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/LuaWidgetApi.h>
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>

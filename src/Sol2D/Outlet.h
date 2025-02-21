@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <Sol2D/Fragment.h>
+#include <Sol2D/Area.h>
 #include <Sol2D/Canvas.h>
 #include <Sol2D/MediaLayer/MediaLayer.h>
 
@@ -27,24 +27,24 @@ class Outlet final
     S2_DISABLE_COPY_AND_MOVE(Outlet)
 
 public:
-    Outlet(const Fragment & _fragmet, Renderer & _renderer);
+    Outlet(const Area & _area, Renderer & _renderer);
     void resize();
     void bind(std::shared_ptr<Canvas> _canvas);
-    void reconfigure(const Fragment & _fragment);
+    void reconfigure(const Area & _area);
     void step(const StepState & _state);
-    const Fragment & getFragment() const;
+    const Area & getFragmentArea() const;
 
 private:
-    Fragment m_fragment;
+    Area m_aria;
     Renderer & mr_renderer;
     Texture m_texture;
     SDL_FRect m_rect;
     std::shared_ptr<Canvas> m_canvas;
 };
 
-inline const Fragment & Outlet::getFragment() const
+inline const Area & Outlet::getFragmentArea() const
 {
-    return m_fragment;
+    return m_aria;
 }
 
 } // namespace Sol2D

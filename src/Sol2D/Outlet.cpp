@@ -18,8 +18,8 @@
 
 using namespace Sol2D;
 
-Outlet::Outlet(const Fragment & _fragmet, Renderer & _renderer) :
-    m_fragment(_fragmet),
+Outlet::Outlet(const Area & _aria, Renderer & _renderer) :
+    m_aria(_aria),
     mr_renderer(_renderer),
     m_rect{.0f, .0f, .0f, .0f}
 {
@@ -27,20 +27,20 @@ Outlet::Outlet(const Fragment & _fragmet, Renderer & _renderer) :
 
 void Outlet::resize()
 {
-    if(!m_canvas || !m_fragment.is_visible)
+    if(!m_canvas || !m_aria.is_visible)
         return;
 
     const FSize output_size = mr_renderer.getOutputSize();
-    m_rect.x = m_fragment.left.has_value() ? m_fragment.left.value().getPixels(output_size.w) : .0f;
-    m_rect.y = m_fragment.top.has_value() ? m_fragment.top.value().getPixels(output_size.h): .0f;
+    m_rect.x = m_aria.left.has_value() ? m_aria.left.value().getPixels(output_size.w) : .0f;
+    m_rect.y = m_aria.top.has_value() ? m_aria.top.value().getPixels(output_size.h): .0f;
 
-    if(m_fragment.width.has_value())
+    if(m_aria.width.has_value())
     {
-        m_rect.w = m_fragment.width.value().getPixels(output_size.w);
+        m_rect.w = m_aria.width.value().getPixels(output_size.w);
     }
-    else if(m_fragment.right.has_value())
+    else if(m_aria.right.has_value())
     {
-        float right_margin = m_fragment.right.value().getPixels(output_size.w);
+        float right_margin = m_aria.right.value().getPixels(output_size.w);
         m_rect.w = output_size.w - (m_rect.x + right_margin);
     }
     else
@@ -48,13 +48,13 @@ void Outlet::resize()
         m_rect.w = output_size.w - m_rect.x;
     }
 
-    if(m_fragment.height.has_value())
+    if(m_aria.height.has_value())
     {
-        m_rect.h = m_fragment.height.value().getPixels(output_size.h);
+        m_rect.h = m_aria.height.value().getPixels(output_size.h);
     }
-    else if(m_fragment.bottom.has_value())
+    else if(m_aria.bottom.has_value())
     {
-        float bottom_margin = m_fragment.bottom.value().getPixels(output_size.h);
+        float bottom_margin = m_aria.bottom.value().getPixels(output_size.h);
         m_rect.h = output_size.h - (m_rect.y + bottom_margin);
     }
     else
@@ -71,9 +71,9 @@ void Outlet::bind(std::shared_ptr<Canvas> _canvas)
     resize();
 }
 
-void Outlet::reconfigure(const Fragment & _fragment)
+void Outlet::reconfigure(const Area & _area)
 {
-    m_fragment = _fragment;
+    m_aria = _area;
     resize();
 }
 

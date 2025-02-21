@@ -16,31 +16,13 @@
 
 #pragma once
 
-#include <Sol2D/Dimension.h>
-#include <Sol2D/Def.h>
-#include <cstdint>
-#include <optional>
+#include <Sol2D/Area.h>
+#include <Sol2D/Lua/Aux/LuaForward.h>
 
-namespace Sol2D {
+namespace Sol2D::Lua {
 
-struct Fragment
-{
-    S2_DEFAULT_COPY_AND_MOVE(Fragment)
+void pushArea(lua_State * _lua, const Area & _area);
 
-    Fragment() :
-        z_index(0),
-        is_visible(true)
-    {
-    }
+bool tryGetArea(lua_State * _lua, int _idx, Area & _area);
 
-    std::optional<Dimension<int32_t>> top;
-    std::optional<Dimension<int32_t>> right;
-    std::optional<Dimension<int32_t>> left;
-    std::optional<Dimension<int32_t>> bottom;
-    std::optional<Dimension<uint32_t>> width;
-    std::optional<Dimension<uint32_t>> height;
-    uint16_t z_index;
-    bool is_visible;
-};
-
-} // namespace Sol2D
+} // namespace Sol2D::Lua
