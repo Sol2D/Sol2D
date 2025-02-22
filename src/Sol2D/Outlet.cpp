@@ -18,8 +18,8 @@
 
 using namespace Sol2D;
 
-Outlet::Outlet(const Area & _aria, Renderer & _renderer) :
-    m_aria(_aria),
+Outlet::Outlet(const Area & _area, Renderer & _renderer) :
+    m_aria(_area),
     mr_renderer(_renderer),
     m_rect{.0f, .0f, .0f, .0f}
 {
@@ -27,42 +27,12 @@ Outlet::Outlet(const Area & _aria, Renderer & _renderer) :
 
 void Outlet::resize()
 {
-    if(!m_canvas || !m_aria.is_visible)
-        return;
-
-    const FSize output_size = mr_renderer.getOutputSize();
-    m_rect.x = m_aria.left.has_value() ? m_aria.left.value().getPixels(output_size.w) : .0f;
-    m_rect.y = m_aria.top.has_value() ? m_aria.top.value().getPixels(output_size.h): .0f;
-
-    if(m_aria.width.has_value())
+    if(m_canvas && m_aria.is_visible)
     {
-        m_rect.w = m_aria.width.value().getPixels(output_size.w);
+        m_rect = m_aria.calculateRect(mr_renderer.getOutputSize());
+        m_canvas->reconfigure(m_rect);
+        m_texture = mr_renderer.createTexture(m_rect.w, m_rect.h, "Outlet");
     }
-    else if(m_aria.right.has_value())
-    {
-        float right_margin = m_aria.right.value().getPixels(output_size.w);
-        m_rect.w = output_size.w - (m_rect.x + right_margin);
-    }
-    else
-    {
-        m_rect.w = output_size.w - m_rect.x;
-    }
-
-    if(m_aria.height.has_value())
-    {
-        m_rect.h = m_aria.height.value().getPixels(output_size.h);
-    }
-    else if(m_aria.bottom.has_value())
-    {
-        float bottom_margin = m_aria.bottom.value().getPixels(output_size.h);
-        m_rect.h = output_size.h - (m_rect.y + bottom_margin);
-    }
-    else
-    {
-        m_rect.h = output_size.h - m_rect.y;
-    }
-    m_canvas->reconfigure(m_rect);
-    m_texture = mr_renderer.createTexture(m_rect.w, m_rect.h, "Outlet");
 }
 
 void Outlet::bind(std::shared_ptr<Canvas> _canvas)
@@ -79,8 +49,10 @@ void Outlet::reconfigure(const Area & _area)
 
 void Outlet::step(const StepState & _state)
 {
-    if(!m_canvas) return;
-    mr_renderer.beginRenderPass(m_texture, m_canvas->getClearColor());
-    m_canvas->step(_state);
-    mr_renderer.endRenderPass(m_texture, m_rect);
+    if(m_canvas && m_aria.is_visible)
+    {
+        mr_renderer.beginRenderPass(m_texture, m_canvas->getClearColor());
+        m_canvas->step(_state);
+        mr_renderer.endRenderPass(m_texture, m_rect);
+    }
 }

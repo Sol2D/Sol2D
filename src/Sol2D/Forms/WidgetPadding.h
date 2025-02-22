@@ -45,7 +45,7 @@ struct WidgetPadding
         const Dimension<float> & _right,
         const Dimension<float> & _bottom,
         const Dimension<float> & _left
-        ) :
+    ) :
         top(_top),
         right(_right),
         bottom(_bottom),
