@@ -17,6 +17,7 @@
 #pragma once
 
 #include <Sol2D/MediaLayer/Number.h>
+#include <cstdint>
 
 namespace Sol2D {
 

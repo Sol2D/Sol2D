@@ -15,10 +15,195 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/MediaLayer/Renderer.h>
-#include <Sol2D/MediaLayer/Primitive.h>
 #include <Sol2D/MediaLayer/SDLException.h>
 
 using namespace Sol2D;
+
+class Sol2D::RenderTask
+{
+    S2_DISABLE_COPY_AND_MOVE(RenderTask)
+
+public:
+    RenderTask() {}
+    virtual ~RenderTask() {}
+    virtual void render(const RenderingContext & _context) = 0;
+};
+
+namespace {
+class RectRenderTask : public RenderTask
+{
+public:
+    RectRenderTask(const RectRenderer & _renderer, RectRenderingData && _data) :
+          mr_renderer(_renderer),
+          m_data(_data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderRect(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const RectRenderingData m_data;
+};
+
+class SolidRectRenderTask : public RenderTask
+{
+public:
+    SolidRectRenderTask(const RectRenderer & _renderer, SolidRectRenderingData && _data) :
+          mr_renderer(_renderer),
+          m_data(_data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderRect(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const SolidRectRenderingData m_data;
+};
+
+class TextureRenderTask : public RenderTask
+{
+public:
+    TextureRenderTask(const RectRenderer & _renderer, TextureRenderingData && _data) :
+          mr_renderer(_renderer),
+          m_data(_data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderTexture(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const TextureRenderingData m_data;
+};
+
+class LineRenderTask : public RenderTask
+{
+public:
+    LineRenderTask(const LineRenderer & _renderer, const LineRenderer::ChunkID & _id, const SDL_FColor & _color) :
+          mr_renderer(_renderer),
+          m_color(_color),
+          m_id(_id)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.render(_context, m_id, m_color);
+    }
+
+private:
+    const LineRenderer & mr_renderer;
+    const SDL_FColor m_color;
+    const LineRenderer::ChunkID m_id;
+};
+
+class CircleRenderTask : public RenderTask
+{
+public:
+    CircleRenderTask(const RectRenderer & _renderer, CircleRenderingData && _data) :
+          mr_renderer(_renderer),
+          m_data(_data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderCircle(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const CircleRenderingData m_data;
+};
+
+class SolidCircleRenderTask : public RenderTask
+{
+public:
+    SolidCircleRenderTask(const RectRenderer & _renderer, SolidCircleRenderingData && _data) :
+          mr_renderer(_renderer),
+          m_data(_data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderCircle(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const SolidCircleRenderingData m_data;
+};
+
+class CapsuleRenderTask: public RenderTask
+{
+public:
+    CapsuleRenderTask(const RectRenderer & _renderer, CapsuleRenderingData && _data) :
+          mr_renderer(_renderer),
+          m_data(_data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderCapsule(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const CapsuleRenderingData m_data;
+};
+
+class SolidCapsuleRenderTask: public RenderTask
+{
+public:
+    SolidCapsuleRenderTask(const RectRenderer & _renderer, SolidCapsuleRenderingData && _data) :
+          mr_renderer(_renderer),
+          m_data(_data)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.renderCapsule(_context, m_data);
+    }
+
+private:
+    const RectRenderer & mr_renderer;
+    const SolidCapsuleRenderingData m_data;
+};
+
+class UIRenderTask: public RenderTask
+{
+public:
+    UIRenderTask(const UIRenderer & _renderer, const UI & _ui) :
+          mr_renderer(_renderer),
+          mr_ui(_ui)
+    {
+    }
+
+    void render(const RenderingContext & _context) override
+    {
+        mr_renderer.render(_context, mr_ui);
+    }
+
+private:
+    const UIRenderer & mr_renderer;
+    const UI & mr_ui;
+};
+
+} // namespace
 
 Renderer::Renderer(const ResourceManager & _resource_manager, SDL_Window * _window, SDL_GPUDevice * _device) :
     mr_resource_manager(_resource_manager),
@@ -166,12 +351,51 @@ void Renderer::beginStep()
     }
 }
 
-void Renderer::beginRenderPass(Texture & _texture, const SDL_FColor & _clear_color)
+void Renderer::beginDefaultRenderPass()
+{
+    beginRenderPass(
+        mp_swapchain_texture,
+        FSize(m_rendering_context.window_size.w, m_rendering_context.window_size.h));
+}
+
+void Renderer::endDefaultRenderPass()
+{
+    endRenderPass();
+}
+
+void Renderer::endRenderPass()
+{
+    if(!m_rendering_context.render_pass)
+        throw InvalidOperationException("Render pass not running");
+
+    m_line_renderer.beginRendering();
+    while(!m_queue.empty())
+    {
+        RenderTask * task = m_queue.front();
+        task->render(m_rendering_context);
+        delete task;
+        m_queue.pop();
+    }
+    m_line_renderer.endRendering();
+
+    SDL_EndGPURenderPass(m_rendering_context.render_pass);
+    m_rendering_context.render_pass = nullptr;
+}
+
+void Renderer::beginRenderPass(Texture & _texture, const SDL_FColor * _clear_color /*= nullptr*/)
+{
+    beginRenderPass(_texture.getTexture(), _texture.getSize(), _clear_color);
+}
+
+void Renderer::beginRenderPass(
+    SDL_GPUTexture * _texture,
+    const FSize & _texture_size,
+    const SDL_FColor * _clear_color /*= nullptr*/)
 {
     if(!m_rendering_context.command_buffer)
     {
         throw InvalidOperationException(
-            "A new rendering step cannot be started because the rendering step has not started");
+            "A new rendering pass cannot be started because the rendering step has not started");
     }
     if(m_rendering_context.render_pass)
     {
@@ -181,51 +405,43 @@ void Renderer::beginRenderPass(Texture & _texture, const SDL_FColor & _clear_col
 
     // FIXME: sometimes a generic render pass cannot be used (MSAA, Stencil test)
     SDL_GPUColorTargetInfo color_target_info = {};
-    color_target_info.texture = _texture.getTexture();
-    color_target_info.load_op = SDL_GPU_LOADOP_CLEAR;
+    color_target_info.texture = _texture;
     color_target_info.store_op = SDL_GPU_STOREOP_STORE;
-    color_target_info.clear_color = _clear_color;
+    if(_clear_color)
+    {
+        color_target_info.load_op = SDL_GPU_LOADOP_CLEAR;
+        color_target_info.clear_color = *_clear_color;
+    }
+    else
+    {
+        color_target_info.load_op = SDL_GPU_LOADOP_LOAD;
+    }
     m_rendering_context.render_pass = SDL_BeginGPURenderPass(
         m_rendering_context.command_buffer,
         &color_target_info,
         1,
         nullptr);
-    m_rendering_context.texture_size = _texture.getSize();
+    m_rendering_context.texture_size = _texture_size;
 }
 
 void Renderer::endRenderPass(const Texture & _texture, const SDL_FRect & _output_rect)
 {
-    if(!m_rendering_context.render_pass)
-        throw InvalidOperationException("Render pass not running");
+    endRenderPass();
 
-    m_line_renderer.beginRendering();
-    while(!m_queue.empty())
-    {
-        Primitive * primitive = m_queue.front();
-        primitive->render(m_rendering_context);
-        delete primitive;
-        m_queue.pop();
-    }
-    m_line_renderer.endRendering();
-    SDL_EndGPURenderPass(m_rendering_context.render_pass);
-    m_rendering_context.render_pass = nullptr;
-
-    {
-        SDL_GPUBlitInfo blit_info = {};
-        blit_info.load_op = SDL_GPU_LOADOP_LOAD;
-        blit_info.source.texture = _texture.getTexture();
-        blit_info.source.x = .0f;
-        blit_info.source.y = .0f;
-        blit_info.source.w = _texture.getWidth();
-        blit_info.source.h = _texture.getHeight();
-        blit_info.destination.texture = mp_swapchain_texture;
-        blit_info.destination.x = _output_rect.x;
-        blit_info.destination.y = _output_rect.y;
-        blit_info.destination.w = _output_rect.w;
-        blit_info.destination.h = _output_rect.h;
-        blit_info.filter = SDL_GPU_FILTER_NEAREST;
-        SDL_BlitGPUTexture(m_rendering_context.command_buffer, &blit_info);
-    }
+    SDL_GPUBlitInfo blit_info = {};
+    blit_info.load_op = SDL_GPU_LOADOP_LOAD;
+    blit_info.source.texture = _texture.getTexture();
+    blit_info.source.x = .0f;
+    blit_info.source.y = .0f;
+    blit_info.source.w = _texture.getWidth();
+    blit_info.source.h = _texture.getHeight();
+    blit_info.destination.texture = mp_swapchain_texture;
+    blit_info.destination.x = _output_rect.x;
+    blit_info.destination.y = _output_rect.y;
+    blit_info.destination.w = _output_rect.w;
+    blit_info.destination.h = _output_rect.h;
+    blit_info.filter = SDL_GPU_FILTER_NEAREST;
+    SDL_BlitGPUTexture(m_rendering_context.command_buffer, &blit_info);
 }
 
 void Renderer::submitStep()
@@ -238,54 +454,57 @@ void Renderer::submitStep()
     mp_swapchain_texture = nullptr;
 }
 
-
 void Renderer::renderRect(RectRenderingData && _data)
 {
-    m_queue.push(new RectPrimitive(m_rect_renderer, std::forward<RectRenderingData>(_data)));
+    m_queue.push(new RectRenderTask(m_rect_renderer, std::forward<RectRenderingData>(_data)));
 }
 
 void Renderer::renderRect(SolidRectRenderingData && _data)
 {
-    m_queue.push(new SolidRectPrimitive(m_rect_renderer, std::forward<SolidRectRenderingData>(_data)));
+    m_queue.push(new SolidRectRenderTask(m_rect_renderer, std::forward<SolidRectRenderingData>(_data)));
 }
 
 void Renderer::renderTexture(TextureRenderingData && _data)
 {
-    m_queue.push(new TexturePrimitive(m_rect_renderer, std::forward<TextureRenderingData>(_data)));
+    m_queue.push(new TextureRenderTask(m_rect_renderer, std::forward<TextureRenderingData>(_data)));
 }
 
 void Renderer::renderLine(const SDL_FPoint & _point1, const SDL_FPoint & _point2, const SDL_FColor & _color)
 {
-    m_queue.push(new LinePrimitive(m_line_renderer, m_line_renderer.enqueueLine(_point1, _point2), _color));
+    m_queue.push(new LineRenderTask(m_line_renderer, m_line_renderer.enqueueLine(_point1, _point2), _color));
 }
 
 void Renderer::renderLines(const std::vector<SDL_FPoint> & _points, const SDL_FColor & _color)
 {
-    m_queue.push(new LinePrimitive(m_line_renderer, m_line_renderer.enqueueLines(_points), _color));
+    m_queue.push(new LineRenderTask(m_line_renderer, m_line_renderer.enqueueLines(_points), _color));
 }
 
 void Renderer::renderPolyline(const std::vector<SDL_FPoint> & _points, const SDL_FColor & _color, bool _close)
 {
-    m_queue.push(new LinePrimitive(m_line_renderer, m_line_renderer.enqueuePolyline(_points, _close), _color));
+    m_queue.push(new LineRenderTask(m_line_renderer, m_line_renderer.enqueuePolyline(_points, _close), _color));
 }
 
 void Renderer::renderCircle(CircleRenderingData && _data)
 {
-    m_queue.push(new CirclePrimitive(m_rect_renderer, std::forward<CircleRenderingData>(_data)));
+    m_queue.push(new CircleRenderTask(m_rect_renderer, std::forward<CircleRenderingData>(_data)));
 }
 
 void Renderer::renderCircle(SolidCircleRenderingData && _data)
 {
-    m_queue.push(new SolidCirclePrimitive(m_rect_renderer, std::forward<SolidCircleRenderingData>(_data)));
+    m_queue.push(new SolidCircleRenderTask(m_rect_renderer, std::forward<SolidCircleRenderingData>(_data)));
 }
 
 void Renderer::renderCapsule(CapsuleRenderingData && _data)
 {
-    m_queue.push(new CapsulePrimitive(m_rect_renderer, std::forward<CapsuleRenderingData>(_data)));
-
+    m_queue.push(new CapsuleRenderTask(m_rect_renderer, std::forward<CapsuleRenderingData>(_data)));
 }
 
 void Renderer::renderCapsule(SolidCapsuleRenderingData && _data)
 {
-    m_queue.push(new SolidCapsulePrimitive(m_rect_renderer, std::forward<SolidCapsuleRenderingData>(_data)));
+    m_queue.push(new SolidCapsuleRenderTask(m_rect_renderer, std::forward<SolidCapsuleRenderingData>(_data)));
+}
+
+void Renderer::renderUI(const UI & _ui)
+{
+    m_queue.push(new UIRenderTask(m_ui_renderer, _ui));
 }

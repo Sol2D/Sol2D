@@ -16,35 +16,14 @@
 
 #pragma once
 
-#include <Sol2D/MediaLayer/Size.h>
-#include <Sol2D/Dimension.h>
-#include <Sol2D/Def.h>
-#include <SDL3/SDL_rect.h>
-#include <cstdint>
-#include <optional>
+#include <Sol2D/UI.h>
+#include <Sol2D/Lua/Aux/LuaForward.h>
+#include <memory>
 
-namespace Sol2D {
+namespace Sol2D::Lua {
 
-struct Area
-{
-    S2_DEFAULT_COPY_AND_MOVE(Area)
+void pushUIApi(lua_State * _lua, std::shared_ptr<UI> _ui);
 
-    Area() :
-        z_index(0),
-        is_visible(true)
-    {
-    }
+std::shared_ptr<UI> tryGetUI(lua_State * _lua, int _idx);
 
-    SDL_FRect calculateRect(const FSize & _output_size) const;
-
-    std::optional<Dimension<int32_t>> top;
-    std::optional<Dimension<int32_t>> right;
-    std::optional<Dimension<int32_t>> left;
-    std::optional<Dimension<int32_t>> bottom;
-    std::optional<Dimension<uint32_t>> width;
-    std::optional<Dimension<uint32_t>> height;
-    uint16_t z_index;
-    bool is_visible;
-};
-
-} // namespace Sol2D
+} // namespace Sol2D::Lua

@@ -94,5 +94,13 @@ void View::resize()
 void View::step(const StepState & _state)
 {
     for(auto & pair : m_outlets)
+    {
         pair.second->step(_state);
+    }
+    if(m_ui)
+    {
+        mr_renderer.beginDefaultRenderPass();
+        mr_renderer.renderUI(*m_ui);
+        mr_renderer.endDefaultRenderPass();
+    }
 }

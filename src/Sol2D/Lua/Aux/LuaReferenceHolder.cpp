@@ -18,6 +18,8 @@
 #include <Sol2D/Lua/Aux/LuaUtils.h>
 #include <lua.hpp>
 #include <format>
+#include <vector>
+#include <cstring>
 
 using namespace Sol2D::Lua;
 

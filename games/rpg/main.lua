@@ -104,7 +104,32 @@ local function createSwitchViewButton()
     return button
 end
 
+local function createShowUIButton()
+    local button = form:createButton('Show UI')
+    local default_fg = { r = 0.78, g = 1.0, b = 1.0 }
+    local focused_fg = { r = 1.0, g = 0.39, b = 0.39 }
+    local activated_fg = { r = 0.39, g = 1.0, b = 0.39 }
+    button:setFont(font_roboto)
+    button:setX('70%')
+    button:setY(8)
+    button:setWidth(250);
+    button:setHeight(34);
+    button:setBackgroundColor({ r = 0, g = 0.39, b = 0.12 }, sol.WidgetState.FOCUSED)
+    button:setForegroundColor(default_fg)
+    button:setForegroundColor(focused_fg, sol.WidgetState.FOCUSED)
+    button:setForegroundColor(activated_fg, sol.WidgetState.ACTIVATED)
+    button:setBorderColor(default_fg)
+    button:setBorderColor(focused_fg, sol.WidgetState.FOCUSED)
+    button:setBorderColor(activated_fg, sol.WidgetState.ACTIVATED)
+    button:setBorderWidth(6)
+    button:setVerticalTextAlignment(sol.VerticalTextAlignment.CENTER)
+    button:setHorizontalTextAlignment(sol.HorizontalTextAlignment.CENTER)
+    button:setPadding({ left = 15 })
+    return button
+end
+
 local switch_view_button = createSwitchViewButton()
+local show_ui_button = createShowUIButton()
 
 local score_fragment_id = view:createFragment({
     height = { unit = sol.DimensionUnit.PIXEL, value = 50 }
@@ -533,6 +558,15 @@ switch_view_button:subscribeOnClick(function()
     end
     scene:setFollowedBody(followed_body)
     click_sound_effect:play()
+end)
+
+show_ui_button:subscribeOnClick(function()
+    local ui = store:createUI('ui')
+    local form1 = ui:addForm('First Lua Form')
+    form1:addLabel('Label 1')
+    local form2 = ui:addForm('Second Lua Form')
+    form2:addLabel('Label 2')
+    view:bindUI(ui)
 end)
 
 local PLAYER_WALK_FORCE = 1700

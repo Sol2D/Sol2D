@@ -18,6 +18,7 @@
 
 #include <Sol2D/StepState.h>
 #include <Sol2D/Outlet.h>
+#include <Sol2D/UI.h>
 #include <unordered_map>
 #include <list>
 
@@ -34,6 +35,8 @@ public:
     bool updateFragment(uint16_t _id, const Area & _aria);
     bool deleteFragment(uint16_t _id);
     bool bindFragment(uint16_t _fragment_id, std::shared_ptr<Canvas> _canvas);
+    void bindUI(std::shared_ptr<UI> _ui);
+    void deleteUI();
     void resize();
     void step(const StepState & _state);
 
@@ -46,12 +49,23 @@ private:
     std::unordered_map<uint16_t, std::unique_ptr<Outlet>> m_outlets;
     uint16_t m_next_fragment_id;
     std::list<Outlet *> m_ordered_outlets;
+    std::shared_ptr<UI> m_ui;
 };
 
 inline View::View(Renderer & _renderer) :
     mr_renderer(_renderer),
     m_next_fragment_id(1)
 {
+}
+
+inline void View::bindUI(std::shared_ptr<UI> _ui)
+{
+    m_ui = _ui;
+}
+
+inline void View::deleteUI()
+{
+    m_ui.reset();
 }
 
 } // namespace Sol2D

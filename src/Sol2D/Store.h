@@ -19,6 +19,7 @@
 #include <Sol2D/View.h>
 #include <Sol2D/World/Scene.h>
 #include <Sol2D/Forms/Form.h>
+#include <Sol2D/UI.h>
 #include <Sol2D/Utils/ObjectStore.h>
 #include <filesystem>
 
@@ -73,6 +74,15 @@ struct Utils::ObjectFactory<Forms::Form>
 };
 
 template<>
+struct Utils::ObjectFactory<UI>
+{
+    std::shared_ptr<UI> produce() const
+    {
+        return std::make_shared<UI>();
+    }
+};
+
+template<>
 struct Utils::ObjectFactory<TTF_Font>
 {
     std::shared_ptr<TTF_Font> produce(const std::filesystem::path & _file_path, uint16_t _size) const
@@ -105,6 +115,7 @@ using Store = Utils::ObjectStore<
     SpriteSheet,
     World::Scene,
     Forms::Form,
+    UI,
     TTF_Font,
     Mix_Chunk,
     Mix_Music>;

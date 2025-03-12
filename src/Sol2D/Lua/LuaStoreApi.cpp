@@ -20,6 +20,7 @@
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
 #include <Sol2D/Lua/LuaViewApi.h>
+#include <Sol2D/Lua/LuaUIApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
 #include <Sol2D/Lua/LuaGraphicsPackApi.h>
@@ -155,6 +156,30 @@ int luaApi_GetForm(lua_State * _lua)
     const Self * self = UserData::getUserData(_lua, 1);
     if(std::shared_ptr<Form> form = self->getStore(_lua)->getObject<Form>(argToStringOrError(_lua, 2)))
         pushFormApi(_lua, self->workspace, form);
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 key
+int luaApi_CreateUI(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    const char * key = argToStringOrError(_lua, 2);
+    std::shared_ptr<UI> ui = self->getStore(_lua)->createObject<UI>(key);
+    pushUIApi(_lua, ui);
+    self->holdReference(_lua, LuaTypeName::ui, key);
+    return 1;
+}
+
+// 1 self
+// 2 key
+int luaApi_GetUI(lua_State * _lua)
+{
+    const Self * self = UserData::getUserData(_lua, 1);
+    if(std::shared_ptr<UI> ui = self->getStore(_lua)->getObject<UI>(argToStringOrError(_lua, 2)))
+        pushUIApi(_lua, ui);
     else
         lua_pushnil(_lua);
     return 1;
@@ -353,6 +378,9 @@ void Sol2D::Lua::pushStoreApi(
             { "createForm", luaApi_CreateForm },
             { "getForm", luaApi_GetForm },
             { "freeForm", luaApi_FreeObject<Form, LuaTypeName::form> },
+            { "createUI", luaApi_CreateUI },
+            { "getUI", luaApi_GetUI },
+            { "freeUI", luaApi_FreeObject<UI, LuaTypeName::ui> },
             { "createSprite", luaApi_CreateSprite },
             { "getSprite", luaApi_GetSprite },
             { "freeSprite", luaApi_FreeObject<Sprite, LuaTypeName::sprite> },

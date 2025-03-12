@@ -272,6 +272,11 @@ function __view:deleteFragment(fragment_id) end
 ---@return boolean
 function __view:bindFragment(fragment_id, target) end
 
+---@param ui sol.UI?
+function __view:bindUI(ui) end
+
+function __view:deleteUI() end
+
 ---@class sol.Scene
 local __scene
 
@@ -965,6 +970,19 @@ function __button:subscribeOnClick(callback) end
 ---@param subscription_id integer
 function __button:unsubscribeOnClick(subscription_id) end
 
+---@class sol.UI
+local __ui
+
+---@param title string
+---@return sol.UIForm
+function __ui:addForm(title) end
+
+---@class sol.UIForm
+local __ui_form
+
+---@param text string
+function __ui_form:addLabel(text) end
+
 ---@class sol.Contact
 ---@field sideA sol.ContactSide
 ---@field sideB sol.ContactSide
@@ -1035,6 +1053,18 @@ function __store:getForm(key) end
 ---@param key string
 ---@return boolean
 function __store:freeForm(key) end
+
+---@param key string
+---@return sol.UI
+function __store:createUI(key) end
+
+---@param key string
+---@return sol.UI | nil
+function __store:getUI(key) end
+
+---@param key string
+---@return boolean
+function __store:freeUI(key) end
 
 ---@param key string
 ---@return sol.Sprite

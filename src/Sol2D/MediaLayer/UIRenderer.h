@@ -16,35 +16,15 @@
 
 #pragma once
 
-#include <Sol2D/MediaLayer/Size.h>
-#include <Sol2D/Dimension.h>
-#include <Sol2D/Def.h>
-#include <SDL3/SDL_rect.h>
-#include <cstdint>
-#include <optional>
+#include <Sol2D/MediaLayer/RenderingContext.h>
+#include <Sol2D/UI.h>
 
 namespace Sol2D {
 
-struct Area
+class UIRenderer
 {
-    S2_DEFAULT_COPY_AND_MOVE(Area)
-
-    Area() :
-        z_index(0),
-        is_visible(true)
-    {
-    }
-
-    SDL_FRect calculateRect(const FSize & _output_size) const;
-
-    std::optional<Dimension<int32_t>> top;
-    std::optional<Dimension<int32_t>> right;
-    std::optional<Dimension<int32_t>> left;
-    std::optional<Dimension<int32_t>> bottom;
-    std::optional<Dimension<uint32_t>> width;
-    std::optional<Dimension<uint32_t>> height;
-    uint16_t z_index;
-    bool is_visible;
+public:
+    void render(const RenderingContext & _ctx, const UI & _ui) const;
 };
 
 } // namespace Sol2D

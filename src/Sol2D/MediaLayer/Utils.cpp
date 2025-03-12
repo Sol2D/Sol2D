@@ -15,7 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/MediaLayer/Utils.h>
+#include <vector>
 #include <cstring>
+#include <algorithm>
 
 using namespace Sol2D;
 

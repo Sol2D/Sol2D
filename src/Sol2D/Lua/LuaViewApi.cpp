@@ -18,6 +18,7 @@
 #include <Sol2D/Lua/LuaAreaApi.h>
 #include <Sol2D/Lua/LuaFormApi.h>
 #include <Sol2D/Lua/LuaSceneApi.h>
+#include <Sol2D/Lua/LuaUIApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
@@ -130,6 +131,32 @@ int luaApi_BindFragment(lua_State * _lua)
     return 1;
 }
 
+// 1 self
+// 2 ui | nil (optional)
+int luaApi_BindUI(lua_State * _lua)
+{
+    const Self * self = UserData::getUserData(_lua, 1);
+    if(lua_gettop(_lua) > 1)
+    {
+        std::shared_ptr<UI> ui = tryGetUI(_lua, 2);
+        luaL_argexpected(_lua, ui != nullptr, 2, LuaTypeName::ui);
+        self->getView(_lua)->bindUI(ui);
+    }
+    else
+    {
+        self->getView(_lua)->deleteUI();
+    }
+    return 0;
+}
+
+// 1 self
+int luaApi_DeleteUI(lua_State * _lua)
+{
+    const Self * self = UserData::getUserData(_lua, 1);
+    self->getView(_lua)->deleteUI();
+    return 0;
+}
+
 } // namespace
 
 std::shared_ptr<View> Sol2D::Lua::tryGetView(lua_State * _lua, int _idx)
@@ -152,6 +179,8 @@ void Sol2D::Lua::pushViewApi(lua_State * _lua, std::shared_ptr<View> _view)
             { "getFragmentArea", luaApi_GetFragmentArea },
             { "deleteFragment", luaApi_DeleteFragment },
             { "bindFragment", luaApi_BindFragment },
+            { "bindUI", luaApi_BindUI },
+            { "deleteUI", luaApi_DeleteUI },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);

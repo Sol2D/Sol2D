@@ -66,6 +66,7 @@ add_subdirectory(third_party/SDL_image)
 add_subdirectory(third_party/SDL_ttf)
 add_subdirectory(third_party/SDL_mixer)
 add_subdirectory(third_party/box2d)
+add_subdirectory(third_party/ImGui)
 
 find_package(ZLIB REQUIRED)
 find_package(tinyxml2 REQUIRED)
@@ -113,16 +114,14 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL_ttf/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/SDL_mixer/include
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/box2d/include
+    PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/ImGui/ImGui
+    PRIVATE ${CMAKE_CURRENT_LIST_DIR}/third_party/ImGui/ImGui/backends
     PRIVATE ${ZSTD_INCLUDEDIR}
     PRIVATE ${SDL3_INCLUDE_DIR}
     PRIVATE ${LUA_INCLUDEDIR}
     PRIVATE ${LUA_INCLUDE_DIRS}
     PRIVATE ${ZSTD_INCLUDE_DIRS}
     PRIVATE ${Boost_INCLUDE_DIRS}
-)
-
-target_precompile_headers(${PROJECT_NAME}
-    PRIVATE ${SOL2D_SRC_DIR}/MediaLayer/MediaLayer.h
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -137,6 +136,7 @@ target_link_libraries(${PROJECT_NAME}
     Boost::boost
     ${LUA_LINK_LIBRARIES}
     ${ZSTD_LINK_LIBRARIES}
+    ImGui
 )
 
 block() # Shaders

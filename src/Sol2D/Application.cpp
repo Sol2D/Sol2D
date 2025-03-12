@@ -19,6 +19,9 @@
 #include <Sol2D/Window.h>
 #include <Sol2D/MediaLayer/MediaLayer.h>
 #include <Sol2D/Lua/LuaLibrary.h>
+#include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlgpu3.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -108,12 +111,37 @@ Application::Application(const Workspace & _workspace) :
         throw SDLException("Unable to create GPU device.");
     if(!SDL_ClaimWindowForGPUDevice(mp_device, mp_sdl_window))
         throw SDLException("Unable to claim window for GPU device.");
+    if(!SDL_SetGPUSwapchainParameters(
+        mp_device,
+        mp_sdl_window,
+        SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
+        SDL_GPU_PRESENTMODE_MAILBOX))
+    {
+        throw SDLException("Unable to configuire GPU swapchain.");
+    }
     if(!SDL_ShowWindow(mp_sdl_window))
         throw SDLException("Unable to show window.");
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO & io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+    // ImGui::StyleColorsClassic();
+    // ImGui::StyleColorsLight();
+    ImGui::StyleColorsDark(); // TODO: should be controlled by user
+    ImGui_ImplSDL3_InitForSDLGPU(mp_sdl_window);
+    ImGui_ImplSDLGPU3_InitInfo init_info = {};
+    init_info.Device = mp_device;
+    init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(mp_device, mp_sdl_window);
+    init_info.MSAASamples = SDL_GPU_SAMPLECOUNT_1;
+    ImGui_ImplSDLGPU3_Init(&init_info);
 }
 
 Application::~Application()
 {
+    ImGui_ImplSDL3_Shutdown();
+    ImGui_ImplSDLGPU3_Shutdown();
+    ImGui::DestroyContext();
     delete mp_window;
     if(mp_device) SDL_DestroyGPUDevice(mp_device);
     if(mp_sdl_window) SDL_DestroyWindow(mp_sdl_window);
@@ -162,6 +190,7 @@ void Application::exec()
 
 bool Application::handleEvent(const SDL_Event & _event)
 {
+    ImGui_ImplSDL3_ProcessEvent(&_event);
     switch (_event.type)
     {
     case SDL_EVENT_MOUSE_BUTTON_DOWN:

@@ -17,10 +17,14 @@
 #pragma once
 
 #include <Sol2D/ResourceManager.h>
-#include <Sol2D/MediaLayer/Primitive.h>
+#include <Sol2D/MediaLayer/UIRenderer.h>
+#include <Sol2D/MediaLayer/RectRenderer.h>
+#include <Sol2D/MediaLayer/LineRenderer.h>
 #include <queue>
 
 namespace Sol2D {
+
+class RenderTask;
 
 class Renderer final
 {
@@ -34,7 +38,9 @@ public:
     Texture createTexture(float _width, float _height, const char * _name = nullptr) const;
 
     void beginStep();
-    void beginRenderPass(Texture & _texture, const SDL_FColor & _clear_color);
+    void beginDefaultRenderPass();
+    void endDefaultRenderPass();
+    void beginRenderPass(Texture & _texture, const SDL_FColor * _clear_color = nullptr);
     void endRenderPass(const Texture & _texture, const SDL_FRect & _output_rect);
     void submitStep();
 
@@ -48,6 +54,14 @@ public:
     void renderCircle(SolidCircleRenderingData && _data);
     void renderCapsule(CapsuleRenderingData && _data);
     void renderCapsule(SolidCapsuleRenderingData && _data);
+    void renderUI(const UI & _ui);
+
+private:
+    void beginRenderPass(
+        SDL_GPUTexture * _texture,
+        const FSize & _texture_size,
+        const SDL_FColor * _clear_color = nullptr);
+    void endRenderPass();
 
 private:
     const ResourceManager & mr_resource_manager;
@@ -55,7 +69,8 @@ private:
     SDL_GPUTexture * mp_swapchain_texture;
     RectRenderer m_rect_renderer;
     LineRenderer m_line_renderer;
-    std::queue<Primitive *> m_queue;
+    UIRenderer m_ui_renderer;
+    std::queue<RenderTask *> m_queue;
 };
 
 } // namespace Sol2D

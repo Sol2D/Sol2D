@@ -51,7 +51,7 @@ void Outlet::step(const StepState & _state)
 {
     if(m_canvas && m_aria.is_visible)
     {
-        mr_renderer.beginRenderPass(m_texture, m_canvas->getClearColor());
+        mr_renderer.beginRenderPass(m_texture, &m_canvas->getClearColor());
         m_canvas->step(_state);
         mr_renderer.endRenderPass(m_texture, m_rect);
     }
