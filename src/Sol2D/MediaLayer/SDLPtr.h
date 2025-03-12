@@ -33,7 +33,7 @@ class SDLPtr
         {
         }
 
-        void operator ()(SDL_GPUTexture * _texture) noexcept
+        void operator() (SDL_GPUTexture * _texture) noexcept
         {
             if(_texture)
                 SDL_ReleaseGPUTexture(mp_device, _texture);

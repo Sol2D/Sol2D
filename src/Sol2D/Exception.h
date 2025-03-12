@@ -23,17 +23,23 @@ namespace Sol2D {
 class Exception : public std::runtime_error
 {
 public:
-    explicit Exception(const std::string & _message) : std::runtime_error(_message) { }
+    explicit Exception(const std::string & _message) :
+        std::runtime_error(_message)
+    {
+    }
 };
 
 } // namespace Sol2D
 
-#define S2_DEFINE_EXCEPTION(classname) \
-class classname : public Sol2D::Exception \
-{ \
-    public: \
-    explicit classname(const std::string & _message) : Sol2D::Exception(_message) { } \
-};
+#define S2_DEFINE_EXCEPTION(classname)                                                                                 \
+    class classname : public Sol2D::Exception                                                                          \
+    {                                                                                                                  \
+    public:                                                                                                            \
+        explicit classname(const std::string & _message) :                                                             \
+            Sol2D::Exception(_message)                                                                                 \
+        {                                                                                                              \
+        }                                                                                                              \
+    };
 
 namespace Sol2D {
 

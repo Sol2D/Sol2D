@@ -26,7 +26,9 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-struct Self : LuaSelfBase { };
+struct Self : LuaSelfBase
+{
+};
 
 using UserData = LuaUserData<Self, LuaTypeName::mouse>;
 
@@ -53,11 +55,10 @@ void Sol2D::Lua::pushMouseApi(lua_State * _lua)
     UserData::pushUserData(_lua);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "getState", luaApi_GetState },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",     UserData::luaGC},
+            {"getState", luaApi_GetState},
+            {nullptr,    nullptr        }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

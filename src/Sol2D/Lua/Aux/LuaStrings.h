@@ -84,11 +84,11 @@ struct LuaTypeName
     static const char sound_effect[];
     static const char music[];
 
-    template<typename ...T>
+    template<typename... T>
     static std::string joinTypes(const T... _type);
 };
 
-template<typename ...T>
+template<typename... T>
 std::string LuaTypeName::joinTypes(const T... _type)
 {
     std::stringstream ss;
@@ -105,8 +105,7 @@ std::string LuaTypeName::joinTypes(const T... _type)
 
 constexpr std::vector<const char *> getAllJointTypes()
 {
-    return std::vector<const char *>
-    {
+    return std::vector<const char *> {
         LuaTypeName::distance_joint,
         LuaTypeName::motor_joint,
         LuaTypeName::mouse_joint,

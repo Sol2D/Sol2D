@@ -64,11 +64,10 @@ void Sol2D::Lua::pushUIApi(lua_State * _lua, std::shared_ptr<UI> _ui)
     UserData::pushUserData(_lua, _ui);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "addForm", luaApi_AddForm },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",    UserData::luaGC},
+            {"addForm", luaApi_AddForm },
+            {nullptr,   nullptr        }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

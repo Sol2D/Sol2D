@@ -67,7 +67,7 @@ bool Sol2D::Lua::tryGetVerticalTextAlignment(lua_State * _lua, int _idx, Forms::
             return true;
         case static_cast<lua_Integer>(VerticalTextAlignment::Top):
             *_out = VerticalTextAlignment::Top;
-            return true;;
+            return true;
         }
     }
     return false;

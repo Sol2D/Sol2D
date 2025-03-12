@@ -29,7 +29,6 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-
 template<BodyShapeType shape_type>
 void readBasicShape(LuaTable & _table, BodyBasicShapeDefinition<shape_type> & _shape);
 
@@ -38,26 +37,29 @@ bool tryGetPoints(lua_State * _lua, int _idx, std::vector<SDL_FPoint> & _points)
 void addPolygon(
     LuaTable & _table,
     const std::string & _key,
-    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
+);
 
 void addCircle(
     LuaTable & _table,
     const std::string & _key,
-    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
+);
 
 void addCapsule(
     LuaTable & _table,
     const std::string & _key,
-    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
+);
 
 void addShape(
     lua_State * _lua,
     int _idx,
     const std::string & _key,
-    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
+);
 
 void getShapes(lua_State * _lua, int _idx, std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes);
-
 
 void getShapes(lua_State * _lua, int _idx, std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
 {
@@ -77,7 +79,8 @@ void addShape(
     lua_State * _lua,
     int _idx,
     const std::string & _key,
-    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
+)
 {
     LuaTable table(_lua, _idx);
     if(!table.isValid())
@@ -104,7 +107,8 @@ void addShape(
 void addPolygon(
     LuaTable & _table,
     const std::string & _key,
-    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
+)
 {
     if(_table.tryGetValue("rect"))
     {
@@ -175,7 +179,8 @@ bool tryGetPoints(lua_State * _lua, int _idx, std::vector<SDL_FPoint> & _points)
 void addCircle(
     LuaTable & _table,
     const std::string & _key,
-    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
+)
 {
     BodyCircleDefinition def;
     {
@@ -193,13 +198,12 @@ void addCircle(
 void addCapsule(
     LuaTable & _table,
     const std::string & _key,
-    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes)
+    std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
+)
 {
     BodyCapsuleShapeDefinition def;
-    if(
-        !_table.tryGetNumber("radius", &def.radius) ||
-        !_table.tryGetPoint("center1", def.center1) ||
-        !_table.tryGetPoint("center2", def.center2))
+    if(!_table.tryGetNumber("radius", &def.radius) || !_table.tryGetPoint("center1", def.center1) ||
+       !_table.tryGetPoint("center2", def.center2))
     {
         return;
     }

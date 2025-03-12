@@ -31,9 +31,8 @@ public:
     const std::string & getKey() const;
     const std::optional<uint32_t> getTileMapObjectId() const;
     void addGraphics(
-        Renderer & _renderer,
-        const Utils::PreHashedKey<std::string> & _key,
-        const GraphicsPackDefinition & _definition);
+        Renderer & _renderer, const Utils::PreHashedKey<std::string> & _key, const GraphicsPackDefinition & _definition
+    );
     bool setCurrentGraphics(const Utils::PreHashedKey<std::string> & _key);
     GraphicsPack * getCurrentGraphics();
     std::optional<Utils::PreHashedKey<std::string>> getCurrentGraphicsKey() const;

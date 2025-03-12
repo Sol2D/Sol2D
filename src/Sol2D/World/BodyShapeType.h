@@ -29,7 +29,8 @@ enum class BodyShapeType
 
 std::optional<BodyShapeType> castToBodyShapeType(std::integral auto _integer)
 {
-    switch(_integer) {
+    switch(_integer)
+    {
     case static_cast<decltype(_integer)>(BodyShapeType::Polygon):
         return BodyShapeType::Polygon;
     case static_cast<decltype(_integer)>(BodyShapeType::Circle):

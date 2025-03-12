@@ -46,7 +46,8 @@ public:
         int32_t _x,
         int32_t _y,
         uint32_t _width,
-        uint32_t _height);
+        uint32_t _height
+    );
     TileMapObjectLayer & createObjectLayer(const TileMapLayer * _parent, uint32_t _id, const std::string & _name);
     TileMapImageLayer & createImageLayer(const TileMapLayer * _parent, uint32_t _id, const std::string & _name);
     TileMapGroupLayer & createGroupLayer(const TileMapLayer * _parent, uint32_t _id, const std::string & _name);

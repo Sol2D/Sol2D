@@ -33,7 +33,6 @@ enum class TileMapObjectType
     Text
 };
 
-
 struct TileMapObjectDef
 {
     uint32_t id;
@@ -42,9 +41,8 @@ struct TileMapObjectDef
     const char * name;
 };
 
-
 class TileMapObject
-{   
+{
 protected:
     TileMapObject(TileMapObjectType _type, const TileMapObjectDef & _def) :
         m_class(_def.klass ? _def.klass : std::string()),
@@ -60,28 +58,103 @@ protected:
 public:
     S2_DEFAULT_COPY(TileMapObject)
 
-    virtual ~TileMapObject() { }
-    TileMapObjectType getObjectType() const { return m_type; }
-    uint32_t getId() const { return m_id; }
-    const std::string & getClass() const { return m_class; }
-    void eraseClass() { setClass(std::string()); }
-    void setClass(const char * _class) { setClass(_class ? _class : std::string()); }
+    virtual ~TileMapObject()
+    {
+    }
+
+    TileMapObjectType getObjectType() const
+    {
+        return m_type;
+    }
+
+    uint32_t getId() const
+    {
+        return m_id;
+    }
+
+    const std::string & getClass() const
+    {
+        return m_class;
+    }
+
+    void eraseClass()
+    {
+        setClass(std::string());
+    }
+
+    void setClass(const char * _class)
+    {
+        setClass(_class ? _class : std::string());
+    }
+
     virtual void setClass(const std::string & _class) = 0;
-    uint32_t getLayerId() const { return m_layer_id; }
+    uint32_t getLayerId() const
+    {
+        return m_layer_id;
+    }
+
     virtual void setLayerId(uint32_t _layer_id) = 0;
-    void setName(const char * _name) { setName(_name ? _name : std::string()); }
+    void setName(const char * _name)
+    {
+        setName(_name ? _name : std::string());
+    }
+
     virtual void setName(const std::string & _name) = 0;
-    const std::string & getName() const { return m_name; }
-    const SDL_FPoint & getPosition() const { return m_position; }
-    void setPosition(const SDL_FPoint & _position) { m_position = _position; }
-    void setX(float _x) { m_position.x = _x; }
-    void setY(float _y) { m_position.y = _y; }
-    void setVisibility(bool _visible) { m_is_visible = _visible; }
-    bool isVisible() const { return m_is_visible; }
-    bool hasTileGid() const { return m_tile_gid.has_value(); }
-    const std::optional<uint32_t> getTileGid() const { return m_tile_gid; }
-    void setTileGid(uint32_t _gid) { m_tile_gid = _gid; }
-    void eraseTileGid() { m_tile_gid.reset(); }
+
+    const std::string & getName() const
+    {
+        return m_name;
+    }
+
+    const SDL_FPoint & getPosition() const
+    {
+        return m_position;
+    }
+
+    void setPosition(const SDL_FPoint & _position)
+    {
+        m_position = _position;
+    }
+
+    void setX(float _x)
+    {
+        m_position.x = _x;
+    }
+
+    void setY(float _y)
+    {
+        m_position.y = _y;
+    }
+
+    void setVisibility(bool _visible)
+    {
+        m_is_visible = _visible;
+    }
+
+    bool isVisible() const
+    {
+        return m_is_visible;
+    }
+
+    bool hasTileGid() const
+    {
+        return m_tile_gid.has_value();
+    }
+
+    const std::optional<uint32_t> getTileGid() const
+    {
+        return m_tile_gid;
+    }
+
+    void setTileGid(uint32_t _gid)
+    {
+        m_tile_gid = _gid;
+    }
+
+    void eraseTileGid()
+    {
+        m_tile_gid.reset();
+    }
 
 protected:
     std::string m_class;
@@ -96,27 +169,37 @@ private:
     std::optional<uint32_t> m_tile_gid;
 };
 
-
 class TileMapObjectWithWidthAndHeight : public TileMapObject
 {
 public:
-    TileMapObjectWithWidthAndHeight(TileMapObjectType _type, const TileMapObjectDef & _def):
+    TileMapObjectWithWidthAndHeight(TileMapObjectType _type, const TileMapObjectDef & _def) :
         TileMapObject(_type, _def),
         m_width(.0f),
         m_height(.0f)
     {
     }
 
-    float getWidth() const { return m_width; }
-    void setWidth(float _width) { m_width = _width; }
-    float getHeight() const { return m_height; }
-    void setHeight(float _height) { m_height = _height; }
+    float getWidth() const
+    {
+        return m_width;
+    }
+    void setWidth(float _width)
+    {
+        m_width = _width;
+    }
+    float getHeight() const
+    {
+        return m_height;
+    }
+    void setHeight(float _height)
+    {
+        m_height = _height;
+    }
 
 private:
     float m_width;
     float m_height;
 };
-
 
 class TileMapCircle : public TileMapObject
 {
@@ -127,20 +210,27 @@ public:
     {
     }
 
-    float getRadius() const { return m_radius; }
-    void setRadius(float _radius) { m_radius = _radius; }
+    float getRadius() const
+    {
+        return m_radius;
+    }
+    void setRadius(float _radius)
+    {
+        m_radius = _radius;
+    }
 
 private:
     float m_radius;
 };
 
-
 class TileMapPoint : public TileMapObject
 {
 public:
-    explicit TileMapPoint(const TileMapObjectDef & _def) : TileMapObject(TileMapObjectType::Point, _def) { }
+    explicit TileMapPoint(const TileMapObjectDef & _def) :
+        TileMapObject(TileMapObjectType::Point, _def)
+    {
+    }
 };
-
 
 class TileMapPolyX : public TileMapObjectWithWidthAndHeight
 {
@@ -177,7 +267,6 @@ private:
     std::vector<SDL_FPoint> m_points;
 };
 
-
 class TileMapPolygon : public TileMapPolyX
 {
 public:
@@ -187,7 +276,6 @@ public:
     }
 };
 
-
 class TileMapPolyline : public TileMapPolyX
 {
 public:
@@ -196,7 +284,6 @@ public:
     {
     }
 };
-
 
 class TileMapText : public TileMapObjectWithWidthAndHeight
 {
@@ -222,7 +309,7 @@ public:
         m_font_family("sans-serif"),
         m_font_size(16u),
         m_is_word_wrap_enabled(false),
-        m_color{},
+        m_color {},
         m_is_bold(false),
         m_is_italic(false),
         m_is_underlined(false),
@@ -233,28 +320,94 @@ public:
     {
     }
 
-    const std::string & getFontFamily() const { return m_font_family; }
-    void setFontFamily(const std::string & _family) { m_font_family = _family; }
-    uint16_t getFontSize() const { return m_font_size; }
-    void setFontSize(uint16_t _size) { m_font_size = _size; }
-    bool isWordWraEnabled() const { return m_is_word_wrap_enabled; }
-    void ebableWordWrap(bool _enabled) { m_is_word_wrap_enabled = _enabled; }
-    const SDL_FColor & getColor() const { return m_color; }
-    void setColor(const SDL_FColor  & _color) { m_color = _color; }
-    bool isBold() const { return m_is_bold; }
-    void setBold(bool _bold) { m_is_bold = _bold; }
-    bool isItalic() const { return m_is_italic; }
-    void setItalic(bool _italic) { m_is_italic = _italic; }
-    bool isUnderlined() const { return m_is_underlined; }
-    void setUnderlined(bool _underlined) { m_is_underlined = _underlined; }
-    bool isStruckOut() const { return m_is_struck_out; }
-    void setStruckOut(bool _struck_out) { m_is_struck_out = _struck_out; }
-    bool isKerningEnabled() const { return m_is_kerning_enabled; }
-    void enableKerning(bool _enabled) { m_is_kerning_enabled = _enabled; }
-    HAlignment getHorizontalAlignment() const { return m_h_alignment; }
-    void setHorizontalAlignment(HAlignment _alignment) { m_h_alignment = _alignment; }
-    VAlignment getVerticalAlignment() const { return m_v_alignment; }
-    void setVerticalAlignment(VAlignment _alignment) { m_v_alignment = _alignment; }
+    const std::string & getFontFamily() const
+    {
+        return m_font_family;
+    }
+    void setFontFamily(const std::string & _family)
+    {
+        m_font_family = _family;
+    }
+    uint16_t getFontSize() const
+    {
+        return m_font_size;
+    }
+    void setFontSize(uint16_t _size)
+    {
+        m_font_size = _size;
+    }
+    bool isWordWraEnabled() const
+    {
+        return m_is_word_wrap_enabled;
+    }
+    void ebableWordWrap(bool _enabled)
+    {
+        m_is_word_wrap_enabled = _enabled;
+    }
+    const SDL_FColor & getColor() const
+    {
+        return m_color;
+    }
+    void setColor(const SDL_FColor & _color)
+    {
+        m_color = _color;
+    }
+    bool isBold() const
+    {
+        return m_is_bold;
+    }
+    void setBold(bool _bold)
+    {
+        m_is_bold = _bold;
+    }
+    bool isItalic() const
+    {
+        return m_is_italic;
+    }
+    void setItalic(bool _italic)
+    {
+        m_is_italic = _italic;
+    }
+    bool isUnderlined() const
+    {
+        return m_is_underlined;
+    }
+    void setUnderlined(bool _underlined)
+    {
+        m_is_underlined = _underlined;
+    }
+    bool isStruckOut() const
+    {
+        return m_is_struck_out;
+    }
+    void setStruckOut(bool _struck_out)
+    {
+        m_is_struck_out = _struck_out;
+    }
+    bool isKerningEnabled() const
+    {
+        return m_is_kerning_enabled;
+    }
+    void enableKerning(bool _enabled)
+    {
+        m_is_kerning_enabled = _enabled;
+    }
+    HAlignment getHorizontalAlignment() const
+    {
+        return m_h_alignment;
+    }
+    void setHorizontalAlignment(HAlignment _alignment)
+    {
+        m_h_alignment = _alignment;
+    }
+    VAlignment getVerticalAlignment() const
+    {
+        return m_v_alignment;
+    }
+    void setVerticalAlignment(VAlignment _alignment)
+    {
+        m_v_alignment = _alignment;
+    }
 
 private:
     std::string m_font_family;

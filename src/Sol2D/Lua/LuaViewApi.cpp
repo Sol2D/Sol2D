@@ -122,10 +122,8 @@ int luaApi_BindFragment(lua_State * _lua)
     else
     {
         luaL_argexpected(
-            _lua,
-            false,
-            3,
-            LuaTypeName::joinTypes(LuaTypeName::scene, LuaTypeName::form, LuaTypeName::nil).c_str());
+            _lua, false, 3, LuaTypeName::joinTypes(LuaTypeName::scene, LuaTypeName::form, LuaTypeName::nil).c_str()
+        );
     }
     lua_pushboolean(_lua, result);
     return 1;
@@ -171,17 +169,16 @@ void Sol2D::Lua::pushViewApi(lua_State * _lua, std::shared_ptr<View> _view)
     UserData::pushUserData(_lua, _view);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "createFragment", luaApi_CreateFragment },
-            { "updateFragment", luaApi_UpdateFragment },
-            { "getFragmentArea", luaApi_GetFragmentArea },
-            { "deleteFragment", luaApi_DeleteFragment },
-            { "bindFragment", luaApi_BindFragment },
-            { "bindUI", luaApi_BindUI },
-            { "deleteUI", luaApi_DeleteUI },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",            UserData::luaGC       },
+            {"createFragment",  luaApi_CreateFragment },
+            {"updateFragment",  luaApi_UpdateFragment },
+            {"getFragmentArea", luaApi_GetFragmentArea},
+            {"deleteFragment",  luaApi_DeleteFragment },
+            {"bindFragment",    luaApi_BindFragment   },
+            {"bindUI",          luaApi_BindUI         },
+            {"deleteUI",        luaApi_DeleteUI       },
+            {nullptr,           nullptr               }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

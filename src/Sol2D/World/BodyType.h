@@ -29,7 +29,8 @@ enum class BodyType
 
 std::optional<BodyType> castToBodyType(std::integral auto _integer)
 {
-    switch(_integer) {
+    switch(_integer)
+    {
     case static_cast<decltype(_integer)>(BodyType::Static):
         return BodyType::Static;
     case static_cast<decltype(_integer)>(BodyType::Dynamic):

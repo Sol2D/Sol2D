@@ -24,7 +24,7 @@ namespace {
 static constexpr char gc_key_x[] = "x";
 static constexpr char gc_key_y[] = "y";
 
-} // namespace name
+} // namespace
 
 bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point)
 {
@@ -33,9 +33,7 @@ bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point)
         return false;
 
     float x, y;
-    if(
-        table.tryGetNumber(gc_key_x, &x) &&
-        table.tryGetNumber(gc_key_y, &y))
+    if(table.tryGetNumber(gc_key_x, &x) && table.tryGetNumber(gc_key_y, &y))
     {
         _point.x = x;
         _point.y = y;

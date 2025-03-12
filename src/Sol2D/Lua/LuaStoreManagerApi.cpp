@@ -79,21 +79,18 @@ int luaApi_DeleteStore(lua_State * _lua)
 } // namespace
 
 void Sol2D::Lua::pushStoreManagerApi(
-    lua_State * _lua,
-    const Workspace & _workspace,
-    Renderer & _renderer,
-    StoreManager & _store_manager)
+    lua_State * _lua, const Workspace & _workspace, Renderer & _renderer, StoreManager & _store_manager
+)
 {
     UserData::pushUserData(_lua, _store_manager, _workspace, _renderer);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "createStore", luaApi_CreateStore },
-            { "getStore", luaApi_GetStore },
-            { "deleteStore", luaApi_DeleteStore },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",        UserData::luaGC   },
+            {"createStore", luaApi_CreateStore},
+            {"getStore",    luaApi_GetStore   },
+            {"deleteStore", luaApi_DeleteStore},
+            {nullptr,       nullptr           }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

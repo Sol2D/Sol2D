@@ -43,21 +43,15 @@ private:
     SDL_GPUGraphicsPipeline * createCapsulePipeline(SDL_Window * _window) const;
     SDL_GPUGraphicsPipeline * createTexturePipeline(SDL_Window * _window) const;
     SDL_GPUGraphicsPipeline * createPipeline(
-        SDL_Window * _window,
-        SDL_GPUShader * _vert_shader,
-        SDL_GPUShader * _frag_shader) const;
-    void renderRect(
-        const RenderingContext & _ctx,
-        const RectRenderingDataBase & _data,
-        const void * _frag_uniform) const;
-    void renderCircle(
-        const RenderingContext & _ctx,
-        const CircleRenderingDataBase & _data,
-        const void * _frag_uniform) const;
+        SDL_Window * _window, SDL_GPUShader * _vert_shader, SDL_GPUShader * _frag_shader
+    ) const;
+    void renderRect(const RenderingContext & _ctx, const RectRenderingDataBase & _data, const void * _frag_uniform)
+        const;
+    void renderCircle(const RenderingContext & _ctx, const CircleRenderingDataBase & _data, const void * _frag_uniform)
+        const;
     void renderCapsule(
-        const RenderingContext & _ctx,
-        const CapsuleRenderingDataBase & _data,
-        const void * _frag_uniform) const;
+        const RenderingContext & _ctx, const CapsuleRenderingDataBase & _data, const void * _frag_uniform
+    ) const;
     void bindBuffers(const RenderingContext & _ctx) const;
 
 private:

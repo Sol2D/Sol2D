@@ -27,7 +27,8 @@ void pushGraphicsPackApi(
     std::shared_ptr<World::Scene> _scene,
     uint64_t _body_id,
     const Utils::PreHashedKey<std::string> & _shape_key,
-    const Utils::PreHashedKey<std::string> & _graphics_pack_key);
+    const Utils::PreHashedKey<std::string> & _graphics_pack_key
+);
 
 GraphicsPack * tryGetGraphicsPack(lua_State * _lua, int _idx);
 

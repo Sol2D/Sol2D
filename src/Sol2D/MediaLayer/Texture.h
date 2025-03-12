@@ -37,17 +37,17 @@ public:
     {
     }
 
-    operator bool() const
+    operator bool () const
     {
         return m_texture != nullptr;
     }
 
-    bool operator == (std::nullopt_t) const
+    bool operator== (std::nullopt_t) const
     {
         return m_texture == nullptr;
     }
 
-    bool operator != (std::nullopt_t) const
+    bool operator!= (std::nullopt_t) const
     {
         return m_texture != nullptr;
     }
@@ -57,7 +57,7 @@ public:
         return m_texture.get();
     }
 
-    operator SDL_GPUTexture *() const
+    operator SDL_GPUTexture * () const
     {
         return m_texture.get();
     }

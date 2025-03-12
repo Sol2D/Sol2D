@@ -39,12 +39,21 @@ private:
 public:
     UIForm(uint32_t _id, const std::string & _title);
     ~UIForm();
-    uint32_t getId() const { return m_id; }
+
+    uint32_t getId() const
+    {
+        return m_id;
+    }
+
     void addLabel(const std::string & _label);
     void addButton(const std::string & _label);
     void addCheckbox(const std::string & _label, bool _checked = false);
     void renderWidgets();
-    ImDrawData * getDrawData() const { return ImGui::GetDrawData(); }
+
+    ImDrawData * getDrawData() const
+    {
+        return ImGui::GetDrawData();
+    }
 
 private:
     void addWidget(const std::string & _key, Widget * _widget);
@@ -73,8 +82,14 @@ public:
     ~UI();
     UIForm & addForm(const std::string & _title);
     UIForm * getForm(uint32_t _id);
-    Forms getForms() { return m_forms; }
-    ConstForms getForms() const { return m_forms; }
+    Forms getForms()
+    {
+        return m_forms;
+    }
+    ConstForms getForms() const
+    {
+        return m_forms;
+    }
 
 private:
     FormMap m_forms;

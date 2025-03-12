@@ -51,17 +51,40 @@ public:
         int32_t _x,
         int32_t _y,
         uint32_t _width,
-        uint32_t _height);
+        uint32_t _height
+    );
+
     ~TileMapTileLayer() override;
-    int32_t getX() const{ return m_x; }
-    int32_t getY() const { return m_y; }
-    uint32_t getWidth() const { return m_width; }
-    uint32_t getHeight() const { return m_height; }
+
+    int32_t getX() const
+    {
+        return m_x;
+    }
+
+    int32_t getY() const
+    {
+        return m_y;
+    }
+
+    uint32_t getWidth() const
+    {
+        return m_width;
+    }
+
+    uint32_t getHeight() const
+    {
+        return m_height;
+    }
+
     void setTile(int32_t _x, int32_t _y, uint32_t _gid);
     bool eraseTile(int32_t _x, int32_t _y);
     const Tile * getTileAtPoint(int32_t _x, int32_t _y) const;
     const Tile * getTile(int32_t _x, int32_t _y) const;
-    const TileMapTileLayerCell * getCell(int32_t _x, int32_t _y) const { return getLayerCell(_x, _y); }
+
+    const TileMapTileLayerCell * getCell(int32_t _x, int32_t _y) const
+    {
+        return getLayerCell(_x, _y);
+    }
 
 private:
     TileMapTileLayerCell * getLayerCell(uint32_t _x, uint32_t _y) const
@@ -95,4 +118,4 @@ private:
     TileMapTileLayerCell * mp_cells;
 };
 
-} // namespace Tiles::Sol2D
+} // namespace Sol2D::Tiles

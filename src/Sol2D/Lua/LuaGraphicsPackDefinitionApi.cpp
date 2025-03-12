@@ -54,10 +54,7 @@ void addFrames(lua_State * _lua, int _idx, GraphicsPackDefinition & _pack_def)
 
 } // namespace
 
-bool Sol2D::Lua::tryGetGraphicsPackDefinition(
-    lua_State * _lua,
-    int _idx,
-    GraphicsPackDefinition & _result)
+bool Sol2D::Lua::tryGetGraphicsPackDefinition(lua_State * _lua, int _idx, GraphicsPackDefinition & _result)
 {
     LuaTable table(_lua, _idx);
     if(!table.isValid())
@@ -110,8 +107,8 @@ bool Sol2D::Lua::tryGetGraphicsPackSpriteDefinition(lua_State * _lua, int _idx, 
             lua_Integer sprite_index;
             if(sprite_sheet && sprite_definition_table.tryGetInteger("spriteIndex", &sprite_index))
             {
-                _result.sprite = GraphicsPackSpriteSheetSpriteDefinition(
-                    sprite_sheet, static_cast<size_t>(sprite_index));
+                _result.sprite =
+                    GraphicsPackSpriteSheetSpriteDefinition(sprite_sheet, static_cast<size_t>(sprite_index));
             }
             else
             {

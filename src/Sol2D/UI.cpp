@@ -21,7 +21,10 @@ using namespace Sol2D;
 class UIForm::Widget
 {
 public:
-    virtual ~Widget() {}
+    virtual ~Widget()
+    {
+    }
+
     virtual bool push() = 0;
 };
 
@@ -29,7 +32,7 @@ class UIForm::Label : public UIForm::Widget
 {
 public:
     explicit Label(const std::string _label) :
-          m_label(_label)
+        m_label(_label)
     {
     }
 

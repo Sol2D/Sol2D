@@ -244,7 +244,7 @@ bool LuaTable::tryGetUnsignedInteger(const char * _key, T * _value) const
 }
 
 template<DimensionValueConcept Number>
-bool LuaTable::tryGetDimension(const char * _key, std::optional<Dimension<Number> > & _value)
+bool LuaTable::tryGetDimension(const char * _key, std::optional<Dimension<Number>> & _value)
 {
     if(tryGetValue(_key) && Lua::tryGetDimension(mp_lua, -1, _value))
     {

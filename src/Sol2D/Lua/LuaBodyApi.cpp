@@ -44,7 +44,7 @@ struct Self : LuaSelfBase
 
     std::shared_ptr<Scene> getScene(lua_State * _lua) const
     {
-        std::shared_ptr<Scene> ptr =  m_scene.lock();
+        std::shared_ptr<Scene> ptr = m_scene.lock();
         if(!ptr)
             luaL_error(_lua, LuaMessage::scene_is_destroyed);
         return ptr;
@@ -200,21 +200,20 @@ void Lua::pushBodyApi(lua_State * _lua, std::shared_ptr<Scene> _scene, uint64_t 
     UserData::pushUserData(_lua, _scene, _body_id);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "isValid", luaApi_IsValid },
-            { "getId", luaApi_GetId },
-            { "getShape", luaApi_GetShape },
-            { "setLayer", luaApi_SetLayer },
-            { "getPosition", luaApi_GetPosition },
-            { "setPosition", luaApi_SetPosition },
-            { "applyForceToCenter", luaApi_ApplyForceToCenter },
-            { "applyImpulseToCenter", luaApi_ApplyImpulseToCenter },
-            { "getLinearVelocity", luaApi_GetLinearVelocity },
-            { "setLinearVelocity", luaApi_SetLinearVelocity },
-            { "getMass", luaApi_GetBodyMass },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",                 UserData::luaGC            },
+            {"isValid",              luaApi_IsValid             },
+            {"getId",                luaApi_GetId               },
+            {"getShape",             luaApi_GetShape            },
+            {"setLayer",             luaApi_SetLayer            },
+            {"getPosition",          luaApi_GetPosition         },
+            {"setPosition",          luaApi_SetPosition         },
+            {"applyForceToCenter",   luaApi_ApplyForceToCenter  },
+            {"applyImpulseToCenter", luaApi_ApplyImpulseToCenter},
+            {"getLinearVelocity",    luaApi_GetLinearVelocity   },
+            {"setLinearVelocity",    luaApi_SetLinearVelocity   },
+            {"getMass",              luaApi_GetBodyMass         },
+            {nullptr,                nullptr                    }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

@@ -90,11 +90,11 @@ void Sol2D::Lua::pushFormApi(lua_State * _lua, const Workspace & _workspace, std
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
-            { "__gc", UserData::luaGC },
-            { "setBackgroundColor", luaApi_SetBackgroundColor },
-            { "createLabel", luaApi_CreateLabel },
-            { "createButton", luaApi_CreateButton },
-            { nullptr, nullptr }
+            {"__gc",               UserData::luaGC          },
+            {"setBackgroundColor", luaApi_SetBackgroundColor},
+            {"createLabel",        luaApi_CreateLabel       },
+            {"createButton",       luaApi_CreateButton      },
+            {nullptr,              nullptr                  }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

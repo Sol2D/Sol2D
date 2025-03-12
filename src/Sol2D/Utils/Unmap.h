@@ -35,11 +35,8 @@ class UnmapIterator
         using ValueType = const Map::mapped_type;
     };
 
-    using TraitsType = std::conditional<
-        std::is_same<InnerIterator, typename Map::iterator>::value,
-        MapTraits,
-        ConstMapTraits
-    >::type;
+    using TraitsType =
+        std::conditional<std::is_same<InnerIterator, typename Map::iterator>::value, MapTraits, ConstMapTraits>::type;
 
 public:
     using iterator = UnmapIterator<Map, InnerIterator>;
@@ -56,35 +53,35 @@ public:
     {
     }
 
-    iterator operator ++ ()
+    iterator operator++ ()
     {
         ++m_iterator;
         return *this;
     }
 
-    iterator operator ++ (int)
+    iterator operator++ (int)
     {
         UnmapIterator it(mr_map, m_iterator);
         ++m_iterator;
         return it;
     }
 
-    reference operator * ()
+    reference operator* ()
     {
         return m_iterator->second;
     }
 
-    pointer operator -> ()
+    pointer operator->()
     {
         return &m_iterator->second;
     }
 
-    bool operator == (const iterator & _rhs)
+    bool operator== (const iterator & _rhs)
     {
         return m_iterator == _rhs.m_iterator;
     }
 
-    bool operator != (const iterator & _rhs)
+    bool operator!= (const iterator & _rhs)
     {
         return m_iterator != _rhs.m_iterator;
     }
@@ -100,9 +97,18 @@ class Unmap
 public:
     using Iterator = UnmapIterator<Map, typename Map::iterator>;
 
-    Unmap(Map & _map) : mr_map(_map) { }
-    Iterator begin() { return Iterator(mr_map, mr_map.begin()); }
-    Iterator end() { return Iterator(mr_map, mr_map.end()); }
+    Unmap(Map & _map) :
+        mr_map(_map)
+    {
+    }
+    Iterator begin()
+    {
+        return Iterator(mr_map, mr_map.begin());
+    }
+    Iterator end()
+    {
+        return Iterator(mr_map, mr_map.end());
+    }
 
 private:
     Map & mr_map;
@@ -114,11 +120,26 @@ class ConstUnmap
 public:
     using Iterator = UnmapIterator<Map, typename Map::const_iterator>;
 
-    ConstUnmap(const Map & _map) : mr_map(_map) { }
-    Iterator begin() const { return cbegin(); }
-    Iterator end() const { return cend(); }
-    Iterator cbegin() const { return Iterator(mr_map, mr_map.cbegin()); }
-    Iterator cend() const { return Iterator(mr_map, mr_map.cend()); }
+    ConstUnmap(const Map & _map) :
+        mr_map(_map)
+    {
+    }
+    Iterator begin() const
+    {
+        return cbegin();
+    }
+    Iterator end() const
+    {
+        return cend();
+    }
+    Iterator cbegin() const
+    {
+        return Iterator(mr_map, mr_map.cbegin());
+    }
+    Iterator cend() const
+    {
+        return Iterator(mr_map, mr_map.cend());
+    }
 
 private:
     const Map & mr_map;

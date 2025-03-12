@@ -25,6 +25,7 @@ void pushBodyShapeApi(
     lua_State * _lua,
     std::shared_ptr<World::Scene> _scene,
     uint64_t _body_id,
-    const Utils::PreHashedKey<std::string> & _shape_key);
+    const Utils::PreHashedKey<std::string> & _shape_key
+);
 
 } // namespace Sol2D::Lua

@@ -35,17 +35,21 @@ private:
 
 public:
     Observable();
-    virtual ~Observable() { }
+
+    virtual ~Observable()
+    {
+    }
+
     void addObserver(Observer & _observer);
     void removeObserver(Observer & _observer);
 
 protected:
-    template<ObserverMethodConcept Method, typename ...Args>
-    void callObservers(Method _method, Args ... _args);
+    template<ObserverMethodConcept Method, typename... Args>
+    void callObservers(Method _method, Args... _args);
     void forEachObserver(std::function<bool(Observer &)> _callback);
 
 private:
-    void modifyObserverCollection(std::function<void(ObserverList&)> _callback);
+    void modifyObserverCollection(std::function<void(ObserverList &)> _callback);
 
 private:
     std::atomic<std::shared_ptr<ObserverList>> m_observers;
@@ -60,9 +64,7 @@ Observable<Observer>::Observable()
 template<typename Observer>
 void Observable<Observer>::addObserver(Observer & _observer)
 {
-    modifyObserverCollection([&_observer](ObserverList & observers) {
-        observers.push_front(&_observer);
-    });
+    modifyObserverCollection([&_observer](ObserverList & observers) { observers.push_front(&_observer); });
 }
 
 template<typename Observer>
@@ -76,7 +78,7 @@ void Observable<Observer>::removeObserver(Observer & _observer)
 }
 
 template<typename Observer>
-void Observable<Observer>::modifyObserverCollection(std::function<void(ObserverList&)> _callback)
+void Observable<Observer>::modifyObserverCollection(std::function<void(ObserverList &)> _callback)
 {
     while(true)
     {
@@ -89,7 +91,7 @@ void Observable<Observer>::modifyObserverCollection(std::function<void(ObserverL
 }
 
 template<typename Observer>
-template<ObserverMethodConcept Method, typename ...Args>
+template<ObserverMethodConcept Method, typename... Args>
 void Observable<Observer>::callObservers(Method _method, Args... _args)
 {
     auto observers = m_observers.load(std::memory_order::acquire);

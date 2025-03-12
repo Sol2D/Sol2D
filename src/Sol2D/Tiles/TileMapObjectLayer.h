@@ -24,7 +24,9 @@ namespace Sol2D::Tiles {
 class TileMapObjectLayer : public TileMapLayer
 {
 public:
-    TileMapObjectLayer(const TileMapLayer * _parent, const ObjectHeap & _heap, uint32_t _id, const std::string & _name) :
+    TileMapObjectLayer(
+        const TileMapLayer * _parent, const ObjectHeap & _heap, uint32_t _id, const std::string & _name
+    ) :
         TileMapLayer(_parent, _id, _name, TileMapLayerType::Object),
         mr_heap(_heap)
     {
@@ -39,4 +41,4 @@ private:
     const ObjectHeap & mr_heap;
 };
 
-} // namespace Tiles::Sol2D
+} // namespace Sol2D::Tiles

@@ -46,11 +46,7 @@ struct Node
 class AStar final
 {
 public:
-    AStar(
-        b2WorldId _world_id,
-        b2BodyId _body_id,
-        const b2Vec2 & _destination,
-        const AStarOptions & _options);
+    AStar(b2WorldId _world_id, b2BodyId _body_id, const b2Vec2 & _destination, const AStarOptions & _options);
     ~AStar();
     std::optional<std::vector<b2Vec2>> exec();
 
@@ -78,12 +74,7 @@ private:
 
 } // namespace
 
-AStar::AStar(
-    b2WorldId _world_id,
-    b2BodyId _body_id,
-    const b2Vec2 & _destination,
-    const AStarOptions & _options
-) :
+AStar::AStar(b2WorldId _world_id, b2BodyId _body_id, const b2Vec2 & _destination, const AStarOptions & _options) :
     m_world_id(_world_id),
     m_body_id(_body_id),
     m_start_point(b2Body_GetPosition(m_body_id)),
@@ -91,14 +82,7 @@ AStar::AStar(
     m_cell_size(calculateCellSize(_body_id)),
     mr_options(_options)
 {
-    Node * root = new Node
-    {
-        .x = 0,
-        .y = 0,
-        .cost = 0,
-        .index = { .map_key = 0 },
-        .prev = nullptr
-    };
+    Node * root = new Node {.x = 0, .y = 0, .cost = 0, .index = {.map_key = 0}, .prev = nullptr};
     m_known_nodes.emplace(0, root);
     m_open_nodes.emplace(.0f, root);
 }
@@ -114,7 +98,7 @@ b2Vec2 AStar::calculateCellSize(b2BodyId _body_id)
     int shape_count = b2Body_GetShapeCount(_body_id);
     if(shape_count == 0)
     {
-        return { .x = 1.0f, .y = 1.0f };
+        return {.x = 1.0f, .y = 1.0f};
     }
     std::vector<b2ShapeId> shape_ids(shape_count);
     b2Body_GetShapes(_body_id, shape_ids.data(), shape_count);
@@ -138,7 +122,7 @@ b2Vec2 AStar::calculateCellSize(b2BodyId _body_id)
     }
     else
     {
-        return { .x = 1.0f, .y = 1.0f };
+        return {.x = 1.0f, .y = 1.0f};
     }
 }
 
@@ -176,20 +160,16 @@ void AStar::emplaceSuccessors(const Node & _node)
 
 void AStar::emplaceNode(int32_t _x, int32_t _y, const Node & _parent_node)
 {
-    Index index { .matrix_index { _x, _y } };
+    Index index {
+        .matrix_index {_x, _y}
+    };
     if(m_known_nodes.contains(index.map_key))
         return;
-    Node * node = new Node
-    {
-        .x = _x,
-        .y = _y,
-        .cost = _parent_node.cost + s_step_cost,
-        .index = index,
-        .prev = &_parent_node
-    };
+    Node * node =
+        new Node {.x = _x, .y = _y, .cost = _parent_node.cost + s_step_cost, .index = index, .prev = &_parent_node};
     m_known_nodes.emplace(index.map_key, node);
     float full_cost = node->cost +
-        getDistance(mr_dest_point, { m_start_point.x + _x * m_cell_size.x, m_start_point.y + _y * m_cell_size.y });
+        getDistance(mr_dest_point, {m_start_point.x + _x * m_cell_size.x, m_start_point.y + _y * m_cell_size.y});
     m_open_nodes.emplace(full_cost, node);
 }
 
@@ -200,8 +180,7 @@ inline float AStar::getDistance(const b2Vec2 & _p1, const b2Vec2 & _p2)
 
 inline bool AStar::isDestination(const b2Vec2 & _point) const
 {
-    return
-        std::abs(_point.x - mr_dest_point.x) <= m_cell_size.x / 2 &&
+    return std::abs(_point.x - mr_dest_point.x) <= m_cell_size.x / 2 &&
         std::abs(_point.y - mr_dest_point.y) <= m_cell_size.y / 2;
 }
 
@@ -209,8 +188,7 @@ bool AStar::isDeadEnd(const b2Vec2 & _point) const
 {
     float half_width = m_cell_size.x / 2; // TODO: to const
     float half_height = m_cell_size.y / 2; // TODO: to const
-    b2AABB aabb
-    {
+    b2AABB aabb {
         .lowerBound = b2Vec2(_point.x - half_width, _point.y - half_height),
         .upperBound = b2Vec2(_point.x + half_width, _point.y + half_height)
     };
@@ -221,7 +199,7 @@ bool AStar::isDeadEnd(const b2Vec2 & _point) const
             OverlapResult * self = static_cast<OverlapResult *>(__context);
             b2BodyId body_id = b2Shape_GetBody(__shapeId);
             if(B2_ID_EQUALS(body_id, self->astar->m_body_id) ||
-                (b2Shape_IsSensor(__shapeId) && !self->astar->mr_options.avoid_sensors))
+               (b2Shape_IsSensor(__shapeId) && !self->astar->mr_options.avoid_sensors))
             {
                 return true;
             }
@@ -232,13 +210,14 @@ bool AStar::isDeadEnd(const b2Vec2 & _point) const
         const AStar * astar;
         bool is_dead_end;
     };
-    OverlapResult result { .astar = this, .is_dead_end = false };
+    OverlapResult result {.astar = this, .is_dead_end = false};
     b2World_OverlapAABB( // FIXME: Invalid when the world is locked
         m_world_id,
         aabb,
-        b2QueryFilter { .categoryBits = B2_DEFAULT_CATEGORY_BITS, .maskBits = B2_DEFAULT_MASK_BITS },
+        b2QueryFilter {.categoryBits = B2_DEFAULT_CATEGORY_BITS, .maskBits = B2_DEFAULT_MASK_BITS},
         &OverlapResult::callback,
-        &result);
+        &result
+    );
     return result.is_dead_end;
 }
 
@@ -258,7 +237,9 @@ std::vector<b2Vec2> AStar::translatePath(const Node & _end_node) const
     while(!node_points.empty())
     {
         const std::pair<int32_t, int32_t> & point = node_points.top();
-        result.push_back(b2Vec2(m_start_point.x + point.first * m_cell_size.x, m_start_point.y + point.second * m_cell_size.y));
+        result.push_back(
+            b2Vec2(m_start_point.x + point.first * m_cell_size.x, m_start_point.y + point.second * m_cell_size.y)
+        );
         node_points.pop();
     }
     return result;
@@ -270,10 +251,8 @@ inline bool AStar::arePointsInRow(int32_t x1, int32_t y1, int32_t x2, int32_t y2
 }
 
 std::optional<std::vector<b2Vec2>> Sol2D::World::aStarFindPath(
-    b2WorldId _world,
-    b2BodyId _body_id,
-    const b2Vec2 & _destination,
-    const AStarOptions & _options)
+    b2WorldId _world, b2BodyId _body_id, const b2Vec2 & _destination, const AStarOptions & _options
+)
 {
     AStar a(_world, _body_id, _destination, _options);
     return a.exec();

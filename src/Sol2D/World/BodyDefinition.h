@@ -37,7 +37,7 @@ using RectShapeDefinition = SDL_FRect;
 struct CircleShapeDefinition
 {
     CircleShapeDefinition() :
-        center{ .x = .0f, .y = .0f },
+        center {.x = .0f, .y = .0f},
         radius(1.0f)
     {
     }
@@ -59,22 +59,26 @@ struct BodyBasicShapeDefinition
     BodyShapePhysicsDefinition physics;
     std::vector<std::pair<std::string, GraphicsPackDefinition>> graphics;
     const BodyShapeType type = shape_type;
-
 };
 
-struct BodyPolygonDefinition : BodyBasicShapeDefinition<BodyShapeType::Polygon>, PolygonShapeDefinition { };
+struct BodyPolygonDefinition : BodyBasicShapeDefinition<BodyShapeType::Polygon>, PolygonShapeDefinition
+{
+};
 
-struct BodyRectDefinition : BodyBasicShapeDefinition<BodyShapeType::Polygon>, RectShapeDefinition { };
+struct BodyRectDefinition : BodyBasicShapeDefinition<BodyShapeType::Polygon>, RectShapeDefinition
+{
+};
 
-struct BodyCircleDefinition : BodyBasicShapeDefinition<BodyShapeType::Circle>, CircleShapeDefinition { };
+struct BodyCircleDefinition : BodyBasicShapeDefinition<BodyShapeType::Circle>, CircleShapeDefinition
+{
+};
 
-struct BodyCapsuleShapeDefinition : BodyBasicShapeDefinition<BodyShapeType::Capsule>, CapsuleShapeDefinition  { };
+struct BodyCapsuleShapeDefinition : BodyBasicShapeDefinition<BodyShapeType::Capsule>, CapsuleShapeDefinition
+{
+};
 
-using BodyVariantShapeDefinition = std::variant<
-    BodyPolygonDefinition,
-    BodyRectDefinition,
-    BodyCircleDefinition,
-    BodyCapsuleShapeDefinition>;
+using BodyVariantShapeDefinition =
+    std::variant<BodyPolygonDefinition, BodyRectDefinition, BodyCircleDefinition, BodyCapsuleShapeDefinition>;
 
 struct BodyDefinition
 {

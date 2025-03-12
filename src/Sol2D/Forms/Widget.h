@@ -66,12 +66,12 @@ protected:
     Dimension<float> m_width;
     Dimension<float> m_height;
 
-    static constexpr SDL_FColor sc_default_foreground_color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    static constexpr SDL_FColor sc_default_background_color = { .0f, .0f, .0f, .0f };
+    static constexpr SDL_FColor sc_default_foreground_color = {1.0f, 1.0f, 1.0f, 1.0f};
+    static constexpr SDL_FColor sc_default_background_color = {.0f, .0f, .0f, .0f};
     static constexpr SDL_FColor sc_default_border_color = sc_default_foreground_color;
 };
 
-inline Widget::Widget(const Canvas & _parent, Renderer & _renderer):
+inline Widget::Widget(const Canvas & _parent, Renderer & _renderer) :
     font(nullptr),
     foreground_color(sc_default_foreground_color),
     background_color(sc_default_background_color),

@@ -43,10 +43,8 @@ std::string getFileExt(SDL_GPUShaderFormat _format)
 } // namespace
 
 ShaderPtr ShaderLoader::loadStandard(
-    SDL_GPUShaderStage _stage,
-    SDL_GPUShaderFormat _format,
-    const std::string & _name,
-    const ShaderOptions & _options)
+    SDL_GPUShaderStage _stage, SDL_GPUShaderFormat _format, const std::string & _name, const ShaderOptions & _options
+)
 {
     std::filesystem::path path = std::filesystem::path("Shaders") / std::format("{}.{}", _name, getFileExt(_format));
     return loadFromFile(_stage, _format, path, _options);
@@ -56,12 +54,12 @@ ShaderPtr ShaderLoader::loadFromFile(
     SDL_GPUShaderStage _stage,
     SDL_GPUShaderFormat _format,
     const std::filesystem::path & _path,
-    const ShaderOptions & _options)
+    const ShaderOptions & _options
+)
 {
     SDL_GPUShader * shader = nullptr;
     std::vector<uint8_t> code = mr_resource_manager.loadFileContent(_path);
-    SDL_GPUShaderCreateInfo shader_create_info
-    {
+    SDL_GPUShaderCreateInfo shader_create_info {
         .code_size = code.size(),
         .code = code.data(),
         .entrypoint = gc_entry_point,

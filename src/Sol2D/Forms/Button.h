@@ -23,7 +23,10 @@ namespace Sol2D::Forms {
 class ButtonClickObserver
 {
 public:
-    virtual ~ButtonClickObserver() { }
+    virtual ~ButtonClickObserver()
+    {
+    }
+
     virtual void onClick() = 0;
 };
 

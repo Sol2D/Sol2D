@@ -27,12 +27,7 @@ public:
     S2_DEFAULT_COPY_AND_MOVE(Tile)
 
     Tile(
-        const TileSet & _set,
-        const Texture & _source,
-        int32_t _src_x,
-        int32_t _src_y,
-        uint32_t _width,
-        uint32_t _height
+        const TileSet & _set, const Texture & _source, int32_t _src_x, int32_t _src_y, uint32_t _width, uint32_t _height
     ) :
         mp_set(&_set),
         m_x(_src_x),
@@ -44,12 +39,36 @@ public:
     }
 
     ~Tile() = default;
-    const TileSet getTileSet() const { return *mp_set; }
-    int32_t getSourceX() const { return m_x; }
-    int32_t getSourceY() const { return m_y; }
-    uint32_t getWidth() const { return m_width; }
-    uint32_t getHeight() const { return m_height; }
-    const Texture & getSource() const { return m_source_ptr; }
+
+    const TileSet getTileSet() const
+    {
+        return *mp_set;
+    }
+
+    int32_t getSourceX() const
+    {
+        return m_x;
+    }
+
+    int32_t getSourceY() const
+    {
+        return m_y;
+    }
+
+    uint32_t getWidth() const
+    {
+        return m_width;
+    }
+
+    uint32_t getHeight() const
+    {
+        return m_height;
+    }
+
+    const Texture & getSource() const
+    {
+        return m_source_ptr;
+    }
 
 private:
     const TileSet * mp_set;

@@ -24,7 +24,7 @@ bool Sol2D::Lua::tryGetSceneOptions(lua_State * _lua, int _idx, SceneOptions & _
 {
     LuaTable table(_lua, _idx);
     if(!table.isValid())
-        return false;    
+        return false;
     table.tryGetNumber("metersPerPixel", &_options.meters_per_pixel);
     table.tryGetPoint("gravity", _options.gravity);
     return true;

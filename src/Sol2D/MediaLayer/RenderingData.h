@@ -26,9 +26,7 @@ namespace Sol2D {
 
 struct RectRenderingDataBase
 {
-    RectRenderingDataBase(
-        const SDL_FRect & _rect,
-        const std::optional<Rotation> & _rotation) :
+    RectRenderingDataBase(const SDL_FRect & _rect, const std::optional<Rotation> & _rotation) :
         rect(_rect),
         rotation(_rotation)
     {
@@ -41,9 +39,7 @@ struct RectRenderingDataBase
 struct SolidRectRenderingData : RectRenderingDataBase
 {
     SolidRectRenderingData(
-        const SDL_FRect & _rect,
-        const SDL_FColor & _color,
-        const std::optional<Rotation> & _rotation = std::nullopt
+        const SDL_FRect & _rect, const SDL_FColor & _color, const std::optional<Rotation> & _rotation = std::nullopt
     ) :
         RectRenderingDataBase(_rect, _rotation),
         color(_color)
@@ -59,7 +55,7 @@ struct RectRenderingData : RectRenderingDataBase
         const SDL_FRect & _rect,
         const SDL_FColor & _border_color,
         float _border_width = 1.0f,
-        const SDL_FColor & _color = { .0f, .0f, .0f, .0f },
+        const SDL_FColor & _color = {.0f, .0f, .0f, .0f},
         const std::optional<Rotation> & _rotation = std::nullopt
     ) :
         RectRenderingDataBase(_rect, _rotation),
@@ -97,11 +93,7 @@ struct TextureRenderingData : RectRenderingDataBase
 
 struct CircleRenderingDataBase
 {
-    CircleRenderingDataBase(
-        const SDL_FPoint & _center,
-        float _radius,
-        const SDL_FColor & _color
-    ) :
+    CircleRenderingDataBase(const SDL_FPoint & _center, float _radius, const SDL_FColor & _color) :
         center(_center),
         radius(_radius),
         color(_color)
@@ -122,7 +114,7 @@ struct CircleRenderingData : CircleRenderingDataBase
         float _radius,
         const SDL_FColor & _border_color,
         float _border_width = 1.0f,
-        const SDL_FColor & _color = { .0f, .0f, .0f, .0f }
+        const SDL_FColor & _color = {.0f, .0f, .0f, .0f}
     ) :
         CircleRenderingDataBase(_center, _radius, _color),
         border_width(_border_width),
@@ -137,10 +129,7 @@ struct CircleRenderingData : CircleRenderingDataBase
 struct CapsuleRenderingDataBase
 {
     CapsuleRenderingDataBase(
-        float _radius,
-        const SDL_FPoint & _center1,
-        const SDL_FPoint & _center2,
-        const SDL_FColor & _color
+        float _radius, const SDL_FPoint & _center1, const SDL_FPoint & _center2, const SDL_FColor & _color
     ) :
         capsule(_radius, _center1, _center2),
         color(_color)
@@ -161,7 +150,7 @@ struct CapsuleRenderingData : CapsuleRenderingDataBase
         const SDL_FPoint & _center2,
         const SDL_FColor & _border_color,
         float _border_width = 1.0f,
-        const SDL_FColor & _color = { .0f, .0f, .0f, .0f }
+        const SDL_FColor & _color = {.0f, .0f, .0f, .0f}
     ) :
         CapsuleRenderingDataBase(_radius, _center1, _center2, _color),
         border_width(_border_width),

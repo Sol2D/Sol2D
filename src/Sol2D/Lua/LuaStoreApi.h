@@ -22,10 +22,6 @@
 
 namespace Sol2D::Lua {
 
-void pushStoreApi(
-    lua_State * _lua,
-    const Workspace & _workspace,
-    Renderer & _renderer,
-    std::shared_ptr<Store> _store);
+void pushStoreApi(lua_State * _lua, const Workspace & _workspace, Renderer & _renderer, std::shared_ptr<Store> _store);
 
 } // namespace Sol2D::Lua

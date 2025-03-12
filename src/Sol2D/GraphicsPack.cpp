@@ -81,8 +81,7 @@ GraphicsPack::Frame::Frame(const GraphicsPackFrameDefinition & _definition) :
 }
 
 GraphicsPack::GraphicsPack(
-    Renderer & _renderer,
-    const GraphicsPackDefinition & _definition /*= GraphicsPackDefinition()*/
+    Renderer & _renderer, const GraphicsPackDefinition & _definition /*= GraphicsPackDefinition()*/
 ) :
     mp_renderer(&_renderer),
     m_position(_definition.position),
@@ -140,7 +139,7 @@ GraphicsPack::~GraphicsPack()
     destroy();
 }
 
-GraphicsPack & GraphicsPack::operator = (const GraphicsPack & _graphics_pack)
+GraphicsPack & GraphicsPack::operator= (const GraphicsPack & _graphics_pack)
 {
     if(this != &_graphics_pack)
     {
@@ -160,7 +159,7 @@ GraphicsPack & GraphicsPack::operator = (const GraphicsPack & _graphics_pack)
     return *this;
 }
 
-GraphicsPack & GraphicsPack::operator = (GraphicsPack && _graphics_pack)
+GraphicsPack & GraphicsPack::operator= (GraphicsPack && _graphics_pack)
 {
     if(this != &_graphics_pack)
     {
@@ -305,9 +304,8 @@ bool GraphicsPack::removeSprite(size_t _frame, size_t _sprite)
 }
 
 void GraphicsPack::render(
-    const SDL_FPoint & _position,
-    const Rotation & _rotation,
-    std::chrono::milliseconds _delta_time)
+    const SDL_FPoint & _position, const Rotation & _rotation, std::chrono::milliseconds _delta_time
+)
 {
     if(m_max_iterations == 0 || m_total_duration == std::chrono::milliseconds::zero())
     {
@@ -413,10 +411,8 @@ void GraphicsPack::performRender(const SDL_FPoint & _position, const Rotation & 
     {
         if(graphics.sprite.has_value() && graphics.is_visible)
         {
-            SDL_FPoint graphics_position
-            {
-                .x = m_position.x + graphics.position.x,
-                .y = m_position.y + graphics.position.y
+            SDL_FPoint graphics_position {
+                .x = m_position.x + graphics.position.x, .y = m_position.y + graphics.position.y
             };
             if(!_rotation.isZero() && (graphics_position.x || graphics_position.y))
                 graphics_position = _rotation.rotateVectorCCW(graphics_position);
@@ -426,7 +422,8 @@ void GraphicsPack::performRender(const SDL_FPoint & _position, const Rotation & 
                     .y = graphics_position.y + _position.y,
                 },
                 _rotation,
-                m_flip_mode);
+                m_flip_mode
+            );
         }
     }
 }

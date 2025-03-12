@@ -58,9 +58,8 @@ public:
 
 private:
     void beginRenderPass(
-        SDL_GPUTexture * _texture,
-        const FSize & _texture_size,
-        const SDL_FColor * _clear_color = nullptr);
+        SDL_GPUTexture * _texture, const FSize & _texture_size, const SDL_FColor * _clear_color = nullptr
+    );
     void endRenderPass();
 
 private:

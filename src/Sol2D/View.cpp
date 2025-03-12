@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 #include <Sol2D/View.h>
 
 using namespace Sol2D;
@@ -37,7 +36,7 @@ const Area * View::getFragmentArea(uint16_t _id) const
 bool View::updateFragment(uint16_t _id, const Area & _area)
 {
     auto it = m_outlets.find(_id);
-    if(it == m_outlets.end() )
+    if(it == m_outlets.end())
         return false;
     bool need_to_reorder = _area.z_index != it->second->getFragmentArea().z_index;
     it->second->reconfigure(_area);
@@ -52,10 +51,9 @@ bool View::updateFragment(uint16_t _id, const Area & _area)
 void View::emplaceOrderedOutlet(Outlet * _outlet)
 {
     uint16_t z_index = _outlet->getFragmentArea().z_index;
-    auto it = std::find_if(
-        m_ordered_outlets.begin(),
-        m_ordered_outlets.end(),
-        [z_index](const Outlet * __outlet) { return z_index < __outlet->getFragmentArea().z_index; });
+    auto it = std::find_if(m_ordered_outlets.begin(), m_ordered_outlets.end(), [z_index](const Outlet * __outlet) {
+        return z_index < __outlet->getFragmentArea().z_index;
+    });
     m_ordered_outlets.insert(it, _outlet);
 }
 
@@ -69,7 +67,7 @@ void View::eraseOrderedOutlet(Outlet * _outlet)
 bool View::deleteFragment(uint16_t _id)
 {
     auto it = m_outlets.find(_id);
-    if(it == m_outlets.end() )
+    if(it == m_outlets.end())
         return false;
     eraseOrderedOutlet(it->second.get());
     m_outlets.erase(_id);
@@ -79,7 +77,7 @@ bool View::deleteFragment(uint16_t _id)
 bool View::bindFragment(uint16_t _fragment_id, std::shared_ptr<Canvas> _canvas)
 {
     auto outlet_it = m_outlets.find(_fragment_id);
-    if(outlet_it == m_outlets.end() )
+    if(outlet_it == m_outlets.end())
         return false;
     outlet_it->second->bind(_canvas);
     return true;

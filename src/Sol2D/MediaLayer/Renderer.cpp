@@ -24,8 +24,14 @@ class Sol2D::RenderTask
     S2_DISABLE_COPY_AND_MOVE(RenderTask)
 
 public:
-    RenderTask() {}
-    virtual ~RenderTask() {}
+    RenderTask()
+    {
+    }
+
+    virtual ~RenderTask()
+    {
+    }
+
     virtual void render(const RenderingContext & _context) = 0;
 };
 
@@ -34,8 +40,8 @@ class RectRenderTask : public RenderTask
 {
 public:
     RectRenderTask(const RectRenderer & _renderer, RectRenderingData && _data) :
-          mr_renderer(_renderer),
-          m_data(_data)
+        mr_renderer(_renderer),
+        m_data(_data)
     {
     }
 
@@ -53,8 +59,8 @@ class SolidRectRenderTask : public RenderTask
 {
 public:
     SolidRectRenderTask(const RectRenderer & _renderer, SolidRectRenderingData && _data) :
-          mr_renderer(_renderer),
-          m_data(_data)
+        mr_renderer(_renderer),
+        m_data(_data)
     {
     }
 
@@ -72,8 +78,8 @@ class TextureRenderTask : public RenderTask
 {
 public:
     TextureRenderTask(const RectRenderer & _renderer, TextureRenderingData && _data) :
-          mr_renderer(_renderer),
-          m_data(_data)
+        mr_renderer(_renderer),
+        m_data(_data)
     {
     }
 
@@ -91,9 +97,9 @@ class LineRenderTask : public RenderTask
 {
 public:
     LineRenderTask(const LineRenderer & _renderer, const LineRenderer::ChunkID & _id, const SDL_FColor & _color) :
-          mr_renderer(_renderer),
-          m_color(_color),
-          m_id(_id)
+        mr_renderer(_renderer),
+        m_color(_color),
+        m_id(_id)
     {
     }
 
@@ -112,8 +118,8 @@ class CircleRenderTask : public RenderTask
 {
 public:
     CircleRenderTask(const RectRenderer & _renderer, CircleRenderingData && _data) :
-          mr_renderer(_renderer),
-          m_data(_data)
+        mr_renderer(_renderer),
+        m_data(_data)
     {
     }
 
@@ -131,8 +137,8 @@ class SolidCircleRenderTask : public RenderTask
 {
 public:
     SolidCircleRenderTask(const RectRenderer & _renderer, SolidCircleRenderingData && _data) :
-          mr_renderer(_renderer),
-          m_data(_data)
+        mr_renderer(_renderer),
+        m_data(_data)
     {
     }
 
@@ -146,12 +152,12 @@ private:
     const SolidCircleRenderingData m_data;
 };
 
-class CapsuleRenderTask: public RenderTask
+class CapsuleRenderTask : public RenderTask
 {
 public:
     CapsuleRenderTask(const RectRenderer & _renderer, CapsuleRenderingData && _data) :
-          mr_renderer(_renderer),
-          m_data(_data)
+        mr_renderer(_renderer),
+        m_data(_data)
     {
     }
 
@@ -165,12 +171,12 @@ private:
     const CapsuleRenderingData m_data;
 };
 
-class SolidCapsuleRenderTask: public RenderTask
+class SolidCapsuleRenderTask : public RenderTask
 {
 public:
     SolidCapsuleRenderTask(const RectRenderer & _renderer, SolidCapsuleRenderingData && _data) :
-          mr_renderer(_renderer),
-          m_data(_data)
+        mr_renderer(_renderer),
+        m_data(_data)
     {
     }
 
@@ -184,12 +190,12 @@ private:
     const SolidCapsuleRenderingData m_data;
 };
 
-class UIRenderTask: public RenderTask
+class UIRenderTask : public RenderTask
 {
 public:
     UIRenderTask(const UIRenderer & _renderer, const UI & _ui) :
-          mr_renderer(_renderer),
-          mr_ui(_ui)
+        mr_renderer(_renderer),
+        mr_ui(_ui)
     {
     }
 
@@ -207,8 +213,7 @@ private:
 
 Renderer::Renderer(const ResourceManager & _resource_manager, SDL_Window * _window, SDL_GPUDevice * _device) :
     mr_resource_manager(_resource_manager),
-    m_rendering_context
-    {
+    m_rendering_context {
         .window = _window,
         .device = _device,
         .command_buffer = nullptr,
@@ -260,7 +265,8 @@ Texture Renderer::createTexture(SDL_Surface & _surface, const char * _name) cons
 
     if(!texture)
     {
-        if(surface != &_surface) SDL_DestroySurface(surface);
+        if(surface != &_surface)
+            SDL_DestroySurface(surface);
         throw SDLException("Unable to create texture for transform from surface.");
     }
 
@@ -272,13 +278,10 @@ Texture Renderer::createTexture(SDL_Surface & _surface, const char * _name) cons
         const SDL_PixelFormatDetails * surface_format = SDL_GetPixelFormatDetails(surface->format);
         SDL_GPUTransferBufferCreateInfo tex_transfer_buffer_create_info = {};
         tex_transfer_buffer_create_info.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-        tex_transfer_buffer_create_info.size = static_cast<uint32_t>(
-            surface->w * surface->h * surface_format->bytes_per_pixel);
+        tex_transfer_buffer_create_info.size =
+            static_cast<uint32_t>(surface->w * surface->h * surface_format->bytes_per_pixel);
         tex_transfer_buffer = SDL_CreateGPUTransferBuffer(m_rendering_context.device, &tex_transfer_buffer_create_info);
-        void * tex_transfer_ptr = SDL_MapGPUTransferBuffer(
-            m_rendering_context.device,
-            tex_transfer_buffer,
-            false);
+        void * tex_transfer_ptr = SDL_MapGPUTransferBuffer(m_rendering_context.device, tex_transfer_buffer, false);
         memcpy(tex_transfer_ptr, surface->pixels, tex_transfer_buffer_create_info.size);
         SDL_UnmapGPUTransferBuffer(m_rendering_context.device, tex_transfer_buffer);
     }
@@ -311,9 +314,8 @@ Texture Renderer::createTexture(float _width, float _height, const char * _name)
 {
     SDL_GPUTextureCreateInfo texture_create_info = {};
     texture_create_info.type = SDL_GPU_TEXTURETYPE_2D;
-    texture_create_info.format = SDL_GetGPUSwapchainTextureFormat(
-        m_rendering_context.device,
-        m_rendering_context.window);
+    texture_create_info.format =
+        SDL_GetGPUSwapchainTextureFormat(m_rendering_context.device, m_rendering_context.window);
     texture_create_info.usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET | SDL_GPU_TEXTUREUSAGE_SAMPLER;
     texture_create_info.width = _width;
     texture_create_info.height = _height;
@@ -332,7 +334,8 @@ void Renderer::beginStep()
     if(m_rendering_context.command_buffer)
     {
         throw InvalidOperationException(
-            "It is not possible to start a new rendering step until the previous one has completed");
+            "It is not possible to start a new rendering step until the previous one has completed"
+        );
     }
 
     m_rendering_context.command_buffer = SDL_AcquireGPUCommandBuffer(m_rendering_context.device);
@@ -340,12 +343,13 @@ void Renderer::beginStep()
         throw SDLException("Unable to acquire a command buffer.");
 
     if(!SDL_WaitAndAcquireGPUSwapchainTexture(
-            m_rendering_context.command_buffer,
-            m_rendering_context.window,
-            &mp_swapchain_texture,
-            &m_rendering_context.window_size.w,
-            &m_rendering_context.window_size.h) ||
-        !mp_swapchain_texture)
+           m_rendering_context.command_buffer,
+           m_rendering_context.window,
+           &mp_swapchain_texture,
+           &m_rendering_context.window_size.w,
+           &m_rendering_context.window_size.h
+       ) ||
+       !mp_swapchain_texture)
     {
         throw SDLException("Unable to acquire a swapchain texture.");
     }
@@ -353,9 +357,7 @@ void Renderer::beginStep()
 
 void Renderer::beginDefaultRenderPass()
 {
-    beginRenderPass(
-        mp_swapchain_texture,
-        FSize(m_rendering_context.window_size.w, m_rendering_context.window_size.h));
+    beginRenderPass(mp_swapchain_texture, FSize(m_rendering_context.window_size.w, m_rendering_context.window_size.h));
 }
 
 void Renderer::endDefaultRenderPass()
@@ -388,19 +390,20 @@ void Renderer::beginRenderPass(Texture & _texture, const SDL_FColor * _clear_col
 }
 
 void Renderer::beginRenderPass(
-    SDL_GPUTexture * _texture,
-    const FSize & _texture_size,
-    const SDL_FColor * _clear_color /*= nullptr*/)
+    SDL_GPUTexture * _texture, const FSize & _texture_size, const SDL_FColor * _clear_color /*= nullptr*/
+)
 {
     if(!m_rendering_context.command_buffer)
     {
         throw InvalidOperationException(
-            "A new rendering pass cannot be started because the rendering step has not started");
+            "A new rendering pass cannot be started because the rendering step has not started"
+        );
     }
     if(m_rendering_context.render_pass)
     {
         throw InvalidOperationException(
-            "It is not possible to start a new rendering pass until the previous one has completed");
+            "It is not possible to start a new rendering pass until the previous one has completed"
+        );
     }
 
     // FIXME: sometimes a generic render pass cannot be used (MSAA, Stencil test)
@@ -416,18 +419,14 @@ void Renderer::beginRenderPass(
     {
         color_target_info.load_op = SDL_GPU_LOADOP_LOAD;
     }
-    m_rendering_context.render_pass = SDL_BeginGPURenderPass(
-        m_rendering_context.command_buffer,
-        &color_target_info,
-        1,
-        nullptr);
+    m_rendering_context.render_pass =
+        SDL_BeginGPURenderPass(m_rendering_context.command_buffer, &color_target_info, 1, nullptr);
     m_rendering_context.texture_size = _texture_size;
 }
 
 void Renderer::endRenderPass(const Texture & _texture, const SDL_FRect & _output_rect)
 {
     endRenderPass();
-
     SDL_GPUBlitInfo blit_info = {};
     blit_info.load_op = SDL_GPU_LOADOP_LOAD;
     blit_info.source.texture = _texture.getTexture();

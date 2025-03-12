@@ -111,7 +111,8 @@ private:
 uint32_t ButtonSelf::subscribeOnClick(lua_State * _lua, int _callback_idx)
 {
     std::shared_ptr<Button> button = getWidget(_lua);
-    LuaButtonClickObserver * observer = static_cast<LuaButtonClickObserver *>(button->getCompanion(m_click_companion_id));
+    LuaButtonClickObserver * observer =
+        static_cast<LuaButtonClickObserver *>(button->getCompanion(m_click_companion_id));
     if(observer == nullptr)
     {
         observer = new LuaButtonClickObserver(_lua, mr_workspace);
@@ -124,7 +125,8 @@ uint32_t ButtonSelf::subscribeOnClick(lua_State * _lua, int _callback_idx)
 void ButtonSelf::unsubscribeOnClick(lua_State * _lua, int _subscription_id)
 {
     std::shared_ptr<Button> button = getWidget(_lua);
-    LuaButtonClickObserver * observer = static_cast<LuaButtonClickObserver *>(button->getCompanion(m_click_companion_id));
+    LuaButtonClickObserver * observer =
+        static_cast<LuaButtonClickObserver *>(button->getCompanion(m_click_companion_id));
     if(observer == nullptr)
         return;
     if(LuaCallbackStorage(_lua).removeCallback(observer, gc_event_click, _subscription_id) == 0)
@@ -296,7 +298,9 @@ int luaApi_SetHorizontalTextAlignment(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
     HorizontalTextAlignment alignment;
-    luaL_argexpected(_lua, tryGetHorizontalTextAlignment(_lua, 2, &alignment), 2, LuaTypeName::horizontal_text_alignment);
+    luaL_argexpected(
+        _lua, tryGetHorizontalTextAlignment(_lua, 2, &alignment), 2, LuaTypeName::horizontal_text_alignment
+    );
     self->getWidget(_lua)->horizontal_text_alignment.setValue(getWidgetState(_lua, 3), alignment);
     return 0;
 }
@@ -313,7 +317,8 @@ int luaApi_SetPadding(lua_State * _lua)
         _lua,
         tryGetWidgetPadding(_lua, 2, padding),
         2,
-        LuaTypeName::joinTypes(LuaTypeName::widget_padding, LuaTypeName::dimension).c_str());
+        LuaTypeName::joinTypes(LuaTypeName::widget_padding, LuaTypeName::dimension).c_str()
+    );
     self->getWidget(_lua)->padding.setValue(getWidgetState(_lua, 3), padding);
     return 0;
 }
@@ -341,47 +346,32 @@ int luaApi_ButtonUnsubscribeOnClick(lua_State * _lua)
 }
 
 template<typename UserDataT>
-constexpr std::array<luaL_Reg, 10> gc_widget_funcs =
-{
-    {
-        { "__gc", UserDataT::luaGC },
-        { "setX", luaApi_SetX<UserDataT> },
-        { "setY", luaApi_SetY<UserDataT> },
-        { "setWidth", luaApi_SetWidth<UserDataT> },
-        { "setHeight", luaApi_SetHeight<UserDataT> },
-        { "setBackgroundColor", luaApi_SetBackgroundColor<UserDataT> },
-        { "setForegroundColor", luaApi_SetForegroundColor<UserDataT> },
-        { "setBorderColor", luaApi_SetBorderColor<UserDataT> },
-        { "setBorderWidth", luaApi_SetBorderWidth<UserDataT> },
-        { "setPadding", luaApi_SetPadding<UserDataT> }
-    }
+constexpr std::array<luaL_Reg, 10> gc_widget_funcs = {
+    {{"__gc", UserDataT::luaGC},
+     {"setX", luaApi_SetX<UserDataT>},
+     {"setY", luaApi_SetY<UserDataT>},
+     {"setWidth", luaApi_SetWidth<UserDataT>},
+     {"setHeight", luaApi_SetHeight<UserDataT>},
+     {"setBackgroundColor", luaApi_SetBackgroundColor<UserDataT>},
+     {"setForegroundColor", luaApi_SetForegroundColor<UserDataT>},
+     {"setBorderColor", luaApi_SetBorderColor<UserDataT>},
+     {"setBorderWidth", luaApi_SetBorderWidth<UserDataT>},
+     {"setPadding", luaApi_SetPadding<UserDataT>}}
 };
 
 template<typename UserDataT>
-constexpr std::array<luaL_Reg, 4> gc_label_funcs =
-{
-    {
-        { "setFont", luaApi_SetFont<UserDataT> },
-        { "setText", luaApi_SetText<UserDataT> },
-        { "setVerticalTextAlignment", luaApi_SetVerticalTextAlignment<UserDataT> },
-        { "setHorizontalTextAlignment", luaApi_SetHorizontalTextAlignment<UserDataT> }
-    }
+constexpr std::array<luaL_Reg, 4> gc_label_funcs = {
+    {{"setFont", luaApi_SetFont<UserDataT>},
+     {"setText", luaApi_SetText<UserDataT>},
+     {"setVerticalTextAlignment", luaApi_SetVerticalTextAlignment<UserDataT>},
+     {"setHorizontalTextAlignment", luaApi_SetHorizontalTextAlignment<UserDataT>}}
 };
 
-constexpr std::array<luaL_Reg, 2> gc_button_funcs =
-{
-    {
-        { "subscribeOnClick", luaApi_ButtonSubscribeOnClick },
-        { "unsubscribeOnClick", luaApi_ButtonUnsubscribeOnClick }
-    }
+constexpr std::array<luaL_Reg, 2> gc_button_funcs = {
+    {{"subscribeOnClick", luaApi_ButtonSubscribeOnClick}, {"unsubscribeOnClick", luaApi_ButtonUnsubscribeOnClick}}
 };
 
-constexpr std::array<luaL_Reg, 1> gc_null_funcs =
-{
-    {
-        { nullptr, nullptr }
-    }
-};
+constexpr std::array<luaL_Reg, 1> gc_null_funcs = {{{nullptr, nullptr}}};
 
 } // namespace
 
@@ -403,10 +393,7 @@ void Sol2D::Lua::pushLabelApi(lua_State * _lua, std::shared_ptr<Label> _label)
     LabelUserData::pushUserData(_lua, _label);
     if(LabelUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs =
-            gc_widget_funcs<LabelUserData> +
-            gc_label_funcs<LabelUserData> +
-            gc_null_funcs;
+        auto funcs = gc_widget_funcs<LabelUserData> + gc_label_funcs<LabelUserData> + gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);
@@ -417,11 +404,7 @@ void Sol2D::Lua::pushButtonApi(lua_State * _lua, std::shared_ptr<Button> _button
     ButtonUserData::pushUserData(_lua, _button, _workspace);
     if(ButtonUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs =
-            gc_widget_funcs<ButtonUserData> +
-            gc_label_funcs<ButtonUserData> +
-            gc_button_funcs +
-            gc_null_funcs;
+        auto funcs = gc_widget_funcs<ButtonUserData> + gc_label_funcs<ButtonUserData> + gc_button_funcs + gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);

@@ -47,7 +47,7 @@ struct Dimension
     {
     }
 
-    Dimension & operator = (Number _pixels)
+    Dimension & operator= (Number _pixels)
     {
         value = _pixels;
         unit = DimensionUnit::Pixel;

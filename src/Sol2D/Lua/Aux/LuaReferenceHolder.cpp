@@ -25,11 +25,11 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-const char gc_key[] { '\0' };
+const char gc_key[] {'\0'};
 
 std::string makeKeyPrefix(const void * _owner)
 {
-     return std::format("{:x}:", reinterpret_cast<size_t>(_owner));
+    return std::format("{:x}:", reinterpret_cast<size_t>(_owner));
 }
 
 std::string makeKey(const void * _owner, const char * _object_type, const char * _key)

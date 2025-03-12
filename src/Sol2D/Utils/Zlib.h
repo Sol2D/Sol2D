@@ -22,7 +22,11 @@
 
 namespace Sol2D::Utils {
 
-enum class ZlibAlgorithm { Zlib, GZip };
+enum class ZlibAlgorithm
+{
+    Zlib,
+    GZip
+};
 
 std::shared_ptr<std::vector<uint8_t>> zlibDecompress(ZlibAlgorithm _algorithm, const std::vector<uint8_t> & _data);
 

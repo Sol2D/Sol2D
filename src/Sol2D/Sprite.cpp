@@ -28,11 +28,7 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     {
         SDL_Color color = toR8G8B8A8_UINT(_options.color_to_alpha.value());
         const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
-        SDL_SetSurfaceColorKey(
-            surface,
-            true,
-            SDL_MapRGBA(pixel_format, nullptr, color.r, color.g, color.b, color.a)
-        );
+        SDL_SetSurfaceColorKey(surface, true, SDL_MapRGBA(pixel_format, nullptr, color.r, color.g, color.b, color.a));
     }
     if(_options.autodetect_rect)
     {
@@ -64,20 +60,10 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     return true;
 }
 
-void Sprite::render(
-    const SDL_FPoint & _point,
-    const Rotation & _rotation,
-    SDL_FlipMode _flip_mode)
+void Sprite::render(const SDL_FPoint & _point, const Rotation & _rotation, SDL_FlipMode _flip_mode)
 {
     if(!isValid())
         return;
-    SDL_FRect dest_rect =
-    {
-        .x = _point.x,
-        .y = _point.y,
-        .w = m_desination_size.w,
-        .h = m_desination_size.h
-    };
-    mp_renderer->renderTexture(
-        TextureRenderingData(dest_rect, m_texture, m_source_rect, _rotation, _flip_mode));
+    SDL_FRect dest_rect = {.x = _point.x, .y = _point.y, .w = m_desination_size.w, .h = m_desination_size.h};
+    mp_renderer->renderTexture(TextureRenderingData(dest_rect, m_texture, m_source_rect, _rotation, _flip_mode));
 }

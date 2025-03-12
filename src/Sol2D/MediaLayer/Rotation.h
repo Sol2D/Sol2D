@@ -89,8 +89,7 @@ struct Rotation
 
     SDL_FPoint rotateVectorCCW(const SDL_FPoint & _vector) const
     {
-        return
-        {
+        return {
             .x = _vector.x * cosine - _vector.y * sine,
             .y = _vector.x * sine + _vector.y * cosine,
         };
@@ -98,8 +97,7 @@ struct Rotation
 
     SDL_FPoint rotateVectorCW(const SDL_FPoint & _vector) const
     {
-        return
-        {
+        return {
             .x = _vector.x * cosine + _vector.y * sine,
             .y = _vector.y * cosine - _vector.x * sine,
         };

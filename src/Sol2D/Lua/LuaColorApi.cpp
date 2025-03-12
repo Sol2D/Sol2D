@@ -27,7 +27,7 @@ static constexpr char gc_key_g[] = "g";
 static constexpr char gc_key_b[] = "b";
 static constexpr char gc_key_a[] = "a";
 
-} // namespace name
+} // namespace
 
 bool Sol2D::Lua::tryGetColor(lua_State * _lua, int _idx, SDL_FColor & _color)
 {
@@ -35,10 +35,7 @@ bool Sol2D::Lua::tryGetColor(lua_State * _lua, int _idx, SDL_FColor & _color)
     if(!table.isValid())
         return false;
     float r, g, b;
-    if(
-        table.tryGetNumber(gc_key_r, &r) &&
-        table.tryGetNumber(gc_key_g, &g) &&
-        table.tryGetNumber(gc_key_b, &b))
+    if(table.tryGetNumber(gc_key_r, &r) && table.tryGetNumber(gc_key_g, &g) && table.tryGetNumber(gc_key_b, &b))
     {
         if(!table.tryGetNumber(gc_key_a, &_color.a))
             _color.a = 1.0f;

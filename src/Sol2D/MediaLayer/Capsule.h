@@ -25,9 +25,21 @@ class Capsule final
 {
 public:
     Capsule(float _radius, const SDL_FPoint & _center1, const SDL_FPoint & _center2);
-    float getRadius() const { return m_radius; }
-    const Rotation & getRotation() const { return m_rotation; }
-    const SDL_FRect & getRect() const { return m_rect; }
+
+    float getRadius() const
+    {
+        return m_radius;
+    }
+
+    const Rotation & getRotation() const
+    {
+        return m_rotation;
+    }
+
+    const SDL_FRect & getRect() const
+    {
+        return m_rect;
+    }
 
 private:
     float m_radius;

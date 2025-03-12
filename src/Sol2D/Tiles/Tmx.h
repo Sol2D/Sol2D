@@ -32,8 +32,7 @@ struct Tmx
 
     Tmx(std::unique_ptr<TileHeap> && _tile_heap,
         std::unique_ptr<ObjectHeap> _object_heap,
-        std::unique_ptr<TileMap> && _tile_map
-    ) :
+        std::unique_ptr<TileMap> && _tile_map) :
         tile_heap(std::move(_tile_heap)),
         object_heap(std::move(_object_heap)),
         tile_map(std::move(_tile_map))
@@ -47,7 +46,7 @@ struct Tmx
     {
     }
 
-    Tmx & operator = (Tmx && _tmx)
+    Tmx & operator= (Tmx && _tmx)
     {
         if(this != &_tmx)
         {

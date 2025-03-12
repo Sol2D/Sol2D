@@ -28,8 +28,8 @@ class Canvas : public Object
 
 public:
     Canvas() :
-        m_rect{.0f, .0f, .0f, .0f},
-        m_clear_color{.0f, .0f, .0f, 1.0f}
+        m_rect {.0f, .0f, .0f, .0f},
+        m_clear_color {.0f, .0f, .0f, 1.0f}
     {
     }
 
@@ -74,7 +74,7 @@ inline float Canvas::getHeight() const
 
 inline SDL_FPoint Canvas::getTranslatedPoint(float _x, float _y) const
 {
-    return { .x = _x - m_rect.x, .y = _y - m_rect.y };
+    return {.x = _x - m_rect.x, .y = _y - m_rect.y};
 }
 
 inline void Canvas::translatePoint(float * _x, float * _y) const

@@ -72,12 +72,11 @@ void Sol2D::Lua::pushWindowApi(lua_State * _lua, Window & _window)
     UserData::pushUserData(_lua, _window);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "setView", luaApi_SetView },
-            { "getView", luaApi_GetView },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",    UserData::luaGC},
+            {"setView", luaApi_SetView },
+            {"getView", luaApi_GetView },
+            {nullptr,   nullptr        }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

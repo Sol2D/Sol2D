@@ -41,7 +41,7 @@ private:
     std::list<std::shared_ptr<View>> m_view_list;
 };
 
-inline Window:: Window()
+inline Window::Window()
 {
 }
 

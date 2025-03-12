@@ -44,9 +44,8 @@ const std::optional<uint32_t> BodyShape::getTileMapObjectId() const
 }
 
 void BodyShape::addGraphics(
-    Renderer & _renderer,
-    const PreHashedKey<std::string> & _key,
-    const GraphicsPackDefinition & _definition)
+    Renderer & _renderer, const PreHashedKey<std::string> & _key, const GraphicsPackDefinition & _definition
+)
 {
     auto it = m_graphics.find(_key);
     if(it != m_graphics.end())
@@ -73,10 +72,7 @@ GraphicsPack * BodyShape::getGraphics(const PreHashedKey<std::string> & _key)
     return it == m_graphics.end() ? nullptr : it->second;
 }
 
-bool BodyShape::flipGraphics(
-    const PreHashedKey<std::string> & _key,
-    bool _flip_horizontally,
-    bool _flip_vertically)
+bool BodyShape::flipGraphics(const PreHashedKey<std::string> & _key, bool _flip_horizontally, bool _flip_vertically)
 {
     auto it = m_graphics.find(_key);
     if(it == m_graphics.end())

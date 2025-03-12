@@ -45,7 +45,7 @@ void setContactSide(LuaTable & _table, const char * _key, const ContactSide & _s
     _table.setValueFromTop(_key);
 }
 
-} // namespace name
+} // namespace
 
 void Sol2D::Lua::pushContact(lua_State * _lua, const Contact & _contact)
 {

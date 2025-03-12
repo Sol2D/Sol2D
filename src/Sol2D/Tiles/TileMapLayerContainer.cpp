@@ -33,27 +33,18 @@ TileMapTileLayer & TileMapLayerContainer::createTileLayer(
     int32_t _x,
     int32_t _y,
     uint32_t _width,
-    uint32_t _height)
+    uint32_t _height
+)
 {
-    TileMapTileLayer * layer = new TileMapTileLayer(
-        _parent,
-        mr_tile_heap,
-        _id,
-        _name,
-        _tile_width,
-        _tile_height,
-        _x,
-        _y,
-        _width,
-        _height);
+    TileMapTileLayer * layer =
+        new TileMapTileLayer(_parent, mr_tile_heap, _id, _name, _tile_width, _tile_height, _x, _y, _width, _height);
     storeLayer(_name, layer);
     return *layer;
 }
 
 TileMapObjectLayer & TileMapLayerContainer::createObjectLayer(
-    const TileMapLayer * _parent,
-    uint32_t _id,
-    const std::string & _name)
+    const TileMapLayer * _parent, uint32_t _id, const std::string & _name
+)
 {
     TileMapObjectLayer * layer = new TileMapObjectLayer(_parent, mr_object_heap, _id, _name);
     storeLayer(_name, layer);
@@ -61,9 +52,8 @@ TileMapObjectLayer & TileMapLayerContainer::createObjectLayer(
 }
 
 TileMapImageLayer & TileMapLayerContainer::createImageLayer(
-    const TileMapLayer * _parent,
-    uint32_t _id,
-    const std::string & _name)
+    const TileMapLayer * _parent, uint32_t _id, const std::string & _name
+)
 {
     TileMapImageLayer * layer = new TileMapImageLayer(_parent, _id, _name);
     storeLayer(_name, layer);
@@ -71,9 +61,8 @@ TileMapImageLayer & TileMapLayerContainer::createImageLayer(
 }
 
 TileMapGroupLayer & TileMapLayerContainer::createGroupLayer(
-    const TileMapLayer * _parent,
-    uint32_t _id,
-    const std::string & _name)
+    const TileMapLayer * _parent, uint32_t _id, const std::string & _name
+)
 {
     TileMapGroupLayer * layer = new TileMapGroupLayer(_parent, _id, _name, mr_tile_heap, mr_object_heap);
     storeLayer(_name, layer);

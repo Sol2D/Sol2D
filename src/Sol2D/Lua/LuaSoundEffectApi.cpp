@@ -75,12 +75,11 @@ void Sol2D::Lua::pushSoundEffectApi(lua_State * _lua, std::shared_ptr<Mix_Chunk>
     UserData::pushUserData(_lua, _chunk);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "play", luaApi_Play },
-            { "loop", luaApi_Loop },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",  UserData::luaGC},
+            {"play",  luaApi_Play    },
+            {"loop",  luaApi_Loop    },
+            {nullptr, nullptr        }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

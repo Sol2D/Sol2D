@@ -28,56 +28,51 @@ namespace Transform {
 
 inline Matrix4x4 createRotation(const Rotation & _rotation)
 {
-    return
-    {
-        Vector4 { _rotation.cosine,   _rotation.sine,  .0f,  .0f},
-        Vector4 {  -_rotation.sine, _rotation.cosine,  .0f,  .0f},
-        Vector4 {              .0f,              .0f, 1.0f,  .0f},
-        Vector4 {              .0f,              .0f,  .0f, 1.0f}
+    return {
+        Vector4 {_rotation.cosine, _rotation.sine,   .0f,  .0f },
+        Vector4 {-_rotation.sine,  _rotation.cosine, .0f,  .0f },
+        Vector4 {.0f,              .0f,              1.0f, .0f },
+        Vector4 {.0f,              .0f,              .0f,  1.0f}
     };
 }
 
 inline Matrix4x4 createTranslation(float _x, float _y)
 {
-    return
-    {
-        Vector4 {1.0f,  .0f,  .0f,  .0f},
-        Vector4 { .0f, 1.0f,  .0f,  .0f},
-        Vector4 { .0f,  .0f, 1.0f,  .0f},
-        Vector4 {  _x,   _y,  .0f, 1.0f}
+    return {
+        Vector4 {1.0f, .0f,  .0f,  .0f },
+        Vector4 {.0f,  1.0f, .0f,  .0f },
+        Vector4 {.0f,  .0f,  1.0f, .0f },
+        Vector4 {_x,   _y,   .0f,  1.0f}
     };
 }
 
 inline Matrix4x4 createScale(float _h, float _v)
 {
-    return
-    {
-        Vector4 {  _h,  .0f,  .0f,  .0f},
-        Vector4 { .0f,   _v,  .0f,  .0f},
-        Vector4 { .0f,  .0f, 1.0f,  .0f},
-        Vector4 { .0f,  .0f,  .0f, 1.0f}
+    return {
+        Vector4 {_h,  .0f, .0f,  .0f },
+        Vector4 {.0f, _v,  .0f,  .0f },
+        Vector4 {.0f, .0f, 1.0f, .0f },
+        Vector4 {.0f, .0f, .0f,  1.0f}
     };
 }
 
 inline Matrix4x4 createScale(float _s)
 {
-    return
-    {
-        Vector4 {  _s,  .0f,  .0f,  .0f},
-        Vector4 { .0f,   _s,  .0f,  .0f},
-        Vector4 { .0f,  .0f, 1.0f,  .0f},
-        Vector4 { .0f,  .0f,  .0f, 1.0f}
+    return {
+        Vector4 {_s,  .0f, .0f,  .0f },
+        Vector4 {.0f, _s,  .0f,  .0f },
+        Vector4 {.0f, .0f, 1.0f, .0f },
+        Vector4 {.0f, .0f, .0f,  1.0f}
     };
 }
 
 inline Matrix4x4 createOrtho(float _ratio)
 {
-    return
-    {
-        Vector4 { 1.0f / _ratio,  .0f, .0f,   .0f},
-        Vector4 { .0f,           1.0f,  .0f,  .0f},
-        Vector4 { .0f,            .0f, 1.0f,  .0f},
-        Vector4 { .0f,            .0f,  .0f, 1.0f}
+    return {
+        Vector4 {1.0f / _ratio, .0f,  .0f,  .0f },
+        Vector4 {.0f,           1.0f, .0f,  .0f },
+        Vector4 {.0f,           .0f,  1.0f, .0f },
+        Vector4 {.0f,           .0f,  .0f,  1.0f}
     };
 }
 

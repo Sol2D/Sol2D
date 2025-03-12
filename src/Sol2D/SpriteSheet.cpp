@@ -34,16 +34,11 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
     {
         SDL_Color color = toR8G8B8A8_UINT(_options.color_to_alpha.value());
         const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
-        SDL_SetSurfaceColorKey(
-            surface,
-            true,
-            SDL_MapRGBA(pixel_format, nullptr, color.r, color.g, color.b, color.a)
-        );
+        SDL_SetSurfaceColorKey(surface, true, SDL_MapRGBA(pixel_format, nullptr, color.r, color.g, color.b, color.a));
     }
     m_texture = mp_renderer->createTexture(*surface, "Sprite Sheet");
     SDL_DestroySurface(surface);
-    SDL_FRect rect =
-    {
+    SDL_FRect rect = {
         .x = .0f,
         .y = .0f,
         .w = static_cast<float>(_options.sprite_width),

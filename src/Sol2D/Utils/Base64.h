@@ -26,4 +26,3 @@ namespace Sol2D::Utils {
 std::shared_ptr<std::vector<uint8_t>> decodeBase64(const std::string & _base64);
 
 } // namespace Sol2D::Utils
-

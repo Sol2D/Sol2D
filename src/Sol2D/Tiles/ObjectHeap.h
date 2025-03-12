@@ -30,45 +30,42 @@ namespace Sol2D::Tiles {
 
 template<typename T>
 concept TileMapObjectConcept =
-    std::same_as<T, TileMapObject> ||
-    std::same_as<T, TileMapCircle> ||
-    std::same_as<T, TileMapPoint> ||
-    std::same_as<T, TileMapPolygon> ||
-    std::same_as<T, TileMapPolyline> ||
-    std::same_as<T, TileMapText>;
-
+    std::same_as<T, TileMapObject> || std::same_as<T, TileMapCircle> || std::same_as<T, TileMapPoint> ||
+    std::same_as<T, TileMapPolygon> || std::same_as<T, TileMapPolyline> || std::same_as<T, TileMapText>;
 
 class ObjectHeap final
 {
     S2_DISABLE_COPY_AND_MOVE(ObjectHeap)
 
 private:
-    struct ObjectIdTag {};
-    struct ObjectLayerTag {};
-    struct ObjectClassTag {};
-    struct ObjectNameTag {};
+    struct ObjectIdTag
+    {
+    };
+    struct ObjectLayerTag
+    {
+    };
+    struct ObjectClassTag
+    {
+    };
+    struct ObjectNameTag
+    {
+    };
 
     using ObjectMap = boost::multi_index_container<
         std::shared_ptr<TileMapObject>,
         boost::multi_index::indexed_by<
             boost::multi_index::hashed_unique<
                 boost::multi_index::tag<ObjectIdTag>,
-                boost::multi_index::const_mem_fun<TileMapObject, uint32_t, &TileMapObject::getId>
-            >,
+                boost::multi_index::const_mem_fun<TileMapObject, uint32_t, &TileMapObject::getId>>,
             boost::multi_index::hashed_non_unique<
                 boost::multi_index::tag<ObjectLayerTag>,
-                boost::multi_index::const_mem_fun<TileMapObject, uint32_t, &TileMapObject::getLayerId>
-            >,
+                boost::multi_index::const_mem_fun<TileMapObject, uint32_t, &TileMapObject::getLayerId>>,
             boost::multi_index::hashed_non_unique<
                 boost::multi_index::tag<ObjectClassTag>,
-                boost::multi_index::const_mem_fun<TileMapObject, const std::string &, &TileMapObject::getClass>
-            >,
+                boost::multi_index::const_mem_fun<TileMapObject, const std::string &, &TileMapObject::getClass>>,
             boost::multi_index::hashed_non_unique<
                 boost::multi_index::tag<ObjectNameTag>,
-                boost::multi_index::const_mem_fun<TileMapObject, const std::string &, &TileMapObject::getName>
-            >
-        >
-    >;
+                boost::multi_index::const_mem_fun<TileMapObject, const std::string &, &TileMapObject::getName>>>>;
 
     using ObjectMapById = ObjectMap::index<ObjectIdTag>::type;
     using ObjectMapByLayer = ObjectMap::index<ObjectLayerTag>::type;
@@ -172,7 +169,7 @@ T & ObjectHeap::createObject(uint32_t _layer_id, uint32_t _gid, const char * _cl
     {
         // TODO: if ID exists (see TileHeap)
     }
-    TileMapObjectDef def { .id = _gid, .layer_id = _layer_id, .klass = _class, .name = _name };
+    TileMapObjectDef def {.id = _gid, .layer_id = _layer_id, .klass = _class, .name = _name};
     ObjectImpl<T> * object = new ObjectImpl<T>(mr_objects_by_id, def);
     m_objects.insert(std::shared_ptr<TileMapObject>(object));
     if(m_next_gid <= _gid)

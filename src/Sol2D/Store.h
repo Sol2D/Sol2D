@@ -56,9 +56,8 @@ template<>
 struct Utils::ObjectFactory<World::Scene>
 {
     std::shared_ptr<World::Scene> produce(
-        const World::SceneOptions & _options,
-        const Workspace & _workspace,
-        Renderer & _renderer) const
+        const World::SceneOptions & _options, const Workspace & _workspace, Renderer & _renderer
+    ) const
     {
         return std::make_shared<World::Scene>(_options, _workspace, _renderer);
     }
@@ -109,16 +108,8 @@ struct Utils::ObjectFactory<Mix_Music>
     }
 };
 
-using Store = Utils::ObjectStore<
-    View,
-    Sprite,
-    SpriteSheet,
-    World::Scene,
-    Forms::Form,
-    UI,
-    TTF_Font,
-    Mix_Chunk,
-    Mix_Music>;
+using Store =
+    Utils::ObjectStore<View, Sprite, SpriteSheet, World::Scene, Forms::Form, UI, TTF_Font, Mix_Chunk, Mix_Music>;
 
 class StoreManager
 {

@@ -30,7 +30,7 @@ struct Bool32
     {
     }
 
-    void operator = (bool _value)
+    void operator= (bool _value)
     {
         value = _value ? 1u : 0u;
     }

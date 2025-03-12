@@ -20,7 +20,7 @@
 #include <Sol2D/Lua/Aux/LuaUtils.h>
 
 using namespace Sol2D;
-using namespace Sol2D::Lua;;
+using namespace Sol2D::Lua;
 
 namespace {
 
@@ -62,11 +62,10 @@ void Sol2D::Lua::pushUIFormApi(lua_State * _lua, std::shared_ptr<UI> _ui, const 
     UserData::pushUserData(_lua, _ui, _form.getId());
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "addLabel", luaApi_AddLabel },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",     UserData::luaGC},
+            {"addLabel", luaApi_AddLabel},
+            {nullptr,    nullptr        }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

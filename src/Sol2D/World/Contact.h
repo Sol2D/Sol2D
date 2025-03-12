@@ -51,7 +51,10 @@ struct PreSolveContact
 class ContactObserver
 {
 public:
-    virtual ~ContactObserver() { }
+    virtual ~ContactObserver()
+    {
+    }
+
     virtual void beginContact(const Contact & _contact) = 0;
     virtual void endContact(const Contact & _contact) = 0;
     virtual void beginSensorContact(const SensorContact & _contact) = 0;

@@ -34,14 +34,12 @@ private:
     struct Frame;
 
 public:
-    explicit GraphicsPack(
-        Renderer & _renderer,
-        const GraphicsPackDefinition & _definition = GraphicsPackDefinition());
+    explicit GraphicsPack(Renderer & _renderer, const GraphicsPackDefinition & _definition = GraphicsPackDefinition());
     GraphicsPack(const GraphicsPack & _graphics_pack);
     GraphicsPack(GraphicsPack && _graphics_pack);
     ~GraphicsPack();
-    GraphicsPack & operator = (const GraphicsPack & _graphics_pack);
-    GraphicsPack & operator = (GraphicsPack && _graphics_pack);
+    GraphicsPack & operator= (const GraphicsPack & _graphics_pack);
+    GraphicsPack & operator= (GraphicsPack && _graphics_pack);
 
     void setFilippedHorizontally(bool _flipped);
     void setFilippedVertically(bool _flipped);
@@ -86,16 +84,14 @@ inline size_t GraphicsPack::getCurrentFrameIndex() const
 
 inline void GraphicsPack::setFilippedHorizontally(bool _flipped)
 {
-    m_flip_mode = _flipped
-        ? static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) | SDL_FLIP_HORIZONTAL)
-        : static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) & ~SDL_FLIP_HORIZONTAL);
+    m_flip_mode = _flipped ? static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) | SDL_FLIP_HORIZONTAL)
+                           : static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) & ~SDL_FLIP_HORIZONTAL);
 }
 
 inline void GraphicsPack::setFilippedVertically(bool _flipped)
 {
-    m_flip_mode = _flipped
-        ? static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) | SDL_FLIP_VERTICAL)
-        : static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) & ~SDL_FLIP_VERTICAL);
+    m_flip_mode = _flipped ? static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) | SDL_FLIP_VERTICAL)
+                           : static_cast<SDL_FlipMode>(static_cast<int>(m_flip_mode) & ~SDL_FLIP_VERTICAL);
 }
 
 inline size_t GraphicsPack::getCurrentAnimationIteration() const

@@ -48,7 +48,7 @@ int luaApi_GetState(lua_State * _lua)
     return top - 1;
 }
 
-} // namespace name
+} // namespace
 
 void Sol2D::Lua::pushKeyboardApi(lua_State * _lua)
 {
@@ -56,11 +56,10 @@ void Sol2D::Lua::pushKeyboardApi(lua_State * _lua)
     self->kb_state = SDL_GetKeyboardState(&self->kb_state_length);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "getState", luaApi_GetState },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",     UserData::luaGC},
+            {"getState", luaApi_GetState},
+            {nullptr,    nullptr        }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

@@ -26,7 +26,8 @@ static const char gp_b64_alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmno
 inline size_t getLengthWithoutPads(const std::string & _base64)
 {
     size_t length = _base64.length();
-    for(; length > 0 && '=' == _base64[length - 1]; --length);
+    for(; length > 0 && '=' == _base64[length - 1]; --length)
+        ;
     return length;
 }
 

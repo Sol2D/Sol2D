@@ -40,7 +40,8 @@ Tile * TileHeap::createTile(
     int32_t _src_x,
     int32_t _src_y,
     uint32_t _width,
-    uint32_t _height)
+    uint32_t _height
+)
 {
     if(m_tiles.contains(_gid))
         return nullptr;

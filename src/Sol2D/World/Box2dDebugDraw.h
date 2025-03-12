@@ -31,7 +31,8 @@ public:
         Renderer & _renderer,
         b2WorldId _world_id,
         std::function<SDL_FPoint(float, float)> _translate_point,
-        std::function<float(float)> _translate_length);
+        std::function<float(float)> _translate_length
+    );
     void draw();
 
 private:
@@ -42,7 +43,8 @@ private:
         int _vertex_count,
         float _radius,
         b2HexColor _color,
-        void * _context);
+        void * _context
+    );
     static void drawCircle(b2Vec2 _center, float _radius, b2HexColor _color, void * _context);
     static void drawSolidCircle(b2Transform _transform, float _radius, b2HexColor _color, void * _context);
     static void drawPoint(b2Vec2 _point, float _size, b2HexColor _color, void * _context);

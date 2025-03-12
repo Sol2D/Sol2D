@@ -39,7 +39,7 @@ struct Self : LuaSelfBase
 
     std::shared_ptr<Scene> getScene(lua_State * _lua) const
     {
-        std::shared_ptr<Scene> ptr =  m_scene.lock();
+        std::shared_ptr<Scene> ptr = m_scene.lock();
         if(!ptr)
             luaL_error(_lua, LuaMessage::scene_is_destroyed);
         return ptr;
@@ -84,17 +84,14 @@ int luaApi_GetGraphicsPack(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * graphic_key = argToStringOrError(_lua, 2);
-    const GraphicsPack *  pack = self->getScene(_lua)->getBodyShapeGraphicsPack(
-        self->body_id,
-        self->shape_key,
-        makePreHashedKey(std::string(graphic_key)));
+    const GraphicsPack * pack = self->getScene(_lua)->getBodyShapeGraphicsPack(
+        self->body_id, self->shape_key, makePreHashedKey(std::string(graphic_key))
+    );
     if(pack)
     {
         pushGraphicsPackApi(
-            _lua, self->getScene(_lua),
-            self->body_id,
-            self->shape_key,
-            makePreHashedKey(std::string(graphic_key)));
+            _lua, self->getScene(_lua), self->body_id, self->shape_key, makePreHashedKey(std::string(graphic_key))
+        );
     }
     else
     {
@@ -131,10 +128,12 @@ int luaApi_SetCurrentGraphics(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * graphic_key = argToStringOrError(_lua, 2);
-    lua_pushboolean(_lua, self->getScene(_lua)->setBodyShapeCurrentGraphics(
-        self->body_id,
-        self->shape_key,
-        makePreHashedKey(std::string(graphic_key))));
+    lua_pushboolean(
+        _lua,
+        self->getScene(_lua)->setBodyShapeCurrentGraphics(
+            self->body_id, self->shape_key, makePreHashedKey(std::string(graphic_key))
+        )
+    );
     return 1;
 }
 
@@ -153,7 +152,8 @@ int luaApi_FlipGraphics(lua_State * _lua)
         self->shape_key,
         makePreHashedKey(std::string(graphic_key)),
         lua_toboolean(_lua, 3),
-        lua_toboolean(_lua, 4));
+        lua_toboolean(_lua, 4)
+    );
     lua_pushboolean(_lua, result);
     return 1;
 }
@@ -164,22 +164,22 @@ void Sol2D::Lua::pushBodyShapeApi(
     lua_State * _lua,
     std::shared_ptr<Scene> _scene,
     uint64_t _body_id,
-    const Utils::PreHashedKey<std::string> & _shape_key)
+    const Utils::PreHashedKey<std::string> & _shape_key
+)
 {
     UserData::pushUserData(_lua, _scene, _body_id, _shape_key);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "isValid", luaApi_IsValid },
-            { "getKey", luaApi_GetKey },
-            { "getBody", luaApi_GetBody },
-            { "getGraphicsPack", luaApi_GetGraphicsPack },
-            { "getCurrentGraphicsPack", luaApi_GetCurrentGraphicsPack },
-            { "setCurrentGraphics", luaApi_SetCurrentGraphics },
-            { "flipGraphics", luaApi_FlipGraphics },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",                   UserData::luaGC              },
+            {"isValid",                luaApi_IsValid               },
+            {"getKey",                 luaApi_GetKey                },
+            {"getBody",                luaApi_GetBody               },
+            {"getGraphicsPack",        luaApi_GetGraphicsPack       },
+            {"getCurrentGraphicsPack", luaApi_GetCurrentGraphicsPack},
+            {"setCurrentGraphics",     luaApi_SetCurrentGraphics    },
+            {"flipGraphics",           luaApi_FlipGraphics          },
+            {nullptr,                  nullptr                      }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

@@ -32,8 +32,7 @@ void Button::step(const StepState & _state)
 
 void Button::handleState(const StepState & _state)
 {
-    SDL_FRect rect
-    {
+    SDL_FRect rect {
         .x = m_x.getPixels(mr_parent.getWidth()),
         .y = m_y.getPixels(mr_parent.getHeight()),
         .w = m_width.getPixels(mr_parent.getWidth()),
@@ -66,8 +65,5 @@ void Button::handleState(const StepState & _state)
 bool Button::isPointIn(const SDL_FPoint & _point, const SDL_FRect & _rect) const
 {
     SDL_FPoint point = mr_parent.getTranslatedPoint(_point.x, _point.y);
-    return point.x >= _rect.x &&
-           point.y >= _rect.y &&
-           (point.x < _rect.x + _rect.w) &&
-           (point.y < _rect.y + _rect.h);
+    return point.x >= _rect.x && point.y >= _rect.y && (point.x < _rect.x + _rect.w) && (point.y < _rect.y + _rect.h);
 }

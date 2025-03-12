@@ -23,12 +23,12 @@ namespace {
 
 inline SDL_FColor b2ColorToSDL(const b2HexColor & _color)
 {
-    return Sol2D::toR32G32B32A32_SFLOAT({
-        .r = static_cast<uint8_t>((_color & 0xff0000) >> 16),
-        .g = static_cast<uint8_t>((_color & 0x00ff00) >> 8),
-        .b = static_cast<uint8_t>((_color & 0x0000ff)),
-        .a = 255
-    });
+    return Sol2D::toR32G32B32A32_SFLOAT(
+        {.r = static_cast<uint8_t>((_color & 0xff0000) >> 16),
+         .g = static_cast<uint8_t>((_color & 0x00ff00) >> 8),
+         .b = static_cast<uint8_t>((_color & 0x0000ff)),
+         .a = 255}
+    );
 }
 
 } // namespace
@@ -36,7 +36,7 @@ inline SDL_FColor b2ColorToSDL(const b2HexColor & _color)
 Box2dDebugDraw::Box2dDebugDraw(
     Renderer & _renderer,
     b2WorldId _world_id,
-    std::function<SDL_FPoint (float, float)> _translate_point,
+    std::function<SDL_FPoint(float, float)> _translate_point,
     std::function<float(float)> _translate_length
 ) :
     m_b2_debug_draw(b2DefaultDebugDraw()),
@@ -80,7 +80,8 @@ void Box2dDebugDraw::drawSolidPolygon(
     int _vertex_count,
     float _radius,
     b2HexColor _color,
-    void * _context)
+    void * _context
+)
 {
     S2_UNUSED(_radius)
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
@@ -92,7 +93,7 @@ void Box2dDebugDraw::drawSolidPolygon(
         if(_transform.q.s)
         {
             x = static_cast<float>(_transform.q.c * _vertices[i].x - _transform.q.s * _vertices[i].y) + _transform.p.x;
-            y = static_cast<float>(_transform.q.s * _vertices[i].x + _transform.q.c  * _vertices[i].y) + _transform.p.y;
+            y = static_cast<float>(_transform.q.s * _vertices[i].x + _transform.q.c * _vertices[i].y) + _transform.p.y;
         }
         else
         {
@@ -108,9 +109,8 @@ void Box2dDebugDraw::drawCircle(b2Vec2 _center, float _radius, b2HexColor _color
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
     self->mp_renderer->renderCircle(CircleRenderingData(
-        self->m_translate_point(_center.x, _center.y),
-        self->m_translate_length(_radius),
-        b2ColorToSDL(_color)));
+        self->m_translate_point(_center.x, _center.y), self->m_translate_length(_radius), b2ColorToSDL(_color)
+    ));
 }
 
 inline void Box2dDebugDraw::drawSolidCircle(b2Transform _transform, float _radius, b2HexColor _color, void * _context)
@@ -121,27 +121,26 @@ inline void Box2dDebugDraw::drawSolidCircle(b2Transform _transform, float _radiu
 void Box2dDebugDraw::drawPoint(b2Vec2 _point, float _size, b2HexColor _color, void * _context)
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    self->mp_renderer->renderCircle(SolidCircleRenderingData(
-        self->m_translate_point(_point.x, _point.y),
-        _size,
-        b2ColorToSDL(_color)));
+    self->mp_renderer->renderCircle(
+        SolidCircleRenderingData(self->m_translate_point(_point.x, _point.y), _size, b2ColorToSDL(_color))
+    );
 }
 
 void Box2dDebugDraw::drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void * _context)
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
     self->mp_renderer->renderLine(
-        self->m_translate_point(_p1.x, _p1.y),
-        self->m_translate_point(_p2.x, _p2.y),
-        b2ColorToSDL(_color));
+        self->m_translate_point(_p1.x, _p1.y), self->m_translate_point(_p2.x, _p2.y), b2ColorToSDL(_color)
+    );
 }
 
-void Box2dDebugDraw:: drawSolidCapsule(b2Vec2 _p1, b2Vec2 _p2, float _radius, b2HexColor _color, void * _context)
+void Box2dDebugDraw::drawSolidCapsule(b2Vec2 _p1, b2Vec2 _p2, float _radius, b2HexColor _color, void * _context)
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
     self->mp_renderer->renderCapsule(CapsuleRenderingData(
         self->m_translate_length(_radius),
         self->m_translate_point(_p1.x, _p1.y),
         self->m_translate_point(_p2.x, _p2.y),
-        b2ColorToSDL(_color)));
+        b2ColorToSDL(_color)
+    ));
 }

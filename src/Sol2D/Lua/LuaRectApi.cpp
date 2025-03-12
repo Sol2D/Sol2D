@@ -26,7 +26,7 @@ static constexpr char gc_key_y[] = "y";
 static constexpr char gc_key_w[] = "w";
 static constexpr char gc_key_h[] = "h";
 
-} // namespace name
+} // namespace
 
 bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, SDL_FRect & _rect)
 {
@@ -35,11 +35,8 @@ bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, SDL_FRect & _rect)
         return false;
 
     float x, y, w, h;
-    if(
-        table.tryGetNumber(gc_key_w, &w) &&
-        table.tryGetNumber(gc_key_h, &h) &&
-        table.tryGetNumber(gc_key_x, &x) &&
-        table.tryGetNumber(gc_key_y, &y))
+    if(table.tryGetNumber(gc_key_w, &w) && table.tryGetNumber(gc_key_h, &h) && table.tryGetNumber(gc_key_x, &x) &&
+       table.tryGetNumber(gc_key_y, &y))
     {
         _rect.x = x;
         _rect.y = y;

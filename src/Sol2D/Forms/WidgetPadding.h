@@ -24,7 +24,8 @@ struct WidgetPadding
 {
     S2_DEFAULT_COPY_AND_MOVE(WidgetPadding)
 
-    WidgetPadding() : WidgetPadding(.0f)
+    WidgetPadding() :
+        WidgetPadding(.0f)
     {
     }
 
@@ -53,7 +54,7 @@ struct WidgetPadding
     {
     }
 
-    WidgetPadding & operator = (float _pixels)
+    WidgetPadding & operator= (float _pixels)
     {
         top = _pixels;
         right = _pixels;

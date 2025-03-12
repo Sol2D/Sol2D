@@ -47,28 +47,113 @@ public:
     {
     }
 
-    virtual ~TileMapLayer() { }
-    const TileMapLayer * getParent() const { return mp_parent; }
-    uint32_t getId() const { return m_id; }
-    const std::string & getName() const { return m_name; }
-    TileMapLayerType getType() const { return m_type; }
-    void setClass(const char * _class) { m_class = _class ? _class : std::string(); }
-    const std::string & getClass() const { return m_class; }
-    void setVisibility(bool _visible) { m_is_visible = _visible; }
-    bool isVisible() const { return m_is_visible; }
-    void setOpacity(float _opacity) { m_opacity = _opacity; }
-    float getOpacity() const { return m_opacity; }
-    void setOffsetX(float _offset) { m_offset_x = _offset; }
-    float getOffsetX() const { return m_offset_x; }
-    void setOffsetY(float _offset) { m_offset_y = _offset; }
-    float getOffsetY() const { return m_offset_y; }
-    void setParallaxX(float _parallax) { m_parallax_x = _parallax; }
-    float getParallaxX() const { return m_parallax_x; }
-    void setParallaxY(float _parallax) { m_parallax_y = _parallax; }
-    float getParallaxY() const { return m_parallax_y; }
-    void setTintColor(const SDL_FColor & _color) { m_tint_color = _color; }
-    void removeTintColor() { m_tint_color.reset(); }
-    const std::optional<SDL_FColor> & getTintColor() const { return m_tint_color; }
+    virtual ~TileMapLayer()
+    {
+    }
+
+    const TileMapLayer * getParent() const
+    {
+        return mp_parent;
+    }
+
+    uint32_t getId() const
+    {
+        return m_id;
+    }
+
+    const std::string & getName() const
+    {
+        return m_name;
+    }
+
+    TileMapLayerType getType() const
+    {
+        return m_type;
+    }
+
+    void setClass(const char * _class)
+    {
+        m_class = _class ? _class : std::string();
+    }
+
+    const std::string & getClass() const
+    {
+        return m_class;
+    }
+
+    void setVisibility(bool _visible)
+    {
+        m_is_visible = _visible;
+    }
+
+    bool isVisible() const
+    {
+        return m_is_visible;
+    }
+
+    void setOpacity(float _opacity)
+    {
+        m_opacity = _opacity;
+    }
+
+    float getOpacity() const
+    {
+        return m_opacity;
+    }
+    void setOffsetX(float _offset)
+    {
+        m_offset_x = _offset;
+    }
+
+    float getOffsetX() const
+    {
+        return m_offset_x;
+    }
+
+    void setOffsetY(float _offset)
+    {
+        m_offset_y = _offset;
+    }
+
+    float getOffsetY() const
+    {
+        return m_offset_y;
+    }
+
+    void setParallaxX(float _parallax)
+    {
+        m_parallax_x = _parallax;
+    }
+
+    float getParallaxX() const
+    {
+        return m_parallax_x;
+    }
+
+    void setParallaxY(float _parallax)
+    {
+        m_parallax_y = _parallax;
+    }
+
+    float getParallaxY() const
+    {
+        return m_parallax_y;
+    }
+
+    void setTintColor(const SDL_FColor & _color)
+    {
+        m_tint_color = _color;
+    }
+
+    void removeTintColor()
+    {
+        m_tint_color.reset();
+    }
+
+    const std::optional<SDL_FColor> & getTintColor() const
+    {
+        return m_tint_color;
+    }
 
 private:
     const TileMapLayer * mp_parent;
@@ -82,7 +167,8 @@ private:
     float m_offset_y;
     float m_parallax_x; // TODO: To render parallax https://doc.mapeditor.org/en/stable/manual/layers/#parallax-factor
     float m_parallax_y;
-    std::optional<SDL_FColor> m_tint_color; // TODO: To render tint color. https://doc.mapeditor.org/en/stable/manual/layers/#tint-color
+    std::optional<SDL_FColor>
+        m_tint_color; // TODO: To render tint color. https://doc.mapeditor.org/en/stable/manual/layers/#tint-color
 };
 
 } // namespace Sol2D::Tiles

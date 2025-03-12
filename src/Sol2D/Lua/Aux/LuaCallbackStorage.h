@@ -43,7 +43,8 @@ public:
         uint16_t _event_id,
         uint16_t _args_count,
         uint16_t _return_count = 0,
-        std::optional<std::function<bool()>> _callback = std::nullopt);
+        std::optional<std::function<bool()>> _callback = std::nullopt
+    );
     void destroyCallbacks(const void * _owner);
 
 private:

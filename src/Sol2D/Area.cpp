@@ -22,7 +22,7 @@ SDL_FRect Area::calculateRect(const FSize & _output_size) const
 {
     SDL_FRect rect;
     rect.x = left.has_value() ? left.value().getPixels(_output_size.w) : .0f;
-    rect.y = top.has_value() ? top.value().getPixels(_output_size.h): .0f;
+    rect.y = top.has_value() ? top.value().getPixels(_output_size.h) : .0f;
 
     if(width.has_value())
     {

@@ -55,24 +55,25 @@ int luaApi_LoadFromFile(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * path = argToStringOrError(_lua, 2);
     SpriteSheetOptions options = {};
-    luaL_argexpected(_lua,  tryGetSpriteSheetOptions(_lua, 3, options), 3, LuaTypeName::sprite_sheet_options);
+    luaL_argexpected(_lua, tryGetSpriteSheetOptions(_lua, 3, options), 3, LuaTypeName::sprite_sheet_options);
     bool result = self->getSpriteSheet(_lua)->loadFromFile(self->workspace.getResourceFullPath(path), options);
     lua_pushboolean(_lua, result);
     return 1;
 }
 
-} // namespace name
+} // namespace
 
-void Sol2D::Lua::pushSpriteSheetApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<SpriteSheet> _sprite_sheet)
+void Sol2D::Lua::pushSpriteSheetApi(
+    lua_State * _lua, const Workspace & _workspace, std::shared_ptr<SpriteSheet> _sprite_sheet
+)
 {
     UserData::pushUserData(_lua, _workspace, _sprite_sheet);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "loadFromFile", luaApi_LoadFromFile },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",         UserData::luaGC    },
+            {"loadFromFile", luaApi_LoadFromFile},
+            {nullptr,        nullptr            }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

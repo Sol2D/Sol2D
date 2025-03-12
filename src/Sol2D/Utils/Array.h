@@ -20,7 +20,7 @@
 #include <cstddef>
 
 template<typename T, size_t left_len, size_t right_len>
-constexpr std::array<T, left_len + right_len> operator + (std::array<T, left_len> _left, std::array<T, right_len> _right)
+constexpr std::array<T, left_len + right_len> operator+ (std::array<T, left_len> _left, std::array<T, right_len> _right)
 {
     std::array<T, left_len + right_len> result;
     std::copy(_right.begin(), _right.end(), std::copy(_left.begin(), _left.end(), result.begin()));

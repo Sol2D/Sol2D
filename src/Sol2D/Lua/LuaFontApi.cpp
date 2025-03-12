@@ -36,17 +36,16 @@ struct Self : LuaSelfBase
 
 using UserData = LuaUserData<Self, LuaTypeName::font>;
 
-} // namespace name
+} // namespace
 
 void Sol2D::Lua::pushFontApi(lua_State * _lua, std::shared_ptr<TTF_Font> _font)
 {
     UserData::pushUserData(_lua, _font);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",  UserData::luaGC},
+            {nullptr, nullptr        }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

@@ -21,7 +21,7 @@ using namespace Sol2D;
 Outlet::Outlet(const Area & _area, Renderer & _renderer) :
     m_aria(_area),
     mr_renderer(_renderer),
-    m_rect{.0f, .0f, .0f, .0f}
+    m_rect {.0f, .0f, .0f, .0f}
 {
 }
 

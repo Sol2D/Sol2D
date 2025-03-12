@@ -47,7 +47,7 @@ bool Label::setState(WidgetState _state)
 {
     if(Widget::setState(_state))
     {
-        m_texture.reset();;
+        m_texture.reset();
         return true;
     }
     return false;
@@ -70,8 +70,7 @@ void Label::step(const StepState & _state)
     const float padding_right = padding.right.getPixels(canvas_width);
     const float padding_top = padding.top.getPixels(canvas_height);
     const float padding_bottom = padding.bottom.getPixels(canvas_height);
-    const SDL_FRect control_rect
-    {
+    const SDL_FRect control_rect {
         .x = m_x.getPixels(getParent().getWidth()),
         .y = m_y.getPixels(getParent().getHeight()),
         .w = m_width.getPixels(canvas_width),
@@ -87,13 +86,7 @@ void Label::step(const StepState & _state)
     SDL_FRect dest_rect;
     dest_rect.w = draw_area_width > m_texture_width ? m_texture_width : draw_area_width;
     dest_rect.h = draw_area_height > m_texture_height ? m_texture_height : draw_area_height;
-    SDL_FRect src_rect
-    {
-        .x = .0f,
-        .y = .0f,
-        .w = dest_rect.w,
-        .h = dest_rect.h
-    };
+    SDL_FRect src_rect {.x = .0f, .y = .0f, .w = dest_rect.w, .h = dest_rect.h};
 
     // TODO: RTL
     switch(htext_alignment)

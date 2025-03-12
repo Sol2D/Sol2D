@@ -56,9 +56,8 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
         if(table.tryGetString(gc_key_path, search_paths))
         {
             std::stringstream search_paths_stream(search_paths);
-            search_paths_stream << search_paths <<
-                LUA_PATH_SEP << (_path / LUA_PATH_MARK ".lua").string() <<
-                LUA_PATH_SEP << (_path / LUA_PATH_MARK / "init.lua").string();
+            search_paths_stream << search_paths << LUA_PATH_SEP << (_path / LUA_PATH_MARK ".lua").string()
+                                << LUA_PATH_SEP << (_path / LUA_PATH_MARK / "init.lua").string();
             table.setStringValue(gc_key_path, search_paths_stream.str().c_str());
             result = true;
         }
@@ -67,13 +66,10 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
     return result;
 }
 
-} // namespace name
+} // namespace
 
 LuaLibrary::LuaLibrary(
-    const Workspace & _workspace,
-    StoreManager & _store_manager,
-    Window & _window,
-    Renderer & _renderer
+    const Workspace & _workspace, StoreManager & _store_manager, Window & _window, Renderer & _renderer
 ) :
     mp_lua(luaL_newstate()),
     mr_workspace(_workspace)

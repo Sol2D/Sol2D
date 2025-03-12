@@ -41,10 +41,8 @@ public:
     void handle(const SDL_AssertData * _data) const
     {
         mr_workspace.getMainLogger().critical(
-            "SDL assertion failed: {} at {}:{}",
-            _data->condition,
-            _data->filename,
-            _data->linenum);
+            "SDL assertion failed: {} at {}:{}", _data->condition, _data->filename, _data->linenum
+        );
     }
 
 private:
@@ -87,7 +85,7 @@ SDL_AssertState SDLCALL sdlAssertionHandler(const SDL_AssertData * _data, void *
 Application::Application(const Workspace & _workspace) :
     mr_workspace(_workspace),
     m_sdl_assertion_handler(_workspace),
-    m_step_state{},
+    m_step_state {},
     mp_sdl_window(nullptr),
     mp_device(nullptr),
     mp_window(new Window)
@@ -100,10 +98,8 @@ Application::Application(const Workspace & _workspace) :
         throw SDLException("SDL_Mixer initialization failed.");
     SDL_SetAssertionHandler(sdlAssertionHandler, &m_sdl_assertion_handler);
     mp_sdl_window = SDL_CreateWindow(
-        mr_workspace.getApplicationName().c_str(),
-        1024,
-        768,
-        SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
+        mr_workspace.getApplicationName().c_str(), 1024, 768, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN
+    );
     if(!mp_sdl_window)
         throw SDLException("Unable to create window");
     mp_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
@@ -112,10 +108,8 @@ Application::Application(const Workspace & _workspace) :
     if(!SDL_ClaimWindowForGPUDevice(mp_device, mp_sdl_window))
         throw SDLException("Unable to claim window for GPU device.");
     if(!SDL_SetGPUSwapchainParameters(
-        mp_device,
-        mp_sdl_window,
-        SDL_GPU_SWAPCHAINCOMPOSITION_SDR,
-        SDL_GPU_PRESENTMODE_MAILBOX))
+           mp_device, mp_sdl_window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_MAILBOX
+       ))
     {
         throw SDLException("Unable to configuire GPU swapchain.");
     }
@@ -143,8 +137,10 @@ Application::~Application()
     ImGui_ImplSDLGPU3_Shutdown();
     ImGui::DestroyContext();
     delete mp_window;
-    if(mp_device) SDL_DestroyGPUDevice(mp_device);
-    if(mp_sdl_window) SDL_DestroyWindow(mp_sdl_window);
+    if(mp_device)
+        SDL_DestroyGPUDevice(mp_device);
+    if(mp_sdl_window)
+        SDL_DestroyWindow(mp_sdl_window);
     TTF_Quit();
     Mix_Quit();
     SDL_Quit();
@@ -163,16 +159,16 @@ void Application::exec()
     for(;;)
     {
         while(SDL_PollEvent(&event))
-            if(handleEvent(event)) return;
+            if(handleEvent(event))
+                return;
         const uint32_t now_ticks = SDL_GetTicks();
         const uint32_t passed_ticks = now_ticks - last_rendering_ticks;
         if(passed_ticks >= render_frame_delay)
         {
             last_rendering_ticks = now_ticks;
             m_step_state.delta_time = std::chrono::milliseconds(passed_ticks);
-            m_step_state.mouse_state.buttons = SDL_GetMouseState(
-                &m_step_state.mouse_state.position.x,
-                &m_step_state.mouse_state.position.y);
+            m_step_state.mouse_state.buttons =
+                SDL_GetMouseState(&m_step_state.mouse_state.position.x, &m_step_state.mouse_state.position.y);
             renderer.beginStep();
             step();
             renderer.submitStep();
@@ -184,14 +180,15 @@ void Application::exec()
                 m_step_state.mouse_state.mb_click.state = MouseClickState::None;
         }
         int32_t delay = render_frame_delay - passed_ticks;
-        if(delay > 5) SDL_Delay(delay);
+        if(delay > 5)
+            SDL_Delay(delay);
     }
 }
 
 bool Application::handleEvent(const SDL_Event & _event)
 {
     ImGui_ImplSDL3_ProcessEvent(&_event);
-    switch (_event.type)
+    switch(_event.type)
     {
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
         onMouseButtonDown(_event.button);
@@ -280,7 +277,7 @@ int main(int _argc, const char ** _argv)
             data.title = "Critical error";
             SDL_ShowMessageBox(&data, nullptr);
             return -1;
-        }        
+        }
     }
     try
     {

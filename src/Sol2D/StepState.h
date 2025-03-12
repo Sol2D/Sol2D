@@ -43,9 +43,20 @@ struct MouseState
     MouseClick rb_click;
     MouseClick mb_click;
 
-    bool isLeftButtonDown() const { return buttons & SDL_BUTTON_LMASK; }
-    bool isRightButtonDown() const { return buttons & SDL_BUTTON_RIGHT; }
-    bool isMiddleButtonDown() const { return buttons & SDL_BUTTON_MMASK; }
+    bool isLeftButtonDown() const
+    {
+        return buttons & SDL_BUTTON_LMASK;
+    }
+
+    bool isRightButtonDown() const
+    {
+        return buttons & SDL_BUTTON_RIGHT;
+    }
+
+    bool isMiddleButtonDown() const
+    {
+        return buttons & SDL_BUTTON_MMASK;
+    }
 };
 
 struct StepState

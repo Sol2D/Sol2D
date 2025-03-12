@@ -67,21 +67,15 @@ Capsule::Capsule(float _radius, const SDL_FPoint & _center1, const SDL_FPoint & 
     const float cosine = ac / bc;
     m_rotation.reset(cosine, -sine); // Rotate 90 degrees since we are expecting a vertical capsule.
 
-    SDL_FPoint origin_center_of_entire_capsule
-    {
-        .x = aabb_min.x + (aabb_max.x - aabb_min.x) / 2,
-        .y = aabb_min.y + (aabb_max.y - aabb_min.y) / 2
+    SDL_FPoint origin_center_of_entire_capsule {
+        .x = aabb_min.x + (aabb_max.x - aabb_min.x) / 2, .y = aabb_min.y + (aabb_max.y - aabb_min.y) / 2
     };
 
-    SDL_FPoint new_center1
-    {
-        .x = _center1.x - origin_center_of_entire_capsule.x,
-        .y = _center1.y - origin_center_of_entire_capsule.y
+    SDL_FPoint new_center1 {
+        .x = _center1.x - origin_center_of_entire_capsule.x, .y = _center1.y - origin_center_of_entire_capsule.y
     };
-    SDL_FPoint new_center2
-    {
-        .x = _center2.x - origin_center_of_entire_capsule.x,
-        .y = _center2.y - origin_center_of_entire_capsule.y
+    SDL_FPoint new_center2 {
+        .x = _center2.x - origin_center_of_entire_capsule.x, .y = _center2.y - origin_center_of_entire_capsule.y
     };
     new_center1 = m_rotation.rotateVectorCW(new_center1);
     new_center2 = m_rotation.rotateVectorCW(new_center2);

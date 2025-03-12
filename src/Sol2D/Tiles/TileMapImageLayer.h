@@ -28,11 +28,18 @@ public:
     {
     }
 
-    void setImage(const Texture _image) { m_image = _image; }
-    const Texture & getImage() const { return m_image; }
+    void setImage(const Texture _image)
+    {
+        m_image = _image;
+    }
+
+    const Texture & getImage() const
+    {
+        return m_image;
+    }
 
 private:
     Texture m_image;
 };
 
-} // namespace Tiles::Sol2D
+} // namespace Sol2D::Tiles

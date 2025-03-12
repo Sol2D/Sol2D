@@ -18,16 +18,16 @@
 #include <zlib.h>
 
 std::shared_ptr<std::vector<uint8_t>> Sol2D::Utils::zlibDecompress(
-    ZlibAlgorithm _algorithm,
-    const std::vector<uint8_t> & _data)
+    ZlibAlgorithm _algorithm, const std::vector<uint8_t> & _data
+)
 {
-    z_stream stream = { };
+    z_stream stream = {};
     stream.next_in = const_cast<Bytef *>(_data.data());
     stream.avail_in = static_cast<uint32_t>(_data.size());
     stream.zalloc = Z_NULL;
     stream.zfree = Z_NULL;
     stream.opaque = Z_NULL;
-    
+
     if(inflateInit2(&stream, _algorithm == ZlibAlgorithm::Zlib ? MAX_WBITS : MAX_WBITS + 16) != Z_OK)
         return nullptr;
 
@@ -50,7 +50,7 @@ std::shared_ptr<std::vector<uint8_t>> Sol2D::Utils::zlibDecompress(
         }
         uint8_t * b = buffer.get();
         output->insert(output->end(), b, &b[buffer_size - stream.avail_out]);
-    } while (stream.avail_out == 0);
+    } while(stream.avail_out == 0);
     inflateEnd(&stream);
     return output;
 }

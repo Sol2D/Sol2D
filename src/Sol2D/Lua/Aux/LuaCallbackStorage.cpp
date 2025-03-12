@@ -75,7 +75,8 @@ int LuaCallbackStorage::luaGC(lua_State *)
 
 uint32_t LuaCallbackStorage::addCallback(const void * _owner, uint16_t _event_id, int _callback_idx)
 {
-    if(s_is_disposed) return 0;
+    if(s_is_disposed)
+        return 0;
 
     const int callback_abs_idx = lua_absindex(mp_lua, _callback_idx);
     const uint32_t id = m_sequential_id.getNext();
@@ -104,10 +105,9 @@ void LuaCallbackStorage::createCallbackRegisty()
 {
     lua_newtable(mp_lua);
     pushMetatable(mp_lua, "sol.Internal.CallbackStorage");
-    luaL_Reg funcs[] =
-    {
-        { "__gc", LuaCallbackStorage::luaGC }, // Lua is destroying, application is terminating
-        { nullptr, nullptr }
+    luaL_Reg funcs[] = {
+        {"__gc",  LuaCallbackStorage::luaGC}, // Lua is destroying, application is terminating
+        {nullptr, nullptr                  }
     };
     luaL_setfuncs(mp_lua, funcs, 0);
     lua_setmetatable(mp_lua, -2);
@@ -145,7 +145,8 @@ void LuaCallbackStorage::ensureEventsTable(const void * _owner, uint16_t _event_
 
 size_t LuaCallbackStorage::removeCallback(const void * _owner, uint16_t _event_id, uint32_t _subscription_id)
 {
-    if(s_is_disposed) return 0;
+    if(s_is_disposed)
+        return 0;
 
     getCallbackRegisty();
     if(!tryGetEventsTable(_owner, _event_id))
@@ -171,9 +172,11 @@ void LuaCallbackStorage::execute(
     uint16_t _event_id,
     uint16_t _args_count,
     uint16_t _return_count /*= 0*/,
-    std::optional<std::function<bool()>> _callback /*= std::nullopt*/)
+    std::optional<std::function<bool()>> _callback /*= std::nullopt*/
+)
 {
-    if(s_is_disposed) return;
+    if(s_is_disposed)
+        return;
 
     const int args_top = lua_gettop(mp_lua);
     getCallbackRegisty();
@@ -208,7 +211,8 @@ void LuaCallbackStorage::execute(
 
 void LuaCallbackStorage::destroyCallbacks(const void * _owner)
 {
-    if(s_is_disposed) return;
+    if(s_is_disposed)
+        return;
 
     getCallbackRegisty();
     lua_pushnil(mp_lua);

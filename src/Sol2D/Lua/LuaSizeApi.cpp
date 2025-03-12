@@ -24,7 +24,7 @@ namespace {
 static constexpr char gc_key_w[] = "w";
 static constexpr char gc_key_h[] = "h";
 
-} // namespace name
+} // namespace
 
 bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, FSize & _size)
 {
@@ -33,9 +33,7 @@ bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, FSize & _size)
         return false;
 
     float w, h;
-    if(
-        table.tryGetNumber(gc_key_w, &w) &&
-        table.tryGetNumber(gc_key_h, &h))
+    if(table.tryGetNumber(gc_key_w, &w) && table.tryGetNumber(gc_key_h, &h))
     {
         _size.h = h;
         _size.w = w;

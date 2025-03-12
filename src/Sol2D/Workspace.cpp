@@ -26,7 +26,7 @@ namespace fs = std::filesystem;
 Workspace::Workspace() :
     m_frame_rate(60),
     m_is_debug_rendering_enabled(false),
-    m_main_logger_ptr (spdlog::stdout_logger_mt("engine")),
+    m_main_logger_ptr(spdlog::stdout_logger_mt("engine")),
     m_lua_logger_ptr(spdlog::stdout_logger_mt("application"))
 {
     m_main_logger_ptr->set_level(spdlog::level::off);

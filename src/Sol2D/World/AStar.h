@@ -35,9 +35,7 @@ struct AStarOptions
 };
 
 std::optional<std::vector<b2Vec2>> aStarFindPath(
-    b2WorldId _world_id,
-    b2BodyId _body_id,
-    const b2Vec2 & _destination,
-    const AStarOptions & _options);
+    b2WorldId _world_id, b2BodyId _body_id, const b2Vec2 & _destination, const AStarOptions & _options
+);
 
 } // namespace Sol2D::World

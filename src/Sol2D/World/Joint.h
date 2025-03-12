@@ -34,7 +34,9 @@ protected:
     }
 
 public:
-    virtual ~Joint() { }
+    virtual ~Joint()
+    {
+    }
 
     uint64_t getGid() const
     {
@@ -91,7 +93,8 @@ private:
     uint64_t m_gid;
 };
 
-class DistanceJoint : public Joint {
+class DistanceJoint : public Joint
+{
 public:
     S2_DEFAULT_COPY_AND_MOVE(DistanceJoint)
 
@@ -316,7 +319,6 @@ public:
     {
         b2MouseJoint_SetMaxForce(m_b2_joint_id, _max_force);
     }
-
 };
 
 class PrismaticJoint : public Joint

@@ -31,8 +31,15 @@ public:
     TileHeap();
     ~TileHeap();
     TileSet & createTileSet();
-    Tile * createTile(uint32_t _gid, const TileSet & _set, const Texture & _source,
-                     int32_t _src_x, int32_t _src_y, uint32_t _width, uint32_t _height);
+    Tile * createTile(
+        uint32_t _gid,
+        const TileSet & _set,
+        const Texture & _source,
+        int32_t _src_x,
+        int32_t _src_y,
+        uint32_t _width,
+        uint32_t _height
+    );
     uint32_t getNextGid() const;
     const Tile * getTile(uint32_t _gid) const;
     Tile * getTile(uint32_t _gid);

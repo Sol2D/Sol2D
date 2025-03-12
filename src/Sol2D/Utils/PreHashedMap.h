@@ -22,8 +22,7 @@
 namespace Sol2D::Utils {
 
 template<typename Key>
-concept PreHashedInnerKeyConcept = requires(Key _key, Key _key2)
-{
+concept PreHashedInnerKeyConcept = requires(Key _key, Key _key2) {
     std::hash<Key>()(_key);
     { _key == _key2 } -> std::same_as<bool>;
 };
@@ -46,7 +45,7 @@ public:
     {
     }
 
-    bool operator == (const PreHashedKey & _key) const
+    bool operator== (const PreHashedKey & _key) const
     {
         return key == _key.key;
     }
@@ -76,7 +75,7 @@ std::hash<T> PreHashedKey<T>::s_hash = std::hash<T>();
 template<PreHashedInnerKeyConcept Key>
 struct PreHashedKeyHash
 {
-    size_t operator ()(const PreHashedKey<Key> & _key) const
+    size_t operator() (const PreHashedKey<Key> & _key) const
     {
         return _key.hash;
     }

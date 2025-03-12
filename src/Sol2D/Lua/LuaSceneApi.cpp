@@ -150,7 +150,7 @@ public:
 
     std::shared_ptr<Scene> getScene(lua_State * _lua) const
     {
-        std::shared_ptr<Scene> ptr =  m_scene.lock();
+        std::shared_ptr<Scene> ptr = m_scene.lock();
         if(!ptr)
             luaL_error(_lua, LuaMessage::scene_is_destroyed);
         return ptr;
@@ -266,9 +266,8 @@ int luaApi_GetTileMapObjectById(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
-    const Tiles::TileMapObject * object = self
-        ->getScene(_lua)
-        ->getTileMapObjectById(static_cast<uint32_t>(lua_tointeger(_lua, 2)));
+    const Tiles::TileMapObject * object =
+        self->getScene(_lua)->getTileMapObjectById(static_cast<uint32_t>(lua_tointeger(_lua, 2)));
     if(object)
         pushTileMapObject(_lua, *object);
     else
@@ -317,7 +316,7 @@ int luaApi_CreateBody(lua_State * _lua)
     bool has_script_argument = lua_gettop(_lua) >= 5;
     const Self * self = UserData::getUserData(_lua, 1);
     std::shared_ptr<Scene> scene = self->getScene(_lua);
-    SDL_FPoint position = { .0f, .0f };
+    SDL_FPoint position = {.0f, .0f};
     if(!lua_isnil(_lua, 2))
         luaL_argexpected(_lua, tryGetPoint(_lua, 2, position), 2, LuaTypeName::point);
     uint64_t body_id = 0;
@@ -332,7 +331,8 @@ int luaApi_CreateBody(lua_State * _lua)
         table.setValueFromTop("body");
         lua_pushvalue(_lua, 1);
         table.setValueFromTop("scene");
-        if(has_script_argument) {
+        if(has_script_argument)
+        {
             lua_pushvalue(_lua, 5);
             table.setValueFromTop("arg");
         }
@@ -546,10 +546,8 @@ int luaApi_CreateDistanceJoint(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     DistanceJointDefenition definition;
     luaL_argexpected(
-        _lua,
-        tryGetDistanceJointDefenition(_lua, 2, definition),
-        2,
-        LuaTypeName::distance_joint_definition);
+        _lua, tryGetDistanceJointDefenition(_lua, 2, definition), 2, LuaTypeName::distance_joint_definition
+    );
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     uint64_t id = scene->createJoint(definition);
     pushJointApi(_lua, scene, scene->getDistanceJoint(id).value());
@@ -589,10 +587,8 @@ int luaApi_CreatePrismaticJoint(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     PrismaticJointDefinition definition;
     luaL_argexpected(
-        _lua,
-        tryGetPrismaticJointDefinition(_lua, 2, definition),
-        2,
-        LuaTypeName::prismatic_joint_definition);
+        _lua, tryGetPrismaticJointDefinition(_lua, 2, definition), 2, LuaTypeName::prismatic_joint_definition
+    );
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     uint64_t id = scene->createJoint(definition);
     pushJointApi(_lua, scene, scene->getPrismaticJoint(id).value());
@@ -735,7 +731,8 @@ int luaApi_DestroyJoint(lua_State * _lua)
         std::stringstream ss;
         for(size_t i = 0; i < all_joint_types.size(); ++i)
         {
-            if(i > 0) ss << ", ";
+            if(i > 0)
+                ss << ", ";
             ss << all_joint_types[i];
         }
         ss << ", " << LuaTypeName::integer;
@@ -783,48 +780,47 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
     UserData::pushUserData(_lua, _workspace, _scene);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "setBackgroundColor", luaApi_SetBackgroundColor },
-            { "setGravity", luaApi_SetGravity },
-            { "loadTileMap", luaApi_LoadTileMap },
-            { "getTileMapObjectById", luaApi_GetTileMapObjectById },
-            { "getTileMapObjectByName", luaApi_GetTileMapObjectByName },
-            { "getTileMapObjectsByClass", luaApi_GetTileMapObjectsByClass },
-            { "createBody", luaApi_CreateBody },
-            { "destroyBody", luaApi_DestroyBody },
-            { "getBody", luaApi_GetBody },
-            { "createBodiesFromMapObjects", luaApi_CreateBodiesFromMapObjects },
-            { "setFollowedBody", luaApi_SetFollowedBody },
-            { "resetFollowedBody", luaApi_ResetFollowedBody },
-            { "subscribeToBeginContact", luaApi_SubscribeToBeginContact },
-            { "unsubscribeFromBeginContact", luaApi_UnsubscribeFromBeginContact },
-            { "subscribeToEndContact", luaApi_SubscribeToEndContact },
-            { "unsubscribeFromEndContact", luaApi_UnsubscribeFromEndContact },
-            { "subscribeToSensorBeginContact", luaApi_SubscribeToSensorBeginContact },
-            { "unsubscribeFromSensorBeginContact", luaApi_UnsubscribeFromSensorBeginContact },
-            { "subscribeToSensorEndContact", luaApi_SubscribeToSensorEndContact },
-            { "unsubscribeFromSesnsorEndContact", luaApi_UnsubscribeFromSesnsorEndContact },
-            { "subscribeToPreSolveContact", luaApi_SubscribeToPreSolveContact },
-            { "unsubscribeFromPreSolveContact", luaApi_UnsubscribeFromPreSolveContact },
-            { "subscribeToStep", luaApi_SubscribeToStep },
-            { "unsubscribeFromStep", luaApi_UnsubscribeFromStep },
-            { "createDistanceJoint", luaApi_CreateDistanceJoint },
-            { "createMotorJoint", luaApi_CreateMotorJoint },
-            { "createMouseJoint", luaApi_CreateMouseJoint },
-            { "createPrismaticJoint", luaApi_CreatePrismaticJoint },
-            { "createWeldJoint", luaApi_CreateWeldJoint },
-            { "createWheelJoint", luaApi_CreateWheelJoint },
-            { "getDistanceJoint", luaApi_GetDistanceJoint },
-            { "getMotorJoint", luaApi_GetMotorJoint },
-            { "getMouseJoint", luaApi_GetMouseJoint },
-            { "getPrismaticJoint", luaApi_GetPrismaticJoint },
-            { "getWeldJoint", luaApi_GetWeldJoint },
-            { "getWheelJoint", luaApi_GetWheelJoint },
-            { "destroyJoint", luaApi_DestroyJoint },
-            { "findPath", luaApi_FindPath },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",                              UserData::luaGC                         },
+            {"setBackgroundColor",                luaApi_SetBackgroundColor               },
+            {"setGravity",                        luaApi_SetGravity                       },
+            {"loadTileMap",                       luaApi_LoadTileMap                      },
+            {"getTileMapObjectById",              luaApi_GetTileMapObjectById             },
+            {"getTileMapObjectByName",            luaApi_GetTileMapObjectByName           },
+            {"getTileMapObjectsByClass",          luaApi_GetTileMapObjectsByClass         },
+            {"createBody",                        luaApi_CreateBody                       },
+            {"destroyBody",                       luaApi_DestroyBody                      },
+            {"getBody",                           luaApi_GetBody                          },
+            {"createBodiesFromMapObjects",        luaApi_CreateBodiesFromMapObjects       },
+            {"setFollowedBody",                   luaApi_SetFollowedBody                  },
+            {"resetFollowedBody",                 luaApi_ResetFollowedBody                },
+            {"subscribeToBeginContact",           luaApi_SubscribeToBeginContact          },
+            {"unsubscribeFromBeginContact",       luaApi_UnsubscribeFromBeginContact      },
+            {"subscribeToEndContact",             luaApi_SubscribeToEndContact            },
+            {"unsubscribeFromEndContact",         luaApi_UnsubscribeFromEndContact        },
+            {"subscribeToSensorBeginContact",     luaApi_SubscribeToSensorBeginContact    },
+            {"unsubscribeFromSensorBeginContact", luaApi_UnsubscribeFromSensorBeginContact},
+            {"subscribeToSensorEndContact",       luaApi_SubscribeToSensorEndContact      },
+            {"unsubscribeFromSesnsorEndContact",  luaApi_UnsubscribeFromSesnsorEndContact },
+            {"subscribeToPreSolveContact",        luaApi_SubscribeToPreSolveContact       },
+            {"unsubscribeFromPreSolveContact",    luaApi_UnsubscribeFromPreSolveContact   },
+            {"subscribeToStep",                   luaApi_SubscribeToStep                  },
+            {"unsubscribeFromStep",               luaApi_UnsubscribeFromStep              },
+            {"createDistanceJoint",               luaApi_CreateDistanceJoint              },
+            {"createMotorJoint",                  luaApi_CreateMotorJoint                 },
+            {"createMouseJoint",                  luaApi_CreateMouseJoint                 },
+            {"createPrismaticJoint",              luaApi_CreatePrismaticJoint             },
+            {"createWeldJoint",                   luaApi_CreateWeldJoint                  },
+            {"createWheelJoint",                  luaApi_CreateWheelJoint                 },
+            {"getDistanceJoint",                  luaApi_GetDistanceJoint                 },
+            {"getMotorJoint",                     luaApi_GetMotorJoint                    },
+            {"getMouseJoint",                     luaApi_GetMouseJoint                    },
+            {"getPrismaticJoint",                 luaApi_GetPrismaticJoint                },
+            {"getWeldJoint",                      luaApi_GetWeldJoint                     },
+            {"getWheelJoint",                     luaApi_GetWheelJoint                    },
+            {"destroyJoint",                      luaApi_DestroyJoint                     },
+            {"findPath",                          luaApi_FindPath                         },
+            {nullptr,                             nullptr                                 }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

@@ -28,8 +28,7 @@ struct ObjectFactory
 };
 
 template<typename T>
-concept ObjectConcept =
-    std::default_initializable<ObjectFactory<T>> &&
+concept ObjectConcept = std::default_initializable<ObjectFactory<T>> &&
     std::is_member_function_pointer<decltype(&ObjectFactory<T>::produce)>::value;
 
 template<typename T, typename... Object>
@@ -46,7 +45,7 @@ class ObjectStore : private ObjectStoreData<ObjectType>...
 {
 public:
     template<AnyObjectConcept<ObjectType...> T, typename... FactoryArgs>
-    std::shared_ptr<T> createObject(const std::string & _key, FactoryArgs && ... _factory_args)
+    std::shared_ptr<T> createObject(const std::string & _key, FactoryArgs &&... _factory_args)
     {
         ObjectFactory<T> factory;
         std::shared_ptr<T> object = factory.produce(_factory_args...);

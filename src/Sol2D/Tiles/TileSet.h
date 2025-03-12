@@ -63,20 +63,75 @@ public:
     {
     }
 
-    void setName(const char * _name) { m_name = _name ? _name : std::string(); }
-    const std::string & getName() const { return m_name; }
-    void setClass(const char * _class) { m_class = _class ? _class : std::string(); }
-    const std::string & getClass() const { return m_class; }
-    void setTileWidth(uint32_t _width) { m_tile_width = _width; }
-    uint32_t getTileWidth() const { return m_tile_width; }
-    void setTileHeight(uint32_t _height) { m_tile_height = _height; }
-    uint32_t getTileHeight() const { return m_tile_height; }
-    void setObjectAlignment(ObjectAlignment _aligment) { m_object_aligment = _aligment; }
-    ObjectAlignment getObjectAlignment() const { return m_object_aligment; }
-    void setTileRenderSize(TileRenderSize _size) { m_tile_render_size = _size; }
-    TileRenderSize getTileRenderSize() const { return m_tile_render_size; }
-    void setFillMode(FillMode _mode) { m_fill_mode = _mode; }
-    FillMode getFillMode() const { return m_fill_mode; }
+    void setName(const char * _name)
+    {
+        m_name = _name ? _name : std::string();
+    }
+
+    const std::string & getName() const
+    {
+        return m_name;
+    }
+
+    void setClass(const char * _class)
+    {
+        m_class = _class ? _class : std::string();
+    }
+
+    const std::string & getClass() const
+    {
+        return m_class;
+    }
+
+    void setTileWidth(uint32_t _width)
+    {
+        m_tile_width = _width;
+    }
+
+    uint32_t getTileWidth() const
+    {
+        return m_tile_width;
+    }
+
+    void setTileHeight(uint32_t _height)
+    {
+        m_tile_height = _height;
+    }
+
+    uint32_t getTileHeight() const
+    {
+        return m_tile_height;
+    }
+
+    void setObjectAlignment(ObjectAlignment _aligment)
+    {
+        m_object_aligment = _aligment;
+    }
+
+    ObjectAlignment getObjectAlignment() const
+    {
+        return m_object_aligment;
+    }
+
+    void setTileRenderSize(TileRenderSize _size)
+    {
+        m_tile_render_size = _size;
+    }
+
+    TileRenderSize getTileRenderSize() const
+    {
+        return m_tile_render_size;
+    }
+
+    void setFillMode(FillMode _mode)
+    {
+        m_fill_mode = _mode;
+    }
+
+    FillMode getFillMode() const
+    {
+        return m_fill_mode;
+    }
 
 private:
     std::string m_name;

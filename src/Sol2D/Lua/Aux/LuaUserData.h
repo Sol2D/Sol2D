@@ -28,19 +28,23 @@ namespace Sol2D::Lua {
 struct LuaSelfBase
 {
 public:
-    virtual ~LuaSelfBase() { }
-    virtual void beforeDelete(lua_State *) { }
+    virtual ~LuaSelfBase()
+    {
+    }
+    virtual void beforeDelete(lua_State *)
+    {
+    }
 };
 
 template<std::derived_from<LuaSelfBase> LuaSelf, const char metatable[]>
 struct LuaUserData
 {
-    template<typename ...CtorArgs>
-    static LuaSelf * pushUserData(lua_State * _lua, CtorArgs && ... _ctor_args)
+    template<typename... CtorArgs>
+    static LuaSelf * pushUserData(lua_State * _lua, CtorArgs &&... _ctor_args)
     {
         void * data = lua_newuserdata(_lua, sizeof(LuaSelf));
         std::memset(data, 0, sizeof(LuaSelf));
-        return new(data) LuaSelf(std::forward<CtorArgs>(_ctor_args)...);
+        return new (data) LuaSelf(std::forward<CtorArgs>(_ctor_args)...);
     }
 
     static MetatablePushResult pushMetatable(lua_State * _lua)

@@ -26,7 +26,7 @@ bool Sol2D::Lua::tryGetBodyShapePhysicsDefinition(lua_State * _lua, int _idx, Bo
     {
         table.tryGetNumber("density", _definition.density);
         table.tryGetNumber("restitution", _definition.restitution);
-        table.tryGetNumber("friction",  _definition.friction);
+        table.tryGetNumber("friction", _definition.friction);
         table.tryGetBoolean("isSensor", &_definition.is_sensor);
         table.tryGetBoolean("isPreSolveEnabled", &_definition.is_pre_solve_enabled);
         return true;

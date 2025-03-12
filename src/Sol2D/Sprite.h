@@ -49,10 +49,7 @@ public:
     void setDesinationSize(const FSize & _size);
     void scale(float _scale_factor);
     void scale(float _scale_factor_x, float _scale_factor_y);
-    void render(
-        const SDL_FPoint & _point,
-        const Rotation & _rotation,
-        SDL_FlipMode _flip_mode);
+    void render(const SDL_FPoint & _point, const Rotation & _rotation, SDL_FlipMode _flip_mode);
 
 private:
     Renderer * mp_renderer;

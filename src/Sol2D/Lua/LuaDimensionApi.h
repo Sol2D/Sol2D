@@ -35,7 +35,7 @@ bool tryGetDimension(lua_State * _lua, int _idx, std::optional<Dimension<Number>
     DimensionUnit unit;
     if(tryGetDimensionI(_lua, _idx, &value, &unit))
     {
-        _value = Dimension<Number>(static_cast<Number>(value), unit);;
+        _value = Dimension<Number>(static_cast<Number>(value), unit);
         return true;
     }
     return false;

@@ -31,18 +31,14 @@ LineRenderer::LineRenderer(const ResourceManager & _resource_manager, SDL_Window
         SDL_GPU_SHADERSTAGE_VERTEX,
         SDL_GPU_SHADERFORMAT_SPIRV,
         "Polyline.vert",
-        {
-            .num_samplers = 0,
-            .num_uniform_buffers = 1
-        });
+        {.num_samplers = 0, .num_uniform_buffers = 1}
+    );
     ShaderPtr frag_shader = loader.loadStandard(
         SDL_GPU_SHADERSTAGE_FRAGMENT,
         SDL_GPU_SHADERFORMAT_SPIRV,
         "Polyline.frag",
-        {
-            .num_samplers = 0,
-            .num_uniform_buffers = 1
-        });
+        {.num_samplers = 0, .num_uniform_buffers = 1}
+    );
 
     SDL_GPUColorTargetDescription color_target_description = {};
     color_target_description.format = SDL_GetGPUSwapchainTextureFormat(mp_device, _window);
@@ -55,22 +51,11 @@ LineRenderer::LineRenderer(const ResourceManager & _resource_manager, SDL_Window
     color_target_description.blend_state.alpha_blend_op = SDL_GPU_BLENDOP_ADD;
     color_target_description.blend_state.enable_blend = true;
 
-    SDL_GPUVertexAttribute vertex_attributes[]
-    {
-        SDL_GPUVertexAttribute
-        {
-            .location = 0,
-            .buffer_slot = 0,
-            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
-            .offset = 0
-        }
+    SDL_GPUVertexAttribute vertex_attributes[] {
+        {.location = 0, .buffer_slot = 0, .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, .offset = 0}
     };
-    SDL_GPUVertexBufferDescription vertex_buffer_description
-    {
-        .slot = 0,
-        .pitch = sizeof(SDL_FPoint),
-        .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
-        .instance_step_rate = 0
+    SDL_GPUVertexBufferDescription vertex_buffer_description {
+        .slot = 0, .pitch = sizeof(SDL_FPoint), .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX, .instance_step_rate = 0
     };
     SDL_GPUGraphicsPipelineCreateInfo pipeline_create_info = {};
     pipeline_create_info.vertex_shader = vert_shader.get();
@@ -143,22 +128,11 @@ void LineRenderer::beginRendering()
     }
 
     {
-        SDL_GPUTransferBufferLocation transfer_buffer_location
-        {
-            .transfer_buffer = transfer_buffer,
-            .offset = 0
+        SDL_GPUTransferBufferLocation transfer_buffer_location {.transfer_buffer = transfer_buffer, .offset = 0};
+        SDL_GPUBufferRegion transfer_destination {
+            .buffer = mp_vertex_buffer, .offset = 0, .size = vertex_buffer_create_info.size
         };
-        SDL_GPUBufferRegion transfer_destination
-        {
-            .buffer = mp_vertex_buffer,
-            .offset = 0,
-            .size = vertex_buffer_create_info.size
-        };
-        SDL_UploadToGPUBuffer(
-            copy_pass,
-            &transfer_buffer_location,
-            &transfer_destination,
-            false);
+        SDL_UploadToGPUBuffer(copy_pass, &transfer_buffer_location, &transfer_destination, false);
     }
 
     SDL_EndGPUCopyPass(copy_pass);
@@ -178,11 +152,7 @@ void LineRenderer::endRendering()
 
 LineRenderer::ChunkID LineRenderer::enqueueLine(const SDL_FPoint & _point1, const SDL_FPoint & _point2)
 {
-    ChunkID id
-    {
-        .idx = m_vertices.size(),
-        .cnt = 2
-    };
+    ChunkID id {.idx = m_vertices.size(), .cnt = 2};
     reserveSpace(id.cnt);
     m_vertices.push_back(_point1);
     m_vertices.push_back(_point2);
@@ -194,11 +164,7 @@ LineRenderer::ChunkID LineRenderer::enqueueLines(const std::vector<SDL_FPoint> &
     if(_points.size() < 2)
         throw InvalidOperationException("A line must contain at least 2 points");
 
-    ChunkID id
-    {
-        .idx = m_vertices.size(),
-        .cnt = _points.size()
-    };
+    ChunkID id {.idx = m_vertices.size(), .cnt = _points.size()};
     reserveSpace(id.cnt);
     m_vertices.insert(m_vertices.end(), _points.begin(), _points.end());
     return id;
@@ -206,11 +172,7 @@ LineRenderer::ChunkID LineRenderer::enqueueLines(const std::vector<SDL_FPoint> &
 
 LineRenderer::ChunkID LineRenderer::enqueuePolyline(const std::vector<SDL_FPoint> & _points, bool _close)
 {
-    ChunkID id
-    {
-        .idx = m_vertices.size(),
-        .cnt = _points.size() * 2
-    };
+    ChunkID id {.idx = m_vertices.size(), .cnt = _points.size() * 2};
 
     if(_close)
     {
@@ -247,11 +209,7 @@ void LineRenderer::render(const RenderingContext & _ctx, ChunkID _id, const SDL_
     SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_pipeline);
     SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &_ctx.texture_size, sizeof(FSize));
     SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, &_color, sizeof(SDL_FColor));
-    SDL_GPUBufferBinding binding
-    {
-        .buffer = mp_vertex_buffer,
-        .offset = 0
-    };
+    SDL_GPUBufferBinding binding {.buffer = mp_vertex_buffer, .offset = 0};
     SDL_BindGPUVertexBuffers(_ctx.render_pass, 0, &binding, 1);
     SDL_DrawGPUPrimitives(_ctx.render_pass, _id.cnt, 1, _id.idx, 0);
 }

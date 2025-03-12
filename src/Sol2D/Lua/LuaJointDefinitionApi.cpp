@@ -47,9 +47,8 @@ bool tryGetJointDefinition(const LuaTable & _table, World::JointDefinition & _re
     if(!_table.isValid())
         return false;
     uint64_t body_a, body_b;
-    if(
-        !tryGetBodyIdFromJointDefinition(_table, "bodyA", &body_a) ||
-        !tryGetBodyIdFromJointDefinition(_table, "bodyB", &body_b))
+    if(!tryGetBodyIdFromJointDefinition(_table, "bodyA", &body_a) ||
+       !tryGetBodyIdFromJointDefinition(_table, "bodyB", &body_b))
     {
         return false;
     }
@@ -60,7 +59,6 @@ bool tryGetJointDefinition(const LuaTable & _table, World::JointDefinition & _re
 }
 
 } // namespace
-
 
 bool Sol2D::Lua::tryGetDistanceJointDefenition(lua_State * _lua, int _idx, World::DistanceJointDefenition & _result)
 {
@@ -126,7 +124,6 @@ bool Sol2D::Lua::tryGetPrismaticJointDefinition(lua_State * _lua, int _idx, Worl
     table.tryGetNumber("lowerTranslation", _result.lower_translation);
     table.tryGetNumber("upperTranslation", _result.upper_translation);
     return true;
-
 }
 
 bool Sol2D::Lua::tryGetWeldJointDefinition(lua_State * _lua, int _idx, World::WeldJointDefinition & _result)

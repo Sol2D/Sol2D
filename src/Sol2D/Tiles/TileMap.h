@@ -55,35 +55,148 @@ public:
 
 public:
     TileMap(const TileHeap & _tile_heap, const ObjectHeap & _object_heap);
-    void setClass(const char * _class) { m_class = _class ? _class : std::string(); }
-    const std::string & getClass() const { return m_class; }
-    void setOrientation(Orientation _orientation) { m_orientation = _orientation; }
-    Orientation getOrientation() const { return m_orientation; }
-    void setRenderOrder(RenderOrder _order) { m_render_order = _order; }
-    RenderOrder getRenderOrder() const { return m_render_order; }
-    int32_t getX() const { return m_x; }
-    int32_t getY() const { return m_y; }
-    void setWidth(uint32_t _width) { m_width = _width; }
-    uint32_t getWidth() const { return m_width; }
-    void setHeight(uint32_t _height) { m_height = _height; }
-    uint32_t getHeight() const { return m_height; }
+
+    void setClass(const char * _class)
+    {
+        m_class = _class ? _class : std::string();
+    }
+
+    const std::string & getClass() const
+    {
+        return m_class;
+    }
+
+    void setOrientation(Orientation _orientation)
+    {
+        m_orientation = _orientation;
+    }
+
+    Orientation getOrientation() const
+    {
+        return m_orientation;
+    }
+
+    void setRenderOrder(RenderOrder _order)
+    {
+        m_render_order = _order;
+    }
+
+    RenderOrder getRenderOrder() const
+    {
+        return m_render_order;
+    }
+
+    int32_t getX() const
+    {
+        return m_x;
+    }
+
+    int32_t getY() const
+    {
+        return m_y;
+    }
+
+    void setWidth(uint32_t _width)
+    {
+        m_width = _width;
+    }
+
+    uint32_t getWidth() const
+    {
+        return m_width;
+    }
+
+    void setHeight(uint32_t _height)
+    {
+        m_height = _height;
+    }
+
+    uint32_t getHeight() const
+    {
+        return m_height;
+    }
+
     void expand(int _x, int _y, uint32_t _width, uint32_t _height);
-    void setTileWidth(uint32_t _width) { m_tile_width = _width; }
-    uint32_t getTileWidth() const { return m_tile_width; }
-    void setTileHeight(uint32_t _height) { m_tile_height = _height; }
-    uint32_t getTileHeight() const { return m_tile_height; }
-    void setHexSideLength(uint32_t _length) { m_hex_side_length = _length; }
-    uint32_t getHexSideLength() const { return m_hex_side_length; }
-    void setStaggerAxis(Axis _axis) { m_stagger_axis = _axis; }
-    Axis getStaggerAxis() const { return m_stagger_axis; }
-    void setStaggerIndex(StaggerIndex _index) { m_stagger_index = _index; }
-    StaggerIndex getStaggerIndex() const { return m_stagger_index; }
-    void setParallaxOriginX(int32_t _value) { m_parallax_origin_x = _value; }
-    int32_t getParallaxOriginX() const { return m_parallax_origin_x; }
-    void setParallaxOriginY(int32_t _value) { m_parallax_origin_y = _value; }
-    int32_t getParallaxOriginY() const { return m_parallax_origin_y; }
-    void setBackgroundColor(const SDL_FColor & _color) { m_background_color = _color; }
-    const SDL_FColor & getBackgroundColor() const { return m_background_color; }
+
+    void setTileWidth(uint32_t _width)
+    {
+        m_tile_width = _width;
+    }
+
+    uint32_t getTileWidth() const
+    {
+        return m_tile_width;
+    }
+
+    void setTileHeight(uint32_t _height)
+    {
+        m_tile_height = _height;
+    }
+
+    uint32_t getTileHeight() const
+    {
+        return m_tile_height;
+    }
+
+    void setHexSideLength(uint32_t _length)
+    {
+        m_hex_side_length = _length;
+    }
+
+    uint32_t getHexSideLength() const
+    {
+        return m_hex_side_length;
+    }
+
+    void setStaggerAxis(Axis _axis)
+    {
+        m_stagger_axis = _axis;
+    }
+
+    Axis getStaggerAxis() const
+    {
+        return m_stagger_axis;
+    }
+
+    void setStaggerIndex(StaggerIndex _index)
+    {
+        m_stagger_index = _index;
+    }
+
+    StaggerIndex getStaggerIndex() const
+    {
+        return m_stagger_index;
+    }
+
+    void setParallaxOriginX(int32_t _value)
+    {
+        m_parallax_origin_x = _value;
+    }
+
+    int32_t getParallaxOriginX() const
+    {
+        return m_parallax_origin_x;
+    }
+
+    void setParallaxOriginY(int32_t _value)
+    {
+        m_parallax_origin_y = _value;
+    }
+
+    int32_t getParallaxOriginY() const
+    {
+        return m_parallax_origin_y;
+    }
+
+    void setBackgroundColor(const SDL_FColor & _color)
+    {
+        m_background_color = _color;
+    }
+
+    const SDL_FColor & getBackgroundColor() const
+    {
+        return m_background_color;
+    }
 
 private:
     std::string m_class;
@@ -104,4 +217,3 @@ private:
 };
 
 } // namespace Sol2D::Tiles
-

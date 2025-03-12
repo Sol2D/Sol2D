@@ -22,8 +22,7 @@ namespace Sol2D {
 
 inline SDL_Color toR8G8B8A8_UINT(const SDL_FColor & _color)
 {
-    return
-    {
+    return {
         .r = static_cast<uint8_t>(_color.r * 255.0f),
         .g = static_cast<uint8_t>(_color.g * 255.0f),
         .b = static_cast<uint8_t>(_color.b * 255.0f),
@@ -33,13 +32,7 @@ inline SDL_Color toR8G8B8A8_UINT(const SDL_FColor & _color)
 
 inline SDL_FColor toR32G32B32A32_SFLOAT(const SDL_Color & _color)
 {
-    return
-    {
-        .r = _color.r / 255.0f,
-        .g = _color.g / 255.0f,
-        .b = _color.b / 255.0f,
-        .a = _color.a / 255.0f
-    };
+    return {.r = _color.r / 255.0f, .g = _color.g / 255.0f, .b = _color.b / 255.0f, .a = _color.a / 255.0f};
 }
 
 } // namespace Sol2D

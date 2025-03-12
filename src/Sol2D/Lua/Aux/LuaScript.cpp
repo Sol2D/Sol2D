@@ -16,10 +16,7 @@
 
 #include <Sol2D/Lua/Aux/LuaScript.h>
 
-void Sol2D::Lua::executeScript(
-    lua_State * _lua,
-    const Workspace & _workspace,
-    const std::filesystem::path & _path)
+void Sol2D::Lua::executeScript(lua_State * _lua, const Workspace & _workspace, const std::filesystem::path & _path)
 {
     std::filesystem::path path = _workspace.getScriptFullPath(_path);
     _workspace.getMainLogger().info("Executing script \"{0}\"", path.c_str());
@@ -37,9 +34,8 @@ void Sol2D::Lua::executeScript(
 }
 
 void Sol2D::Lua::executeScriptWithContext(
-    lua_State * _lua,
-    const Workspace & _workspace,
-    const std::filesystem::path & _path)
+    lua_State * _lua, const Workspace & _workspace, const std::filesystem::path & _path
+)
 {
     const char global_name[] = "script";
     lua_setglobal(_lua, global_name);

@@ -120,23 +120,22 @@ int luaApi_Scale(lua_State * _lua)
     return 0;
 }
 
-} // namespace name
+} // namespace
 
 void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, std::shared_ptr<Sprite> _sprite)
 {
     UserData::pushUserData(_lua, _workspace, _sprite);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] =
-        {
-            { "__gc", UserData::luaGC },
-            { "loadFromFile", luaApi_LoadFromFile },
-            { "isValid", luaApi_IsValid },
-            { "getSourceRect", luaApi_GetSourceRect },
-            { "getDestinationSize", luaApi_GetDestinationSize },
-            { "setDestinationSize", luaApi_SetDestinationSize },
-            { "scale", luaApi_Scale },
-            { nullptr, nullptr }
+        luaL_Reg funcs[] = {
+            {"__gc",               UserData::luaGC          },
+            {"loadFromFile",       luaApi_LoadFromFile      },
+            {"isValid",            luaApi_IsValid           },
+            {"getSourceRect",      luaApi_GetSourceRect     },
+            {"getDestinationSize", luaApi_GetDestinationSize},
+            {"setDestinationSize", luaApi_SetDestinationSize},
+            {"scale",              luaApi_Scale             },
+            {nullptr,              nullptr                  }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

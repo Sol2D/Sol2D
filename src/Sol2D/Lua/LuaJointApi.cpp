@@ -40,7 +40,7 @@ public:
 
     std::shared_ptr<Scene> getScene(lua_State * _lua) const
     {
-        std::shared_ptr<Scene> ptr =  m_scene.lock();
+        std::shared_ptr<Scene> ptr = m_scene.lock();
         if(!ptr)
             luaL_error(_lua, LuaMessage::scene_is_destroyed);
         return ptr;
@@ -418,8 +418,8 @@ int luaApi_SetLengthRange(lua_State * _lua)
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     luaL_argexpected(_lua, lua_isnumber(_lua, 3), 3, LuaTypeName::number);
     self->getDistanceJoint().setLengthRange(
-        static_cast<float>(lua_tonumber(_lua, 2)),
-        static_cast<float>(lua_tonumber(_lua, 3)));
+        static_cast<float>(lua_tonumber(_lua, 2)), static_cast<float>(lua_tonumber(_lua, 3))
+    );
     self->getDistanceJoint().wakeBodies();
     return 0;
 }
@@ -777,8 +777,8 @@ int luaApi_SetLimits(lua_State * _lua)
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     luaL_argexpected(_lua, lua_isnumber(_lua, 3), 3, LuaTypeName::number);
     self->getPrismaticJoint().setLimits(
-        static_cast<float>(lua_tonumber(_lua, 2)),
-        static_cast<float>(lua_tonumber(_lua, 3)));
+        static_cast<float>(lua_tonumber(_lua, 2)), static_cast<float>(lua_tonumber(_lua, 3))
+    );
     self->getPrismaticJoint().wakeBodies();
     return 0;
 }
@@ -945,8 +945,7 @@ int luaApi_SetLimits(lua_State * _lua)
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     luaL_argexpected(_lua, lua_isnumber(_lua, 3), 3, LuaTypeName::number);
     self->getRevoluteJoint().setLimits(
-        static_cast<float>(lua_tonumber(_lua, 2)),
-        static_cast<float>(lua_tonumber(_lua, 3))
+        static_cast<float>(lua_tonumber(_lua, 2)), static_cast<float>(lua_tonumber(_lua, 3))
     );
     self->getRevoluteJoint().wakeBodies();
     return 0;
@@ -1226,8 +1225,8 @@ int luaApi_SetLimits(lua_State * _lua)
     luaL_argexpected(_lua, lua_isnumber(_lua, 2), 2, LuaTypeName::number);
     luaL_argexpected(_lua, lua_isnumber(_lua, 3), 3, LuaTypeName::number);
     self->getWheelJoint().setLimits(
-        static_cast<float>(lua_tonumber(_lua, 2)),
-        static_cast<float>(lua_tonumber(_lua, 3)));
+        static_cast<float>(lua_tonumber(_lua, 2)), static_cast<float>(lua_tonumber(_lua, 3))
+    );
     self->getWheelJoint().wakeBodies();
     return 0;
 }
@@ -1311,173 +1310,144 @@ int luaApi_GetMotorTorque(lua_State * _lua)
 } // namespace WheelJointApi
 
 template<typename UserDataT>
-constexpr std::array<luaL_Reg, 9> gc_joint_funcs =
-{
-    {
-        { "__gc", UserDataT::luaGC },
-        { "isValid", luaApi_IsValid },
-        { "getId", luaApi_GetId },
-        { "getBodyA", luaApi_GetBodyA },
-        { "getBodyB", luaApi_GetBodyB },
-        { "getLocalAnchorA", luaApi_GetLocalAnchorA },
-        { "getLocalAnchorB", luaApi_GetLocalAnchorB },
-        { "isCollideConnectedEnabled", luaApi_IsCollideConnectedEnabled },
-        { "enableCollideConnected", luaApi_EnableCollideConnected }
-    }
+constexpr std::array<luaL_Reg, 9> gc_joint_funcs = {
+    {{"__gc", UserDataT::luaGC},
+     {"isValid", luaApi_IsValid},
+     {"getId", luaApi_GetId},
+     {"getBodyA", luaApi_GetBodyA},
+     {"getBodyB", luaApi_GetBodyB},
+     {"getLocalAnchorA", luaApi_GetLocalAnchorA},
+     {"getLocalAnchorB", luaApi_GetLocalAnchorB},
+     {"isCollideConnectedEnabled", luaApi_IsCollideConnectedEnabled},
+     {"enableCollideConnected", luaApi_EnableCollideConnected}}
 };
 
-constexpr std::array<luaL_Reg, 21> gc_distance_joint_funcs =
-{
-    {
-        { "getLength", DistanceJointApi::luaApi_GetLength },
-        { "setLength", DistanceJointApi::luaApi_SetLength },
-        { "isSpringEnabled", DistanceJointApi::luaApi_IsSpringEnabled },
-        { "enableSpring", DistanceJointApi::luaApi_EnableSpring },
-        { "getSpringDampingRatio", DistanceJointApi::luaApi_GetSpringDampingRatio },
-        { "setSpringDampingRatio", DistanceJointApi::luaApi_SetSpringDampingRatio },
-        { "getSpringHertz", DistanceJointApi::luaApi_GetSpringHertz },
-        { "setSpringHertz", DistanceJointApi::luaApi_SetSpringHertz },
-        { "isLimtEnabled", DistanceJointApi::luaApi_IsLimtEnabled },
-        { "enableLimit", DistanceJointApi::luaApi_EnableLimit },
-        { "getMinLength", DistanceJointApi::luaApi_GetMinLength },
-        { "getMaxLength", DistanceJointApi::luaApi_GetMaxLength },
-        { "getCurrentLength", DistanceJointApi::luaApi_GetCurrentLength },
-        { "setLengthRange", DistanceJointApi::luaApi_SetLengthRange },
-        { "isMotorEnabled", DistanceJointApi::luaApi_IsMotorEnabled },
-        { "enableMotor", DistanceJointApi::luaApi_EnableMotor },
-        { "getMotorSpeed", DistanceJointApi::luaApi_GetMotorSpeed },
-        { "setMotorSpeed", DistanceJointApi::luaApi_SetMotorSpeed },
-        { "getMotorForce", DistanceJointApi::luaApi_GetMotorForce },
-        { "getMaxMotorForce", DistanceJointApi::luaApi_GetMaxMotorForce },
-        { "setMaxMotorForce", DistanceJointApi::luaApi_SetMaxMotorForce }
-    }
+constexpr std::array<luaL_Reg, 21> gc_distance_joint_funcs = {
+    {{"getLength", DistanceJointApi::luaApi_GetLength},
+     {"setLength", DistanceJointApi::luaApi_SetLength},
+     {"isSpringEnabled", DistanceJointApi::luaApi_IsSpringEnabled},
+     {"enableSpring", DistanceJointApi::luaApi_EnableSpring},
+     {"getSpringDampingRatio", DistanceJointApi::luaApi_GetSpringDampingRatio},
+     {"setSpringDampingRatio", DistanceJointApi::luaApi_SetSpringDampingRatio},
+     {"getSpringHertz", DistanceJointApi::luaApi_GetSpringHertz},
+     {"setSpringHertz", DistanceJointApi::luaApi_SetSpringHertz},
+     {"isLimtEnabled", DistanceJointApi::luaApi_IsLimtEnabled},
+     {"enableLimit", DistanceJointApi::luaApi_EnableLimit},
+     {"getMinLength", DistanceJointApi::luaApi_GetMinLength},
+     {"getMaxLength", DistanceJointApi::luaApi_GetMaxLength},
+     {"getCurrentLength", DistanceJointApi::luaApi_GetCurrentLength},
+     {"setLengthRange", DistanceJointApi::luaApi_SetLengthRange},
+     {"isMotorEnabled", DistanceJointApi::luaApi_IsMotorEnabled},
+     {"enableMotor", DistanceJointApi::luaApi_EnableMotor},
+     {"getMotorSpeed", DistanceJointApi::luaApi_GetMotorSpeed},
+     {"setMotorSpeed", DistanceJointApi::luaApi_SetMotorSpeed},
+     {"getMotorForce", DistanceJointApi::luaApi_GetMotorForce},
+     {"getMaxMotorForce", DistanceJointApi::luaApi_GetMaxMotorForce},
+     {"setMaxMotorForce", DistanceJointApi::luaApi_SetMaxMotorForce}}
 };
 
-constexpr std::array<luaL_Reg, 10> gc_motor_joint_funcs =
-{
-    {
-        { "getLinearOffset", MotorJointApi::luaApi_GetLinearOffset },
-        { "setLinearOffset", MotorJointApi::luaApi_SetLinearOffset },
-        { "getAngularOffset", MotorJointApi::luaApi_GetAngularOffset },
-        { "setAngularOffset", MotorJointApi::luaApi_SetAngularOffset },
-        { "getMaxForce", MotorJointApi::luaApi_GetMaxForce },
-        { "setMaxForce", MotorJointApi::luaApi_SetMaxForce },
-        { "getMaxTorque", MotorJointApi::luaApi_GetMaxTorque },
-        { "setMaxTorque", MotorJointApi::luaApi_SetMaxTorque },
-        { "getCorrectionFactor", MotorJointApi::luaApi_GetCorrectionFactor },
-        { "setCorrectionFactor", MotorJointApi::luaApi_SetCorrectionFactor }
-    }
+constexpr std::array<luaL_Reg, 10> gc_motor_joint_funcs = {
+    {{"getLinearOffset", MotorJointApi::luaApi_GetLinearOffset},
+     {"setLinearOffset", MotorJointApi::luaApi_SetLinearOffset},
+     {"getAngularOffset", MotorJointApi::luaApi_GetAngularOffset},
+     {"setAngularOffset", MotorJointApi::luaApi_SetAngularOffset},
+     {"getMaxForce", MotorJointApi::luaApi_GetMaxForce},
+     {"setMaxForce", MotorJointApi::luaApi_SetMaxForce},
+     {"getMaxTorque", MotorJointApi::luaApi_GetMaxTorque},
+     {"setMaxTorque", MotorJointApi::luaApi_SetMaxTorque},
+     {"getCorrectionFactor", MotorJointApi::luaApi_GetCorrectionFactor},
+     {"setCorrectionFactor", MotorJointApi::luaApi_SetCorrectionFactor}}
 };
 
-constexpr std::array<luaL_Reg, 8> gc_mouse_joint_funcs =
-{
-    {
-        { "getTarget", MouseJointApi::luaApi_GetTarget },
-        { "setTarget", MouseJointApi::luaApi_SetTarget },
-        { "getSpringHertz", MouseJointApi::luaApi_GetSpringHertz },
-        { "setSpringHertz", MouseJointApi::luaApi_SetSpringHertz },
-        { "getSpringDampingRatio", MouseJointApi::luaApi_GetSpringDampingRatio },
-        { "setSpringDampingRatio", MouseJointApi::luaApi_SetSpringDampingRatio },
-        { "getMaxForce", MouseJointApi::luaApi_GetMaxForce },
-        { "setMaxForce", MouseJointApi::luaApi_SetMaxForce }
-    }
+constexpr std::array<luaL_Reg, 8> gc_mouse_joint_funcs = {
+    {{"getTarget", MouseJointApi::luaApi_GetTarget},
+     {"setTarget", MouseJointApi::luaApi_SetTarget},
+     {"getSpringHertz", MouseJointApi::luaApi_GetSpringHertz},
+     {"setSpringHertz", MouseJointApi::luaApi_SetSpringHertz},
+     {"getSpringDampingRatio", MouseJointApi::luaApi_GetSpringDampingRatio},
+     {"setSpringDampingRatio", MouseJointApi::luaApi_SetSpringDampingRatio},
+     {"getMaxForce", MouseJointApi::luaApi_GetMaxForce},
+     {"setMaxForce", MouseJointApi::luaApi_SetMaxForce}}
 };
 
-constexpr std::array<luaL_Reg, 18> gc_prismatic_joint_funcs =
-{
-    {
-        { "isSpringEnabled", PrismaticJointApi::luaApi_IsSpringEnabled },
-        { "enableSpring", PrismaticJointApi::luaApi_EnableSpring },
-        { "getSpringHertz", PrismaticJointApi::luaApi_GetSpringHertz },
-        { "setSpringHertz", PrismaticJointApi::luaApi_SetSpringHertz },
-        { "getSpringDampingRatio", PrismaticJointApi::luaApi_GetSpringDampingRatio },
-        { "setSpringDampingRatio", PrismaticJointApi::luaApi_SetSpringDampingRatio },
-        { "isLimitEnabled", PrismaticJointApi::luaApi_IsLimitEnabled },
-        { "enableLimit", PrismaticJointApi::luaApi_EnableLimit },
-        { "getLowerLimit", PrismaticJointApi::luaApi_GetLowerLimit },
-        { "getUpperLimit", PrismaticJointApi::luaApi_GetUpperLimit },
-        { "setLimits", PrismaticJointApi::luaApi_SetLimits },
-        { "isMotorEnabled", PrismaticJointApi::luaApi_IsMotorEnabled },
-        { "enableMotor", PrismaticJointApi::luaApi_EnableMotor },
-        { "getMotorSpeed", PrismaticJointApi::luaApi_GetMotorSpeed },
-        { "setMotorSpeed", PrismaticJointApi::luaApi_SetMotorSpeed },
-        { "getMaxMotorForce", PrismaticJointApi::luaApi_GetMaxMotorForce },
-        { "getMotorForce", PrismaticJointApi::luaApi_GetMotorForce },
-        { "setMaxMotorForce", PrismaticJointApi::luaApi_SetMaxMotorForce },
-    }
+constexpr std::array<luaL_Reg, 18> gc_prismatic_joint_funcs = {
+    {{"isSpringEnabled", PrismaticJointApi::luaApi_IsSpringEnabled},
+     {"enableSpring", PrismaticJointApi::luaApi_EnableSpring},
+     {"getSpringHertz", PrismaticJointApi::luaApi_GetSpringHertz},
+     {"setSpringHertz", PrismaticJointApi::luaApi_SetSpringHertz},
+     {"getSpringDampingRatio", PrismaticJointApi::luaApi_GetSpringDampingRatio},
+     {"setSpringDampingRatio", PrismaticJointApi::luaApi_SetSpringDampingRatio},
+     {"isLimitEnabled", PrismaticJointApi::luaApi_IsLimitEnabled},
+     {"enableLimit", PrismaticJointApi::luaApi_EnableLimit},
+     {"getLowerLimit", PrismaticJointApi::luaApi_GetLowerLimit},
+     {"getUpperLimit", PrismaticJointApi::luaApi_GetUpperLimit},
+     {"setLimits", PrismaticJointApi::luaApi_SetLimits},
+     {"isMotorEnabled", PrismaticJointApi::luaApi_IsMotorEnabled},
+     {"enableMotor", PrismaticJointApi::luaApi_EnableMotor},
+     {"getMotorSpeed", PrismaticJointApi::luaApi_GetMotorSpeed},
+     {"setMotorSpeed", PrismaticJointApi::luaApi_SetMotorSpeed},
+     {"getMaxMotorForce", PrismaticJointApi::luaApi_GetMaxMotorForce},
+     {"getMotorForce", PrismaticJointApi::luaApi_GetMotorForce},
+     {"setMaxMotorForce", PrismaticJointApi::luaApi_SetMaxMotorForce}}
 };
 
-constexpr std::array<luaL_Reg, 19> gc_revolute_joint_funcs =
-{
-    {
-        { "isSpringEnabled", RevoluteJointApi::luaApi_IsSpringEnabled },
-        { "enableSpring", RevoluteJointApi::luaApi_EnableSpring },
-        { "getSpringHertz", RevoluteJointApi::luaApi_GetSpringHertz },
-        { "setSpringHertz", RevoluteJointApi::luaApi_SetSpringHertz },
-        { "getSpringDampingRatio", RevoluteJointApi::luaApi_GetSpringDampingRatio },
-        { "setSpringDampingRatio", RevoluteJointApi::luaApi_SetSpringDampingRatio },
-        { "getAngle", RevoluteJointApi::luaApi_GetAngle },
-        { "isLimitEnabled", RevoluteJointApi::luaApi_IsLimitEnabled },
-        { "enableLimit", RevoluteJointApi::luaApi_EnableLimit },
-        { "setLimits", RevoluteJointApi::luaApi_SetLimits },
-        { "getLowerLimit", RevoluteJointApi::luaApi_GetLowerLimit },
-        { "getUpperLimit", RevoluteJointApi::luaApi_GetUpperLimit },
-        { "isMotorEnabled", RevoluteJointApi::luaApi_IsMotorEnabled },
-        { "enableMotor", RevoluteJointApi::luaApi_EnableMotor },
-        { "getMotorSpeed", RevoluteJointApi::luaApi_GetMotorSpeed },
-        { "setMotorSpeed", RevoluteJointApi::luaApi_SetMotorSpeed },
-        { "getMotorTorque", RevoluteJointApi::luaApi_GetMotorTorque },
-        { "getMaxMotorTorque", RevoluteJointApi::luaApi_GetMaxMotorTorque },
-        { "setMaxMotorTorque", RevoluteJointApi::luaApi_SetMaxMotorTorque }
-    }
+constexpr std::array<luaL_Reg, 19> gc_revolute_joint_funcs = {
+    {{"isSpringEnabled", RevoluteJointApi::luaApi_IsSpringEnabled},
+     {"enableSpring", RevoluteJointApi::luaApi_EnableSpring},
+     {"getSpringHertz", RevoluteJointApi::luaApi_GetSpringHertz},
+     {"setSpringHertz", RevoluteJointApi::luaApi_SetSpringHertz},
+     {"getSpringDampingRatio", RevoluteJointApi::luaApi_GetSpringDampingRatio},
+     {"setSpringDampingRatio", RevoluteJointApi::luaApi_SetSpringDampingRatio},
+     {"getAngle", RevoluteJointApi::luaApi_GetAngle},
+     {"isLimitEnabled", RevoluteJointApi::luaApi_IsLimitEnabled},
+     {"enableLimit", RevoluteJointApi::luaApi_EnableLimit},
+     {"setLimits", RevoluteJointApi::luaApi_SetLimits},
+     {"getLowerLimit", RevoluteJointApi::luaApi_GetLowerLimit},
+     {"getUpperLimit", RevoluteJointApi::luaApi_GetUpperLimit},
+     {"isMotorEnabled", RevoluteJointApi::luaApi_IsMotorEnabled},
+     {"enableMotor", RevoluteJointApi::luaApi_EnableMotor},
+     {"getMotorSpeed", RevoluteJointApi::luaApi_GetMotorSpeed},
+     {"setMotorSpeed", RevoluteJointApi::luaApi_SetMotorSpeed},
+     {"getMotorTorque", RevoluteJointApi::luaApi_GetMotorTorque},
+     {"getMaxMotorTorque", RevoluteJointApi::luaApi_GetMaxMotorTorque},
+     {"setMaxMotorTorque", RevoluteJointApi::luaApi_SetMaxMotorTorque}}
 };
 
-constexpr std::array<luaL_Reg, 10> gc_weld_joint_funcs =
-{
-    {
-        { "getReferenceAngle", WeldJointApi::luaApi_GetReferenceAngle },
-        { "setReferenceAngle", WeldJointApi::luaApi_SetReferenceAngle },
-        { "getLinearHertz", WeldJointApi::luaApi_GetLinearHertz },
-        { "setLinearHertz", WeldJointApi::luaApi_SetLinearHertz },
-        { "getLinearDampingRatio", WeldJointApi::luaApi_GetLinearDampingRatio },
-        { "setLinearDampingRatio", WeldJointApi::luaApi_SetLinearDampingRatio },
-        { "getAngularHertz", WeldJointApi::luaApi_GetAngularHertz },
-        { "setAngularHertz", WeldJointApi::luaApi_SetAngularHertz },
-        { "getAngularDampingRatio", WeldJointApi::luaApi_GetAngularDampingRatio },
-        { "setAngularDampingRatio", WeldJointApi::luaApi_SetAngularDampingRatio }
-    }
+constexpr std::array<luaL_Reg, 10> gc_weld_joint_funcs = {
+    {{"getReferenceAngle", WeldJointApi::luaApi_GetReferenceAngle},
+     {"setReferenceAngle", WeldJointApi::luaApi_SetReferenceAngle},
+     {"getLinearHertz", WeldJointApi::luaApi_GetLinearHertz},
+     {"setLinearHertz", WeldJointApi::luaApi_SetLinearHertz},
+     {"getLinearDampingRatio", WeldJointApi::luaApi_GetLinearDampingRatio},
+     {"setLinearDampingRatio", WeldJointApi::luaApi_SetLinearDampingRatio},
+     {"getAngularHertz", WeldJointApi::luaApi_GetAngularHertz},
+     {"setAngularHertz", WeldJointApi::luaApi_SetAngularHertz},
+     {"getAngularDampingRatio", WeldJointApi::luaApi_GetAngularDampingRatio},
+     {"setAngularDampingRatio", WeldJointApi::luaApi_SetAngularDampingRatio}}
 };
 
-constexpr std::array<luaL_Reg, 18> gc_wheel_joint_funcs =
-{
-    {
-        { "isSpringEnabled", WheelJointApi::luaApi_IsSpringEnabled },
-        { "enableSpring", WheelJointApi::luaApi_EnableSpring },
-        { "getSpringHertz", WheelJointApi::luaApi_GetSpringHertz },
-        { "setSpringHertz", WheelJointApi::luaApi_SetSpringHertz },
-        { "getSpringDampingRatio", WheelJointApi::luaApi_GetSpringDampingRatio },
-        { "setSpringDampingRatio", WheelJointApi::luaApi_SetSpringDampingRatio },
-        { "isLimitEnabled", WheelJointApi::luaApi_IsLimitEnabled },
-        { "getLowerLimit", WheelJointApi::luaApi_GetLowerLimit },
-        { "getUpperLimit", WheelJointApi::luaApi_GetUpperLimit },
-        { "setLimits", WheelJointApi::luaApi_SetLimits },
-        { "enableLimit", WheelJointApi::luaApi_EnableLimit },
-        { "isMotorEnabled", WheelJointApi::luaApi_IsMotorEnabled },
-        { "enableMotor", WheelJointApi::luaApi_EnableMotor },
-        { "getMotorSpeed", WheelJointApi::luaApi_GetMotorSpeed },
-        { "setMotorSpeed", WheelJointApi::luaApi_SetMotorSpeed },
-        { "getMaxMotorTorque", WheelJointApi::luaApi_GetMaxMotorTorque },
-        { "setMaxMotorTorque", WheelJointApi::luaApi_SetMaxMotorTorque },
-        { "getMotorTorque", WheelJointApi::luaApi_GetMotorTorque }
-    }
+constexpr std::array<luaL_Reg, 18> gc_wheel_joint_funcs = {
+    {{"isSpringEnabled", WheelJointApi::luaApi_IsSpringEnabled},
+     {"enableSpring", WheelJointApi::luaApi_EnableSpring},
+     {"getSpringHertz", WheelJointApi::luaApi_GetSpringHertz},
+     {"setSpringHertz", WheelJointApi::luaApi_SetSpringHertz},
+     {"getSpringDampingRatio", WheelJointApi::luaApi_GetSpringDampingRatio},
+     {"setSpringDampingRatio", WheelJointApi::luaApi_SetSpringDampingRatio},
+     {"isLimitEnabled", WheelJointApi::luaApi_IsLimitEnabled},
+     {"getLowerLimit", WheelJointApi::luaApi_GetLowerLimit},
+     {"getUpperLimit", WheelJointApi::luaApi_GetUpperLimit},
+     {"setLimits", WheelJointApi::luaApi_SetLimits},
+     {"enableLimit", WheelJointApi::luaApi_EnableLimit},
+     {"isMotorEnabled", WheelJointApi::luaApi_IsMotorEnabled},
+     {"enableMotor", WheelJointApi::luaApi_EnableMotor},
+     {"getMotorSpeed", WheelJointApi::luaApi_GetMotorSpeed},
+     {"setMotorSpeed", WheelJointApi::luaApi_SetMotorSpeed},
+     {"getMaxMotorTorque", WheelJointApi::luaApi_GetMaxMotorTorque},
+     {"setMaxMotorTorque", WheelJointApi::luaApi_SetMaxMotorTorque},
+     {"getMotorTorque", WheelJointApi::luaApi_GetMotorTorque}}
 };
 
-constexpr std::array<luaL_Reg, 1> gc_null_funcs =
-{
-    {
-        { nullptr, nullptr }
-    }
-};
+constexpr std::array<luaL_Reg, 1> gc_null_funcs = {{{nullptr, nullptr}}};
 
 } // namespace
 
@@ -1486,10 +1456,7 @@ void Sol2D::Lua::pushJointApi(lua_State * _lua, std::shared_ptr<Scene> _scene, D
     DistanceJointUserData::pushUserData(_lua, _scene, std::forward<DistanceJoint>(_joint));
     if(DistanceJointUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs =
-            gc_joint_funcs<DistanceJointUserData> +
-            gc_distance_joint_funcs +
-            gc_null_funcs;
+        auto funcs = gc_joint_funcs<DistanceJointUserData> + gc_distance_joint_funcs + gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);
@@ -1500,10 +1467,7 @@ void Sol2D::Lua::pushJointApi(lua_State * _lua, std::shared_ptr<Scene> _scene, M
     MotorJointUserData::pushUserData(_lua, _scene, std::forward<MotorJoint>(_joint));
     if(MotorJointUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs =
-            gc_joint_funcs<MotorJointUserData> +
-            gc_motor_joint_funcs +
-            gc_null_funcs;
+        auto funcs = gc_joint_funcs<MotorJointUserData> + gc_motor_joint_funcs + gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);
@@ -1514,10 +1478,7 @@ void Sol2D::Lua::pushJointApi(lua_State * _lua, std::shared_ptr<Scene> _scene, M
     MouseJointUserData::pushUserData(_lua, _scene, std::forward<MouseJoint>(_joint));
     if(MouseJointUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs =
-            gc_joint_funcs<MouseJointUserData> +
-            gc_mouse_joint_funcs +
-            gc_null_funcs;
+        auto funcs = gc_joint_funcs<MouseJointUserData> + gc_mouse_joint_funcs + gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);
@@ -1528,10 +1489,7 @@ void Sol2D::Lua::pushJointApi(lua_State * _lua, std::shared_ptr<Scene> _scene, P
     PrismaticJointUserData::pushUserData(_lua, _scene, std::forward<PrismaticJoint>(_joint));
     if(PrismaticJointUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs =
-            gc_joint_funcs<PrismaticJointUserData> +
-            gc_prismatic_joint_funcs +
-            gc_null_funcs;
+        auto funcs = gc_joint_funcs<PrismaticJointUserData> + gc_prismatic_joint_funcs + gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);
@@ -1542,10 +1500,7 @@ void pushJointApi(lua_State * _lua, std::shared_ptr<World::Scene> _scene, World:
     RevoluteJointUserData::pushUserData(_lua, _scene, std::forward<RevoluteJoint>(_joint));
     if(RevoluteJointUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs =
-            gc_joint_funcs<RevoluteJointUserData> +
-            gc_revolute_joint_funcs +
-            gc_null_funcs;
+        auto funcs = gc_joint_funcs<RevoluteJointUserData> + gc_revolute_joint_funcs + gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);
@@ -1556,10 +1511,7 @@ void Sol2D::Lua::pushJointApi(lua_State * _lua, std::shared_ptr<Scene> _scene, W
     WeldJointUserData::pushUserData(_lua, _scene, std::forward<WeldJoint>(_joint));
     if(WeldJointUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs =
-            gc_joint_funcs<WeldJointUserData> +
-            gc_weld_joint_funcs +
-            gc_null_funcs;
+        auto funcs = gc_joint_funcs<WeldJointUserData> + gc_weld_joint_funcs + gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);
@@ -1570,10 +1522,7 @@ void Sol2D::Lua::pushJointApi(lua_State * _lua, std::shared_ptr<Scene> _scene, W
     WheelJointUserData::pushUserData(_lua, _scene, std::forward<WheelJoint>(_joint));
     if(WheelJointUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs =
-            gc_joint_funcs<WheelJointUserData> +
-            gc_wheel_joint_funcs +
-            gc_null_funcs;
+        auto funcs = gc_joint_funcs<WheelJointUserData> + gc_wheel_joint_funcs + gc_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);

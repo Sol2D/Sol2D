@@ -87,11 +87,13 @@ void TileMapTileLayer::setTile(int32_t _x, int32_t _y, uint32_t _gid)
         for(uint32_t dx = 1; dx <= spread_right; ++dx)
         {
             uint32_t x = matrix_x + dx;
-            if(x >= m_width) continue;
+            if(x >= m_width)
+                continue;
             for(uint32_t dy = 1; dy <= spread_top; ++dy)
             {
                 int32_t y = matrix_y - dy;
-                if(y < 0) continue;
+                if(y < 0)
+                    continue;
                 TileMapTileLayerCell * slave_cell = getMatrixCell(x, y);
                 if(slave_cell)
                 {

@@ -25,9 +25,9 @@ std::shared_ptr<std::vector<uint8_t>> Sol2D::Utils::zstdDecompress(const std::ve
 
     static const uint32_t buffer_size = 16384;
     std::unique_ptr<uint8_t[]> buffer(new uint8_t[buffer_size]);
-    ZSTD_inBuffer input = { _data.data(), _data.size(), 0 };
+    ZSTD_inBuffer input = {_data.data(), _data.size(), 0};
     std::shared_ptr<std::vector<uint8_t>> output_buffer(new std::vector<uint8_t>);
-    ZSTD_outBuffer output = { buffer.get(), buffer_size, 0 };
+    ZSTD_outBuffer output = {buffer.get(), buffer_size, 0};
 
     do
     {

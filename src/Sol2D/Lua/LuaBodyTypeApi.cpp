@@ -23,7 +23,6 @@
 using namespace Sol2D::World;
 using namespace Sol2D::Lua;
 
-
 void Sol2D::Lua::pushBodyTypeEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);

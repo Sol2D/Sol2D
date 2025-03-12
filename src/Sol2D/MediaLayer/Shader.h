@@ -31,7 +31,7 @@ public:
     {
     }
 
-    void operator ()(SDL_GPUShader * _shader) noexcept
+    void operator() (SDL_GPUShader * _shader) noexcept
     {
         if(_shader)
         {
@@ -71,13 +71,15 @@ public:
         SDL_GPUShaderStage _stage,
         SDL_GPUShaderFormat _format,
         const std::string & _name,
-        const ShaderOptions & _options = {});
+        const ShaderOptions & _options = {}
+    );
 
     ShaderPtr loadFromFile(
         SDL_GPUShaderStage _stage,
         SDL_GPUShaderFormat _format,
         const std::filesystem::path & _path,
-        const ShaderOptions & _options = {});
+        const ShaderOptions & _options = {}
+    );
 
 private:
     SDL_GPUDevice * mp_device;

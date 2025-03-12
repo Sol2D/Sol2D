@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 #pragma once
 
 #include <Sol2D/Utils/SequentialId.h>
@@ -28,7 +27,9 @@ constexpr uint64_t null_companion_id = 0;
 class ObjectCompanion
 {
 public:
-    virtual ~ObjectCompanion() { }
+    virtual ~ObjectCompanion()
+    {
+    }
 };
 
 class Object
@@ -40,7 +41,9 @@ public:
     {
     }
 
-    virtual ~Object() { }
+    virtual ~Object()
+    {
+    }
 
     uint64_t addCompanion(std::unique_ptr<ObjectCompanion> && _companion)
     {
