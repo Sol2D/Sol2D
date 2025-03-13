@@ -33,32 +33,32 @@ using namespace Sol2D::Forms;
 
 namespace {
 
-const uint16_t gc_event_click = 0;
+const uint16_t g_event_click = 0;
 
 class LuaButtonClickObserver : public ButtonClickObserver, public ObjectCompanion
 {
 public:
     LuaButtonClickObserver(lua_State * _lua, const Workspace & _workspace) :
-        mp_lua(_lua),
-        mr_worksapce(_workspace)
+        m_lua(_lua),
+        m_worksapce(_workspace)
     {
     }
 
     ~LuaButtonClickObserver() override
     {
-        LuaCallbackStorage storage(mp_lua);
+        LuaCallbackStorage storage(m_lua);
         storage.destroyCallbacks(this);
     }
 
     void onClick() override
     {
-        LuaCallbackStorage storage(mp_lua);
-        storage.execute(mr_worksapce, this, gc_event_click, 0);
+        LuaCallbackStorage storage(m_lua);
+        storage.execute(m_worksapce, this, g_event_click, 0);
     }
 
 private:
-    lua_State * mp_lua;
-    const Workspace & mr_worksapce;
+    lua_State * m_lua;
+    const Workspace & m_worksapce;
 };
 
 template<typename WidgetT>
@@ -95,7 +95,7 @@ struct ButtonSelf : Self<Button>
 public:
     ButtonSelf(std::shared_ptr<Button> & _button, const Workspace & _workspace) :
         Self<Button>(_button),
-        mr_workspace(_workspace),
+        m_workspace(_workspace),
         m_click_companion_id(null_companion_id)
     {
     }
@@ -104,7 +104,7 @@ public:
     void unsubscribeOnClick(lua_State * _lua, int _subscription_id);
 
 private:
-    const Workspace & mr_workspace;
+    const Workspace & m_workspace;
     uint64_t m_click_companion_id;
 };
 
@@ -115,11 +115,11 @@ uint32_t ButtonSelf::subscribeOnClick(lua_State * _lua, int _callback_idx)
         static_cast<LuaButtonClickObserver *>(button->getCompanion(m_click_companion_id));
     if(observer == nullptr)
     {
-        observer = new LuaButtonClickObserver(_lua, mr_workspace);
+        observer = new LuaButtonClickObserver(_lua, m_workspace);
         m_click_companion_id = button->addCompanion(std::unique_ptr<ObjectCompanion>(observer));
         button->addObserver(*observer);
     }
-    return LuaCallbackStorage(_lua).addCallback(observer, gc_event_click, _callback_idx);
+    return LuaCallbackStorage(_lua).addCallback(observer, g_event_click, _callback_idx);
 }
 
 void ButtonSelf::unsubscribeOnClick(lua_State * _lua, int _subscription_id)
@@ -129,7 +129,7 @@ void ButtonSelf::unsubscribeOnClick(lua_State * _lua, int _subscription_id)
         static_cast<LuaButtonClickObserver *>(button->getCompanion(m_click_companion_id));
     if(observer == nullptr)
         return;
-    if(LuaCallbackStorage(_lua).removeCallback(observer, gc_event_click, _subscription_id) == 0)
+    if(LuaCallbackStorage(_lua).removeCallback(observer, g_event_click, _subscription_id) == 0)
     {
         button->removeObserver(*observer);
         button->removeCompanion(m_click_companion_id);
@@ -346,7 +346,7 @@ int luaApi_ButtonUnsubscribeOnClick(lua_State * _lua)
 }
 
 template<typename UserDataT>
-constexpr std::array<luaL_Reg, 10> gc_widget_funcs = {
+constexpr std::array<luaL_Reg, 10> g_widget_funcs = {
     {{"__gc", UserDataT::luaGC},
      {"setX", luaApi_SetX<UserDataT>},
      {"setY", luaApi_SetY<UserDataT>},
@@ -360,18 +360,18 @@ constexpr std::array<luaL_Reg, 10> gc_widget_funcs = {
 };
 
 template<typename UserDataT>
-constexpr std::array<luaL_Reg, 4> gc_label_funcs = {
+constexpr std::array<luaL_Reg, 4> g_label_funcs = {
     {{"setFont", luaApi_SetFont<UserDataT>},
      {"setText", luaApi_SetText<UserDataT>},
      {"setVerticalTextAlignment", luaApi_SetVerticalTextAlignment<UserDataT>},
      {"setHorizontalTextAlignment", luaApi_SetHorizontalTextAlignment<UserDataT>}}
 };
 
-constexpr std::array<luaL_Reg, 2> gc_button_funcs = {
+constexpr std::array<luaL_Reg, 2> g_button_funcs = {
     {{"subscribeOnClick", luaApi_ButtonSubscribeOnClick}, {"unsubscribeOnClick", luaApi_ButtonUnsubscribeOnClick}}
 };
 
-constexpr std::array<luaL_Reg, 1> gc_null_funcs = {{{nullptr, nullptr}}};
+constexpr std::array<luaL_Reg, 1> g_null_funcs = {{{nullptr, nullptr}}};
 
 } // namespace
 
@@ -393,7 +393,7 @@ void Sol2D::Lua::pushLabelApi(lua_State * _lua, std::shared_ptr<Label> _label)
     LabelUserData::pushUserData(_lua, _label);
     if(LabelUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs = gc_widget_funcs<LabelUserData> + gc_label_funcs<LabelUserData> + gc_null_funcs;
+        auto funcs = g_widget_funcs<LabelUserData> + g_label_funcs<LabelUserData> + g_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);
@@ -404,7 +404,7 @@ void Sol2D::Lua::pushButtonApi(lua_State * _lua, std::shared_ptr<Button> _button
     ButtonUserData::pushUserData(_lua, _button, _workspace);
     if(ButtonUserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        auto funcs = gc_widget_funcs<ButtonUserData> + gc_label_funcs<ButtonUserData> + gc_button_funcs + gc_null_funcs;
+        auto funcs = g_widget_funcs<ButtonUserData> + g_label_funcs<ButtonUserData> + g_button_funcs + g_null_funcs;
         luaL_setfuncs(_lua, funcs.data(), 0);
     }
     lua_setmetatable(_lua, -2);

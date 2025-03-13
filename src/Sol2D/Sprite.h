@@ -52,21 +52,21 @@ public:
     void render(const SDL_FPoint & _point, const Rotation & _rotation, SDL_FlipMode _flip_mode);
 
 private:
-    Renderer * mp_renderer;
+    Renderer * m_renderer;
     Texture m_texture;
     SDL_FRect m_source_rect;
     FSize m_desination_size;
 };
 
 inline Sprite::Sprite(Renderer & _renderer) :
-    mp_renderer(&_renderer),
+    m_renderer(&_renderer),
     m_source_rect(.0f, .0f, .0f, .0f),
     m_desination_size(.0f, .0f)
 {
 }
 
 inline Sprite::Sprite(Renderer & _renderer, const Texture & _texture, const SDL_FRect & _rect) :
-    mp_renderer(&_renderer),
+    m_renderer(&_renderer),
     m_texture(_texture),
     m_source_rect(_rect),
     m_desination_size(_rect.w, _rect.h)

@@ -55,15 +55,15 @@ private:
     void bindBuffers(const RenderingContext & _ctx) const;
 
 private:
-    SDL_GPUDevice * mp_device;
-    const ResourceManager & mr_resource_manager;
-    SDL_GPUGraphicsPipeline * mp_rect_pipeline;
-    SDL_GPUGraphicsPipeline * mp_texture_pipeline;
-    SDL_GPUGraphicsPipeline * mp_circle_pipeline;
-    SDL_GPUGraphicsPipeline * mp_capsule_pipeline;
-    SDL_GPUBuffer * mp_vertex_buffer;
-    SDL_GPUBuffer * mp_index_buffer;
-    SDL_GPUSampler * mp_texture_sampler;
+    SDL_GPUDevice * m_device;
+    const ResourceManager & m_resource_manager;
+    SDL_GPUGraphicsPipeline * m_rect_pipeline;
+    SDL_GPUGraphicsPipeline * m_texture_pipeline;
+    SDL_GPUGraphicsPipeline * m_circle_pipeline;
+    SDL_GPUGraphicsPipeline * m_capsule_pipeline;
+    SDL_GPUBuffer * m_vertex_buffer;
+    SDL_GPUBuffer * m_index_buffer;
+    SDL_GPUSampler * m_texture_sampler;
 };
 
 } // namespace Sol2D

@@ -29,18 +29,18 @@ class SDLPtr
     {
     public:
         TextureDeleter(SDL_GPUDevice * _device) :
-            mp_device(_device)
+            m_device(_device)
         {
         }
 
         void operator() (SDL_GPUTexture * _texture) noexcept
         {
             if(_texture)
-                SDL_ReleaseGPUTexture(mp_device, _texture);
+                SDL_ReleaseGPUTexture(m_device, _texture);
         }
 
     private:
-        SDL_GPUDevice * mp_device;
+        SDL_GPUDevice * m_device;
     };
 
 public:

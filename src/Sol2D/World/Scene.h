@@ -150,8 +150,8 @@ private:
     SDL_FPoint toAbsoluteCoords(float _world_x, float _world_y) const;
 
 private:
-    const Workspace & mr_workspace;
-    Renderer & mr_renderer;
+    const Workspace & m_workspace;
+    Renderer & m_renderer;
     SDL_FPoint m_world_offset;
     b2WorldId m_b2_world_id;
     float m_meters_per_pixel;
@@ -162,7 +162,7 @@ private:
     std::unique_ptr<Tiles::ObjectHeap> m_object_heap_ptr;
     std::unique_ptr<Tiles::TileMap> m_tile_map_ptr;
     ActionAccumulator m_defers;
-    Box2dDebugDraw * mp_box2d_debug_draw;
+    Box2dDebugDraw * m_box2d_debug_draw;
 };
 
 inline float Scene::physicalToGraphical(float _value)

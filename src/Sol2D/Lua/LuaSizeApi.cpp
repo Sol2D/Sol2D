@@ -21,8 +21,8 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-static constexpr char gc_key_w[] = "w";
-static constexpr char gc_key_h[] = "h";
+static constexpr char g_key_w[] = "w";
+static constexpr char g_key_h[] = "h";
 
 } // namespace
 
@@ -33,7 +33,7 @@ bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, FSize & _size)
         return false;
 
     float w, h;
-    if(table.tryGetNumber(gc_key_w, &w) && table.tryGetNumber(gc_key_h, &h))
+    if(table.tryGetNumber(g_key_w, &w) && table.tryGetNumber(g_key_h, &h))
     {
         _size.h = h;
         _size.w = w;
@@ -45,6 +45,6 @@ bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, FSize & _size)
 void Sol2D::Lua::pushSize(lua_State * _lua, float _w, float _h)
 {
     LuaTable table = LuaTable::pushNew(_lua);
-    table.setNumberValue(gc_key_h, _h);
-    table.setNumberValue(gc_key_w, _w);
+    table.setNumberValue(g_key_h, _h);
+    table.setNumberValue(g_key_w, _w);
 }

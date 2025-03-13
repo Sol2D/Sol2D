@@ -132,9 +132,9 @@ void Label::step(const StepState & _state)
 
     SDL_FColor bg_color = background_color[m_state];
     if(bg_color.a != 0)
-        mr_renderer.renderRect(SolidRectRenderingData(control_rect, bg_color));
+        m_renderer.renderRect(SolidRectRenderingData(control_rect, bg_color));
 
-    mr_renderer.renderTexture(TextureRenderingData(dest_rect, m_texture, src_rect));
+    m_renderer.renderTexture(TextureRenderingData(dest_rect, m_texture, src_rect));
     Widget::step(_state);
 }
 
@@ -147,7 +147,7 @@ void Label::createTexture(TTF_Font * _font)
         toR8G8B8A8_UINT(foreground_color[m_state]),
         toR8G8B8A8_UINT(background_color[m_state])
     );
-    m_texture = mr_renderer.createTexture(*surface, "Label Text");
+    m_texture = m_renderer.createTexture(*surface, "Label Text");
     m_texture_width = static_cast<float>(surface->w);
     m_texture_height = static_cast<float>(surface->h);
     SDL_DestroySurface(surface);

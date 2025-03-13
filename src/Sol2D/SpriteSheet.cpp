@@ -19,7 +19,7 @@
 using namespace Sol2D;
 
 SpriteSheet::SpriteSheet(Renderer & _renderer) :
-    mp_renderer(&_renderer)
+    m_renderer(&_renderer)
 {
 }
 
@@ -36,7 +36,7 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
         const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
         SDL_SetSurfaceColorKey(surface, true, SDL_MapRGBA(pixel_format, nullptr, color.r, color.g, color.b, color.a));
     }
-    m_texture = mp_renderer->createTexture(*surface, "Sprite Sheet");
+    m_texture = m_renderer->createTexture(*surface, "Sprite Sheet");
     SDL_DestroySurface(surface);
     SDL_FRect rect = {
         .x = .0f,

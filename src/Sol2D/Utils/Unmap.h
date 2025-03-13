@@ -48,7 +48,7 @@ public:
     using MapType = TraitsType::MapType;
 
     UnmapIterator(MapType & _map, const InnerIterator & _iterator) :
-        mr_map(_map),
+        m_map(_map),
         m_iterator(_iterator)
     {
     }
@@ -61,7 +61,7 @@ public:
 
     iterator operator++ (int)
     {
-        UnmapIterator it(mr_map, m_iterator);
+        UnmapIterator it(m_map, m_iterator);
         ++m_iterator;
         return it;
     }
@@ -87,7 +87,7 @@ public:
     }
 
 private:
-    MapType & mr_map;
+    MapType & m_map;
     InnerIterator m_iterator;
 };
 
@@ -98,20 +98,20 @@ public:
     using Iterator = UnmapIterator<Map, typename Map::iterator>;
 
     Unmap(Map & _map) :
-        mr_map(_map)
+        m_map(_map)
     {
     }
     Iterator begin()
     {
-        return Iterator(mr_map, mr_map.begin());
+        return Iterator(m_map, m_map.begin());
     }
     Iterator end()
     {
-        return Iterator(mr_map, mr_map.end());
+        return Iterator(m_map, m_map.end());
     }
 
 private:
-    Map & mr_map;
+    Map & m_map;
 };
 
 template<typename Map>
@@ -121,7 +121,7 @@ public:
     using Iterator = UnmapIterator<Map, typename Map::const_iterator>;
 
     ConstUnmap(const Map & _map) :
-        mr_map(_map)
+        m_map(_map)
     {
     }
     Iterator begin() const
@@ -134,15 +134,15 @@ public:
     }
     Iterator cbegin() const
     {
-        return Iterator(mr_map, mr_map.cbegin());
+        return Iterator(m_map, m_map.cbegin());
     }
     Iterator cend() const
     {
-        return Iterator(mr_map, mr_map.cend());
+        return Iterator(m_map, m_map.cend());
     }
 
 private:
-    const Map & mr_map;
+    const Map & m_map;
 };
 
 } // namespace Sol2D::Utils

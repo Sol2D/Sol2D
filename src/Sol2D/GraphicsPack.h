@@ -66,7 +66,7 @@ private:
     void performRender(const SDL_FPoint & _position, const Rotation & _rotation);
 
 private:
-    Renderer * mp_renderer;
+    Renderer * m_renderer;
     SDL_FPoint m_position;
     SDL_FlipMode m_flip_mode;
     std::vector<Frame *> m_frames;

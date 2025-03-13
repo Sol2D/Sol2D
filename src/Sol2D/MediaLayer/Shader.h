@@ -27,7 +27,7 @@ class ShaderDeleter
 {
 public:
     explicit ShaderDeleter(SDL_GPUDevice * _device) :
-        mp_device(_device)
+        m_device(_device)
     {
     }
 
@@ -35,12 +35,12 @@ public:
     {
         if(_shader)
         {
-            SDL_ReleaseGPUShader(mp_device, _shader);
+            SDL_ReleaseGPUShader(m_device, _shader);
         }
     }
 
 private:
-    SDL_GPUDevice * mp_device;
+    SDL_GPUDevice * m_device;
 };
 
 using ShaderPtr = std::unique_ptr<SDL_GPUShader, ShaderDeleter>;
@@ -62,8 +62,8 @@ class ShaderLoader
 
 public:
     ShaderLoader(SDL_GPUDevice * _device, const ResourceManager & _resource_manager) :
-        mp_device(_device),
-        mr_resource_manager(_resource_manager)
+        m_device(_device),
+        m_resource_manager(_resource_manager)
     {
     }
 
@@ -82,8 +82,8 @@ public:
     );
 
 private:
-    SDL_GPUDevice * mp_device;
-    const ResourceManager & mr_resource_manager;
+    SDL_GPUDevice * m_device;
+    const ResourceManager & m_resource_manager;
 };
 
 } // namespace Sol2D

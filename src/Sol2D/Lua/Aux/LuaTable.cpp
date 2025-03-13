@@ -36,10 +36,10 @@ bool LuaTable::tryGetBoolean(const char * _key, std::optional<bool> _value) cons
 
 bool LuaTable::tryGetBoolean(const char * _key, bool * _value) const
 {
-    bool result = lua_getfield(mp_lua, m_idx, _key) == LUA_TBOOLEAN;
+    bool result = lua_getfield(m_lua, m_idx, _key) == LUA_TBOOLEAN;
     if(result)
-        *_value = lua_toboolean(mp_lua, -1);
-    lua_pop(mp_lua, 1);
+        *_value = lua_toboolean(m_lua, -1);
+    lua_pop(m_lua, 1);
     return result;
 }
 
@@ -56,10 +56,10 @@ bool LuaTable::tryGetString(const char * _key, std::optional<std::string> & _val
 
 bool LuaTable::tryGetString(const char * _key, std::string & _value) const
 {
-    bool result = lua_getfield(mp_lua, m_idx, _key) == LUA_TSTRING;
+    bool result = lua_getfield(m_lua, m_idx, _key) == LUA_TSTRING;
     if(result)
-        _value = lua_tostring(mp_lua, -1);
-    lua_pop(mp_lua, 1);
+        _value = lua_tostring(m_lua, -1);
+    lua_pop(m_lua, 1);
     return result;
 }
 
@@ -78,8 +78,8 @@ bool LuaTable::tryGetPoint(const char * _key, SDL_FPoint & _value)
 {
     if(!tryGetValue(_key))
         return false;
-    bool result = Lua::tryGetPoint(mp_lua, -1, _value);
-    lua_pop(mp_lua, 1);
+    bool result = Lua::tryGetPoint(m_lua, -1, _value);
+    lua_pop(m_lua, 1);
     return result;
 }
 
@@ -98,8 +98,8 @@ bool LuaTable::tryGetSize(const char * _key, FSize & _value)
 {
     if(!tryGetValue(_key))
         return false;
-    bool result = Lua::tryGetSize(mp_lua, -1, _value);
-    lua_pop(mp_lua, 1);
+    bool result = Lua::tryGetSize(m_lua, -1, _value);
+    lua_pop(m_lua, 1);
     return result;
 }
 
@@ -118,8 +118,8 @@ bool LuaTable::tryGetRect(const char * _key, SDL_FRect & _value)
 {
     if(!tryGetValue(_key))
         return false;
-    bool result = Lua::tryGetRect(mp_lua, -1, _value);
-    lua_pop(mp_lua, 1);
+    bool result = Lua::tryGetRect(m_lua, -1, _value);
+    lua_pop(m_lua, 1);
     return result;
 }
 
@@ -138,16 +138,16 @@ bool LuaTable::tryGetColor(const char * _key, SDL_FColor & _value)
 {
     if(!tryGetValue(_key))
         return false;
-    bool result = Lua::tryGetColor(mp_lua, -1, _value);
-    lua_pop(mp_lua, 1);
+    bool result = Lua::tryGetColor(m_lua, -1, _value);
+    lua_pop(m_lua, 1);
     return result;
 }
 
 bool LuaTable::tryGetValue(const char * _key) const
 {
-    if(lua_getfield(mp_lua, m_idx, _key) == LUA_TNIL)
+    if(lua_getfield(m_lua, m_idx, _key) == LUA_TNIL)
     {
-        lua_pop(mp_lua, 1);
+        lua_pop(m_lua, 1);
         return false;
     }
     return true;
@@ -155,41 +155,41 @@ bool LuaTable::tryGetValue(const char * _key) const
 
 void LuaTable::setValueFromTop(const char * _key)
 {
-    lua_setfield(mp_lua, m_idx, _key);
+    lua_setfield(m_lua, m_idx, _key);
 }
 
 void LuaTable::setIntegerValue(const char * _key, lua_Integer _value)
 {
-    lua_pushinteger(mp_lua, _value);
-    lua_setfield(mp_lua, m_idx, _key);
+    lua_pushinteger(m_lua, _value);
+    lua_setfield(m_lua, m_idx, _key);
 }
 
 void LuaTable::setNumberValue(const char * _key, lua_Number _value)
 {
-    lua_pushnumber(mp_lua, _value);
-    lua_setfield(mp_lua, m_idx, _key);
+    lua_pushnumber(m_lua, _value);
+    lua_setfield(m_lua, m_idx, _key);
 }
 
 void LuaTable::setBooleanValue(const char * _key, bool _value)
 {
-    lua_pushboolean(mp_lua, _value);
-    lua_setfield(mp_lua, m_idx, _key);
+    lua_pushboolean(m_lua, _value);
+    lua_setfield(m_lua, m_idx, _key);
 }
 
 void LuaTable::setStringValue(const char * _key, const char * _value)
 {
-    lua_pushstring(mp_lua, _value);
-    lua_setfield(mp_lua, m_idx, _key);
+    lua_pushstring(m_lua, _value);
+    lua_setfield(m_lua, m_idx, _key);
 }
 
 void LuaTable::setPointValue(const char * _key, const SDL_FPoint & _point)
 {
-    pushPoint(mp_lua, _point.x, _point.y);
-    lua_setfield(mp_lua, m_idx, _key);
+    pushPoint(m_lua, _point.x, _point.y);
+    lua_setfield(m_lua, m_idx, _key);
 }
 
 void LuaTable::setNullValue(const char * _key)
 {
-    lua_pushnil(mp_lua);
-    lua_setfield(mp_lua, m_idx, _key);
+    lua_pushnil(m_lua);
+    lua_setfield(m_lua, m_idx, _key);
 }

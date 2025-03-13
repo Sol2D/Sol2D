@@ -53,7 +53,7 @@ private:
 
 private:
     b2DebugDraw m_b2_debug_draw;
-    Renderer * mp_renderer;
+    Renderer * m_renderer;
     b2WorldId m_world_id;
     std::function<SDL_FPoint(float, float)> m_translate_point;
     std::function<float(float)> m_translate_length;

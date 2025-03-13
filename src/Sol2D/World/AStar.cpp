@@ -65,9 +65,9 @@ private:
     b2WorldId m_world_id;
     b2BodyId m_body_id;
     const b2Vec2 m_start_point;
-    const b2Vec2 & mr_dest_point;
+    const b2Vec2 & m_dest_point;
     const b2Vec2 m_cell_size;
-    const AStarOptions & mr_options;
+    const AStarOptions & m_options;
     std::map<int64_t, Node *> m_known_nodes;
     std::multimap<float, Node *> m_open_nodes;
 };
@@ -78,9 +78,9 @@ AStar::AStar(b2WorldId _world_id, b2BodyId _body_id, const b2Vec2 & _destination
     m_world_id(_world_id),
     m_body_id(_body_id),
     m_start_point(b2Body_GetPosition(m_body_id)),
-    mr_dest_point(_destination),
+    m_dest_point(_destination),
     m_cell_size(calculateCellSize(_body_id)),
-    mr_options(_options)
+    m_options(_options)
 {
     Node * root = new Node {.x = 0, .y = 0, .cost = 0, .index = {.map_key = 0}, .prev = nullptr};
     m_known_nodes.emplace(0, root);
@@ -149,7 +149,7 @@ void AStar::emplaceSuccessors(const Node & _node)
     emplaceNode(_node.index.matrix_index.x - 1, _node.index.matrix_index.y, _node);
     emplaceNode(_node.index.matrix_index.x, _node.index.matrix_index.y + 1, _node);
     emplaceNode(_node.index.matrix_index.x, _node.index.matrix_index.y - 1, _node);
-    if(mr_options.allow_diagonal_steps)
+    if(m_options.allow_diagonal_steps)
     {
         emplaceNode(_node.index.matrix_index.x - 1, _node.index.matrix_index.y - 1, _node);
         emplaceNode(_node.index.matrix_index.x + 1, _node.index.matrix_index.y + 1, _node);
@@ -169,7 +169,7 @@ void AStar::emplaceNode(int32_t _x, int32_t _y, const Node & _parent_node)
         new Node {.x = _x, .y = _y, .cost = _parent_node.cost + s_step_cost, .index = index, .prev = &_parent_node};
     m_known_nodes.emplace(index.map_key, node);
     float full_cost = node->cost +
-        getDistance(mr_dest_point, {m_start_point.x + _x * m_cell_size.x, m_start_point.y + _y * m_cell_size.y});
+        getDistance(m_dest_point, {m_start_point.x + _x * m_cell_size.x, m_start_point.y + _y * m_cell_size.y});
     m_open_nodes.emplace(full_cost, node);
 }
 
@@ -180,8 +180,8 @@ inline float AStar::getDistance(const b2Vec2 & _p1, const b2Vec2 & _p2)
 
 inline bool AStar::isDestination(const b2Vec2 & _point) const
 {
-    return std::abs(_point.x - mr_dest_point.x) <= m_cell_size.x / 2 &&
-        std::abs(_point.y - mr_dest_point.y) <= m_cell_size.y / 2;
+    return std::abs(_point.x - m_dest_point.x) <= m_cell_size.x / 2 &&
+        std::abs(_point.y - m_dest_point.y) <= m_cell_size.y / 2;
 }
 
 bool AStar::isDeadEnd(const b2Vec2 & _point) const
@@ -199,7 +199,7 @@ bool AStar::isDeadEnd(const b2Vec2 & _point) const
             OverlapResult * self = static_cast<OverlapResult *>(__context);
             b2BodyId body_id = b2Shape_GetBody(__shapeId);
             if(B2_ID_EQUALS(body_id, self->astar->m_body_id) ||
-               (b2Shape_IsSensor(__shapeId) && !self->astar->mr_options.avoid_sensors))
+               (b2Shape_IsSensor(__shapeId) && !self->astar->m_options.avoid_sensors))
             {
                 return true;
             }

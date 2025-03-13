@@ -149,28 +149,28 @@ SDL_FRect calculateNormalTextureFragmentRect(const FSize & _full_texture_size, c
 // TODO: check SDL errors
 // FIXME: exceptions in the constructor!
 RectRenderer::RectRenderer(const ResourceManager & _resource_manager, SDL_Window * _window, SDL_GPUDevice * _device) :
-    mp_device(_device),
-    mr_resource_manager(_resource_manager),
-    mp_rect_pipeline(createRectPipeline(_window)),
-    mp_texture_pipeline(createTexturePipeline(_window)),
-    mp_circle_pipeline(createCirclePipeline(_window)),
-    mp_capsule_pipeline(createCapsulePipeline(_window)),
-    mp_vertex_buffer(nullptr),
-    mp_index_buffer(nullptr),
-    mp_texture_sampler(nullptr)
+    m_device(_device),
+    m_resource_manager(_resource_manager),
+    m_rect_pipeline(createRectPipeline(_window)),
+    m_texture_pipeline(createTexturePipeline(_window)),
+    m_circle_pipeline(createCirclePipeline(_window)),
+    m_capsule_pipeline(createCapsulePipeline(_window)),
+    m_vertex_buffer(nullptr),
+    m_index_buffer(nullptr),
+    m_texture_sampler(nullptr)
 {
     {
         SDL_GPUBufferCreateInfo vertex_buffer_create_info = {};
         vertex_buffer_create_info.usage = SDL_GPU_BUFFERUSAGE_VERTEX;
         vertex_buffer_create_info.size = sizeof(RectVertex) * g_vertex_count;
-        mp_vertex_buffer = SDL_CreateGPUBuffer(_device, &vertex_buffer_create_info);
+        m_vertex_buffer = SDL_CreateGPUBuffer(_device, &vertex_buffer_create_info);
     }
 
     {
         SDL_GPUBufferCreateInfo index_buffer_create_info = {};
         index_buffer_create_info.usage = SDL_GPU_BUFFERUSAGE_INDEX;
         index_buffer_create_info.size = sizeof(float) * g_index_count;
-        mp_index_buffer = SDL_CreateGPUBuffer(_device, &index_buffer_create_info);
+        m_index_buffer = SDL_CreateGPUBuffer(_device, &index_buffer_create_info);
     }
 
     SDL_GPUCommandBuffer * upload_cmd_buffer = SDL_AcquireGPUCommandBuffer(_device);
@@ -219,7 +219,7 @@ RectRenderer::RectRenderer(const ResourceManager & _resource_manager, SDL_Window
     {
         SDL_GPUTransferBufferLocation transfer_vertex_buffer_location {.transfer_buffer = transfer_buffer, .offset = 0};
         SDL_GPUBufferRegion transfer_destination {
-            .buffer = mp_vertex_buffer, .offset = 0, .size = sizeof(RectVertex) * g_vertex_count
+            .buffer = m_vertex_buffer, .offset = 0, .size = sizeof(RectVertex) * g_vertex_count
         };
         SDL_UploadToGPUBuffer(copy_pass, &transfer_vertex_buffer_location, &transfer_destination, false);
     }
@@ -229,7 +229,7 @@ RectRenderer::RectRenderer(const ResourceManager & _resource_manager, SDL_Window
             .transfer_buffer = transfer_buffer, .offset = sizeof(RectVertex) * g_vertex_count
         };
         SDL_GPUBufferRegion transfer_index_buffer_destination {
-            .buffer = mp_index_buffer, .offset = 0, .size = sizeof(uint16_t) * g_index_count
+            .buffer = m_index_buffer, .offset = 0, .size = sizeof(uint16_t) * g_index_count
         };
         SDL_UploadToGPUBuffer(copy_pass, &transfer_index_buffer_location, &transfer_index_buffer_destination, false);
     }
@@ -246,31 +246,31 @@ RectRenderer::RectRenderer(const ResourceManager & _resource_manager, SDL_Window
         sampler_create_info.address_mode_u = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
         sampler_create_info.address_mode_v = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
         sampler_create_info.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-        mp_texture_sampler = SDL_CreateGPUSampler(_device, &sampler_create_info);
+        m_texture_sampler = SDL_CreateGPUSampler(_device, &sampler_create_info);
     }
 }
 
 RectRenderer::~RectRenderer()
 {
-    if(mp_rect_pipeline)
-        SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_rect_pipeline);
-    if(mp_texture_pipeline)
-        SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_texture_pipeline);
-    if(mp_circle_pipeline)
-        SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_circle_pipeline);
-    if(mp_capsule_pipeline)
-        SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_capsule_pipeline);
-    if(mp_index_buffer)
-        SDL_ReleaseGPUBuffer(mp_device, mp_index_buffer);
-    if(mp_vertex_buffer)
-        SDL_ReleaseGPUBuffer(mp_device, mp_vertex_buffer);
-    if(mp_texture_sampler)
-        SDL_ReleaseGPUSampler(mp_device, mp_texture_sampler);
+    if(m_rect_pipeline)
+        SDL_ReleaseGPUGraphicsPipeline(m_device, m_rect_pipeline);
+    if(m_texture_pipeline)
+        SDL_ReleaseGPUGraphicsPipeline(m_device, m_texture_pipeline);
+    if(m_circle_pipeline)
+        SDL_ReleaseGPUGraphicsPipeline(m_device, m_circle_pipeline);
+    if(m_capsule_pipeline)
+        SDL_ReleaseGPUGraphicsPipeline(m_device, m_capsule_pipeline);
+    if(m_index_buffer)
+        SDL_ReleaseGPUBuffer(m_device, m_index_buffer);
+    if(m_vertex_buffer)
+        SDL_ReleaseGPUBuffer(m_device, m_vertex_buffer);
+    if(m_texture_sampler)
+        SDL_ReleaseGPUSampler(m_device, m_texture_sampler);
 }
 
 SDL_GPUGraphicsPipeline * RectRenderer::createRectPipeline(SDL_Window * _window) const
 {
-    ShaderLoader loader(mp_device, mr_resource_manager);
+    ShaderLoader loader(m_device, m_resource_manager);
     ShaderPtr vert_shader = loader.loadStandard(
         SDL_GPU_SHADERSTAGE_VERTEX,
         SDL_GPU_SHADERFORMAT_SPIRV,
@@ -288,7 +288,7 @@ SDL_GPUGraphicsPipeline * RectRenderer::createRectPipeline(SDL_Window * _window)
 
 SDL_GPUGraphicsPipeline * RectRenderer::createTexturePipeline(SDL_Window * _window) const
 {
-    ShaderLoader loader(mp_device, mr_resource_manager);
+    ShaderLoader loader(m_device, m_resource_manager);
     ShaderPtr vert_shader = loader.loadStandard(
         SDL_GPU_SHADERSTAGE_VERTEX,
         SDL_GPU_SHADERFORMAT_SPIRV,
@@ -306,7 +306,7 @@ SDL_GPUGraphicsPipeline * RectRenderer::createTexturePipeline(SDL_Window * _wind
 
 SDL_GPUGraphicsPipeline * RectRenderer::createCirclePipeline(SDL_Window * _window) const
 {
-    ShaderLoader loader(mp_device, mr_resource_manager);
+    ShaderLoader loader(m_device, m_resource_manager);
     ShaderPtr vert_shader = loader.loadStandard(
         SDL_GPU_SHADERSTAGE_VERTEX,
         SDL_GPU_SHADERFORMAT_SPIRV,
@@ -324,7 +324,7 @@ SDL_GPUGraphicsPipeline * RectRenderer::createCirclePipeline(SDL_Window * _windo
 
 SDL_GPUGraphicsPipeline * RectRenderer::createCapsulePipeline(SDL_Window * _window) const
 {
-    ShaderLoader loader(mp_device, mr_resource_manager);
+    ShaderLoader loader(m_device, m_resource_manager);
     ShaderPtr vert_shader = loader.loadStandard(
         SDL_GPU_SHADERSTAGE_VERTEX,
         SDL_GPU_SHADERFORMAT_SPIRV,
@@ -362,7 +362,7 @@ SDL_GPUGraphicsPipeline * RectRenderer::createPipeline(
     };
 
     SDL_GPUColorTargetDescription color_target_description = {};
-    color_target_description.format = SDL_GetGPUSwapchainTextureFormat(mp_device, _window);
+    color_target_description.format = SDL_GetGPUSwapchainTextureFormat(m_device, _window);
     color_target_description.blend_state = {}; // TODO: use common blending in all renderings
     color_target_description.blend_state.src_color_blendfactor = SDL_GPU_BLENDFACTOR_SRC_ALPHA;
     color_target_description.blend_state.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
@@ -383,7 +383,7 @@ SDL_GPUGraphicsPipeline * RectRenderer::createPipeline(
     pipeline_create_info.target_info.color_target_descriptions = &color_target_description;
     pipeline_create_info.target_info.num_color_targets = 1;
 
-    SDL_GPUGraphicsPipeline * pipeline = SDL_CreateGPUGraphicsPipeline(mp_device, &pipeline_create_info);
+    SDL_GPUGraphicsPipeline * pipeline = SDL_CreateGPUGraphicsPipeline(m_device, &pipeline_create_info);
     if(!pipeline)
         throw SDLException("Unable to create GPU graphics pipeline.");
     return pipeline;
@@ -415,7 +415,7 @@ void RectRenderer::renderRect(
     const RenderingContext & _ctx, const RectRenderingDataBase & _data, const void * _frag_uniform
 ) const
 {
-    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_rect_pipeline);
+    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, m_rect_pipeline);
     bindBuffers(_ctx);
     RectVertexUniform vert_uniform {.mvp = getModelViewProjection(_ctx.texture_size, _data.rect, _data.rotation)};
     SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(RectVertexUniform));
@@ -426,15 +426,15 @@ void RectRenderer::renderRect(
 void RectRenderer::bindBuffers(const RenderingContext & _ctx) const
 {
     SDL_GPUBufferBinding binding = {};
-    binding.buffer = mp_vertex_buffer;
+    binding.buffer = m_vertex_buffer;
     SDL_BindGPUVertexBuffers(_ctx.render_pass, 0, &binding, 1);
-    binding.buffer = mp_index_buffer;
+    binding.buffer = m_index_buffer;
     SDL_BindGPUIndexBuffer(_ctx.render_pass, &binding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 }
 
 void RectRenderer::renderTexture(const RenderingContext & _ctx, const TextureRenderingData & _data) const
 {
-    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_texture_pipeline);
+    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, m_texture_pipeline);
     bindBuffers(_ctx);
     {
         TextureVertexUniform vert_uniform {
@@ -446,7 +446,7 @@ void RectRenderer::renderTexture(const RenderingContext & _ctx, const TextureRen
         SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(TextureVertexUniform));
     }
     {
-        SDL_GPUTextureSamplerBinding sampler_binding {.texture = _data.texture, .sampler = mp_texture_sampler};
+        SDL_GPUTextureSamplerBinding sampler_binding {.texture = _data.texture, .sampler = m_texture_sampler};
         SDL_BindGPUFragmentSamplers(_ctx.render_pass, 0, &sampler_binding, 1);
     }
     {
@@ -481,7 +481,7 @@ void RectRenderer::renderCircle(
     const RenderingContext & _ctx, const CircleRenderingDataBase & _data, const void * _frag_uniform
 ) const
 {
-    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_circle_pipeline);
+    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, m_circle_pipeline);
     bindBuffers(_ctx);
     CircleVertexUniform vert_uniform {.mvp = getModelViewProjection(_ctx.texture_size, _data)};
     SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &vert_uniform, sizeof(CircleVertexUniform));
@@ -517,7 +517,7 @@ void RectRenderer::renderCapsule(
     const RenderingContext & _ctx, const CapsuleRenderingDataBase & _data, const void * _frag_uniform
 ) const
 {
-    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_capsule_pipeline);
+    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, m_capsule_pipeline);
     bindBuffers(_ctx);
     CapsuleVertexUniform vert_uniform {
         .mvp = getModelViewProjection(_ctx.texture_size, _data.capsule.getRect(), _data.capsule.getRotation())

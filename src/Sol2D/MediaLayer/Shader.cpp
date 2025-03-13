@@ -21,7 +21,7 @@ using namespace Sol2D;
 
 namespace {
 
-const char gc_entry_point[] = "main";
+const char g_entry_point[] = "main";
 
 std::string getFileExt(SDL_GPUShaderFormat _format)
 {
@@ -58,11 +58,11 @@ ShaderPtr ShaderLoader::loadFromFile(
 )
 {
     SDL_GPUShader * shader = nullptr;
-    std::vector<uint8_t> code = mr_resource_manager.loadFileContent(_path);
+    std::vector<uint8_t> code = m_resource_manager.loadFileContent(_path);
     SDL_GPUShaderCreateInfo shader_create_info {
         .code_size = code.size(),
         .code = code.data(),
-        .entrypoint = gc_entry_point,
+        .entrypoint = g_entry_point,
         .format = _format,
         .stage = _stage,
         .num_samplers = _options.num_samplers,
@@ -71,10 +71,10 @@ ShaderPtr ShaderLoader::loadFromFile(
         .num_uniform_buffers = _options.num_uniform_buffers,
         .props = 0
     };
-    shader = SDL_CreateGPUShader(mp_device, &shader_create_info);
+    shader = SDL_CreateGPUShader(m_device, &shader_create_info);
     if(!shader)
     {
         throw SDLException(std::format("Unable to create shader from file \"{}\".", _path.string()));
     }
-    return makeUniquePtr(mp_device, shader);
+    return makeUniquePtr(m_device, shader);
 }

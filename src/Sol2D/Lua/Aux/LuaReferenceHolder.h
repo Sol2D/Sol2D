@@ -25,7 +25,7 @@ class LuaReferenceHolder
 {
 public:
     LuaReferenceHolder(lua_State * _lua) :
-        mp_lua(_lua)
+        m_lua(_lua)
     {
     }
 
@@ -37,7 +37,7 @@ private:
     void getRegistry() const;
 
 private:
-    lua_State * mp_lua;
+    lua_State * m_lua;
 };
 
 } // namespace Sol2D::Lua

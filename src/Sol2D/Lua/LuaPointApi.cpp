@@ -21,8 +21,8 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-static constexpr char gc_key_x[] = "x";
-static constexpr char gc_key_y[] = "y";
+static constexpr char g_key_x[] = "x";
+static constexpr char g_key_y[] = "y";
 
 } // namespace
 
@@ -33,7 +33,7 @@ bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point)
         return false;
 
     float x, y;
-    if(table.tryGetNumber(gc_key_x, &x) && table.tryGetNumber(gc_key_y, &y))
+    if(table.tryGetNumber(g_key_x, &x) && table.tryGetNumber(g_key_y, &y))
     {
         _point.x = x;
         _point.y = y;
@@ -45,6 +45,6 @@ bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point)
 void Sol2D::Lua::pushPoint(lua_State * _lua, float _x, float _y)
 {
     LuaTable table = LuaTable::pushNew(_lua);
-    table.setNumberValue(gc_key_x, _x);
-    table.setNumberValue(gc_key_y, _y);
+    table.setNumberValue(g_key_x, _x);
+    table.setNumberValue(g_key_y, _y);
 }

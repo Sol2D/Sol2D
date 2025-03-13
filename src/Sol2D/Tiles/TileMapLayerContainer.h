@@ -31,8 +31,8 @@ class TileMapLayerContainer
 {
 public:
     TileMapLayerContainer(const TileHeap & _tile_heap, const ObjectHeap & _object_heap) :
-        mr_tile_heap(_tile_heap),
-        mr_object_heap(_object_heap)
+        m_tile_heap(_tile_heap),
+        m_object_heap(_object_heap)
     {
     }
 
@@ -78,8 +78,8 @@ private:
     }
 
 private:
-    const TileHeap & mr_tile_heap;
-    const ObjectHeap & mr_object_heap;
+    const TileHeap & m_tile_heap;
+    const ObjectHeap & m_object_heap;
     std::list<TileMapLayer *> m_layers;
     std::unordered_map<std::string, TileMapLayer *> m_layers_by_names;
 };

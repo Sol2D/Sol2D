@@ -23,7 +23,7 @@ using namespace Sol2D::Utils;
 BodyShape::BodyShape(const std::string & _key, std::optional<uint32_t> _tile_map_object_id) :
     m_key(_key),
     m_tile_map_object_id(_tile_map_object_id),
-    mp_current_graphics(nullptr)
+    m_current_graphics(nullptr)
 {
 }
 
@@ -58,9 +58,9 @@ bool BodyShape::setCurrentGraphics(const PreHashedKey<std::string> & _key)
     GraphicsPack * graphics = getGraphics(_key);
     if(graphics)
     {
-        mp_current_graphics = graphics;
+        m_current_graphics = graphics;
         m_current_graphics_key = _key;
-        mp_current_graphics->switchToFirstVisibleFrame();
+        m_current_graphics->switchToFirstVisibleFrame();
         return true;
     }
     return false;

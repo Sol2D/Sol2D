@@ -25,7 +25,7 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-const char gc_key[] {'\0'};
+const char g_key[] {'\0'};
 
 std::string makeKeyPrefix(const void * _owner)
 {
@@ -44,19 +44,19 @@ std::string makeKey(const void * _owner, const char * _object_type, const char *
 void LuaReferenceHolder::hold(const void * _owner, const char * _object_type, const char * _key) const
 {
     getRegistry();
-    lua_pushvalue(mp_lua, -2);
-    lua_setfield(mp_lua, -2, makeKey(_owner, _object_type, _key).c_str());
-    lua_pop(mp_lua, 1);
+    lua_pushvalue(m_lua, -2);
+    lua_setfield(m_lua, -2, makeKey(_owner, _object_type, _key).c_str());
+    lua_pop(m_lua, 1);
 }
 
 void LuaReferenceHolder::getRegistry() const
 {
-    if(lua_rawgetp(mp_lua, LUA_REGISTRYINDEX, gc_key) != LUA_TTABLE)
+    if(lua_rawgetp(m_lua, LUA_REGISTRYINDEX, g_key) != LUA_TTABLE)
     {
-        lua_pop(mp_lua, 1);
-        lua_newtable(mp_lua);
-        lua_pushvalue(mp_lua, -1);
-        lua_rawsetp(mp_lua, LUA_REGISTRYINDEX, gc_key);
+        lua_pop(m_lua, 1);
+        lua_newtable(m_lua);
+        lua_pushvalue(m_lua, -1);
+        lua_rawsetp(m_lua, LUA_REGISTRYINDEX, g_key);
     }
 }
 
@@ -65,9 +65,9 @@ void LuaReferenceHolder::getRegistry() const
 void LuaReferenceHolder::release(const void * _owner, const char * _object_type, const char * _key) const
 {
     getRegistry();
-    lua_pushnil(mp_lua);
-    lua_setfield(mp_lua, -2, makeKey(_owner, _object_type, _key).c_str());
-    lua_pop(mp_lua, 1);
+    lua_pushnil(m_lua);
+    lua_setfield(m_lua, -2, makeKey(_owner, _object_type, _key).c_str());
+    lua_pop(m_lua, 1);
 }
 
 void LuaReferenceHolder::releaseAll(const void * _owner) const
@@ -75,22 +75,22 @@ void LuaReferenceHolder::releaseAll(const void * _owner) const
     const std::string key_prefix = makeKeyPrefix(_owner);
     std::vector<std::string> keys_to_delete;
     getRegistry();
-    const int registry_idx = lua_gettop(mp_lua);
-    lua_pushnil(mp_lua);
-    for(bool exit = false; !exit && lua_next(mp_lua, registry_idx);)
+    const int registry_idx = lua_gettop(m_lua);
+    lua_pushnil(m_lua);
+    for(bool exit = false; !exit && lua_next(m_lua, registry_idx);)
     {
-        const char * key = argToString(mp_lua, -2);
+        const char * key = argToString(m_lua, -2);
         if(key && std::strncmp(key_prefix.c_str(), key, key_prefix.size()) == 0)
             keys_to_delete.push_back(key);
-        lua_pop(mp_lua, 1); // value
+        lua_pop(m_lua, 1); // value
     }
-    lua_pop(mp_lua, 1); // index
+    lua_pop(m_lua, 1); // index
 
     for(const std::string & key : keys_to_delete)
     {
-        lua_pushnil(mp_lua);
-        lua_setfield(mp_lua, -2, key.c_str());
+        lua_pushnil(m_lua);
+        lua_setfield(m_lua, -2, key.c_str());
     }
 
-    lua_pop(mp_lua, 1); // registry
+    lua_pop(m_lua, 1); // registry
 }

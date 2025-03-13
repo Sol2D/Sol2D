@@ -31,7 +31,7 @@ TileMapTileLayer::TileMapTileLayer(
     uint32_t _height
 ) :
     TileMapLayer(_parent, _id, _name, TileMapLayerType::Tile),
-    mr_tile_heap(_tile_heap),
+    m_tile_heap(_tile_heap),
     m_tile_width(_tile_width),
     m_tile_height(_tile_height),
     m_x(_x),
@@ -39,7 +39,7 @@ TileMapTileLayer::TileMapTileLayer(
     m_width(_width),
     m_height(_height)
 {
-    mp_cells = static_cast<TileMapTileLayerCell *>(malloc(m_width * m_height * sizeof(TileMapTileLayerCell)));
+    m_cells = static_cast<TileMapTileLayerCell *>(malloc(m_width * m_height * sizeof(TileMapTileLayerCell)));
     for(size_t x = 0; x < m_width; ++x)
     {
         for(size_t y = 0; y < m_height; ++y)
@@ -51,14 +51,14 @@ TileMapTileLayer::TileMapTileLayer(
 
 TileMapTileLayer::~TileMapTileLayer()
 {
-    free(mp_cells);
+    free(m_cells);
 }
 
 void TileMapTileLayer::setTile(int32_t _x, int32_t _y, uint32_t _gid)
 {
     const uint32_t matrix_x = toMatrixX(_x);
     const uint32_t matrix_y = toMatrixY(_y);
-    const Tile * tile = mr_tile_heap.getTile(_gid);
+    const Tile * tile = m_tile_heap.getTile(_gid);
     TileMapTileLayerCell * cell = getMatrixCell(matrix_x, matrix_y);
     if(!tile || !cell)
         return;

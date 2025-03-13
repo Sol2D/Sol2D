@@ -22,11 +22,11 @@
 using namespace Sol2D;
 
 LineRenderer::LineRenderer(const ResourceManager & _resource_manager, SDL_Window * _window, SDL_GPUDevice * _device) :
-    mp_device(_device),
-    mp_pipeline(nullptr),
-    mp_vertex_buffer(nullptr)
+    m_device(_device),
+    m_pipeline(nullptr),
+    m_vertex_buffer(nullptr)
 {
-    ShaderLoader loader(mp_device, _resource_manager);
+    ShaderLoader loader(m_device, _resource_manager);
     ShaderPtr vert_shader = loader.loadStandard(
         SDL_GPU_SHADERSTAGE_VERTEX,
         SDL_GPU_SHADERFORMAT_SPIRV,
@@ -41,7 +41,7 @@ LineRenderer::LineRenderer(const ResourceManager & _resource_manager, SDL_Window
     );
 
     SDL_GPUColorTargetDescription color_target_description = {};
-    color_target_description.format = SDL_GetGPUSwapchainTextureFormat(mp_device, _window);
+    color_target_description.format = SDL_GetGPUSwapchainTextureFormat(m_device, _window);
     color_target_description.blend_state = {}; // TODO: use common blending in all renderings
     color_target_description.blend_state.src_color_blendfactor = SDL_GPU_BLENDFACTOR_SRC_ALPHA;
     color_target_description.blend_state.dst_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
@@ -72,17 +72,17 @@ LineRenderer::LineRenderer(const ResourceManager & _resource_manager, SDL_Window
     pipeline_create_info.target_info.color_target_descriptions = &color_target_description;
     pipeline_create_info.target_info.num_color_targets = 1;
 
-    mp_pipeline = SDL_CreateGPUGraphicsPipeline(mp_device, &pipeline_create_info);
-    if(!mp_pipeline)
+    m_pipeline = SDL_CreateGPUGraphicsPipeline(m_device, &pipeline_create_info);
+    if(!m_pipeline)
         throw SDLException("Unable to create GPU graphics pipeline.");
 }
 
 LineRenderer::~LineRenderer()
 {
-    if(mp_vertex_buffer)
-        SDL_ReleaseGPUBuffer(mp_device, mp_vertex_buffer);
-    if(mp_pipeline)
-        SDL_ReleaseGPUGraphicsPipeline(mp_device, mp_pipeline);
+    if(m_vertex_buffer)
+        SDL_ReleaseGPUBuffer(m_device, m_vertex_buffer);
+    if(m_pipeline)
+        SDL_ReleaseGPUGraphicsPipeline(m_device, m_pipeline);
 }
 
 void LineRenderer::reserveSpace(size_t _n)
@@ -95,7 +95,7 @@ void LineRenderer::reserveSpace(size_t _n)
 
 void LineRenderer::beginRendering()
 {
-    if(mp_vertex_buffer)
+    if(m_vertex_buffer)
         throw InvalidOperationException("There is already an active rendering");
 
     if(m_vertices.empty())
@@ -104,9 +104,9 @@ void LineRenderer::beginRendering()
     SDL_GPUBufferCreateInfo vertex_buffer_create_info = {};
     vertex_buffer_create_info.usage = SDL_GPU_BUFFERUSAGE_VERTEX;
     vertex_buffer_create_info.size = sizeof(SDL_FPoint) * m_vertices.size();
-    mp_vertex_buffer = SDL_CreateGPUBuffer(mp_device, &vertex_buffer_create_info);
+    m_vertex_buffer = SDL_CreateGPUBuffer(m_device, &vertex_buffer_create_info);
 
-    SDL_GPUCommandBuffer * upload_cmd_buffer = SDL_AcquireGPUCommandBuffer(mp_device);
+    SDL_GPUCommandBuffer * upload_cmd_buffer = SDL_AcquireGPUCommandBuffer(m_device);
     SDL_GPUCopyPass * copy_pass;
     SDL_GPUTransferBuffer * transfer_buffer;
 
@@ -117,35 +117,35 @@ void LineRenderer::beginRendering()
         SDL_GPUTransferBufferCreateInfo transfer_buffer_create_info = {};
         transfer_buffer_create_info.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
         transfer_buffer_create_info.size = vertex_buffer_create_info.size;
-        transfer_buffer = SDL_CreateGPUTransferBuffer(mp_device, &transfer_buffer_create_info);
+        transfer_buffer = SDL_CreateGPUTransferBuffer(m_device, &transfer_buffer_create_info);
         if(!transfer_buffer)
             throw SDLException("Unable to create a transfer buffer for line rendering.");
-        void * data = SDL_MapGPUTransferBuffer(mp_device, transfer_buffer, false);
+        void * data = SDL_MapGPUTransferBuffer(m_device, transfer_buffer, false);
         if(!data)
             throw SDLException("Unable to map a vertex buffer for line rendering.");
         memcpy(data, m_vertices.data(), vertex_buffer_create_info.size);
-        SDL_UnmapGPUTransferBuffer(mp_device, transfer_buffer);
+        SDL_UnmapGPUTransferBuffer(m_device, transfer_buffer);
     }
 
     {
         SDL_GPUTransferBufferLocation transfer_buffer_location {.transfer_buffer = transfer_buffer, .offset = 0};
         SDL_GPUBufferRegion transfer_destination {
-            .buffer = mp_vertex_buffer, .offset = 0, .size = vertex_buffer_create_info.size
+            .buffer = m_vertex_buffer, .offset = 0, .size = vertex_buffer_create_info.size
         };
         SDL_UploadToGPUBuffer(copy_pass, &transfer_buffer_location, &transfer_destination, false);
     }
 
     SDL_EndGPUCopyPass(copy_pass);
     SDL_SubmitGPUCommandBuffer(upload_cmd_buffer);
-    SDL_ReleaseGPUTransferBuffer(mp_device, transfer_buffer);
+    SDL_ReleaseGPUTransferBuffer(m_device, transfer_buffer);
 }
 
 void LineRenderer::endRendering()
 {
-    if(mp_vertex_buffer)
+    if(m_vertex_buffer)
     {
-        SDL_ReleaseGPUBuffer(mp_device, mp_vertex_buffer);
-        mp_vertex_buffer = nullptr;
+        SDL_ReleaseGPUBuffer(m_device, m_vertex_buffer);
+        m_vertex_buffer = nullptr;
     }
     m_vertices.clear();
 }
@@ -203,13 +203,13 @@ LineRenderer::ChunkID LineRenderer::enqueuePolyline(const std::vector<SDL_FPoint
 
 void LineRenderer::render(const RenderingContext & _ctx, ChunkID _id, const SDL_FColor & _color) const
 {
-    if(!mp_vertex_buffer)
+    if(!m_vertex_buffer)
         throw InvalidOperationException("There is no active rendering");
 
-    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, mp_pipeline);
+    SDL_BindGPUGraphicsPipeline(_ctx.render_pass, m_pipeline);
     SDL_PushGPUVertexUniformData(_ctx.command_buffer, 0, &_ctx.texture_size, sizeof(FSize));
     SDL_PushGPUFragmentUniformData(_ctx.command_buffer, 0, &_color, sizeof(SDL_FColor));
-    SDL_GPUBufferBinding binding {.buffer = mp_vertex_buffer, .offset = 0};
+    SDL_GPUBufferBinding binding {.buffer = m_vertex_buffer, .offset = 0};
     SDL_BindGPUVertexBuffers(_ctx.render_pass, 0, &binding, 1);
     SDL_DrawGPUPrimitives(_ctx.render_pass, _id.cnt, 1, _id.idx, 0);
 }

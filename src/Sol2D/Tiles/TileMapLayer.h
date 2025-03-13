@@ -34,7 +34,7 @@ class TileMapLayer
 
 public:
     TileMapLayer(const TileMapLayer * _parent, const uint32_t _id, const std::string & _name, TileMapLayerType _type) :
-        mp_parent(_parent),
+        m_parent(_parent),
         m_id(_id),
         m_name(_name),
         m_type(_type),
@@ -53,7 +53,7 @@ public:
 
     const TileMapLayer * getParent() const
     {
-        return mp_parent;
+        return m_parent;
     }
 
     uint32_t getId() const
@@ -156,7 +156,7 @@ public:
     }
 
 private:
-    const TileMapLayer * mp_parent;
+    const TileMapLayer * m_parent;
     uint32_t m_id;
     const std::string m_name;
     TileMapLayerType m_type;

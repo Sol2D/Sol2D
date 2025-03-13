@@ -45,7 +45,7 @@ private:
     void eraseOrderedOutlet(Outlet * _outlet);
 
 private:
-    Renderer & mr_renderer;
+    Renderer & m_renderer;
     std::unordered_map<uint16_t, std::unique_ptr<Outlet>> m_outlets;
     uint16_t m_next_fragment_id;
     std::list<Outlet *> m_ordered_outlets;
@@ -53,7 +53,7 @@ private:
 };
 
 inline View::View(Renderer & _renderer) :
-    mr_renderer(_renderer),
+    m_renderer(_renderer),
     m_next_fragment_id(1)
 {
 }

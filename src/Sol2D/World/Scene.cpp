@@ -50,7 +50,7 @@ void initShapePhysics(b2ShapeDef & _b2_shape_def, const BodyShapePhysicsDefiniti
         _b2_shape_def.friction = _physics.friction.value();
 }
 
-constexpr SDL_FColor gc_object_debug_color = {.r = 1.0f, .g = .08f, .b = .0f, .a = 1.0f}; // TODO: from config
+constexpr SDL_FColor g_object_debug_color = {.r = 1.0f, .g = .08f, .b = .0f, .a = 1.0f}; // TODO: from config
 
 } // namespace
 
@@ -70,19 +70,19 @@ private:
     BodyShape & createShape(const BodyBasicShapeDefinition<shape_type> & _def) const;
 
 private:
-    Scene & mr_scene;
-    Body & mr_body;
-    const b2BodyId & mr_b2_body_id;
-    const std::string & mr_key;
+    Scene & m_scene;
+    Body & m_body;
+    const b2BodyId & m_b2_body_id;
+    const std::string & m_key;
 };
 
 Scene::BodyShapeCreator::BodyShapeCreator(
     Scene & _scene, Body & _body, const b2BodyId & _b2_body_id, const std::string & _key
 ) :
-    mr_scene(_scene),
-    mr_body(_body),
-    mr_b2_body_id(_b2_body_id),
-    mr_key(_key)
+    m_scene(_scene),
+    m_body(_body),
+    m_b2_body_id(_b2_body_id),
+    m_key(_key)
 {
 }
 
@@ -93,13 +93,13 @@ void Scene::BodyShapeCreator::operator() (const BodyPolygonDefinition & _capsule
     std::vector<b2Vec2> shape_points(_capsule.points.size());
     for(size_t i = 0; i < _capsule.points.size(); ++i)
     {
-        shape_points[i].x = mr_scene.graphicalToPhysical(_capsule.points[i].x);
-        shape_points[i].y = mr_scene.graphicalToPhysical(_capsule.points[i].y);
+        shape_points[i].x = m_scene.graphicalToPhysical(_capsule.points[i].x);
+        shape_points[i].y = m_scene.graphicalToPhysical(_capsule.points[i].y);
     }
     b2Hull b2_hull = b2ComputeHull(shape_points.data(), shape_points.size());
     b2Polygon b2_polygon = b2MakePolygon(&b2_hull, .0f);
     b2ShapeDef b2_shape_def = createBox2dShapeDef(_capsule);
-    b2ShapeId b2_shape_id = b2CreatePolygonShape(mr_b2_body_id, &b2_shape_def, &b2_polygon);
+    b2ShapeId b2_shape_id = b2CreatePolygonShape(m_b2_body_id, &b2_shape_def, &b2_polygon);
     BodyShape & body_shape = createShape(_capsule);
     b2Shape_SetUserData(b2_shape_id, &body_shape);
 }
@@ -115,27 +115,27 @@ inline b2ShapeDef Scene::BodyShapeCreator::createBox2dShapeDef(const BodyBasicSh
 template<BodyShapeType shape_type>
 BodyShape & Scene::BodyShapeCreator::createShape(const BodyBasicShapeDefinition<shape_type> & _def) const
 {
-    BodyShape & body_shape = mr_body.createShape(mr_key);
+    BodyShape & body_shape = m_body.createShape(m_key);
     for(const auto & graphics_kv : _def.graphics)
     {
-        body_shape.addGraphics(mr_scene.mr_renderer, makePreHashedKey(graphics_kv.first), graphics_kv.second);
+        body_shape.addGraphics(m_scene.m_renderer, makePreHashedKey(graphics_kv.first), graphics_kv.second);
     }
     return body_shape;
 }
 
 void Scene::BodyShapeCreator::operator() (const BodyRectDefinition & _rect)
 {
-    const float half_w = mr_scene.graphicalToPhysical(_rect.w) / 2.0f;
-    const float half_h = mr_scene.graphicalToPhysical(_rect.h) / 2.0f;
+    const float half_w = m_scene.graphicalToPhysical(_rect.w) / 2.0f;
+    const float half_h = m_scene.graphicalToPhysical(_rect.h) / 2.0f;
     b2Polygon b2_polygon = b2MakeOffsetBox(
         half_w,
         half_h,
-        {.x = (_rect.x ? mr_scene.graphicalToPhysical(_rect.x) : .0f) + half_w,
-         .y = (_rect.y ? mr_scene.graphicalToPhysical(_rect.y) : .0f) + half_h},
+        {.x = (_rect.x ? m_scene.graphicalToPhysical(_rect.x) : .0f) + half_w,
+         .y = (_rect.y ? m_scene.graphicalToPhysical(_rect.y) : .0f) + half_h},
         b2Rot_identity
     );
     b2ShapeDef b2_shape_def = createBox2dShapeDef(_rect);
-    b2ShapeId b2_shape_id = b2CreatePolygonShape(mr_b2_body_id, &b2_shape_def, &b2_polygon);
+    b2ShapeId b2_shape_id = b2CreatePolygonShape(m_b2_body_id, &b2_shape_def, &b2_polygon);
     BodyShape & body_shape = createShape(_rect);
     b2Shape_SetUserData(b2_shape_id, &body_shape);
 }
@@ -144,13 +144,13 @@ void Scene::BodyShapeCreator::operator() (const BodyCircleDefinition & _circle)
 {
     b2Circle b2_circle {
         .center =
-            {.x = mr_scene.graphicalToPhysical(_circle.center.x), .y = mr_scene.graphicalToPhysical(_circle.center.y)},
-        .radius = mr_scene.graphicalToPhysical(_circle.radius)
+            {.x = m_scene.graphicalToPhysical(_circle.center.x), .y = m_scene.graphicalToPhysical(_circle.center.y)},
+        .radius = m_scene.graphicalToPhysical(_circle.radius)
     };
     if(b2_circle.radius <= .0f)
         return; // TODO: log
     b2ShapeDef b2_shape_def = createBox2dShapeDef(_circle);
-    b2ShapeId b2_shape_id = b2CreateCircleShape(mr_b2_body_id, &b2_shape_def, &b2_circle);
+    b2ShapeId b2_shape_id = b2CreateCircleShape(m_b2_body_id, &b2_shape_def, &b2_circle);
     BodyShape & body_shape = createShape(_circle);
     b2Shape_SetUserData(b2_shape_id, &body_shape);
 }
@@ -160,31 +160,31 @@ void Scene::BodyShapeCreator::operator() (const BodyCapsuleShapeDefinition & _ca
     b2Capsule b2_capsule {
         .center1 =
             b2Vec2 {
-                    .x = mr_scene.graphicalToPhysical(_capsule.center1.x),
-                    .y = mr_scene.graphicalToPhysical(_capsule.center1.y)
+                    .x = m_scene.graphicalToPhysical(_capsule.center1.x),
+                    .y = m_scene.graphicalToPhysical(_capsule.center1.y)
             },
         .center2 =
             b2Vec2 {
-                    .x = mr_scene.graphicalToPhysical(_capsule.center2.x),
-                    .y = mr_scene.graphicalToPhysical(_capsule.center2.y)
+                    .x = m_scene.graphicalToPhysical(_capsule.center2.x),
+                    .y = m_scene.graphicalToPhysical(_capsule.center2.y)
             },
-        .radius = mr_scene.graphicalToPhysical(_capsule.radius)
+        .radius = m_scene.graphicalToPhysical(_capsule.radius)
     };
     if(b2_capsule.radius <= .0f)
         return; // TODO: log
     b2ShapeDef b2_shape_def = createBox2dShapeDef(_capsule);
-    b2ShapeId b2_shape_id = b2CreateCapsuleShape(mr_b2_body_id, &b2_shape_def, &b2_capsule);
+    b2ShapeId b2_shape_id = b2CreateCapsuleShape(m_b2_body_id, &b2_shape_def, &b2_capsule);
     BodyShape & body_shape = createShape(_capsule);
     b2Shape_SetUserData(b2_shape_id, &body_shape);
 }
 
 Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, Renderer & _renderer) :
-    mr_workspace(_workspace),
-    mr_renderer(_renderer),
+    m_workspace(_workspace),
+    m_renderer(_renderer),
     m_world_offset {.0f, .0f},
     m_meters_per_pixel(_options.meters_per_pixel),
     m_followed_body_id(b2_nullBodyId),
-    mp_box2d_debug_draw(nullptr)
+    m_box2d_debug_draw(nullptr)
 {
     if(m_meters_per_pixel <= .0f)
         m_meters_per_pixel = SceneOptions::default_meters_per_pixel;
@@ -194,8 +194,8 @@ Scene::Scene(const SceneOptions & _options, const Workspace & _workspace, Render
     b2World_SetPreSolveCallback(m_b2_world_id, &Scene::box2dPreSolveContact, this);
     if(_workspace.isDebugRenderingEnabled())
     {
-        mp_box2d_debug_draw = new Box2dDebugDraw(
-            mr_renderer,
+        m_box2d_debug_draw = new Box2dDebugDraw(
+            m_renderer,
             m_b2_world_id,
             [this](float __x, float __y) {
                 return toAbsoluteCoords(physicalToGraphical(__x), physicalToGraphical(__y));
@@ -209,7 +209,7 @@ Scene::~Scene()
 {
     deinitializeTileMap();
     b2DestroyWorld(m_b2_world_id);
-    delete mp_box2d_debug_draw;
+    delete m_box2d_debug_draw;
 }
 
 void Scene::deinitializeTileMap()
@@ -747,7 +747,7 @@ bool Scene::loadTileMap(const std::filesystem::path & _file_path)
     m_tile_heap_ptr.reset();
     m_tile_map_ptr.reset();
     m_object_heap_ptr.reset();
-    Tmx tmx = loadTmx(mr_renderer, mr_workspace, _file_path); // TODO: handle exceptions
+    Tmx tmx = loadTmx(m_renderer, m_workspace, _file_path); // TODO: handle exceptions
     m_tile_heap_ptr = std::move(tmx.tile_heap);
     m_tile_map_ptr = std::move(tmx.tile_map);
     m_object_heap_ptr = std::move(tmx.object_heap);
@@ -775,8 +775,8 @@ void Scene::step(const StepState & _state)
     for(const uint64_t body_id : bodies_to_render)
         drawBody(m_bodies[body_id], _state.delta_time);
 
-    if(mp_box2d_debug_draw)
-        mp_box2d_debug_draw->draw();
+    if(m_box2d_debug_draw)
+        m_box2d_debug_draw->draw();
 
     Observable<StepObserver>::callObservers(&StepObserver::onStepComplete, _state);
 }
@@ -861,7 +861,7 @@ void Scene::syncWorldWithFollowedBody()
     {
         return;
     }
-    const FSize output_size = mr_renderer.getOutputSize();
+    const FSize output_size = m_renderer.getOutputSize();
     b2Vec2 followed_body_position = b2Body_GetPosition(m_followed_body_id);
     m_world_offset.x = physicalToGraphical(followed_body_position.x) - output_size.w / 2;
     m_world_offset.y = physicalToGraphical(followed_body_position.y) - output_size.h / 2;
@@ -928,7 +928,7 @@ void Scene::drawLayersAndBodies(
             drawTileLayer(dynamic_cast<const TileMapTileLayer &>(__layer));
             break;
         case TileMapLayerType::Object:
-            if(mr_workspace.isDebugRenderingEnabled())
+            if(m_workspace.isDebugRenderingEnabled())
                 drawObjectLayer(dynamic_cast<const TileMapObjectLayer &>(__layer)); // TODO: _viewport
             break;
         case TileMapLayerType::Image:
@@ -990,13 +990,13 @@ void Scene::drawPolyXObject(const TileMapPolyX & _poly, bool _close)
         points[i].x = base_point.x + poly_points[i].x;
         points[i].y = base_point.y + poly_points[i].y;
     }
-    mr_renderer.renderPolyline(points, gc_object_debug_color, _close);
+    m_renderer.renderPolyline(points, g_object_debug_color, _close);
 }
 
 void Scene::drawCircle(const TileMapCircle & _circle)
 {
-    mr_renderer.renderCircle(CircleRenderingData(
-        toAbsoluteCoords(_circle.getPosition().x, _circle.getPosition().y), _circle.getRadius(), gc_object_debug_color
+    m_renderer.renderCircle(CircleRenderingData(
+        toAbsoluteCoords(_circle.getPosition().x, _circle.getPosition().y), _circle.getRadius(), g_object_debug_color
     ));
 }
 
@@ -1053,7 +1053,7 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
             else if(tile_rect.h > tile_map_cell_size.h)
                 dest_rect.y -= tile_rect.h - tile_map_cell_size.h;
 
-            mr_renderer.renderTexture(TextureRenderingData(dest_rect, cell->tile->getSource(), tile_rect));
+            m_renderer.renderTexture(TextureRenderingData(dest_rect, cell->tile->getSource(), tile_rect));
         }
     }
 
@@ -1077,7 +1077,7 @@ void Scene::drawTileLayer(const TileMapTileLayer & _layer)
         if(tile_rect.h > tile_map_cell_size.h)
             dest_rect.y -= tile_rect.h - tile_map_cell_size.h;
 
-        mr_renderer.renderTexture(TextureRenderingData(dest_rect, cell->tile->getSource(), tile_rect));
+        m_renderer.renderTexture(TextureRenderingData(dest_rect, cell->tile->getSource(), tile_rect));
     }
 }
 
@@ -1095,7 +1095,7 @@ SDL_FRect Scene::calculateViewport(const TileMapTileLayer & _layer) const
     }
     viewport.x = m_world_offset.x * layer_parallax.x - layer_offset.x;
     viewport.y = m_world_offset.y * layer_parallax.y - layer_offset.y;
-    const FSize & output_size = mr_renderer.getOutputSize();
+    const FSize & output_size = m_renderer.getOutputSize();
     viewport.w = output_size.w;
     viewport.h = output_size.h;
     return viewport;
@@ -1107,7 +1107,7 @@ void Scene::drawImageLayer(const TileMapImageLayer & _layer)
 
     const Texture & image = _layer.getImage();
     SDL_FRect dim {.0f, .0f, image.getWidth(), image.getHeight()};
-    mr_renderer.renderTexture(TextureRenderingData(dim, image, std::nullopt));
+    m_renderer.renderTexture(TextureRenderingData(dim, image, std::nullopt));
 }
 
 bool Scene::doesBodyExist(uint64_t _body_id) const

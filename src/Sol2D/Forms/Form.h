@@ -32,7 +32,7 @@ public:
     std::shared_ptr<Button> createButton(const std::string & _text);
 
 private:
-    Renderer & mr_renderer;
+    Renderer & m_renderer;
     std::vector<std::shared_ptr<Widget>> m_widgets;
 };
 

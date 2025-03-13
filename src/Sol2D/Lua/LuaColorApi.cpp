@@ -22,10 +22,10 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-static constexpr char gc_key_r[] = "r";
-static constexpr char gc_key_g[] = "g";
-static constexpr char gc_key_b[] = "b";
-static constexpr char gc_key_a[] = "a";
+static constexpr char g_key_r[] = "r";
+static constexpr char g_key_g[] = "g";
+static constexpr char g_key_b[] = "b";
+static constexpr char g_key_a[] = "a";
 
 } // namespace
 
@@ -35,9 +35,9 @@ bool Sol2D::Lua::tryGetColor(lua_State * _lua, int _idx, SDL_FColor & _color)
     if(!table.isValid())
         return false;
     float r, g, b;
-    if(table.tryGetNumber(gc_key_r, &r) && table.tryGetNumber(gc_key_g, &g) && table.tryGetNumber(gc_key_b, &b))
+    if(table.tryGetNumber(g_key_r, &r) && table.tryGetNumber(g_key_g, &g) && table.tryGetNumber(g_key_b, &b))
     {
-        if(!table.tryGetNumber(gc_key_a, &_color.a))
+        if(!table.tryGetNumber(g_key_a, &_color.a))
             _color.a = 1.0f;
         _color.r = r;
         _color.g = g;

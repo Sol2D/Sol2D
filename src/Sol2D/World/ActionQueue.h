@@ -28,17 +28,17 @@ class ActionQueue final
 
 public:
     ActionQueue(boost::container::slist<std::function<void()>> & _actions) :
-        mr_actions(_actions)
+        m_actions(_actions)
     {
     }
 
     void enqueueAction(std::function<void()> _action)
     {
-        mr_actions.push_front(_action);
+        m_actions.push_front(_action);
     }
 
 private:
-    boost::container::slist<std::function<void()>> & mr_actions;
+    boost::container::slist<std::function<void()>> & m_actions;
 };
 
 class ActionAccumulator final

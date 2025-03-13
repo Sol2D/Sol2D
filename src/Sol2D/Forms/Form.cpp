@@ -19,7 +19,7 @@
 using namespace Sol2D::Forms;
 
 Form::Form(Renderer & _renderer) :
-    mr_renderer(_renderer)
+    m_renderer(_renderer)
 {
 }
 
@@ -31,14 +31,14 @@ void Form::step(const StepState & _state)
 
 std::shared_ptr<Label> Form::createLabel(const std::string & _text)
 {
-    std::shared_ptr<Label> widget = std::make_shared<Label>(*this, _text, mr_renderer);
+    std::shared_ptr<Label> widget = std::make_shared<Label>(*this, _text, m_renderer);
     m_widgets.push_back(widget);
     return widget;
 }
 
 std::shared_ptr<Button> Form::createButton(const std::string & _text)
 {
-    std::shared_ptr<Button> button = std::make_shared<Button>(*this, _text, mr_renderer);
+    std::shared_ptr<Button> button = std::make_shared<Button>(*this, _text, m_renderer);
     m_widgets.push_back(button);
     return button;
 }

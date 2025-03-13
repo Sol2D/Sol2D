@@ -83,7 +83,7 @@ GraphicsPack::Frame::Frame(const GraphicsPackFrameDefinition & _definition) :
 GraphicsPack::GraphicsPack(
     Renderer & _renderer, const GraphicsPackDefinition & _definition /*= GraphicsPackDefinition()*/
 ) :
-    mp_renderer(&_renderer),
+    m_renderer(&_renderer),
     m_position(_definition.position),
     m_flip_mode(SDL_FLIP_NONE),
     m_max_iterations(_definition.animation_iterations),
@@ -103,7 +103,7 @@ GraphicsPack::GraphicsPack(
 }
 
 GraphicsPack::GraphicsPack(const GraphicsPack & _graphics_pack) :
-    mp_renderer(_graphics_pack.mp_renderer),
+    m_renderer(_graphics_pack.m_renderer),
     m_position(_graphics_pack.m_position),
     m_flip_mode(_graphics_pack.m_flip_mode),
     m_max_iterations(_graphics_pack.m_max_iterations),
@@ -118,7 +118,7 @@ GraphicsPack::GraphicsPack(const GraphicsPack & _graphics_pack) :
 }
 
 GraphicsPack::GraphicsPack(GraphicsPack && _graphics_pack) :
-    mp_renderer(_graphics_pack.mp_renderer),
+    m_renderer(_graphics_pack.m_renderer),
     m_position(_graphics_pack.m_position),
     m_flip_mode(_graphics_pack.m_flip_mode),
     m_frames(std::move(_graphics_pack.m_frames)),
@@ -128,7 +128,7 @@ GraphicsPack::GraphicsPack(GraphicsPack && _graphics_pack) :
     m_current_frame_duration(_graphics_pack.m_current_frame_duration),
     m_total_duration(_graphics_pack.m_total_duration)
 {
-    _graphics_pack.mp_renderer = nullptr;
+    _graphics_pack.m_renderer = nullptr;
     _graphics_pack.m_current_frame_duration = std::chrono::milliseconds::zero();
     _graphics_pack.m_total_duration = std::chrono::milliseconds::zero();
     _graphics_pack.m_current_frame_index = 0;
@@ -147,7 +147,7 @@ GraphicsPack & GraphicsPack::operator= (const GraphicsPack & _graphics_pack)
         m_frames.reserve(_graphics_pack.m_frames.size());
         for(auto * frame : _graphics_pack.m_frames)
             m_frames.push_back(new Frame(*frame)); // cppcheck-suppress useStlAlgorithm
-        mp_renderer = _graphics_pack.mp_renderer;
+        m_renderer = _graphics_pack.m_renderer;
         m_flip_mode = _graphics_pack.m_flip_mode;
         m_position = _graphics_pack.m_position;
         m_max_iterations = _graphics_pack.m_max_iterations;
@@ -167,8 +167,8 @@ GraphicsPack & GraphicsPack::operator= (GraphicsPack && _graphics_pack)
         m_frames.reserve(_graphics_pack.m_frames.size());
         std::copy(_graphics_pack.m_frames.cbegin(), _graphics_pack.m_frames.cend(), m_frames.end());
         _graphics_pack.m_frames.clear();
-        mp_renderer = _graphics_pack.mp_renderer;
-        _graphics_pack.mp_renderer = nullptr;
+        m_renderer = _graphics_pack.m_renderer;
+        _graphics_pack.m_renderer = nullptr;
         m_position = _graphics_pack.m_position;
         m_flip_mode = _graphics_pack.m_flip_mode;
         m_max_iterations = _graphics_pack.m_max_iterations;

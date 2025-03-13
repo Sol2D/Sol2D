@@ -43,13 +43,13 @@ private:
     const std::string m_key;
     const std::optional<uint32_t> m_tile_map_object_id;
     Utils::PreHashedMap<std::string, GraphicsPack *> m_graphics;
-    GraphicsPack * mp_current_graphics;
+    GraphicsPack * m_current_graphics;
     std::optional<Utils::PreHashedKey<std::string>> m_current_graphics_key;
 };
 
 inline GraphicsPack * BodyShape::getCurrentGraphics()
 {
-    return mp_current_graphics;
+    return m_current_graphics;
 }
 
 inline std::optional<Utils::PreHashedKey<std::string>> BodyShape::getCurrentGraphicsKey() const

@@ -30,18 +30,18 @@ private:
     {
     public:
         explicit SideEffect(Label * _label) :
-            mp_label(_label)
+            m_label(_label)
         {
         }
 
         void onPropertyChanged(const WidgetProperty<PropertyType> &, WidgetState _state) override
         {
-            if(mp_label->m_state == _state)
-                mp_label->m_texture.reset();
+            if(m_label->m_state == _state)
+                m_label->m_texture.reset();
         }
 
     private:
-        Label * mp_label;
+        Label * m_label;
     };
 
 public:

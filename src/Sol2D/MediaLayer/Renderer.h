@@ -63,9 +63,9 @@ private:
     void endRenderPass();
 
 private:
-    const ResourceManager & mr_resource_manager;
+    const ResourceManager & m_resource_manager;
     RenderingContext m_rendering_context;
-    SDL_GPUTexture * mp_swapchain_texture;
+    SDL_GPUTexture * m_swapchain_texture;
     RectRenderer m_rect_renderer;
     LineRenderer m_line_renderer;
     UIRenderer m_ui_renderer;

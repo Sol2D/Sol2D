@@ -40,92 +40,92 @@ using namespace Sol2D::Utils;
 
 namespace {
 
-const uint16_t gc_event_begin_contact = 0;
-const uint16_t gc_event_end_contact = 1;
-const uint16_t gc_event_begin_sensor_contact = 2;
-const uint16_t gc_event_end_sensor_contact = 3;
-const uint16_t gc_event_pre_solve_contact = 4;
+const uint16_t g_event_begin_contact = 0;
+const uint16_t g_event_end_contact = 1;
+const uint16_t g_event_begin_sensor_contact = 2;
+const uint16_t g_event_end_sensor_contact = 3;
+const uint16_t g_event_pre_solve_contact = 4;
 
-const uint16_t gc_event_step = 0;
+const uint16_t g_event_step = 0;
 
 class LuaContactObserver : public ContactObserver, public ObjectCompanion
 {
 public:
     LuaContactObserver(lua_State * _lua, const Workspace & _workspace) :
-        mp_lua(_lua),
-        mr_workspace(_workspace)
+        m_lua(_lua),
+        m_workspace(_workspace)
     {
     }
 
     ~LuaContactObserver() override
     {
-        LuaCallbackStorage(mp_lua).destroyCallbacks(this);
+        LuaCallbackStorage(m_lua).destroyCallbacks(this);
     }
 
     void beginContact(const Contact & _contact) override
     {
-        pushContact(mp_lua, _contact);
-        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_begin_contact, 1);
+        pushContact(m_lua, _contact);
+        LuaCallbackStorage(m_lua).execute(m_workspace, this, g_event_begin_contact, 1);
     }
 
     void endContact(const Contact & _contact) override
     {
-        pushContact(mp_lua, _contact);
-        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_end_contact, 1);
+        pushContact(m_lua, _contact);
+        LuaCallbackStorage(m_lua).execute(m_workspace, this, g_event_end_contact, 1);
     }
 
     void beginSensorContact(const SensorContact & _contact) override
     {
-        pushContact(mp_lua, _contact);
-        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_begin_sensor_contact, 1);
+        pushContact(m_lua, _contact);
+        LuaCallbackStorage(m_lua).execute(m_workspace, this, g_event_begin_sensor_contact, 1);
     }
 
     void endSensorContact(const SensorContact & _contact) override
     {
-        pushContact(mp_lua, _contact);
-        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_end_sensor_contact, 1);
+        pushContact(m_lua, _contact);
+        LuaCallbackStorage(m_lua).execute(m_workspace, this, g_event_end_sensor_contact, 1);
     }
 
     bool preSolveContact(const PreSolveContact & _contact) override
     {
         bool result = true;
-        pushContact(mp_lua, _contact);
-        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_pre_solve_contact, 1, 1, [this, &result]() {
-            if(lua_isboolean(mp_lua, -1))
-                result = lua_toboolean(mp_lua, -1) != 0;
+        pushContact(m_lua, _contact);
+        LuaCallbackStorage(m_lua).execute(m_workspace, this, g_event_pre_solve_contact, 1, 1, [this, &result]() {
+            if(lua_isboolean(m_lua, -1))
+                result = lua_toboolean(m_lua, -1) != 0;
             return result;
         });
         return result;
     }
 
 private:
-    lua_State * mp_lua;
-    const Workspace & mr_workspace;
+    lua_State * m_lua;
+    const Workspace & m_workspace;
 };
 
 class LuaStepObserver : public StepObserver, public ObjectCompanion
 {
 public:
     LuaStepObserver(lua_State * _lua, const Workspace & _workspace) :
-        mp_lua(_lua),
-        mr_workspace(_workspace)
+        m_lua(_lua),
+        m_workspace(_workspace)
     {
     }
 
     ~LuaStepObserver() override
     {
-        LuaCallbackStorage(mp_lua).destroyCallbacks(this);
+        LuaCallbackStorage(m_lua).destroyCallbacks(this);
     }
 
     void onStepComplete(const StepState & _state) override
     {
-        lua_pushinteger(mp_lua, _state.delta_time.count());
-        LuaCallbackStorage(mp_lua).execute(mr_workspace, this, gc_event_step, 1);
+        lua_pushinteger(m_lua, _state.delta_time.count());
+        LuaCallbackStorage(m_lua).execute(m_workspace, this, g_event_step, 1);
     }
 
 private:
-    lua_State * mp_lua;
-    const Workspace & mr_workspace;
+    lua_State * m_lua;
+    const Workspace & m_workspace;
 };
 
 struct Self : LuaSelfBase
@@ -189,12 +189,12 @@ inline void Self::unsubscribeOnContact(lua_State * _lua, uint16_t _event_id, int
 
 uint32_t Self::subscribeOnStep(lua_State * _lua, int _callback_idx)
 {
-    return subscribe<LuaStepObserver>(_lua, gc_event_step, &m_step_observer_companion_id, _callback_idx);
+    return subscribe<LuaStepObserver>(_lua, g_event_step, &m_step_observer_companion_id, _callback_idx);
 }
 
 inline void Self::unsubscribeOnStep(lua_State * _lua, int _subscription_id)
 {
-    unsubscribe<LuaStepObserver>(_lua, gc_event_step, m_step_observer_companion_id, _subscription_id);
+    unsubscribe<LuaStepObserver>(_lua, g_event_step, m_step_observer_companion_id, _subscription_id);
 }
 
 template<typename ObserverType>
@@ -413,7 +413,7 @@ int luaApi_SubscribeToBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
-    uint32_t id = self->subscribeOnContact(_lua, gc_event_begin_contact, 2);
+    uint32_t id = self->subscribeOnContact(_lua, g_event_begin_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
 }
@@ -425,7 +425,7 @@ int luaApi_UnsubscribeFromBeginContact(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    self->unsubscribeOnContact(_lua, gc_event_begin_contact, subscription_id);
+    self->unsubscribeOnContact(_lua, g_event_begin_contact, subscription_id);
     return 0;
 }
 
@@ -435,7 +435,7 @@ int luaApi_SubscribeToEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
-    uint32_t id = self->subscribeOnContact(_lua, gc_event_end_contact, 2);
+    uint32_t id = self->subscribeOnContact(_lua, g_event_end_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
 }
@@ -447,7 +447,7 @@ int luaApi_UnsubscribeFromEndContact(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    self->unsubscribeOnContact(_lua, gc_event_end_contact, subscription_id);
+    self->unsubscribeOnContact(_lua, g_event_end_contact, subscription_id);
     return 0;
 }
 
@@ -457,7 +457,7 @@ int luaApi_SubscribeToSensorBeginContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
-    uint32_t id = self->subscribeOnContact(_lua, gc_event_begin_sensor_contact, 2);
+    uint32_t id = self->subscribeOnContact(_lua, g_event_begin_sensor_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
 }
@@ -469,7 +469,7 @@ int luaApi_UnsubscribeFromSensorBeginContact(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    self->unsubscribeOnContact(_lua, gc_event_begin_sensor_contact, subscription_id);
+    self->unsubscribeOnContact(_lua, g_event_begin_sensor_contact, subscription_id);
     return 0;
 }
 
@@ -479,7 +479,7 @@ int luaApi_SubscribeToSensorEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
-    uint32_t id = self->subscribeOnContact(_lua, gc_event_end_sensor_contact, 2);
+    uint32_t id = self->subscribeOnContact(_lua, g_event_end_sensor_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
 }
@@ -491,7 +491,7 @@ int luaApi_UnsubscribeFromSesnsorEndContact(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    self->unsubscribeOnContact(_lua, gc_event_end_sensor_contact, subscription_id);
+    self->unsubscribeOnContact(_lua, g_event_end_sensor_contact, subscription_id);
     return 0;
 }
 
@@ -501,7 +501,7 @@ int luaApi_SubscribeToPreSolveContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isfunction(_lua, 2), 2, LuaTypeName::function);
-    uint32_t id = self->subscribeOnContact(_lua, gc_event_pre_solve_contact, 2);
+    uint32_t id = self->subscribeOnContact(_lua, g_event_pre_solve_contact, 2);
     lua_pushinteger(_lua, id);
     return 1;
 }
@@ -513,7 +513,7 @@ int luaApi_UnsubscribeFromPreSolveContact(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     uint32_t subscription_id = static_cast<uint32_t>(lua_tointeger(_lua, 2));
-    self->unsubscribeOnContact(_lua, gc_event_pre_solve_contact, subscription_id);
+    self->unsubscribeOnContact(_lua, g_event_pre_solve_contact, subscription_id);
     return 0;
 }
 

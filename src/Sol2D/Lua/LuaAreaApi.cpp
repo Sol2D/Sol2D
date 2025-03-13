@@ -23,14 +23,14 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-const char gc_key_top[] = "top";
-const char gc_key_right[] = "right";
-const char gc_key_left[] = "left";
-const char gc_key_bottom[] = "bottom";
-const char gc_key_width[] = "width";
-const char gc_key_height[] = "height";
-const char gc_key_z_index[] = "zIndex";
-const char gc_key_is_visible[] = "isVisible";
+const char g_key_top[] = "top";
+const char g_key_right[] = "right";
+const char g_key_left[] = "left";
+const char g_key_bottom[] = "bottom";
+const char g_key_width[] = "width";
+const char g_key_height[] = "height";
+const char g_key_z_index[] = "zIndex";
+const char g_key_is_visible[] = "isVisible";
 
 template<std::integral Int>
 void setDimension(LuaTable & table, const char * _key, const std::optional<Dimension<Int>> & _dimension)
@@ -47,14 +47,14 @@ void setDimension(LuaTable & table, const char * _key, const std::optional<Dimen
 void Sol2D::Lua::pushArea(lua_State * _lua, const Area & _area)
 {
     LuaTable table = LuaTable::pushNew(_lua);
-    setDimension(table, gc_key_top, _area.top);
-    setDimension(table, gc_key_right, _area.right);
-    setDimension(table, gc_key_bottom, _area.bottom);
-    setDimension(table, gc_key_left, _area.left);
-    setDimension(table, gc_key_width, _area.width);
-    setDimension(table, gc_key_height, _area.height);
-    table.setIntegerValue(gc_key_z_index, _area.z_index);
-    table.setBooleanValue(gc_key_is_visible, _area.is_visible);
+    setDimension(table, g_key_top, _area.top);
+    setDimension(table, g_key_right, _area.right);
+    setDimension(table, g_key_bottom, _area.bottom);
+    setDimension(table, g_key_left, _area.left);
+    setDimension(table, g_key_width, _area.width);
+    setDimension(table, g_key_height, _area.height);
+    table.setIntegerValue(g_key_z_index, _area.z_index);
+    table.setBooleanValue(g_key_is_visible, _area.is_visible);
 }
 
 bool Sol2D::Lua::tryGetArea(lua_State * _lua, int _idx, Area & _area)
@@ -62,13 +62,13 @@ bool Sol2D::Lua::tryGetArea(lua_State * _lua, int _idx, Area & _area)
     LuaTable table(_lua, _idx);
     if(!table.isValid())
         return false;
-    table.tryGetDimension(gc_key_top, _area.top);
-    table.tryGetDimension(gc_key_right, _area.right);
-    table.tryGetDimension(gc_key_left, _area.left);
-    table.tryGetDimension(gc_key_bottom, _area.bottom);
-    table.tryGetDimension(gc_key_width, _area.width);
-    table.tryGetDimension(gc_key_height, _area.height);
-    table.tryGetBoolean(gc_key_is_visible, &_area.is_visible);
-    table.tryGetInteger(gc_key_z_index, &_area.z_index);
+    table.tryGetDimension(g_key_top, _area.top);
+    table.tryGetDimension(g_key_right, _area.right);
+    table.tryGetDimension(g_key_left, _area.left);
+    table.tryGetDimension(g_key_bottom, _area.bottom);
+    table.tryGetDimension(g_key_width, _area.width);
+    table.tryGetDimension(g_key_height, _area.height);
+    table.tryGetBoolean(g_key_is_visible, &_area.is_visible);
+    table.tryGetInteger(g_key_z_index, &_area.z_index);
     return true;
 }

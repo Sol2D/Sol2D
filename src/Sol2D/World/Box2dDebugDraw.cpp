@@ -40,7 +40,7 @@ Box2dDebugDraw::Box2dDebugDraw(
     std::function<float(float)> _translate_length
 ) :
     m_b2_debug_draw(b2DefaultDebugDraw()),
-    mp_renderer(&_renderer),
+    m_renderer(&_renderer),
     m_world_id(_world_id),
     m_translate_point(_translate_point),
     m_translate_length(_translate_length)
@@ -71,7 +71,7 @@ void Box2dDebugDraw::drawPolygon(const b2Vec2 * _vertices, int _vertex_count, b2
     sdl_points.reserve(_vertex_count + 1);
     for(int i = 0; i < _vertex_count; ++i)
         sdl_points.push_back(self->m_translate_point(_vertices[i].x, _vertices[i].y));
-    self->mp_renderer->renderPolyline(sdl_points, b2ColorToSDL(_color), true);
+    self->m_renderer->renderPolyline(sdl_points, b2ColorToSDL(_color), true);
 }
 
 void Box2dDebugDraw::drawSolidPolygon(
@@ -102,13 +102,13 @@ void Box2dDebugDraw::drawSolidPolygon(
         }
         sdl_points.push_back(self->m_translate_point(x, y));
     }
-    self->mp_renderer->renderPolyline(sdl_points, b2ColorToSDL(_color), true);
+    self->m_renderer->renderPolyline(sdl_points, b2ColorToSDL(_color), true);
 }
 
 void Box2dDebugDraw::drawCircle(b2Vec2 _center, float _radius, b2HexColor _color, void * _context)
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    self->mp_renderer->renderCircle(CircleRenderingData(
+    self->m_renderer->renderCircle(CircleRenderingData(
         self->m_translate_point(_center.x, _center.y), self->m_translate_length(_radius), b2ColorToSDL(_color)
     ));
 }
@@ -121,7 +121,7 @@ inline void Box2dDebugDraw::drawSolidCircle(b2Transform _transform, float _radiu
 void Box2dDebugDraw::drawPoint(b2Vec2 _point, float _size, b2HexColor _color, void * _context)
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    self->mp_renderer->renderCircle(
+    self->m_renderer->renderCircle(
         SolidCircleRenderingData(self->m_translate_point(_point.x, _point.y), _size, b2ColorToSDL(_color))
     );
 }
@@ -129,7 +129,7 @@ void Box2dDebugDraw::drawPoint(b2Vec2 _point, float _size, b2HexColor _color, vo
 void Box2dDebugDraw::drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void * _context)
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    self->mp_renderer->renderLine(
+    self->m_renderer->renderLine(
         self->m_translate_point(_p1.x, _p1.y), self->m_translate_point(_p2.x, _p2.y), b2ColorToSDL(_color)
     );
 }
@@ -137,7 +137,7 @@ void Box2dDebugDraw::drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void
 void Box2dDebugDraw::drawSolidCapsule(b2Vec2 _p1, b2Vec2 _p2, float _radius, b2HexColor _color, void * _context)
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
-    self->mp_renderer->renderCapsule(CapsuleRenderingData(
+    self->m_renderer->renderCapsule(CapsuleRenderingData(
         self->m_translate_length(_radius),
         self->m_translate_point(_p1.x, _p1.y),
         self->m_translate_point(_p2.x, _p2.y),

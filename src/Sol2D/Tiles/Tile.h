@@ -29,7 +29,7 @@ public:
     Tile(
         const TileSet & _set, const Texture & _source, int32_t _src_x, int32_t _src_y, uint32_t _width, uint32_t _height
     ) :
-        mp_set(&_set),
+        m_set(&_set),
         m_x(_src_x),
         m_y(_src_y),
         m_width(_width),
@@ -42,7 +42,7 @@ public:
 
     const TileSet getTileSet() const
     {
-        return *mp_set;
+        return *m_set;
     }
 
     int32_t getSourceX() const
@@ -71,7 +71,7 @@ public:
     }
 
 private:
-    const TileSet * mp_set;
+    const TileSet * m_set;
     int32_t m_x, m_y;
     uint32_t m_width, m_height;
     Texture m_source_ptr;

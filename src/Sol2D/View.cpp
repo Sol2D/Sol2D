@@ -21,7 +21,7 @@ using namespace Sol2D;
 uint16_t View::createFragment(const Area & _area)
 {
     uint16_t id = m_next_fragment_id++;
-    Outlet * outlet = new Outlet(_area, mr_renderer);
+    Outlet * outlet = new Outlet(_area, m_renderer);
     m_outlets[id] = std::unique_ptr<Outlet>(outlet);
     emplaceOrderedOutlet(outlet);
     return id;
@@ -97,8 +97,8 @@ void View::step(const StepState & _state)
     }
     if(m_ui)
     {
-        mr_renderer.beginDefaultRenderPass();
-        mr_renderer.renderUI(*m_ui);
-        mr_renderer.endDefaultRenderPass();
+        m_renderer.beginDefaultRenderPass();
+        m_renderer.renderUI(*m_ui);
+        m_renderer.endDefaultRenderPass();
     }
 }

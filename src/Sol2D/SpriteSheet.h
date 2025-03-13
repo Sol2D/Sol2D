@@ -51,7 +51,7 @@ public:
     const Texture & getTexture() const; // TODO: delete
 
 private:
-    Renderer * mp_renderer;
+    Renderer * m_renderer;
     Texture m_texture;
     std::vector<SDL_FRect> m_rects;
 };
@@ -68,7 +68,7 @@ inline size_t SpriteSheet::getSpriteCount() const
 
 inline Sprite SpriteSheet::toSprite(size_t _idx) const
 {
-    return _idx >= m_rects.size() ? Sprite(*mp_renderer) : Sprite(*mp_renderer, m_texture, m_rects[_idx]);
+    return _idx >= m_rects.size() ? Sprite(*m_renderer) : Sprite(*m_renderer, m_texture, m_rects[_idx]);
 }
 
 inline const std::vector<SDL_FRect> & SpriteSheet::getRects() const

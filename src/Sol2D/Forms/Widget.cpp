@@ -30,11 +30,11 @@ void Widget::renderBorder()
     {
         return;
     }
-    mr_renderer.renderRect(RectRenderingData(
-        {.x = m_x.getPixels(mr_parent.getWidth()),
-         .y = m_y.getPixels(mr_parent.getHeight()),
-         .w = m_width.getPixels(mr_parent.getWidth()),
-         .h = m_height.getPixels(mr_parent.getHeight())},
+    m_renderer.renderRect(RectRenderingData(
+        {.x = m_x.getPixels(m_parent.getWidth()),
+         .y = m_y.getPixels(m_parent.getHeight()),
+         .w = m_width.getPixels(m_parent.getWidth()),
+         .h = m_height.getPixels(m_parent.getHeight())},
         this->border_color[m_state],
         border_width
     ));

@@ -23,8 +23,8 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-const char gc_key_side_a[] = "sideA";
-const char gc_key_side_b[] = "sideB";
+const char g_key_side_a[] = "sideA";
+const char g_key_side_b[] = "sideB";
 
 void pushContactSide(lua_State * _lua, const ContactSide & _side)
 {
@@ -50,8 +50,8 @@ void setContactSide(LuaTable & _table, const char * _key, const ContactSide & _s
 void Sol2D::Lua::pushContact(lua_State * _lua, const Contact & _contact)
 {
     LuaTable contact_table = LuaTable::pushNew(_lua);
-    setContactSide(contact_table, gc_key_side_a, _contact.side_a);
-    setContactSide(contact_table, gc_key_side_b, _contact.side_b);
+    setContactSide(contact_table, g_key_side_a, _contact.side_a);
+    setContactSide(contact_table, g_key_side_b, _contact.side_b);
 }
 
 void Sol2D::Lua::pushContact(lua_State * _lua, const SensorContact & _contact)
@@ -64,8 +64,8 @@ void Sol2D::Lua::pushContact(lua_State * _lua, const SensorContact & _contact)
 void Sol2D::Lua::pushContact(lua_State * _lua, const PreSolveContact & _contact)
 {
     LuaTable contact_table = LuaTable::pushNew(_lua);
-    setContactSide(contact_table, gc_key_side_a, _contact.side_a);
-    setContactSide(contact_table, gc_key_side_b, _contact.side_b);
+    setContactSide(contact_table, g_key_side_a, _contact.side_a);
+    setContactSide(contact_table, g_key_side_b, _contact.side_b);
     pushManifold(_lua, *_contact.manifold);
     contact_table.setValueFromTop("manifold");
 }

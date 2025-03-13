@@ -32,8 +32,8 @@ public:
     void executeMainScript();
 
 private:
-    lua_State * mp_lua;
-    const Workspace & mr_workspace;
+    lua_State * m_lua;
+    const Workspace & m_workspace;
 };
 
 } // namespace Sol2D::Lua

@@ -48,9 +48,9 @@ private:
     void reserveSpace(size_t _n);
 
 private:
-    SDL_GPUDevice * mp_device;
-    SDL_GPUGraphicsPipeline * mp_pipeline;
-    SDL_GPUBuffer * mp_vertex_buffer;
+    SDL_GPUDevice * m_device;
+    SDL_GPUGraphicsPipeline * m_pipeline;
+    SDL_GPUBuffer * m_vertex_buffer;
     std::vector<SDL_FPoint> m_vertices;
 };
 

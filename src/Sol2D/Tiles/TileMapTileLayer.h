@@ -94,7 +94,7 @@ private:
 
     TileMapTileLayerCell * getMatrixCell(uint32_t _x, uint32_t _y) const
     {
-        return _x < m_width && _y < m_height ? &mp_cells[m_width * _y + _x] : nullptr;
+        return _x < m_width && _y < m_height ? &m_cells[m_width * _y + _x] : nullptr;
     }
 
     uint32_t toMatrixX(int32_t _layer_x) const
@@ -108,14 +108,14 @@ private:
     }
 
 private:
-    const TileHeap & mr_tile_heap;
+    const TileHeap & m_tile_heap;
     uint32_t m_tile_width;
     uint32_t m_tile_height;
     int32_t m_x;
     int32_t m_y;
     uint32_t m_width;
     uint32_t m_height;
-    TileMapTileLayerCell * mp_cells;
+    TileMapTileLayerCell * m_cells;
 };
 
 } // namespace Sol2D::Tiles

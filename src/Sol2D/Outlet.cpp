@@ -20,7 +20,7 @@ using namespace Sol2D;
 
 Outlet::Outlet(const Area & _area, Renderer & _renderer) :
     m_aria(_area),
-    mr_renderer(_renderer),
+    m_renderer(_renderer),
     m_rect {.0f, .0f, .0f, .0f}
 {
 }
@@ -29,9 +29,9 @@ void Outlet::resize()
 {
     if(m_canvas && m_aria.is_visible)
     {
-        m_rect = m_aria.calculateRect(mr_renderer.getOutputSize());
+        m_rect = m_aria.calculateRect(m_renderer.getOutputSize());
         m_canvas->reconfigure(m_rect);
-        m_texture = mr_renderer.createTexture(m_rect.w, m_rect.h, "Outlet");
+        m_texture = m_renderer.createTexture(m_rect.w, m_rect.h, "Outlet");
     }
 }
 
@@ -51,8 +51,8 @@ void Outlet::step(const StepState & _state)
 {
     if(m_canvas && m_aria.is_visible)
     {
-        mr_renderer.beginRenderPass(m_texture, &m_canvas->getClearColor());
+        m_renderer.beginRenderPass(m_texture, &m_canvas->getClearColor());
         m_canvas->step(_state);
-        mr_renderer.endRenderPass(m_texture, m_rect);
+        m_renderer.endRenderPass(m_texture, m_rect);
     }
 }

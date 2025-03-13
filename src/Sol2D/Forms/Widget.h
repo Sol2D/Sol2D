@@ -58,8 +58,8 @@ private:
     void renderBorder();
 
 protected:
-    const Canvas & mr_parent;
-    Renderer & mr_renderer;
+    const Canvas & m_parent;
+    Renderer & m_renderer;
     WidgetState m_state;
     Dimension<float> m_x;
     Dimension<float> m_y;
@@ -78,8 +78,8 @@ inline Widget::Widget(const Canvas & _parent, Renderer & _renderer) :
     border_width(0),
     border_color(sc_default_border_color),
     padding(.0f),
-    mr_parent(_parent),
-    mr_renderer(_renderer),
+    m_parent(_parent),
+    m_renderer(_renderer),
     m_state(WidgetState::Default),
     m_x(.0f),
     m_y(.0f),
@@ -94,7 +94,7 @@ inline Widget::~Widget()
 
 inline const Canvas & Widget::getParent() const
 {
-    return mr_parent;
+    return m_parent;
 }
 
 inline void Widget::setX(const Dimension<float> & _x)

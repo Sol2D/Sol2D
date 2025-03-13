@@ -34,19 +34,19 @@ class SDLAssertionHandler final
 
 public:
     explicit SDLAssertionHandler(const Workspace & _workspace) :
-        mr_workspace(_workspace)
+        m_workspace(_workspace)
     {
     }
 
     void handle(const SDL_AssertData * _data) const
     {
-        mr_workspace.getMainLogger().critical(
+        m_workspace.getMainLogger().critical(
             "SDL assertion failed: {} at {}:{}", _data->condition, _data->filename, _data->linenum
         );
     }
 
 private:
-    const Workspace & mr_workspace;
+    const Workspace & m_workspace;
 };
 
 class Application final
@@ -66,12 +66,12 @@ private:
     void step();
 
 private:
-    const Workspace & mr_workspace;
+    const Workspace & m_workspace;
     SDLAssertionHandler m_sdl_assertion_handler;
     StepState m_step_state;
-    SDL_Window * mp_sdl_window;
-    SDL_GPUDevice * mp_device;
-    Window * mp_window;
+    SDL_Window * m_sdl_window;
+    SDL_GPUDevice * m_device;
+    Window * m_window;
 };
 
 SDL_AssertState SDLCALL sdlAssertionHandler(const SDL_AssertData * _data, void * _userdata)
@@ -83,12 +83,12 @@ SDL_AssertState SDLCALL sdlAssertionHandler(const SDL_AssertData * _data, void *
 } // namespace
 
 Application::Application(const Workspace & _workspace) :
-    mr_workspace(_workspace),
+    m_workspace(_workspace),
     m_sdl_assertion_handler(_workspace),
     m_step_state {},
-    mp_sdl_window(nullptr),
-    mp_device(nullptr),
-    mp_window(new Window)
+    m_sdl_window(nullptr),
+    m_device(nullptr),
+    m_window(new Window)
 {
     if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
         throw SDLException("Unable to initialize SDL.");
@@ -97,23 +97,22 @@ Application::Application(const Workspace & _workspace) :
     if(!Mix_OpenAudio(0, nullptr)) // TODO: allow user to select a device
         throw SDLException("SDL_Mixer initialization failed.");
     SDL_SetAssertionHandler(sdlAssertionHandler, &m_sdl_assertion_handler);
-    mp_sdl_window = SDL_CreateWindow(
-        mr_workspace.getApplicationName().c_str(), 1024, 768, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN
-    );
-    if(!mp_sdl_window)
+    m_sdl_window =
+        SDL_CreateWindow(m_workspace.getApplicationName().c_str(), 1024, 768, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
+    if(!m_sdl_window)
         throw SDLException("Unable to create window");
-    mp_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
-    if(!mp_device)
+    m_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
+    if(!m_device)
         throw SDLException("Unable to create GPU device.");
-    if(!SDL_ClaimWindowForGPUDevice(mp_device, mp_sdl_window))
+    if(!SDL_ClaimWindowForGPUDevice(m_device, m_sdl_window))
         throw SDLException("Unable to claim window for GPU device.");
     if(!SDL_SetGPUSwapchainParameters(
-           mp_device, mp_sdl_window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_MAILBOX
+           m_device, m_sdl_window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_MAILBOX
        ))
     {
         throw SDLException("Unable to configuire GPU swapchain.");
     }
-    if(!SDL_ShowWindow(mp_sdl_window))
+    if(!SDL_ShowWindow(m_sdl_window))
         throw SDLException("Unable to show window.");
 
     IMGUI_CHECKVERSION();
@@ -123,10 +122,10 @@ Application::Application(const Workspace & _workspace) :
     // ImGui::StyleColorsClassic();
     // ImGui::StyleColorsLight();
     ImGui::StyleColorsDark(); // TODO: should be controlled by user
-    ImGui_ImplSDL3_InitForSDLGPU(mp_sdl_window);
+    ImGui_ImplSDL3_InitForSDLGPU(m_sdl_window);
     ImGui_ImplSDLGPU3_InitInfo init_info = {};
-    init_info.Device = mp_device;
-    init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(mp_device, mp_sdl_window);
+    init_info.Device = m_device;
+    init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(m_device, m_sdl_window);
     init_info.MSAASamples = SDL_GPU_SAMPLECOUNT_1;
     ImGui_ImplSDLGPU3_Init(&init_info);
 }
@@ -136,11 +135,11 @@ Application::~Application()
     ImGui_ImplSDL3_Shutdown();
     ImGui_ImplSDLGPU3_Shutdown();
     ImGui::DestroyContext();
-    delete mp_window;
-    if(mp_device)
-        SDL_DestroyGPUDevice(mp_device);
-    if(mp_sdl_window)
-        SDL_DestroyWindow(mp_sdl_window);
+    delete m_window;
+    if(m_device)
+        SDL_DestroyGPUDevice(m_device);
+    if(m_sdl_window)
+        SDL_DestroyWindow(m_sdl_window);
     TTF_Quit();
     Mix_Quit();
     SDL_Quit();
@@ -149,11 +148,11 @@ Application::~Application()
 void Application::exec()
 {
     ResourceManager resource_manager; // TODO: create in place
-    Renderer renderer(resource_manager, mp_sdl_window, mp_device);
+    Renderer renderer(resource_manager, m_sdl_window, m_device);
     StoreManager store_manager;
-    std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(mr_workspace, store_manager, *mp_window, renderer);
+    std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(m_workspace, store_manager, *m_window, renderer);
     lua->executeMainScript();
-    const uint32_t render_frame_delay = floor(1000 / mr_workspace.getFrameRate());
+    const uint32_t render_frame_delay = floor(1000 / m_workspace.getFrameRate());
     uint32_t last_rendering_ticks = SDL_GetTicks();
     SDL_Event event;
     for(;;)
@@ -209,7 +208,7 @@ bool Application::handleEvent(const SDL_Event & _event)
 
 inline void Application::onWindowResized(const SDL_WindowEvent & /*_event*/)
 {
-    mp_window->resize();
+    m_window->resize();
 }
 
 inline void Application::onMouseButtonDown(const SDL_MouseButtonEvent & _event)
@@ -258,7 +257,7 @@ inline void Application::onMouseButtonUp(const SDL_MouseButtonEvent & _event)
 
 void Application::step()
 {
-    mp_window->step(m_step_state);
+    m_window->step(m_step_state);
 }
 
 int main(int _argc, const char ** _argv)

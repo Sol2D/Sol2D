@@ -55,7 +55,7 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
     }
     m_desination_size.w = m_source_rect.w;
     m_desination_size.h = m_source_rect.h;
-    m_texture = mp_renderer->createTexture(*surface, "Sprite");
+    m_texture = m_renderer->createTexture(*surface, "Sprite");
     SDL_DestroySurface(surface);
     return true;
 }
@@ -65,5 +65,5 @@ void Sprite::render(const SDL_FPoint & _point, const Rotation & _rotation, SDL_F
     if(!isValid())
         return;
     SDL_FRect dest_rect = {.x = _point.x, .y = _point.y, .w = m_desination_size.w, .h = m_desination_size.h};
-    mp_renderer->renderTexture(TextureRenderingData(dest_rect, m_texture, m_source_rect, _rotation, _flip_mode));
+    m_renderer->renderTexture(TextureRenderingData(dest_rect, m_texture, m_source_rect, _rotation, _flip_mode));
 }

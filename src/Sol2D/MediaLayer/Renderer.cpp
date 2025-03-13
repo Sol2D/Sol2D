@@ -40,18 +40,18 @@ class RectRenderTask : public RenderTask
 {
 public:
     RectRenderTask(const RectRenderer & _renderer, RectRenderingData && _data) :
-        mr_renderer(_renderer),
+        m_renderer(_renderer),
         m_data(_data)
     {
     }
 
     void render(const RenderingContext & _context) override
     {
-        mr_renderer.renderRect(_context, m_data);
+        m_renderer.renderRect(_context, m_data);
     }
 
 private:
-    const RectRenderer & mr_renderer;
+    const RectRenderer & m_renderer;
     const RectRenderingData m_data;
 };
 
@@ -59,18 +59,18 @@ class SolidRectRenderTask : public RenderTask
 {
 public:
     SolidRectRenderTask(const RectRenderer & _renderer, SolidRectRenderingData && _data) :
-        mr_renderer(_renderer),
+        m_renderer(_renderer),
         m_data(_data)
     {
     }
 
     void render(const RenderingContext & _context) override
     {
-        mr_renderer.renderRect(_context, m_data);
+        m_renderer.renderRect(_context, m_data);
     }
 
 private:
-    const RectRenderer & mr_renderer;
+    const RectRenderer & m_renderer;
     const SolidRectRenderingData m_data;
 };
 
@@ -78,18 +78,18 @@ class TextureRenderTask : public RenderTask
 {
 public:
     TextureRenderTask(const RectRenderer & _renderer, TextureRenderingData && _data) :
-        mr_renderer(_renderer),
+        m_renderer(_renderer),
         m_data(_data)
     {
     }
 
     void render(const RenderingContext & _context) override
     {
-        mr_renderer.renderTexture(_context, m_data);
+        m_renderer.renderTexture(_context, m_data);
     }
 
 private:
-    const RectRenderer & mr_renderer;
+    const RectRenderer & m_renderer;
     const TextureRenderingData m_data;
 };
 
@@ -97,7 +97,7 @@ class LineRenderTask : public RenderTask
 {
 public:
     LineRenderTask(const LineRenderer & _renderer, const LineRenderer::ChunkID & _id, const SDL_FColor & _color) :
-        mr_renderer(_renderer),
+        m_renderer(_renderer),
         m_color(_color),
         m_id(_id)
     {
@@ -105,11 +105,11 @@ public:
 
     void render(const RenderingContext & _context) override
     {
-        mr_renderer.render(_context, m_id, m_color);
+        m_renderer.render(_context, m_id, m_color);
     }
 
 private:
-    const LineRenderer & mr_renderer;
+    const LineRenderer & m_renderer;
     const SDL_FColor m_color;
     const LineRenderer::ChunkID m_id;
 };
@@ -118,18 +118,18 @@ class CircleRenderTask : public RenderTask
 {
 public:
     CircleRenderTask(const RectRenderer & _renderer, CircleRenderingData && _data) :
-        mr_renderer(_renderer),
+        m_renderer(_renderer),
         m_data(_data)
     {
     }
 
     void render(const RenderingContext & _context) override
     {
-        mr_renderer.renderCircle(_context, m_data);
+        m_renderer.renderCircle(_context, m_data);
     }
 
 private:
-    const RectRenderer & mr_renderer;
+    const RectRenderer & m_renderer;
     const CircleRenderingData m_data;
 };
 
@@ -137,18 +137,18 @@ class SolidCircleRenderTask : public RenderTask
 {
 public:
     SolidCircleRenderTask(const RectRenderer & _renderer, SolidCircleRenderingData && _data) :
-        mr_renderer(_renderer),
+        m_renderer(_renderer),
         m_data(_data)
     {
     }
 
     void render(const RenderingContext & _context) override
     {
-        mr_renderer.renderCircle(_context, m_data);
+        m_renderer.renderCircle(_context, m_data);
     }
 
 private:
-    const RectRenderer & mr_renderer;
+    const RectRenderer & m_renderer;
     const SolidCircleRenderingData m_data;
 };
 
@@ -156,18 +156,18 @@ class CapsuleRenderTask : public RenderTask
 {
 public:
     CapsuleRenderTask(const RectRenderer & _renderer, CapsuleRenderingData && _data) :
-        mr_renderer(_renderer),
+        m_renderer(_renderer),
         m_data(_data)
     {
     }
 
     void render(const RenderingContext & _context) override
     {
-        mr_renderer.renderCapsule(_context, m_data);
+        m_renderer.renderCapsule(_context, m_data);
     }
 
 private:
-    const RectRenderer & mr_renderer;
+    const RectRenderer & m_renderer;
     const CapsuleRenderingData m_data;
 };
 
@@ -175,18 +175,18 @@ class SolidCapsuleRenderTask : public RenderTask
 {
 public:
     SolidCapsuleRenderTask(const RectRenderer & _renderer, SolidCapsuleRenderingData && _data) :
-        mr_renderer(_renderer),
+        m_renderer(_renderer),
         m_data(_data)
     {
     }
 
     void render(const RenderingContext & _context) override
     {
-        mr_renderer.renderCapsule(_context, m_data);
+        m_renderer.renderCapsule(_context, m_data);
     }
 
 private:
-    const RectRenderer & mr_renderer;
+    const RectRenderer & m_renderer;
     const SolidCapsuleRenderingData m_data;
 };
 
@@ -194,25 +194,25 @@ class UIRenderTask : public RenderTask
 {
 public:
     UIRenderTask(const UIRenderer & _renderer, const UI & _ui) :
-        mr_renderer(_renderer),
-        mr_ui(_ui)
+        m_renderer(_renderer),
+        m_ui(_ui)
     {
     }
 
     void render(const RenderingContext & _context) override
     {
-        mr_renderer.render(_context, mr_ui);
+        m_renderer.render(_context, m_ui);
     }
 
 private:
-    const UIRenderer & mr_renderer;
-    const UI & mr_ui;
+    const UIRenderer & m_renderer;
+    const UI & m_ui;
 };
 
 } // namespace
 
 Renderer::Renderer(const ResourceManager & _resource_manager, SDL_Window * _window, SDL_GPUDevice * _device) :
-    mr_resource_manager(_resource_manager),
+    m_resource_manager(_resource_manager),
     m_rendering_context {
         .window = _window,
         .device = _device,
@@ -222,7 +222,7 @@ Renderer::Renderer(const ResourceManager & _resource_manager, SDL_Window * _wind
         .window_size = USize(),
         .texture_size = FSize()
     },
-    mp_swapchain_texture(nullptr),
+    m_swapchain_texture(nullptr),
     m_rect_renderer(_resource_manager, _window, _device),
     m_line_renderer(_resource_manager, _window, _device)
 {
@@ -345,11 +345,11 @@ void Renderer::beginStep()
     if(!SDL_WaitAndAcquireGPUSwapchainTexture(
            m_rendering_context.command_buffer,
            m_rendering_context.window,
-           &mp_swapchain_texture,
+           &m_swapchain_texture,
            &m_rendering_context.window_size.w,
            &m_rendering_context.window_size.h
        ) ||
-       !mp_swapchain_texture)
+       !m_swapchain_texture)
     {
         throw SDLException("Unable to acquire a swapchain texture.");
     }
@@ -357,7 +357,7 @@ void Renderer::beginStep()
 
 void Renderer::beginDefaultRenderPass()
 {
-    beginRenderPass(mp_swapchain_texture, FSize(m_rendering_context.window_size.w, m_rendering_context.window_size.h));
+    beginRenderPass(m_swapchain_texture, FSize(m_rendering_context.window_size.w, m_rendering_context.window_size.h));
 }
 
 void Renderer::endDefaultRenderPass()
@@ -434,7 +434,7 @@ void Renderer::endRenderPass(const Texture & _texture, const SDL_FRect & _output
     blit_info.source.y = .0f;
     blit_info.source.w = _texture.getWidth();
     blit_info.source.h = _texture.getHeight();
-    blit_info.destination.texture = mp_swapchain_texture;
+    blit_info.destination.texture = m_swapchain_texture;
     blit_info.destination.x = _output_rect.x;
     blit_info.destination.y = _output_rect.y;
     blit_info.destination.w = _output_rect.w;
@@ -450,7 +450,7 @@ void Renderer::submitStep()
 
     SDL_SubmitGPUCommandBuffer(m_rendering_context.command_buffer);
     m_rendering_context.command_buffer = nullptr;
-    mp_swapchain_texture = nullptr;
+    m_swapchain_texture = nullptr;
 }
 
 void Renderer::renderRect(RectRenderingData && _data)

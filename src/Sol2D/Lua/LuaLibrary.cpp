@@ -39,7 +39,7 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-const char gc_key_path[] = "path";
+const char g_key_path[] = "path";
 
 bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
 {
@@ -53,12 +53,12 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
     {
         LuaTable table(_lua, -1);
         std::string search_paths;
-        if(table.tryGetString(gc_key_path, search_paths))
+        if(table.tryGetString(g_key_path, search_paths))
         {
             std::stringstream search_paths_stream(search_paths);
             search_paths_stream << search_paths << LUA_PATH_SEP << (_path / LUA_PATH_MARK ".lua").string()
                                 << LUA_PATH_SEP << (_path / LUA_PATH_MARK / "init.lua").string();
-            table.setStringValue(gc_key_path, search_paths_stream.str().c_str());
+            table.setStringValue(g_key_path, search_paths_stream.str().c_str());
             result = true;
         }
     }
@@ -71,52 +71,52 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
 LuaLibrary::LuaLibrary(
     const Workspace & _workspace, StoreManager & _store_manager, Window & _window, Renderer & _renderer
 ) :
-    mp_lua(luaL_newstate()),
-    mr_workspace(_workspace)
+    m_lua(luaL_newstate()),
+    m_workspace(_workspace)
 {
-    luaL_openlibs(mp_lua);
-    if(!addPackagePath(mp_lua, _workspace.getScriptsRootPath()))
+    luaL_openlibs(m_lua);
+    if(!addPackagePath(m_lua, _workspace.getScriptsRootPath()))
     {
         _workspace.getMainLogger().warn("Unable to add Lua package paths");
     }
-    lua_newuserdata(mp_lua, 1);
-    if(pushMetatable(mp_lua, LuaTypeName::lib) == MetatablePushResult::Created)
+    lua_newuserdata(m_lua, 1);
+    if(pushMetatable(m_lua, LuaTypeName::lib) == MetatablePushResult::Created)
     {
-        pushWindowApi(mp_lua, _window);
-        lua_setfield(mp_lua, -2, "window");
-        pushKeyboardApi(mp_lua);
-        lua_setfield(mp_lua, -2, "keyboard");
-        pushMouseApi(mp_lua);
-        lua_setfield(mp_lua, -2, "mouse");
-        pushStoreManagerApi(mp_lua, _workspace, _renderer, _store_manager);
-        lua_setfield(mp_lua, -2, "stores");
-        pushScancodeEnum(mp_lua);
-        lua_setfield(mp_lua, -2, "Scancode");
-        pushBodyTypeEnum(mp_lua);
-        lua_setfield(mp_lua, -2, "BodyType");
-        pushBodyShapeTypeEnum(mp_lua);
-        lua_setfield(mp_lua, -2, "BodyShapeType");
-        pushTileMapObjectTypeEnum(mp_lua);
-        lua_setfield(mp_lua, -2, "TileMapObjectType");
-        pushDimensionUnitEnum(mp_lua);
-        lua_setfield(mp_lua, -2, "DimensionUnit");
-        pushWidgetStateEnum(mp_lua);
-        lua_setfield(mp_lua, -2, "WidgetState");
-        pushVerticalTextAlignmentEmum(mp_lua);
-        lua_setfield(mp_lua, -2, "VerticalTextAlignment");
-        pushHorizontalTextAlignmentEmum(mp_lua);
-        lua_setfield(mp_lua, -2, "HorizontalTextAlignment");
+        pushWindowApi(m_lua, _window);
+        lua_setfield(m_lua, -2, "window");
+        pushKeyboardApi(m_lua);
+        lua_setfield(m_lua, -2, "keyboard");
+        pushMouseApi(m_lua);
+        lua_setfield(m_lua, -2, "mouse");
+        pushStoreManagerApi(m_lua, _workspace, _renderer, _store_manager);
+        lua_setfield(m_lua, -2, "stores");
+        pushScancodeEnum(m_lua);
+        lua_setfield(m_lua, -2, "Scancode");
+        pushBodyTypeEnum(m_lua);
+        lua_setfield(m_lua, -2, "BodyType");
+        pushBodyShapeTypeEnum(m_lua);
+        lua_setfield(m_lua, -2, "BodyShapeType");
+        pushTileMapObjectTypeEnum(m_lua);
+        lua_setfield(m_lua, -2, "TileMapObjectType");
+        pushDimensionUnitEnum(m_lua);
+        lua_setfield(m_lua, -2, "DimensionUnit");
+        pushWidgetStateEnum(m_lua);
+        lua_setfield(m_lua, -2, "WidgetState");
+        pushVerticalTextAlignmentEmum(m_lua);
+        lua_setfield(m_lua, -2, "VerticalTextAlignment");
+        pushHorizontalTextAlignmentEmum(m_lua);
+        lua_setfield(m_lua, -2, "HorizontalTextAlignment");
     }
-    lua_setmetatable(mp_lua, -2);
-    lua_setglobal(mp_lua, "sol");
+    lua_setmetatable(m_lua, -2);
+    lua_setglobal(m_lua, "sol");
 }
 
 LuaLibrary::~LuaLibrary()
 {
-    lua_close(mp_lua);
+    lua_close(m_lua);
 }
 
 void LuaLibrary::executeMainScript()
 {
-    executeScript(mp_lua, mr_workspace, mr_workspace.getMainScriptPath());
+    executeScript(m_lua, m_workspace, m_workspace.getMainScriptPath());
 }

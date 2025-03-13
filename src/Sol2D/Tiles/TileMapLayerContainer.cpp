@@ -37,7 +37,7 @@ TileMapTileLayer & TileMapLayerContainer::createTileLayer(
 )
 {
     TileMapTileLayer * layer =
-        new TileMapTileLayer(_parent, mr_tile_heap, _id, _name, _tile_width, _tile_height, _x, _y, _width, _height);
+        new TileMapTileLayer(_parent, m_tile_heap, _id, _name, _tile_width, _tile_height, _x, _y, _width, _height);
     storeLayer(_name, layer);
     return *layer;
 }
@@ -46,7 +46,7 @@ TileMapObjectLayer & TileMapLayerContainer::createObjectLayer(
     const TileMapLayer * _parent, uint32_t _id, const std::string & _name
 )
 {
-    TileMapObjectLayer * layer = new TileMapObjectLayer(_parent, mr_object_heap, _id, _name);
+    TileMapObjectLayer * layer = new TileMapObjectLayer(_parent, m_object_heap, _id, _name);
     storeLayer(_name, layer);
     return *layer;
 }
@@ -64,7 +64,7 @@ TileMapGroupLayer & TileMapLayerContainer::createGroupLayer(
     const TileMapLayer * _parent, uint32_t _id, const std::string & _name
 )
 {
-    TileMapGroupLayer * layer = new TileMapGroupLayer(_parent, _id, _name, mr_tile_heap, mr_object_heap);
+    TileMapGroupLayer * layer = new TileMapGroupLayer(_parent, _id, _name, m_tile_heap, m_object_heap);
     storeLayer(_name, layer);
     return *layer;
 }

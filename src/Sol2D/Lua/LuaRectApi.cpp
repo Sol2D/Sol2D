@@ -21,10 +21,10 @@ using namespace Sol2D::Lua;
 
 namespace {
 
-static constexpr char gc_key_x[] = "x";
-static constexpr char gc_key_y[] = "y";
-static constexpr char gc_key_w[] = "w";
-static constexpr char gc_key_h[] = "h";
+static constexpr char g_key_x[] = "x";
+static constexpr char g_key_y[] = "y";
+static constexpr char g_key_w[] = "w";
+static constexpr char g_key_h[] = "h";
 
 } // namespace
 
@@ -35,8 +35,8 @@ bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, SDL_FRect & _rect)
         return false;
 
     float x, y, w, h;
-    if(table.tryGetNumber(gc_key_w, &w) && table.tryGetNumber(gc_key_h, &h) && table.tryGetNumber(gc_key_x, &x) &&
-       table.tryGetNumber(gc_key_y, &y))
+    if(table.tryGetNumber(g_key_w, &w) && table.tryGetNumber(g_key_h, &h) && table.tryGetNumber(g_key_x, &x) &&
+       table.tryGetNumber(g_key_y, &y))
     {
         _rect.x = x;
         _rect.y = y;
@@ -50,8 +50,8 @@ bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, SDL_FRect & _rect)
 void Sol2D::Lua::pushRect(lua_State * _lua, const SDL_FRect & _rect)
 {
     LuaTable table = LuaTable::pushNew(_lua);
-    table.setNumberValue(gc_key_x, _rect.x);
-    table.setNumberValue(gc_key_y, _rect.y);
-    table.setNumberValue(gc_key_w, _rect.w);
-    table.setNumberValue(gc_key_h, _rect.h);
+    table.setNumberValue(g_key_x, _rect.x);
+    table.setNumberValue(g_key_y, _rect.y);
+    table.setNumberValue(g_key_w, _rect.w);
+    table.setNumberValue(g_key_h, _rect.h);
 }

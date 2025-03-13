@@ -113,7 +113,7 @@ public:
     void setPointValue(const char * _key, const SDL_FPoint & _point);
 
 private:
-    lua_State * mp_lua;
+    lua_State * m_lua;
     int m_idx;
 };
 
@@ -123,7 +123,7 @@ inline LuaTable::LuaTable(lua_State * _lua) :
 }
 
 inline LuaTable::LuaTable(lua_State * _lua, int _idx) :
-    mp_lua(_lua),
+    m_lua(_lua),
     m_idx(lua_absindex(_lua, _idx))
 {
 }
@@ -136,12 +136,12 @@ inline LuaTable LuaTable::pushNew(lua_State * _lua)
 
 inline lua_State * LuaTable::getLua() const
 {
-    return mp_lua;
+    return m_lua;
 }
 
 inline bool LuaTable::isValid() const
 {
-    return lua_istable(mp_lua, m_idx);
+    return lua_istable(m_lua, m_idx);
 }
 
 template<std::floating_point T>
@@ -159,10 +159,10 @@ bool LuaTable::tryGetNumber(const char * _key, std::optional<T> & _value) const
 template<std::floating_point T>
 bool LuaTable::tryGetNumber(const char * _key, T * _value) const
 {
-    bool result = lua_getfield(mp_lua, m_idx, _key) == LUA_TNUMBER;
+    bool result = lua_getfield(m_lua, m_idx, _key) == LUA_TNUMBER;
     if(result)
-        *_value = static_cast<T>(lua_tonumber(mp_lua, -1));
-    lua_pop(mp_lua, 1);
+        *_value = static_cast<T>(lua_tonumber(m_lua, -1));
+    lua_pop(m_lua, 1);
     return result;
 }
 
@@ -205,11 +205,11 @@ bool LuaTable::tryGetInteger(const char * _key, std::optional<T> & _value) const
 template<std::integral T>
 bool LuaTable::tryGetInteger(const char * _key, T * _value) const
 {
-    lua_getfield(mp_lua, m_idx, _key);
-    bool result = lua_isinteger(mp_lua, -1);
+    lua_getfield(m_lua, m_idx, _key);
+    bool result = lua_isinteger(m_lua, -1);
     if(result)
-        *_value = static_cast<T>(lua_tointeger(mp_lua, -1));
-    lua_pop(mp_lua, 1);
+        *_value = static_cast<T>(lua_tointeger(m_lua, -1));
+    lua_pop(m_lua, 1);
     return result;
 }
 
@@ -228,27 +228,27 @@ bool LuaTable::tryGetUnsignedInteger(const char * _key, std::optional<T> & _valu
 template<std::unsigned_integral T>
 bool LuaTable::tryGetUnsignedInteger(const char * _key, T * _value) const
 {
-    lua_getfield(mp_lua, m_idx, _key);
+    lua_getfield(m_lua, m_idx, _key);
     bool result = false;
-    if(lua_isinteger(mp_lua, -1))
+    if(lua_isinteger(m_lua, -1))
     {
-        lua_Integer value = lua_tointeger(mp_lua, -1);
+        lua_Integer value = lua_tointeger(m_lua, -1);
         if(value >= 0)
         {
             *_value = static_cast<T>(value);
             result = true;
         }
     }
-    lua_pop(mp_lua, 1);
+    lua_pop(m_lua, 1);
     return result;
 }
 
 template<DimensionValueConcept Number>
 bool LuaTable::tryGetDimension(const char * _key, std::optional<Dimension<Number>> & _value)
 {
-    if(tryGetValue(_key) && Lua::tryGetDimension(mp_lua, -1, _value))
+    if(tryGetValue(_key) && Lua::tryGetDimension(m_lua, -1, _value))
     {
-        lua_pop(mp_lua, 1);
+        lua_pop(m_lua, 1);
         return true;
     }
     return false;
@@ -257,9 +257,9 @@ bool LuaTable::tryGetDimension(const char * _key, std::optional<Dimension<Number
 template<DimensionValueConcept Number>
 bool LuaTable::tryGetDimension(const char * _key, Dimension<Number> & _value)
 {
-    if(tryGetValue(_key) && Lua::tryGetDimension(mp_lua, -1, _value))
+    if(tryGetValue(_key) && Lua::tryGetDimension(m_lua, -1, _value))
     {
-        lua_pop(mp_lua, 1);
+        lua_pop(m_lua, 1);
         return true;
     }
     return false;

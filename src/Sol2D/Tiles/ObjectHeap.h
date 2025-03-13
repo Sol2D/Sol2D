@@ -78,13 +78,13 @@ private:
     public:
         ObjectImpl(ObjectMapById & _map, const TileMapObjectDef & _def) :
             TBase(_def),
-            mr_map(_map)
+            m_map(_map)
         {
         }
 
         void setClass(const std::string & _class) override
         {
-            mr_map.modify(mr_map.find(TBase::getId()), [&_class](std::shared_ptr<TileMapObject> & __object) {
+            m_map.modify(m_map.find(TBase::getId()), [&_class](std::shared_ptr<TileMapObject> & __object) {
                 static_cast<ObjectImpl<TBase> *>(__object.get())->m_class = _class;
             });
 
@@ -93,7 +93,7 @@ private:
 
         void setLayerId(uint32_t _layer_id) override
         {
-            mr_map.modify(mr_map.find(TBase::getId()), [_layer_id](std::shared_ptr<TileMapObject> & __object) {
+            m_map.modify(m_map.find(TBase::getId()), [_layer_id](std::shared_ptr<TileMapObject> & __object) {
                 static_cast<ObjectImpl<TBase> *>(__object.get())->m_layer_id = _layer_id;
             });
 
@@ -102,7 +102,7 @@ private:
 
         void setName(const std::string & _name) override
         {
-            mr_map.modify(mr_map.find(TBase::getId()), [&_name](std::shared_ptr<TileMapObject> & __object) {
+            m_map.modify(m_map.find(TBase::getId()), [&_name](std::shared_ptr<TileMapObject> & __object) {
                 static_cast<ObjectImpl<TBase> *>(__object.get())->m_name = _name;
             });
 
@@ -110,7 +110,7 @@ private:
         }
 
     private:
-        ObjectMapById & mr_map;
+        ObjectMapById & m_map;
     };
 
 public:
@@ -140,18 +140,18 @@ public:
 
 private:
     ObjectMap m_objects;
-    ObjectMapById & mr_objects_by_id;
-    ObjectMapByLayer & mr_objects_by_layer;
-    ObjectMapByClass & mr_objects_by_class;
-    ObjectMapByName & mr_objects_by_name;
+    ObjectMapById & m_objects_by_id;
+    ObjectMapByLayer & m_objects_by_layer;
+    ObjectMapByClass & m_objects_by_class;
+    ObjectMapByName & m_objects_by_name;
     uint32_t m_next_gid;
 };
 
 inline ObjectHeap::ObjectHeap() :
-    mr_objects_by_id(m_objects.get<ObjectIdTag>()),
-    mr_objects_by_layer(m_objects.get<ObjectLayerTag>()),
-    mr_objects_by_class(m_objects.get<ObjectClassTag>()),
-    mr_objects_by_name(m_objects.get<ObjectNameTag>()),
+    m_objects_by_id(m_objects.get<ObjectIdTag>()),
+    m_objects_by_layer(m_objects.get<ObjectLayerTag>()),
+    m_objects_by_class(m_objects.get<ObjectClassTag>()),
+    m_objects_by_name(m_objects.get<ObjectNameTag>()),
     m_next_gid(1)
 {
 }
@@ -170,7 +170,7 @@ T & ObjectHeap::createObject(uint32_t _layer_id, uint32_t _gid, const char * _cl
         // TODO: if ID exists (see TileHeap)
     }
     TileMapObjectDef def {.id = _gid, .layer_id = _layer_id, .klass = _class, .name = _name};
-    ObjectImpl<T> * object = new ObjectImpl<T>(mr_objects_by_id, def);
+    ObjectImpl<T> * object = new ObjectImpl<T>(m_objects_by_id, def);
     m_objects.insert(std::shared_ptr<TileMapObject>(object));
     if(m_next_gid <= _gid)
         m_next_gid = _gid + 1;

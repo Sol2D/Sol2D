@@ -31,7 +31,7 @@ public:
     S2_DEFAULT_COPY_AND_MOVE(LuaCallbackStorage)
 
     explicit LuaCallbackStorage(lua_State * _lua) :
-        mp_lua(_lua)
+        m_lua(_lua)
     {
     }
 
@@ -58,7 +58,7 @@ private:
     static const char sc_callback_registry_key;
     static bool s_is_disposed;
     static Utils::SequentialId<uint32_t> m_sequential_id;
-    lua_State * mp_lua;
+    lua_State * m_lua;
 };
 
 } // namespace Sol2D::Lua

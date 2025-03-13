@@ -36,7 +36,7 @@ public:
 
 private:
     Area m_aria;
-    Renderer & mr_renderer;
+    Renderer & m_renderer;
     Texture m_texture;
     SDL_FRect m_rect;
     std::shared_ptr<Canvas> m_canvas;

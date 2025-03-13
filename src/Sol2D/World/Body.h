@@ -32,7 +32,7 @@ public:
     explicit Body(b2BodyId _b2_body_id, ActionQueue & _action_queue) :
         m_gid(s_sequential_id.getNext()),
         m_b2_body_id(_b2_body_id),
-        mr_action_queue(_action_queue)
+        m_action_queue(_action_queue)
     {
     }
 
@@ -49,7 +49,7 @@ public:
 
     void setPosition(const SDL_FPoint & _position)
     {
-        mr_action_queue.enqueueAction([this, _position]() {
+        m_action_queue.enqueueAction([this, _position]() {
             if(B2_IS_NON_NULL(m_b2_body_id))
                 b2Body_SetTransform(m_b2_body_id, toBox2D(_position), b2Body_GetRotation(m_b2_body_id));
         });
@@ -84,7 +84,7 @@ public:
 
     void applyForceToCenter(const SDL_FPoint & _force)
     {
-        mr_action_queue.enqueueAction([this, _force]() {
+        m_action_queue.enqueueAction([this, _force]() {
             if(B2_IS_NON_NULL(m_b2_body_id))
                 b2Body_ApplyForceToCenter(m_b2_body_id, toBox2D(_force), true); // TODO: what is wake?
         });
@@ -92,7 +92,7 @@ public:
 
     void applyImpulseToCenter(const SDL_FPoint & _impulse)
     {
-        mr_action_queue.enqueueAction([this, _impulse]() {
+        m_action_queue.enqueueAction([this, _impulse]() {
             if(B2_IS_NON_NULL(m_b2_body_id))
                 b2Body_ApplyLinearImpulseToCenter(m_b2_body_id, toBox2D(_impulse), true); // TODO: what is wake?
         });
@@ -125,7 +125,7 @@ private:
     static Utils::SequentialId<uint64_t> s_sequential_id;
     uint64_t m_gid;
     b2BodyId m_b2_body_id;
-    ActionQueue & mr_action_queue;
+    ActionQueue & m_action_queue;
     Utils::PreHashedMap<std::string, BodyShape *> m_shapes;
     std::optional<std::string> m_layer;
 };

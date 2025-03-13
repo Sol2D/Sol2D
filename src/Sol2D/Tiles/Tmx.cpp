@@ -86,11 +86,11 @@ protected:
     Texture parseImage(const XMLElement & _xml);
 
 protected:
-    Renderer & mr_renderer;
-    TileHeap & mr_tile_heap;
-    ObjectHeap & mr_object_heap;
-    TileMap & mr_map;
-    const std::filesystem::path & mr_path;
+    Renderer & m_renderer;
+    TileHeap & m_tile_heap;
+    ObjectHeap & m_object_heap;
+    TileMap & m_map;
+    const std::filesystem::path & m_path;
 };
 
 class TileMapXmlLoader : private XmlLoader
@@ -148,7 +148,7 @@ private:
     void loadFromXml(const XMLDocument & _xml);
 
 private:
-    const Workspace & mr_workspace;
+    const Workspace & m_workspace;
     bool m_is_map_infinite;
 };
 
@@ -253,11 +253,11 @@ inline XmlLoader::XmlLoader(
     TileMap & _map,
     const std::filesystem::path & _path
 ) :
-    mr_renderer(_renderer),
-    mr_tile_heap(_tile_heap),
-    mr_object_heap(_object_heap),
-    mr_map(_map),
-    mr_path(_path)
+    m_renderer(_renderer),
+    m_tile_heap(_tile_heap),
+    m_object_heap(_object_heap),
+    m_map(_map),
+    m_path(_path)
 {
 }
 
@@ -268,7 +268,7 @@ uint32_t XmlLoader::readRequiredUintAttribute(const XMLElement & _xml_element, c
     {
         std::stringstream ss;
         ss << "The attribute \"" << _attr << "\" of the tag \"" << _xml_element.Name() << "\" in the XML file "
-           << mr_path << " must be a non-negative integer";
+           << m_path << " must be a non-negative integer";
         throw TiledXmlException(ss.str());
     }
     return static_cast<uint32_t>(int_val);
@@ -281,7 +281,7 @@ uint32_t XmlLoader::readRequiredPositiveUintAttribute(const XMLElement & _xml_el
     {
         std::stringstream ss;
         ss << "The attribute \"" << _attr << "\" of the tag \"" << _xml_element.Name() << "\" in the XML file "
-           << mr_path << " must be a positive integer";
+           << m_path << " must be a positive integer";
         throw TiledXmlException(ss.str());
     }
     return static_cast<uint32_t>(int_val);
@@ -297,7 +297,7 @@ int32_t XmlLoader::readRequiredIntAttribute(const XMLElement & _xml_element, con
     {
         std::stringstream ss;
         ss << "The attribute \"" << _attr << "\" of the tag \"" << _xml_element.Name() << "\" in the XML file "
-           << mr_path << " must be an integer";
+           << m_path << " must be an integer";
         throw TiledXmlException(ss.str());
     }
     return static_cast<int32_t>(int_val);
@@ -310,7 +310,7 @@ const char * XmlLoader::readRequiredAttribute(const XMLElement & _xml_element, c
     {
         std::stringstream ss;
         ss << "The attribute \"" << _attr << "\" is required for the tag \"" << _xml_element.Name()
-           << "\" in the XML file " << mr_path;
+           << "\" in the XML file " << m_path;
         throw TiledXmlException(ss.str());
     }
     return value;
@@ -318,7 +318,7 @@ const char * XmlLoader::readRequiredAttribute(const XMLElement & _xml_element, c
 
 inline std::string XmlLoader::formatFileReadErrorMessage() const
 {
-    return formatFileReadErrorMessage(mr_path);
+    return formatFileReadErrorMessage(m_path);
 }
 
 inline std::string XmlLoader::formatFileReadErrorMessage(const std::filesystem::path & _path) const
@@ -328,7 +328,7 @@ inline std::string XmlLoader::formatFileReadErrorMessage(const std::filesystem::
 
 std::string XmlLoader::formatXmlRootElemetErrorMessage(const char * _expected) const
 {
-    return std::format("The root element of the XML file {}: must be \"{}\"", mr_path.string(), _expected);
+    return std::format("The root element of the XML file {}: must be \"{}\"", m_path.string(), _expected);
 }
 
 bool XmlLoader::tryParseColor(const char * _value, SDL_Color & _color) const
@@ -390,7 +390,7 @@ Texture XmlLoader::parseImage(const XMLElement & _xml)
     {
         std::filesystem::path path(source);
         if(path.is_relative())
-            path = mr_path.parent_path() / path;
+            path = m_path.parent_path() / path;
         surface = IMG_Load(path.c_str());
         if(surface == nullptr)
             throw IOException(formatFileReadErrorMessage(path));
@@ -411,7 +411,7 @@ Texture XmlLoader::parseImage(const XMLElement & _xml)
             );
         }
     }
-    Texture texture = mr_renderer.createTexture(*surface, "Tile");
+    Texture texture = m_renderer.createTexture(*surface, "Tile");
     SDL_DestroySurface(surface);
     return texture;
 }
@@ -425,7 +425,7 @@ inline TileMapXmlLoader::TileMapXmlLoader(
     const std::filesystem::path & _path
 ) :
     XmlLoader(_renderer, _tile_heap, _object_heap, _map, _path),
-    mr_workspace(_workspace),
+    m_workspace(_workspace),
     m_is_map_infinite(false)
 {
 }
@@ -433,7 +433,7 @@ inline TileMapXmlLoader::TileMapXmlLoader(
 void TileMapXmlLoader::loadFromFile()
 {
     XMLDocument xml;
-    if(xml.LoadFile(mr_path.c_str()) != XML_SUCCESS)
+    if(xml.LoadFile(m_path.c_str()) != XML_SUCCESS)
         throw IOException(formatFileReadErrorMessage());
     loadFromXml(xml);
 }
@@ -445,49 +445,49 @@ void TileMapXmlLoader::loadFromXml(const XMLDocument & _xml)
     if(strcmp(tag_name_map, xmap->Name()) != 0)
         throw TiledXmlException(formatXmlRootElemetErrorMessage(tag_name_map));
     m_is_map_infinite = xmap->BoolAttribute("infinite");
-    mr_map.setClass(xmap->Attribute("class"));
-    mr_map.setWidth(xmap->UnsignedAttribute("width"));
-    mr_map.setHeight(xmap->UnsignedAttribute("height"));
-    mr_map.setTileWidth(xmap->UnsignedAttribute("tilewidth"));
-    mr_map.setTileHeight(xmap->UnsignedAttribute("tileheight"));
-    mr_map.setHexSideLength(xmap->UnsignedAttribute("hexsidelength"));
-    mr_map.setParallaxOriginX(xmap->IntAttribute("parallaxoriginx"));
-    mr_map.setParallaxOriginY(xmap->IntAttribute("parallaxoriginy"));
+    m_map.setClass(xmap->Attribute("class"));
+    m_map.setWidth(xmap->UnsignedAttribute("width"));
+    m_map.setHeight(xmap->UnsignedAttribute("height"));
+    m_map.setTileWidth(xmap->UnsignedAttribute("tilewidth"));
+    m_map.setTileHeight(xmap->UnsignedAttribute("tileheight"));
+    m_map.setHexSideLength(xmap->UnsignedAttribute("hexsidelength"));
+    m_map.setParallaxOriginX(xmap->IntAttribute("parallaxoriginx"));
+    m_map.setParallaxOriginY(xmap->IntAttribute("parallaxoriginy"));
     if(const char * render_order = xmap->Attribute("renderorder"))
     {
         if(strcmp("right-down", render_order) == 0)
-            mr_map.setRenderOrder(TileMap::RenderOrder::RightDown);
+            m_map.setRenderOrder(TileMap::RenderOrder::RightDown);
         else if(strcmp("right-up", render_order) == 0)
-            mr_map.setRenderOrder(TileMap::RenderOrder::RightUp);
+            m_map.setRenderOrder(TileMap::RenderOrder::RightUp);
         else if(strcmp("left-down", render_order) == 0)
-            mr_map.setRenderOrder(TileMap::RenderOrder::LeftDown);
+            m_map.setRenderOrder(TileMap::RenderOrder::LeftDown);
         else if(strcmp("left-up", render_order) == 0)
-            mr_map.setRenderOrder(TileMap::RenderOrder::LeftUp);
+            m_map.setRenderOrder(TileMap::RenderOrder::LeftUp);
     }
     if(const char * stagger_axis = xmap->Attribute("staggeraxis"))
     {
         if(strcmp("x", stagger_axis))
-            mr_map.setStaggerAxis(TileMap::Axis::X);
+            m_map.setStaggerAxis(TileMap::Axis::X);
         else if(strcmp("y", stagger_axis))
-            mr_map.setStaggerAxis(TileMap::Axis::Y);
+            m_map.setStaggerAxis(TileMap::Axis::Y);
     }
     if(const char * stagger_index = xmap->Attribute("staggerindex"))
     {
         if(strcmp("even", stagger_index) == 0)
-            mr_map.setStaggerIndex(TileMap::StaggerIndex::Even);
+            m_map.setStaggerIndex(TileMap::StaggerIndex::Even);
         else if(strcmp("odd", stagger_index) == 0)
-            mr_map.setStaggerIndex(TileMap::StaggerIndex::Odd);
+            m_map.setStaggerIndex(TileMap::StaggerIndex::Odd);
     }
     {
         SDL_Color color;
         if(tryParseColor(xmap->Attribute("backgroundcolor"), color))
-            mr_map.setBackgroundColor(toR32G32B32A32_SFLOAT(color));
+            m_map.setBackgroundColor(toR32G32B32A32_SFLOAT(color));
     }
     for(const XMLElement * xts = xmap->FirstChildElement("tileset"); xts; xts = xts->NextSiblingElement(xts->Name()))
     {
         loadTileSet(*xts);
     }
-    loadLayers(*xmap, mr_map, nullptr);
+    loadLayers(*xmap, m_map, nullptr);
 }
 
 void TileMapXmlLoader::loadTileSet(const XMLElement & _xml)
@@ -497,13 +497,13 @@ void TileMapXmlLoader::loadTileSet(const XMLElement & _xml)
     {
         std::filesystem::path source_path(source);
         if(!source_path.is_absolute())
-            source_path = mr_path.parent_path() / source_path;
-        TileSetXmlLoader loader(mr_renderer, mr_tile_heap, mr_object_heap, mr_map, source_path);
+            source_path = m_path.parent_path() / source_path;
+        TileSetXmlLoader loader(m_renderer, m_tile_heap, m_object_heap, m_map, source_path);
         loader.loadFromFile(first_gid);
     }
     else
     {
-        TileSetXmlLoader loader(mr_renderer, mr_tile_heap, mr_object_heap, mr_map, mr_path);
+        TileSetXmlLoader loader(m_renderer, m_tile_heap, m_object_heap, m_map, m_path);
         loader.loadFromXml(_xml, first_gid);
     }
 }
@@ -561,11 +561,11 @@ void TileMapXmlLoader::loadTileLayer(
             loadTileLayerChunk(*xdata, encoding, compression, x, y, width, height, *data);
         }
     }
-    TileMapTileLayer * layer = data->createLayer(_container, _parent, mr_map.getTileWidth(), mr_map.getTileHeight());
+    TileMapTileLayer * layer = data->createLayer(_container, _parent, m_map.getTileWidth(), m_map.getTileHeight());
     if(layer)
     {
         readLayer(_xml, *layer);
-        mr_map.expand(layer->getX(), layer->getY(), layer->getWidth(), layer->getHeight());
+        m_map.expand(layer->getX(), layer->getY(), layer->getWidth(), layer->getHeight());
     }
 }
 
@@ -770,7 +770,7 @@ void TileMapXmlLoader::loadObject(const XMLElement & _xml, TileMapObjectLayer & 
     {
         if(width == height)
         {
-            TileMapCircle & circle = mr_object_heap.createObject<TileMapCircle>(_layer.getId(), id, cls, name);
+            TileMapCircle & circle = m_object_heap.createObject<TileMapCircle>(_layer.getId(), id, cls, name);
             float radius = width / 2;
             circle.setRadius(radius);
             object = &circle;
@@ -779,17 +779,17 @@ void TileMapXmlLoader::loadObject(const XMLElement & _xml, TileMapObjectLayer & 
         }
         else
         {
-            mr_workspace.getMainLogger().warn("Ellipses are not supported. Loading TMX object {} skipped.", id);
+            m_workspace.getMainLogger().warn("Ellipses are not supported. Loading TMX object {} skipped.", id);
             return;
         }
     }
     else if(_xml.FirstChildElement("point"))
     {
-        object = &mr_object_heap.createObject<TileMapPoint>(_layer.getId(), id, cls, name);
+        object = &m_object_heap.createObject<TileMapPoint>(_layer.getId(), id, cls, name);
     }
     else if(const XMLElement * spec = _xml.FirstChildElement("polygon"))
     {
-        TileMapPolygon & polygon = mr_object_heap.createObject<TileMapPolygon>(_layer.getId(), id, cls, name);
+        TileMapPolygon & polygon = m_object_heap.createObject<TileMapPolygon>(_layer.getId(), id, cls, name);
         object = &polygon;
         object_with_width_and_height = &polygon;
         loadPoints(*spec, polygon);
@@ -798,7 +798,7 @@ void TileMapXmlLoader::loadObject(const XMLElement & _xml, TileMapObjectLayer & 
     }
     else if(const XMLElement * spec = _xml.FirstChildElement("polyline"))
     {
-        TileMapPolyline & polyline = mr_object_heap.createObject<TileMapPolyline>(_layer.getId(), id, cls, name);
+        TileMapPolyline & polyline = m_object_heap.createObject<TileMapPolyline>(_layer.getId(), id, cls, name);
         object = &polyline;
         object_with_width_and_height = &polyline;
         loadPoints(*spec, polyline);
@@ -807,14 +807,14 @@ void TileMapXmlLoader::loadObject(const XMLElement & _xml, TileMapObjectLayer & 
     }
     else if(const XMLElement * spec = _xml.FirstChildElement("text"))
     {
-        TileMapText & text = mr_object_heap.createObject<TileMapText>(_layer.getId(), id, cls, name);
+        TileMapText & text = m_object_heap.createObject<TileMapText>(_layer.getId(), id, cls, name);
         object = &text;
         object_with_width_and_height = &text;
         loadText(*spec, text);
     }
     else
     {
-        TileMapPolygon & polygon = mr_object_heap.createObject<TileMapPolygon>(_layer.getId(), id, cls, name);
+        TileMapPolygon & polygon = m_object_heap.createObject<TileMapPolygon>(_layer.getId(), id, cls, name);
         polygon.addPoint({.0f, .0f});
         polygon.addPoint({width, 0.0f});
         polygon.addPoint({width, height});
@@ -935,7 +935,7 @@ inline TileSetXmlLoader::TileSetXmlLoader(
 void TileSetXmlLoader::loadFromFile(uint32_t _first_gid)
 {
     XMLDocument xml;
-    if(xml.LoadFile(mr_path.c_str()) != XML_SUCCESS)
+    if(xml.LoadFile(m_path.c_str()) != XML_SUCCESS)
         throw IOException(formatFileReadErrorMessage());
     const XMLElement * xml_root = xml.RootElement();
     if(strcmp(sc_root_tag_name, xml_root->Name()) != 0)
@@ -950,7 +950,7 @@ void TileSetXmlLoader::loadFromXml(const XMLElement & _xml, uint32_t _first_gid)
     uint32_t spacing = _xml.UnsignedAttribute("spacing");
     uint32_t margin = _xml.UnsignedAttribute("margin");
 
-    TileSet & set = mr_tile_heap.createTileSet();
+    TileSet & set = m_tile_heap.createTileSet();
     set.setName(_xml.Attribute("name"));
     set.setClass(_xml.Attribute("class"));
     set.setTileWidth(tile_width);
@@ -1032,7 +1032,7 @@ void TileSetXmlLoader::makeTiles(
     {
         for(int x = _margin; x <= max_x; x += _spacing + _tile_width)
         {
-            mr_tile_heap.createTile(gid++, _set, _texture, x, y, _tile_width, _tile_height);
+            m_tile_heap.createTile(gid++, _set, _texture, x, y, _tile_width, _tile_height);
         }
     }
 }
@@ -1052,7 +1052,7 @@ void TileSetXmlLoader::makeTile(const XMLElement & _xml_tile, const TileSet & _s
             width = static_cast<uint32_t>(texture.getWidth());
             height = static_cast<uint32_t>(texture.getHeight());
         }
-        mr_tile_heap.createTile(gid, _set, texture, x, y, width, height);
+        m_tile_heap.createTile(gid, _set, texture, x, y, width, height);
     }
 
     // TODO: type: The class of the tile. Is inherited by tile objects.
