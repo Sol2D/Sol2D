@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Layout.h>
+#include <Sol2D/Layouting/Node.h>
 #include <yoga/Yoga.h>
 
-using namespace Sol2D;
+using namespace Sol2D::Layouting;
 
 namespace {
 
@@ -25,47 +25,86 @@ class YogaNodeWrapper
 {
 public:
     YogaNodeWrapper(YGNodeRef _node);
-    void setPositionType(LayoutNode::Position::Type _type);
-    void setPosition(const std::unordered_map<LayoutNode::Edge, LayoutNode::Position> & _positions);
-    void setPosition(LayoutNode::Edge _edge, LayoutNode::Position _posotion);
-    void setMargin(const std::unordered_map<LayoutNode::Edge, float> & _margins);
-    void setMargin(LayoutNode::Edge _edge, float _value);
-    void setPadding(const std::unordered_map<LayoutNode::Edge, float> & _paddings);
-    void setPadding(LayoutNode::Edge _edge, float _value);
-    void setWidth(const LayoutNode::Size & _width);
-    void setHeight(const LayoutNode::Size & _height);
-    void setMinWidth(const LayoutNode::SizeLimit & _min_width);
-    void setMinHeight(const LayoutNode::SizeLimit & _min_height);
-    void setMaxWidth(const LayoutNode::SizeLimit & _max_width);
-    void setMaxHeight(const LayoutNode::SizeLimit & _max_height);
+    void setPositionType(Position::Type _type);
+    void setPosition(const std::unordered_map<Edge, Position> & _positions);
+    void setPosition(Edge _edge, Position _posotion);
+    void setMargin(const std::unordered_map<Edge, float> & _margins);
+    void setMargin(Edge _edge, float _value);
+    void setPadding(const std::unordered_map<Edge, float> & _paddings);
+    void setPadding(Edge _edge, float _value);
+    void setWidth(const Size & _width);
+    void setHeight(const Size & _height);
+    void setMinWidth(const SizeLimit & _min_width);
+    void setMinHeight(const SizeLimit & _min_height);
+    void setMaxWidth(const SizeLimit & _max_width);
+    void setMaxHeight(const SizeLimit & _max_height);
     void setFlexBasis(float _basis);
     void setFlexGrow(float _grow);
     void setFlexShrink(float _shrink);
-    void setFlexDirection(LayoutNode::FlexDirection _direction);
-    void setFlexWrap(LayoutNode::FlexWrap _wrap);
-    void setGap(const std::unordered_map<LayoutNode::GapGutter, float> & _gaps);
-    void setGap(LayoutNode::GapGutter _gutter, float _gap);
-    void setContentAlignment(LayoutNode::ContentAlignment _alignment);
-    void setContentJustification(LayoutNode::ContentJustification _justification);
-    void setItemsAlignment(LayoutNode::ItemAlignment _alignment);
-    void setSelfAlignment(LayoutNode::ItemAlignment _alignment);
+    void setFlexDirection(FlexDirection _direction);
+    void setFlexWrap(FlexWrap _wrap);
+    void setGap(const std::unordered_map<GapGutter, float> & _gaps);
+    void setGap(GapGutter _gutter, float _gap);
+    void setContentAlignment(ContentAlignment _alignment);
+    void setContentJustification(ContentJustification _justification);
+    void setItemsAlignment(ItemAlignment _alignment);
+    void setSelfAlignment(ItemAlignment _alignment);
     void setAspectRatio(float _ratio);
-    void setDisplayMode(LayoutNode::DisplayMode _mode);
+    void setDisplayMode(DisplayMode _mode);
 
 private:
-    static YGEdge edgeToYGEdge(LayoutNode::Edge _edge);
-    static YGFlexDirection flexDirectionToYGFlexDirection(LayoutNode::FlexDirection _fd);
-    static YGWrap flexWrapToYGWrap(LayoutNode::FlexWrap _wrap);
-    static YGAlign contentAlignmentToYGAlign(LayoutNode::ContentAlignment _alignment);
-    static YGAlign itemAlignmentToYGAlign(LayoutNode::ItemAlignment _alignment);
-    static YGJustify contentJustificationToYGJustify(LayoutNode::ContentJustification _justification);
-    static YGDisplay displayModeToYGDisplay(LayoutNode::DisplayMode _mode);
-    static YGGutter gapGutterToYGGutter(LayoutNode::GapGutter _gutter);
-    static YGPositionType positionTypeToYGPositionType(LayoutNode::Position::Type _type);
+    static YGEdge edgeToYGEdge(Edge _edge);
+    static YGFlexDirection flexDirectionToYGFlexDirection(FlexDirection _fd);
+    static YGWrap flexWrapToYGWrap(FlexWrap _wrap);
+    static YGAlign contentAlignmentToYGAlign(ContentAlignment _alignment);
+    static YGAlign itemAlignmentToYGAlign(ItemAlignment _alignment);
+    static YGJustify contentJustificationToYGJustify(ContentJustification _justification);
+    static YGDisplay displayModeToYGDisplay(DisplayMode _mode);
+    static YGGutter gapGutterToYGGutter(GapGutter _gutter);
+    static YGPositionType positionTypeToYGPositionType(Position::Type _type);
 
 private:
     YGNodeRef m_node;
 };
+
+// YGSize yogaMeasure(
+//     YGNodeConstRef _node,
+//     float _width,
+//     YGMeasureMode _width_mode,
+//     float _height,
+//     YGMeasureMode _height_mode)
+// {
+//     const Element * element = static_cast<const LayoutNode *>(YGNodeGetContext(_node))->getElement();
+//     if(!element)
+//         return { .width = _width, .height = _height };
+//     const FSize * size = element->getDesiredSize();
+//     if(!size)
+//         return { .width = _width, .height = _height };
+//     YGSize result { .width = size->w, .height = size->h };
+//     switch(_width_mode)
+//     {
+//     case YGMeasureModeExactly:
+//         result.width = _width;
+//         break;
+//     case YGMeasureModeAtMost:
+//         if(result.width > _width)
+//             result.width = _width;
+//     default:
+//         break;
+//     }
+//     switch(_height_mode)
+//     {
+//     case YGMeasureModeExactly:
+//         result.height = _height;
+//         break;
+//     case YGMeasureModeAtMost:
+//         if(result.height > _height)
+//             result.height = _height;
+//     default:
+//         break;
+//     }
+//     return result;
+// }
 
 } // namespace
 
@@ -74,191 +113,191 @@ inline YogaNodeWrapper::YogaNodeWrapper(YGNodeRef _node) :
 {
 }
 
-inline void YogaNodeWrapper::setPositionType(LayoutNode::Position::Type _type)
+inline void YogaNodeWrapper::setPositionType(Position::Type _type)
 {
     YGNodeStyleSetPositionType(m_node, positionTypeToYGPositionType(_type));
 }
 
 inline void YogaNodeWrapper::setPosition(
-    const std::unordered_map<LayoutNode::Edge, LayoutNode::Position> & _positions)
+    const std::unordered_map<Edge, Position> & _positions)
 {
     for(const auto & position_pair : _positions)
         setPosition(position_pair.first, position_pair.second);
 }
 
-inline void YogaNodeWrapper::setPosition(LayoutNode::Edge _edge, LayoutNode::Position _posotion)
+inline void YogaNodeWrapper::setPosition(Edge _edge, Position _posotion)
 {
-    switch(_posotion.units)
+    switch(_posotion.unit)
     {
-    case LayoutNode::Position::Units::Auto:
+    case Position::Unit::Auto:
         YGNodeStyleSetPositionAuto(m_node, edgeToYGEdge(_edge));
         break;
-    case LayoutNode::Position::Units::Points:
+    case Position::Unit::Point:
         YGNodeStyleSetPosition(m_node, edgeToYGEdge(_edge), _posotion.value);
         break;
-    case LayoutNode::Position::Units::Percentage:
+    case Position::Unit::Percent:
         YGNodeStyleSetPositionPercent(m_node, edgeToYGEdge(_edge), _posotion.value);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setMargin(const std::unordered_map<LayoutNode::Edge, float> & _margins)
+inline void YogaNodeWrapper::setMargin(const std::unordered_map<Edge, float> & _margins)
 {
     for(const auto margin_pair : _margins)
         setMargin(margin_pair.first, margin_pair.second);
 }
 
-inline void YogaNodeWrapper::setMargin(LayoutNode::Edge _edge, float _value)
+inline void YogaNodeWrapper::setMargin(Edge _edge, float _value)
 {
     YGNodeStyleSetMargin(m_node, edgeToYGEdge(_edge), _value);
 }
 
-inline void YogaNodeWrapper::setPadding(const std::unordered_map<LayoutNode::Edge, float> & _paddings)
+inline void YogaNodeWrapper::setPadding(const std::unordered_map<Edge, float> & _paddings)
 {
     for(const auto padding_pair : _paddings)
         setPadding(padding_pair.first, padding_pair.second);
 }
 
-inline void YogaNodeWrapper::setPadding(LayoutNode::Edge _edge, float _value)
+inline void YogaNodeWrapper::setPadding(Edge _edge, float _value)
 {
     YGNodeStyleSetPadding(m_node, edgeToYGEdge(_edge), _value);
 }
 
-inline void YogaNodeWrapper::setWidth(const LayoutNode::Size & _width)
+inline void YogaNodeWrapper::setWidth(const Size & _width)
 {
-    switch(_width.units)
+    switch(_width.unit)
     {
-    case LayoutNode::Size::Units::Points:
+    case Size::Unit::Points:
         YGNodeStyleSetWidth(m_node, _width.value);
         break;
-    case LayoutNode::Size::Units::Auto:
+    case Size::Unit::Auto:
         YGNodeStyleSetWidthAuto(m_node);
         break;
-    case LayoutNode::Size::Units::Percentage:
+    case Size::Unit::Percentage:
         YGNodeStyleSetWidthPercent(m_node, _width.value);
         break;
-    case LayoutNode::Size::Units::MaxContent:
+    case Size::Unit::MaxContent:
         YGNodeStyleSetWidthMaxContent(m_node);
         break;
-    case LayoutNode::Size::Units::FitContent:
+    case Size::Unit::FitContent:
         YGNodeStyleSetWidthFitContent(m_node);
         break;
-    case LayoutNode::Size::Units::Stretch:
+    case Size::Unit::Stretch:
         YGNodeStyleSetWidthStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setHeight(const LayoutNode::Size & _height)
+inline void YogaNodeWrapper::setHeight(const Size & _height)
 {
-    switch(_height.units)
+    switch(_height.unit)
     {
-    case LayoutNode::Size::Units::Points:
+    case Size::Unit::Points:
         YGNodeStyleSetHeight(m_node, _height.value);
         break;
-    case LayoutNode::Size::Units::Auto:
+    case Size::Unit::Auto:
         YGNodeStyleSetHeightAuto(m_node);
         break;
-    case LayoutNode::Size::Units::Percentage:
+    case Size::Unit::Percentage:
         YGNodeStyleSetHeightPercent(m_node, _height.value);
         break;
-    case LayoutNode::Size::Units::MaxContent:
+    case Size::Unit::MaxContent:
         YGNodeStyleSetHeightMaxContent(m_node);
         break;
-    case LayoutNode::Size::Units::FitContent:
+    case Size::Unit::FitContent:
         YGNodeStyleSetHeightFitContent(m_node);
         break;
-    case LayoutNode::Size::Units::Stretch:
+    case Size::Unit::Stretch:
         YGNodeStyleSetHeightStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setMinWidth(const LayoutNode::SizeLimit & _min_width)
+inline void YogaNodeWrapper::setMinWidth(const SizeLimit & _min_width)
 {
-    switch(_min_width.units)
+    switch(_min_width.unit)
     {
-    case LayoutNode::SizeLimit::Units::Points:
+    case SizeLimit::Unit::Point:
         YGNodeStyleSetMinWidth(m_node, _min_width.value);
         break;
-    case LayoutNode::SizeLimit::Units::Percentage:
+    case SizeLimit::Unit::Percentage:
         YGNodeStyleSetMinWidthPercent(m_node, _min_width.value);
         break;
-    case LayoutNode::SizeLimit::Units::MaxContent:
+    case SizeLimit::Unit::MaxContent:
         YGNodeStyleSetMinWidthMaxContent(m_node);
         break;
-    case LayoutNode::SizeLimit::Units::FitContent:
+    case SizeLimit::Unit::FitContent:
         YGNodeStyleSetMinWidthFitContent(m_node);
         break;
-    case LayoutNode::SizeLimit::Units::Stretch:
+    case SizeLimit::Unit::Stretch:
         YGNodeStyleSetMinWidthStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setMinHeight(const LayoutNode::SizeLimit & _min_height)
+inline void YogaNodeWrapper::setMinHeight(const SizeLimit & _min_height)
 {
-    switch(_min_height.units)
+    switch(_min_height.unit)
     {
-    case LayoutNode::SizeLimit::Units::Points:
+    case SizeLimit::Unit::Point:
         YGNodeStyleSetMinHeight(m_node, _min_height.value);
         break;
         break;
-    case LayoutNode::SizeLimit::Units::Percentage:
+    case SizeLimit::Unit::Percentage:
         YGNodeStyleSetMinHeightPercent(m_node, _min_height.value);
         break;
-    case LayoutNode::SizeLimit::Units::MaxContent:
+    case SizeLimit::Unit::MaxContent:
         YGNodeStyleSetMinHeightMaxContent(m_node);
         break;
-    case LayoutNode::SizeLimit::Units::FitContent:
+    case SizeLimit::Unit::FitContent:
         YGNodeStyleSetMinHeightFitContent(m_node);
         break;
-    case LayoutNode::SizeLimit::Units::Stretch:
+    case SizeLimit::Unit::Stretch:
         YGNodeStyleSetMinHeightStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setMaxWidth(const LayoutNode::SizeLimit & _max_width)
+inline void YogaNodeWrapper::setMaxWidth(const SizeLimit & _max_width)
 {
-    switch(_max_width.units)
+    switch(_max_width.unit)
     {
-    case LayoutNode::SizeLimit::Units::Points:
+    case SizeLimit::Unit::Point:
         YGNodeStyleSetMaxWidth(m_node, _max_width.value);
         break;
-    case LayoutNode::SizeLimit::Units::Percentage:
+    case SizeLimit::Unit::Percentage:
         YGNodeStyleSetMaxWidthPercent(m_node, _max_width.value);
         break;
-    case LayoutNode::SizeLimit::Units::MaxContent:
+    case SizeLimit::Unit::MaxContent:
         YGNodeStyleSetMaxWidthMaxContent(m_node);
         break;
-    case LayoutNode::SizeLimit::Units::FitContent:
+    case SizeLimit::Unit::FitContent:
         YGNodeStyleSetMaxWidthFitContent(m_node);
         break;
-    case LayoutNode::SizeLimit::Units::Stretch:
+    case SizeLimit::Unit::Stretch:
         YGNodeStyleSetMaxWidthStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setMaxHeight(const LayoutNode::SizeLimit & _max_height)
+inline void YogaNodeWrapper::setMaxHeight(const SizeLimit & _max_height)
 {
-    switch(_max_height.units)
+    switch(_max_height.unit)
     {
-    case LayoutNode::SizeLimit::Units::Points:
+    case SizeLimit::Unit::Point:
         YGNodeStyleSetMaxHeight(m_node, _max_height.value);
         break;
         break;
-    case LayoutNode::SizeLimit::Units::Percentage:
+    case SizeLimit::Unit::Percentage:
         YGNodeStyleSetMaxHeightPercent(m_node, _max_height.value);
         break;
-    case LayoutNode::SizeLimit::Units::MaxContent:
+    case SizeLimit::Unit::MaxContent:
         YGNodeStyleSetMaxHeightMaxContent(m_node);
         break;
-    case LayoutNode::SizeLimit::Units::FitContent:
+    case SizeLimit::Unit::FitContent:
         YGNodeStyleSetMaxHeightFitContent(m_node);
         break;
-    case LayoutNode::SizeLimit::Units::Stretch:
+    case SizeLimit::Unit::Stretch:
         YGNodeStyleSetMaxHeightStretch(m_node);
         break;
     }
@@ -279,43 +318,43 @@ inline void YogaNodeWrapper::setFlexShrink(float _shrink)
     YGNodeStyleSetFlexShrink(m_node, _shrink);
 }
 
-inline void YogaNodeWrapper::setFlexDirection(LayoutNode::FlexDirection _direction)
+inline void YogaNodeWrapper::setFlexDirection(FlexDirection _direction)
 {
     YGNodeStyleSetFlexDirection(m_node, flexDirectionToYGFlexDirection(_direction));
 }
 
-inline void YogaNodeWrapper::setFlexWrap(LayoutNode::FlexWrap _wrap)
+inline void YogaNodeWrapper::setFlexWrap(FlexWrap _wrap)
 {
     YGNodeStyleSetFlexWrap(m_node, flexWrapToYGWrap(_wrap));
 }
 
-inline void YogaNodeWrapper::setGap(const std::unordered_map<LayoutNode::GapGutter, float> & _gaps)
+inline void YogaNodeWrapper::setGap(const std::unordered_map<GapGutter, float> & _gaps)
 {
     for(const auto & gap_pair : _gaps)
         setGap(gap_pair.first, gap_pair.second);
 }
 
-inline void YogaNodeWrapper::setGap(LayoutNode::GapGutter _gutter, float _gap)
+inline void YogaNodeWrapper::setGap(GapGutter _gutter, float _gap)
 {
     YGNodeStyleSetGap(m_node, gapGutterToYGGutter(_gutter), _gap);
 }
 
-inline void YogaNodeWrapper::setContentAlignment(LayoutNode::ContentAlignment _alignment)
+inline void YogaNodeWrapper::setContentAlignment(ContentAlignment _alignment)
 {
     YGNodeStyleSetAlignContent(m_node, contentAlignmentToYGAlign(_alignment));
 }
 
-inline void YogaNodeWrapper::setContentJustification(LayoutNode::ContentJustification _justification)
+inline void YogaNodeWrapper::setContentJustification(ContentJustification _justification)
 {
     YGNodeStyleSetJustifyContent(m_node, contentJustificationToYGJustify(_justification));
 }
 
-inline void YogaNodeWrapper::setItemsAlignment(LayoutNode::ItemAlignment _alignment)
+inline void YogaNodeWrapper::setItemsAlignment(ItemAlignment _alignment)
 {
     YGNodeStyleSetAlignItems(m_node, itemAlignmentToYGAlign(_alignment));
 }
 
-inline void YogaNodeWrapper::setSelfAlignment(LayoutNode::ItemAlignment _alignment)
+inline void YogaNodeWrapper::setSelfAlignment(ItemAlignment _alignment)
 {
     YGNodeStyleSetAlignSelf(m_node, itemAlignmentToYGAlign(_alignment));
 }
@@ -325,181 +364,183 @@ inline void YogaNodeWrapper::setAspectRatio(float _ratio)
     YGNodeStyleSetAspectRatio(m_node, _ratio);
 }
 
-inline void YogaNodeWrapper::setDisplayMode(LayoutNode::DisplayMode _mode)
+inline void YogaNodeWrapper::setDisplayMode(DisplayMode _mode)
 {
     YGNodeStyleSetDisplay(m_node, displayModeToYGDisplay(_mode));
 }
 
-YGEdge YogaNodeWrapper::edgeToYGEdge(LayoutNode::Edge _edge)
+YGEdge YogaNodeWrapper::edgeToYGEdge(Edge _edge)
 {
     switch(_edge)
     {
-    case LayoutNode::Edge::Left:
+    case Edge::Left:
         return YGEdgeLeft;
-    case LayoutNode::Edge::Top:
+    case Edge::Top:
         return YGEdgeTop;
-    case LayoutNode::Edge::Right:
+    case Edge::Right:
         return YGEdgeRight;
-    case LayoutNode::Edge::Bottom:
+    case Edge::Bottom:
         return YGEdgeBottom;
-    case LayoutNode::Edge::Start:
+    case Edge::Start:
         return YGEdgeStart;
-    case LayoutNode::Edge::End:
+    case Edge::End:
         return YGEdgeEnd;
-    case LayoutNode::Edge::Horizontal:
+    case Edge::Horizontal:
         return YGEdgeHorizontal;
-    case LayoutNode::Edge::Vertical:
+    case Edge::Vertical:
         return YGEdgeVertical;
-    case LayoutNode::Edge::All:
+    case Edge::All:
         return YGEdgeAll;
     default:
         return YGEdgeLeft;
     }
 }
 
-YGFlexDirection YogaNodeWrapper::flexDirectionToYGFlexDirection(LayoutNode::FlexDirection _fd)
+YGFlexDirection YogaNodeWrapper::flexDirectionToYGFlexDirection(FlexDirection _fd)
 {
     switch(_fd)
     {
-    case LayoutNode::FlexDirection::Column:
+    case FlexDirection::Column:
         return YGFlexDirectionColumn;
-    case LayoutNode::FlexDirection::Row:
+    case FlexDirection::Row:
         return YGFlexDirectionRow;
-    case LayoutNode::FlexDirection::ColumnReverse:
+    case FlexDirection::ColumnReverse:
         return YGFlexDirectionColumnReverse;
-    case LayoutNode::FlexDirection::RowReverse:
+    case FlexDirection::RowReverse:
         return YGFlexDirectionRowReverse;
     default:
         return YGFlexDirectionColumn;
     }
 }
 
-YGWrap YogaNodeWrapper::flexWrapToYGWrap(LayoutNode::FlexWrap _wrap)
+YGWrap YogaNodeWrapper::flexWrapToYGWrap(FlexWrap _wrap)
 {
     switch(_wrap)
     {
-    case LayoutNode::FlexWrap::None:
+    case FlexWrap::None:
         return YGWrapNoWrap;
-    case LayoutNode::FlexWrap::Wrap:
+    case FlexWrap::Wrap:
         return YGWrapWrap;
-    case LayoutNode::FlexWrap::WrapReverse:
+    case FlexWrap::WrapReverse:
         return YGWrapWrapReverse;
     default:
         return YGWrapNoWrap;
     }
 }
 
-YGAlign YogaNodeWrapper::contentAlignmentToYGAlign(LayoutNode::ContentAlignment _alignment)
+YGAlign YogaNodeWrapper::contentAlignmentToYGAlign(ContentAlignment _alignment)
 {
     switch(_alignment)
     {
-    case LayoutNode::ContentAlignment::FlexStart:
+    case ContentAlignment::FlexStart:
         return YGAlignFlexStart;
-    case LayoutNode::ContentAlignment::FlexEnd:
+    case ContentAlignment::FlexEnd:
         return YGAlignFlexEnd;
-    case LayoutNode::ContentAlignment::Stretch:
+    case ContentAlignment::Stretch:
         return YGAlignStretch;
-    case LayoutNode::ContentAlignment::Center:
+    case ContentAlignment::Center:
         return YGAlignCenter;
-    case LayoutNode::ContentAlignment::SpaceBetween:
+    case ContentAlignment::SpaceBetween:
         return YGAlignSpaceBetween;
-    case LayoutNode::ContentAlignment::SpaceAround:
+    case ContentAlignment::SpaceAround:
         return YGAlignSpaceAround;
     default:
         return YGAlignFlexStart;
     }
 }
 
-YGAlign YogaNodeWrapper::itemAlignmentToYGAlign(LayoutNode::ItemAlignment _alignment)
+YGAlign YogaNodeWrapper::itemAlignmentToYGAlign(ItemAlignment _alignment)
 {
     switch(_alignment)
     {
-    case LayoutNode::ItemAlignment::Stretch:
+    case ItemAlignment::Stretch:
         return YGAlignStretch;
-    case LayoutNode::ItemAlignment::FlexStart:
+    case ItemAlignment::FlexStart:
         return YGAlignFlexStart;
-    case LayoutNode::ItemAlignment::FlexEnd:
+    case ItemAlignment::FlexEnd:
         return YGAlignFlexEnd;
-    case LayoutNode::ItemAlignment::Center:
+    case ItemAlignment::Center:
         return YGAlignCenter;
-    case LayoutNode::ItemAlignment::Baseline:
+    case ItemAlignment::Baseline:
         return YGAlignBaseline;
     default:
         return YGAlignStretch;
     }
 }
 
-YGJustify YogaNodeWrapper::contentJustificationToYGJustify(LayoutNode::ContentJustification _justification)
+YGJustify YogaNodeWrapper::contentJustificationToYGJustify(ContentJustification _justification)
 {
     switch(_justification)
     {
-    case LayoutNode::ContentJustification::FlexStart:
+    case ContentJustification::FlexStart:
         return YGJustifyFlexStart;
-    case LayoutNode::ContentJustification::FlexEnd:
+    case ContentJustification::FlexEnd:
         return YGJustifyFlexEnd;
-    case LayoutNode::ContentJustification::Center:
+    case ContentJustification::Center:
         return YGJustifyCenter;
-    case LayoutNode::ContentJustification::SpaceBetween:
+    case ContentJustification::SpaceBetween:
         return YGJustifySpaceBetween;
-    case LayoutNode::ContentJustification::SpaceAround:
+    case ContentJustification::SpaceAround:
         return YGJustifySpaceAround;
-    case LayoutNode::ContentJustification::SpaceEvenly:
+    case ContentJustification::SpaceEvenly:
         return YGJustifySpaceEvenly;
     default:
         return YGJustifyFlexStart;
     }
 }
 
-YGDisplay YogaNodeWrapper::displayModeToYGDisplay(LayoutNode::DisplayMode _mode)
+YGDisplay YogaNodeWrapper::displayModeToYGDisplay(DisplayMode _mode)
 {
     switch(_mode)
     {
-    case LayoutNode::DisplayMode::Flex:
+    case DisplayMode::Flex:
         return YGDisplayFlex;
-    case LayoutNode::DisplayMode::None:
+    case DisplayMode::None:
         return YGDisplayNone;
     default:
         return YGDisplayFlex;
     }
 }
 
-YGGutter YogaNodeWrapper::gapGutterToYGGutter(LayoutNode::GapGutter _gutter)
+YGGutter YogaNodeWrapper::gapGutterToYGGutter(GapGutter _gutter)
 {
     switch(_gutter)
     {
-    case LayoutNode::GapGutter::Column:
+    case GapGutter::Column:
         return YGGutterColumn;
-    case LayoutNode::GapGutter::Row:
+    case GapGutter::Row:
         return YGGutterRow;
-    case LayoutNode::GapGutter::All:
+    case GapGutter::All:
         return YGGutterAll;
     default:
         return YGGutterAll;
     }
 }
 
-YGPositionType YogaNodeWrapper::positionTypeToYGPositionType(LayoutNode::Position::Type _type)
+YGPositionType YogaNodeWrapper::positionTypeToYGPositionType(Position::Type _type)
 {
     switch(_type)
     {
-    case LayoutNode::Position::Type::Relative:
+    case Position::Type::Relative:
         return YGPositionTypeRelative;
-    case LayoutNode::Position::Type::Absolute:
+    case Position::Type::Absolute:
         return YGPositionTypeAbsolute;
-    case LayoutNode::Position::Type::Static:
+    case Position::Type::Static:
         return YGPositionTypeStatic;
     default:
         return YGPositionTypeRelative;
     }
 }
 
-LayoutNode::LayoutNode(LayoutNode * _parent, const Style & _style) :
+Node::Node(Node * _parent, const Style & _style) :
     m_node(YGNodeNew()),
     m_parent(_parent)
 {
     if(m_parent)
         YGNodeInsertChild(m_parent->m_node, m_node, YGNodeGetChildCount(m_parent->m_node));
-
+    YGNodeSetContext(m_node, this);
+    // YGNodeSetMeasureFunc(m_node, yogaMeasure);
+    
     YogaNodeWrapper wrapper(m_node);
     wrapper.setPosition(_style.position);
     wrapper.setMargin(_style.margin);
@@ -543,185 +584,185 @@ LayoutNode::LayoutNode(LayoutNode * _parent, const Style & _style) :
         wrapper.setDisplayMode(_style.display_mode.value());
 }
 
-LayoutNode::~LayoutNode()
+Node::~Node()
 {
     for(auto * child : m_children)
         delete child;
     YGNodeFree(m_node);
 }
 
-void LayoutNode::setPositionType(Position::Type _type)
+void Node::setPositionType(Position::Type _type)
 {
     YogaNodeWrapper(m_node).setPositionType(_type);
     forceRecalculation();
 }
 
-void LayoutNode::setPosition(
-    const std::unordered_map<Edge, Position> & _positions)
+void Node::setPosition(
+        const std::unordered_map<Edge, Position> & _positions)
 {
     YogaNodeWrapper(m_node).setPosition(_positions);
     forceRecalculation();
 }
 
-void LayoutNode::setPosition(Edge _edge, Position _posotion)
+void Node::setPosition(Edge _edge, Position _posotion)
 {
     YogaNodeWrapper(m_node).setPosition(_edge, _posotion);
     forceRecalculation();
 }
 
-void LayoutNode::setMargin(const std::unordered_map<Edge, float> & _margins)
+void Node::setMargin(const std::unordered_map<Edge, float> & _margins)
 {
     YogaNodeWrapper(m_node).setMargin(_margins);
     forceRecalculation();
 }
 
-void LayoutNode::setMargin(Edge _edge, float _value)
+void Node::setMargin(Edge _edge, float _value)
 {
     YogaNodeWrapper(m_node).setMargin(_edge, _value);
     forceRecalculation();
 }
 
-void LayoutNode::setPadding(const std::unordered_map<Edge, float> & _paddings)
+void Node::setPadding(const std::unordered_map<Edge, float> & _paddings)
 {
     YogaNodeWrapper(m_node).setPadding(_paddings);
     forceRecalculation();
 }
 
-void LayoutNode::setPadding(Edge _edge, float _value)
+void Node::setPadding(Edge _edge, float _value)
 {
     YogaNodeWrapper(m_node).setPadding(_edge, _value);
     forceRecalculation();
 }
 
-void LayoutNode::setWidth(const Size & _width)
+void Node::setWidth(const Size & _width)
 {
     YogaNodeWrapper(m_node).setWidth(_width);
     forceRecalculation();
 }
 
-void LayoutNode::setHeight(const Size & _height)
+void Node::setHeight(const Size & _height)
 {
     YogaNodeWrapper(m_node).setHeight(_height);
     forceRecalculation();
 }
 
-void LayoutNode::setMinWidth(const SizeLimit & _min_width)
+void Node::setMinWidth(const SizeLimit & _min_width)
 {
     YogaNodeWrapper(m_node).setMinWidth(_min_width);
     forceRecalculation();
 }
 
-void LayoutNode::setMinHeight(const SizeLimit & _min_height)
+void Node::setMinHeight(const SizeLimit & _min_height)
 {
     YogaNodeWrapper(m_node).setMinHeight(_min_height);
     forceRecalculation();
 }
 
-void LayoutNode::setMaxWidth(const SizeLimit & _max_width)
+void Node::setMaxWidth(const SizeLimit & _max_width)
 {
     YogaNodeWrapper(m_node).setMaxWidth(_max_width);
     forceRecalculation();
 }
 
-void LayoutNode::setMaxHeight(const SizeLimit & _max_height)
+void Node::setMaxHeight(const SizeLimit & _max_height)
 {
     YogaNodeWrapper(m_node).setMaxHeight(_max_height);
     forceRecalculation();
 }
 
-void LayoutNode::setFlexBasis(float _basis)
+void Node::setFlexBasis(float _basis)
 {
     YogaNodeWrapper(m_node).setFlexBasis(_basis);
     forceRecalculation();
 }
 
-void LayoutNode::setFlexGrow(float _grow)
+void Node::setFlexGrow(float _grow)
 {
     YogaNodeWrapper(m_node).setFlexGrow(_grow);
     forceRecalculation();
 }
 
-void LayoutNode::setFlexShrink(float _shrink)
+void Node::setFlexShrink(float _shrink)
 {
     YogaNodeWrapper(m_node).setFlexShrink(_shrink);
     forceRecalculation();
 }
 
-void LayoutNode::setFlexDirection(FlexDirection _direction)
+void Node::setFlexDirection(FlexDirection _direction)
 {
     YogaNodeWrapper(m_node).setFlexDirection(_direction);
     forceRecalculation();
 }
 
-void LayoutNode::setFlexWrap(FlexWrap _wrap)
+void Node::setFlexWrap(FlexWrap _wrap)
 {
     YogaNodeWrapper(m_node).setFlexWrap(_wrap);
     forceRecalculation();
 }
 
-void LayoutNode::setGap(const std::unordered_map<GapGutter, float> & _gaps)
+void Node::setGap(const std::unordered_map<GapGutter, float> & _gaps)
 {
     YogaNodeWrapper(m_node).setGap(_gaps);
     forceRecalculation();
 }
 
-void LayoutNode::setGap(GapGutter _gutter, float _gap)
+void Node::setGap(GapGutter _gutter, float _gap)
 {
     YogaNodeWrapper(m_node).setGap(_gutter, _gap);
     forceRecalculation();
 }
 
-void LayoutNode::setContentAlignment(ContentAlignment _alignment)
+void Node::setContentAlignment(ContentAlignment _alignment)
 {
     YogaNodeWrapper(m_node).setContentAlignment(_alignment);
     forceRecalculation();
 }
 
-void LayoutNode::setContentJustification(ContentJustification _justification)
+void Node::setContentJustification(ContentJustification _justification)
 {
     YogaNodeWrapper(m_node).setContentJustification(_justification);
     forceRecalculation();
 }
 
-void LayoutNode::setItemsAlignment(ItemAlignment _alignment)
+void Node::setItemsAlignment(ItemAlignment _alignment)
 {
     YogaNodeWrapper(m_node).setItemsAlignment(_alignment);
     forceRecalculation();
 }
 
-void LayoutNode::setSelfAlignment(ItemAlignment _alignment)
+void Node::setSelfAlignment(ItemAlignment _alignment)
 {
     YogaNodeWrapper(m_node).setSelfAlignment(_alignment);
     forceRecalculation();
 }
 
-void LayoutNode::setAspectRatio(float _ratio)
+void Node::setAspectRatio(float _ratio)
 {
     YogaNodeWrapper(m_node).setAspectRatio(_ratio);
     forceRecalculation();
 }
 
-void LayoutNode::setDisplayMode(DisplayMode _mode)
+void Node::setDisplayMode(DisplayMode _mode)
 {
     YogaNodeWrapper(m_node).setDisplayMode(_mode);
     forceRecalculation();
 }
 
-LayoutNode & LayoutNode::addNode(const Style & _style)
+Node & Node::addNode(const Style & _style)
 {
-    LayoutNode * node = new LayoutNode(this, _style);
+    Node * node = new Node(this, _style);
     m_children.push_back(node);
     forceRecalculation();
     return *node;
 }
 
-void LayoutNode::forceRecalculation()
+void Node::forceRecalculation()
 {
     if(m_parent)
         m_parent->forceRecalculation();
 }
 
-float LayoutNode::getX() const
+float Node::getX() const
 {
     float x = YGNodeLayoutGetLeft(m_node);
     if(m_parent && YGNodeStyleGetPositionType(m_node) != YGPositionTypeAbsolute)
@@ -729,7 +770,7 @@ float LayoutNode::getX() const
     return x;
 }
 
-float LayoutNode::getY() const
+float Node::getY() const
 {
     float y = YGNodeLayoutGetTop(m_node);
     if(m_parent && YGNodeStyleGetPositionType(m_node) != YGPositionTypeAbsolute)
@@ -737,33 +778,28 @@ float LayoutNode::getY() const
     return y;
 }
 
-float LayoutNode::getWidth() const
+float Node::getWidth() const
 {
     return YGNodeLayoutGetWidth(m_node);
 }
 
-float LayoutNode::getHeight() const
+float Node::getHeight() const
 {
     return YGNodeLayoutGetHeight(m_node);
 }
 
-Layout::Layout(const Style & _style) :
-    LayoutNode(nullptr, _style)
+void Node::setElement(std::unique_ptr<Element> && _element)
 {
+    
+    m_element = std::move(_element);
+    // YGNodeMarkDirty(m_node);
+    forceRecalculation();
 }
 
-void Layout::forceRecalculation()
+void Node::step(const StepState & _step)
 {
-    m_force_recalculate = true;
-}
-
-void Layout::recalculate(float _width, float _height)
-{
-    if(m_force_recalculate || m_calculated_width != _width || m_calculated_height != _height)
-    {
-        YGNodeCalculateLayout(m_node, _width, _height, YGDirectionLTR);
-        m_force_recalculate = false;
-        m_calculated_width = _width;
-        m_calculated_height = _height;
-    }
+    if(m_element)
+        m_element->step(_step);
+    for(auto * child : m_children)
+        child->step(_step);
 }

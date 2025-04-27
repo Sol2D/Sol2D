@@ -16,15 +16,23 @@
 
 #pragma once
 
-#include <array>
-#include <cstddef>
+#include <Sol2D/Layouting/Node.h>
+#include <Sol2D/Lua/Aux/LuaForward.h>
 
-template<typename T, size_t left_len, size_t right_len>
-constexpr std::array<T, left_len + right_len> operator + (
-    std::array<T, left_len> _left,
-    std::array<T, right_len> _right)
-{
-    std::array<T, left_len + right_len> result;
-    std::copy(_right.begin(), _right.end(), std::copy(_left.begin(), _left.end(), result.begin()));
-    return result;
-}
+namespace Sol2D::Lua {
+
+void pushContentAlignmentEnum(lua_State * _lua);
+void pushContentJustificationEnum(lua_State * _lua);
+void pushItemAlignmentEnum(lua_State * _lua);
+void pushDisplayModeEnum(lua_State * _lua);
+void pushFlexDirectionEnum(lua_State * _lua);
+void pushFlexWrapEnum(lua_State * _lua);
+void pushEdgeEnum(lua_State * _lua);
+void pushGapGutterEnum(lua_State * _lua);
+void pushPositionTypeEnum(lua_State * _lua);
+void pushPositionUnitEnum(lua_State * _lua);
+void pushSizeUnitEnum(lua_State * _lua);
+void pushSizeLimitUnitEnum(lua_State * _lua);
+void pushLayoutNodeApi(lua_State * _lua, std::shared_ptr<Layouting::Node> _node);
+
+} // namespace Sol2D::Lua

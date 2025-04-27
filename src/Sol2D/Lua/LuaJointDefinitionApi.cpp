@@ -16,14 +16,14 @@
 
 #include <Sol2D/Lua/LuaJointDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 
 namespace {
 
-bool tryGetBodyIdFromJointDefinition(const LuaTable & _table, const char * _field, uint64_t * _id)
+bool tryGetBodyIdFromJointDefinition(const LuaTableApi & _table, const char * _field, uint64_t * _id)
 {
     {
         uint64_t id;
@@ -42,7 +42,7 @@ bool tryGetBodyIdFromJointDefinition(const LuaTable & _table, const char * _fiel
     return false;
 }
 
-bool tryGetJointDefinition(const LuaTable & _table, World::JointDefinition & _result)
+bool tryGetJointDefinition(const LuaTableApi & _table, World::JointDefinition & _result)
 {
     if(!_table.isValid())
         return false;
@@ -62,7 +62,7 @@ bool tryGetJointDefinition(const LuaTable & _table, World::JointDefinition & _re
 
 bool Sol2D::Lua::tryGetDistanceJointDefenition(lua_State * _lua, int _idx, World::DistanceJointDefenition & _result)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
     table.tryGetBoolean("isSpringEnbaled", &_result.is_spring_enabled);
@@ -82,7 +82,7 @@ bool Sol2D::Lua::tryGetDistanceJointDefenition(lua_State * _lua, int _idx, World
 
 bool Sol2D::Lua::tryGetMotorJointDefinition(lua_State * _lua, int _idx, World::MotorJointDefinition & _result)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
     table.tryGetPoint("linearOffset", _result.linear_offset);
@@ -95,7 +95,7 @@ bool Sol2D::Lua::tryGetMotorJointDefinition(lua_State * _lua, int _idx, World::M
 
 bool Sol2D::Lua::tryGetMouseJointDefinition(lua_State * _lua, int _idx, World::MouseJointDefinition & _result)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
     table.tryGetPoint("target", _result.target);
@@ -107,7 +107,7 @@ bool Sol2D::Lua::tryGetMouseJointDefinition(lua_State * _lua, int _idx, World::M
 
 bool Sol2D::Lua::tryGetPrismaticJointDefinition(lua_State * _lua, int _idx, World::PrismaticJointDefinition & _result)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
     table.tryGetBoolean("isSpringEnbaled", &_result.is_spring_enabled);
@@ -128,7 +128,7 @@ bool Sol2D::Lua::tryGetPrismaticJointDefinition(lua_State * _lua, int _idx, Worl
 
 bool Sol2D::Lua::tryGetWeldJointDefinition(lua_State * _lua, int _idx, World::WeldJointDefinition & _result)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
     table.tryGetPoint("localAnchorA", _result.local_anchor_a);
@@ -143,7 +143,7 @@ bool Sol2D::Lua::tryGetWeldJointDefinition(lua_State * _lua, int _idx, World::We
 
 bool Sol2D::Lua::tryGetWheelJointDefinition(lua_State * _lua, int _idx, World::WheelJointDefinition & _result)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
     table.tryGetBoolean("isSpringEnbaled", &_result.is_spring_enabled);

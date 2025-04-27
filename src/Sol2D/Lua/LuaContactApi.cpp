@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaContactApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <Sol2D/Lua/LuaManifoldApi.h>
 
 using namespace Sol2D::World;
@@ -32,14 +32,14 @@ void pushContactSide(lua_State * _lua, const ContactSide & _side)
     static const char key_shape[] = "shapeKey";
     static const char key_tile_map_object_id[] = "tileMapObjectId";
 
-    LuaTable side_a_table = LuaTable::pushNew(_lua);
+    LuaTableApi side_a_table = LuaTableApi::pushNew(_lua);
     side_a_table.setIntegerValue(key_body, _side.body_id);
     side_a_table.setStringValue(key_shape, _side.shape_key);
     if(_side.tile_map_object_id.has_value())
         side_a_table.setIntegerValue(key_tile_map_object_id, _side.tile_map_object_id.value());
 }
 
-void setContactSide(LuaTable & _table, const char * _key, const ContactSide & _side)
+void setContactSide(LuaTableApi & _table, const char * _key, const ContactSide & _side)
 {
     pushContactSide(_table.getLua(), _side);
     _table.setValueFromTop(_key);
@@ -49,21 +49,21 @@ void setContactSide(LuaTable & _table, const char * _key, const ContactSide & _s
 
 void Sol2D::Lua::pushContact(lua_State * _lua, const Contact & _contact)
 {
-    LuaTable contact_table = LuaTable::pushNew(_lua);
+    LuaTableApi contact_table = LuaTableApi::pushNew(_lua);
     setContactSide(contact_table, g_key_side_a, _contact.side_a);
     setContactSide(contact_table, g_key_side_b, _contact.side_b);
 }
 
 void Sol2D::Lua::pushContact(lua_State * _lua, const SensorContact & _contact)
 {
-    LuaTable contact_table = LuaTable::pushNew(_lua);
+    LuaTableApi contact_table = LuaTableApi::pushNew(_lua);
     setContactSide(contact_table, "sensor", _contact.sensor);
     setContactSide(contact_table, "visitor", _contact.visitor);
 }
 
 void Sol2D::Lua::pushContact(lua_State * _lua, const PreSolveContact & _contact)
 {
-    LuaTable contact_table = LuaTable::pushNew(_lua);
+    LuaTableApi contact_table = LuaTableApi::pushNew(_lua);
     setContactSide(contact_table, g_key_side_a, _contact.side_a);
     setContactSide(contact_table, g_key_side_b, _contact.side_b);
     pushManifold(_lua, *_contact.manifold);

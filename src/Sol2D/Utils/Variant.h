@@ -14,20 +14,23 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/LuaBodyPhysicsDefinitionApi.h>
-#include <Sol2D/Lua/Aux/LuaTableApi.h>
+#pragma once
 
-using namespace Sol2D::World;
+#include <variant>
 
-bool Sol2D::Lua::tryGetBodyPhysicsDefinition(lua_State * _lua, int _idx, BodyPhysicsDefinition & _physics)
+namespace Sol2D::Utils {
+
+template<typename T>
+struct is_variant : std::false_type
 {
-    LuaTableApi table(_lua, _idx);
-    if(table.isValid())
-    {
-        table.tryGetNumber("linearDamping", _physics.linear_damping);
-        table.tryGetNumber("angularDamping", _physics.angular_damping);
-        table.tryGetBoolean("fixedRotation", &_physics.fixed_rotation);
-        return true;
-    }
-    return false;
-}
+};
+
+template<typename... Args>
+struct is_variant<std::variant<Args...>> : std::true_type
+{
+};
+
+template<typename T>
+inline constexpr bool is_variant_v = is_variant<T>::value;
+
+} // namespace Sol2D::Utils

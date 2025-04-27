@@ -16,7 +16,7 @@
 
 #include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/LuaWidgetPaddingApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Forms;
@@ -26,7 +26,7 @@ bool Sol2D::Lua::tryGetWidgetPadding(lua_State * _lua, int _idx, Forms::WidgetPa
 {
     if(lua_istable(_lua, _idx))
     {
-        LuaTable table(_lua, _idx);
+        LuaTableApi table(_lua, _idx);
         table.tryGetDimension("top", _padding.top);
         table.tryGetDimension("right", _padding.right);
         table.tryGetDimension("bottom", _padding.bottom);

@@ -17,17 +17,17 @@
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D::Forms;
 using namespace Sol2D::Lua;
 
-void Sol2D::Lua::pushVerticalTextAlignmentEmum(lua_State * _lua)
+void Sol2D::Lua::pushVerticalTextAlignmentEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, LuaTypeName::vertical_text_alignment) == MetatablePushResult::Created)
     {
-        LuaTable table(_lua);
+        LuaTableApi table(_lua);
         table.setIntegerValue("NONE", static_cast<lua_Integer>(VerticalTextAlignment::None));
         table.setIntegerValue("TOP", static_cast<lua_Integer>(VerticalTextAlignment::Top));
         table.setIntegerValue("CENTER", static_cast<lua_Integer>(VerticalTextAlignment::Center));
@@ -36,12 +36,12 @@ void Sol2D::Lua::pushVerticalTextAlignmentEmum(lua_State * _lua)
     lua_setmetatable(_lua, -2);
 }
 
-void Sol2D::Lua::pushHorizontalTextAlignmentEmum(lua_State * _lua)
+void Sol2D::Lua::pushHorizontalTextAlignmentEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
     {
-        LuaTable table(_lua);
+        LuaTableApi table(_lua);
         table.setIntegerValue("NONE", static_cast<lua_Integer>(HorizontalTextAlignment::None));
         table.setIntegerValue("BEGIN", static_cast<lua_Integer>(HorizontalTextAlignment::Begin));
         table.setIntegerValue("CENTER", static_cast<lua_Integer>(HorizontalTextAlignment::Center));

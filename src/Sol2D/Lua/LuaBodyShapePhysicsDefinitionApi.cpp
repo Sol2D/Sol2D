@@ -15,13 +15,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaBodyShapePhysicsDefinitionApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D::World;
 
 bool Sol2D::Lua::tryGetBodyShapePhysicsDefinition(lua_State * _lua, int _idx, BodyShapePhysicsDefinition & _definition)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(table.isValid())
     {
         table.tryGetNumber("density", _definition.density);

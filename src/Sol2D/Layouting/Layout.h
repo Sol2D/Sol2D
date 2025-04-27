@@ -14,20 +14,25 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/LuaBodyPhysicsDefinitionApi.h>
-#include <Sol2D/Lua/Aux/LuaTableApi.h>
+#pragma once
 
-using namespace Sol2D::World;
+#include <Sol2D/Layouting/Node.h>
 
-bool Sol2D::Lua::tryGetBodyPhysicsDefinition(lua_State * _lua, int _idx, BodyPhysicsDefinition & _physics)
+namespace Sol2D::Layouting {
+
+class Layout final : public Node
 {
-    LuaTableApi table(_lua, _idx);
-    if(table.isValid())
-    {
-        table.tryGetNumber("linearDamping", _physics.linear_damping);
-        table.tryGetNumber("angularDamping", _physics.angular_damping);
-        table.tryGetBoolean("fixedRotation", &_physics.fixed_rotation);
-        return true;
-    }
-    return false;
-}
+public:
+    explicit Layout(const Style & _style = Style());
+    void recalculate(float _width, float _height);
+
+protected:
+    void forceRecalculation() override;
+
+private:
+    float m_calculated_width;
+    float m_calculated_height;
+    bool m_force_recalculate;
+};
+
+} // namespace Sol2D::Layouting

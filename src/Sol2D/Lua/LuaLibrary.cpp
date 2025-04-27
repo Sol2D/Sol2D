@@ -27,11 +27,12 @@
 #include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/LuaWidgetApi.h>
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
+#include <Sol2D/Lua/LuaLayoutingApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaScript.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <sstream>
 
 using namespace Sol2D;
@@ -51,7 +52,7 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
     bool result = false;
     if(lua_getglobal(_lua, "package") == LUA_TTABLE)
     {
-        LuaTable table(_lua, -1);
+        LuaTableApi table(_lua, -1);
         std::string search_paths;
         if(table.tryGetString(g_key_path, search_paths))
         {
@@ -101,11 +102,39 @@ LuaLibrary::LuaLibrary(
         pushDimensionUnitEnum(m_lua);
         lua_setfield(m_lua, -2, "DimensionUnit");
         pushWidgetStateEnum(m_lua);
-        lua_setfield(m_lua, -2, "WidgetState");
-        pushVerticalTextAlignmentEmum(m_lua);
-        lua_setfield(m_lua, -2, "VerticalTextAlignment");
-        pushHorizontalTextAlignmentEmum(m_lua);
-        lua_setfield(m_lua, -2, "HorizontalTextAlignment");
+        lua_setfield(m_lua, -2, "WidgetState");        
+        { // Style enums
+            lua_newtable(m_lua);
+            pushVerticalTextAlignmentEnum(m_lua);
+            lua_setfield(m_lua, -2, "VerticalTextAlignment");
+            pushHorizontalTextAlignmentEnum(m_lua);
+            lua_setfield(m_lua, -2, "HorizontalTextAlignment");
+            pushContentAlignmentEnum(m_lua);
+            lua_setfield(m_lua, -2, "ContentAlignment");
+            pushContentJustificationEnum(m_lua);
+            lua_setfield(m_lua, -2, "ContentJustification");
+            pushItemAlignmentEnum(m_lua);
+            lua_setfield(m_lua, -2, "ItemAlignment");
+            pushDisplayModeEnum(m_lua);
+            lua_setfield(m_lua, -2, "DisplayMode");
+            pushFlexDirectionEnum(m_lua);
+            lua_setfield(m_lua, -2, "FlexDirection");
+            pushFlexWrapEnum(m_lua);
+            lua_setfield(m_lua, -2, "FlexWrap");
+            pushEdgeEnum(m_lua);
+            lua_setfield(m_lua, -2, "Edge");
+            pushGapGutterEnum(m_lua);
+            lua_setfield(m_lua, -2, "GapGutter");
+            pushPositionTypeEnum(m_lua);
+            lua_setfield(m_lua, -2, "PositionType");
+            pushPositionUnitEnum(m_lua);
+            lua_setfield(m_lua, -2, "PositionUnit");
+            pushSizeUnitEnum(m_lua);
+            lua_setfield(m_lua, -2, "SizeUnit");
+            pushSizeLimitUnitEnum(m_lua);
+            lua_setfield(m_lua, -2, "SizeLimitUnit");
+            lua_setfield(m_lua, -2, "style");
+        }
     }
     lua_setmetatable(m_lua, -2);
     lua_setglobal(m_lua, "sol");

@@ -14,35 +14,30 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/LuaColorApi.h>
-#include <Sol2D/Lua/Aux/LuaTableApi.h>
+#include <Sol2D/TestElement.h>
+#include <Sol2D/Layouting/Node.h>
+#include <iostream>
 
 using namespace Sol2D;
-using namespace Sol2D::Lua;
+using namespace Sol2D::Layouting;
 
-namespace {
-
-static constexpr char g_key_r[] = "r";
-static constexpr char g_key_g[] = "g";
-static constexpr char g_key_b[] = "b";
-static constexpr char g_key_a[] = "a";
-
-} // namespace
-
-bool Sol2D::Lua::tryGetColor(lua_State * _lua, int _idx, SDL_FColor & _color)
+TestElement::TestElement(Renderer & _renderer, const SDL_FColor & _color, const Node & _node) :
+    Element(_node),
+    m_renderer(_renderer),
+    m_color(_color)
 {
-    LuaTableApi table(_lua, _idx);
-    if(!table.isValid())
-        return false;
-    float r, g, b;
-    if(table.tryGetNumber(g_key_r, &r) && table.tryGetNumber(g_key_g, &g) && table.tryGetNumber(g_key_b, &b))
-    {
-        if(!table.tryGetNumber(g_key_a, &_color.a))
-            _color.a = 1.0f;
-        _color.r = r;
-        _color.g = g;
-        _color.b = b;
-        return true;
-    }
-    return false;
+}
+
+void TestElement::step(const StepState & /*_step*/)
+{
+    static unsigned long frame = 0;
+
+    m_renderer.renderRect(
+        SolidRectRenderingData(
+            { .x = getX(), .y = getY(), .w = getWidth(), .h = getHeight() },
+            m_color
+        )
+    );
+
+    std::cout << "rendering (" << ++frame << "): " << m_node.getWidth() << "x" << m_node.getHeight() << std::endl;
 }

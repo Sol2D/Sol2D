@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaPointApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D::Lua;
 
@@ -28,7 +28,7 @@ static constexpr char g_key_y[] = "y";
 
 bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return false;
 
@@ -44,7 +44,7 @@ bool Sol2D::Lua::tryGetPoint(lua_State * _lua, int _idx, SDL_FPoint & _point)
 
 void Sol2D::Lua::pushPoint(lua_State * _lua, float _x, float _y)
 {
-    LuaTable table = LuaTable::pushNew(_lua);
+    LuaTableApi table = LuaTableApi::pushNew(_lua);
     table.setNumberValue(g_key_x, _x);
     table.setNumberValue(g_key_y, _y);
 }

@@ -16,7 +16,7 @@
 
 #include <Sol2D/Lua/LuaBodyShapeTypeApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 #include <Sol2D/World/BodyShapeType.h>
 
@@ -27,7 +27,7 @@ void Sol2D::Lua::pushBodyShapeTypeEnum(lua_State * _lua)
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, LuaTypeName::body_shape_type) == MetatablePushResult::Created)
     {
-        LuaTable table(_lua);
+        LuaTableApi table(_lua);
         table.setIntegerValue("CIRCLE", static_cast<lua_Integer>(BodyShapeType::Circle));
         table.setIntegerValue("POLYGON", static_cast<lua_Integer>(BodyShapeType::Polygon));
         table.setIntegerValue("CAPSULE", static_cast<lua_Integer>(BodyShapeType::Capsule));

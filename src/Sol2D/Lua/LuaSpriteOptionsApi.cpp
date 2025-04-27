@@ -15,13 +15,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaSpriteOptionsApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D::Lua;
 
 bool Sol2D::Lua::tryGetSpriteOptions(lua_State * _lua, int _idx, SpriteOptions & _sprite_options)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return false;
     table.tryGetRect("rect", _sprite_options.rect);

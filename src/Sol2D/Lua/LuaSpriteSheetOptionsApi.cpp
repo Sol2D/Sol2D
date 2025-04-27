@@ -15,14 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaSpriteSheetOptionsApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 
 bool Sol2D::Lua::tryGetSpriteSheetOptions(lua_State * _lua, int _idx, SpriteSheetOptions & _options)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return false;
     table.tryGetUnsignedInteger("spriteWidth", &_options.sprite_width);

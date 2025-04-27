@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaManifoldApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <Sol2D/Lua/LuaPointApi.h>
 
 using namespace Sol2D::Lua;
@@ -24,7 +24,7 @@ namespace {
 
 void pushManifoldPoint(lua_State * _lua, const b2ManifoldPoint & _point)
 {
-    LuaTable table = LuaTable::pushNew(_lua);
+    LuaTableApi table = LuaTableApi::pushNew(_lua);
     Sol2D::Lua::pushPoint(_lua, _point.point.x, _point.point.y);
     table.setValueFromTop("point");
     Sol2D::Lua::pushPoint(_lua, _point.anchorA.x, _point.anchorA.y);
@@ -41,7 +41,7 @@ void pushManifoldPoint(lua_State * _lua, const b2ManifoldPoint & _point)
 
 void Sol2D::Lua::pushManifold(lua_State * _lua, const b2Manifold & _manifold)
 {
-    LuaTable table = LuaTable::pushNew(_lua);
+    LuaTableApi table = LuaTableApi::pushNew(_lua);
     pushPoint(_lua, _manifold.normal.x, _manifold.normal.y);
     table.setValueFromTop("normal");
 

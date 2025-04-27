@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaRectApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D::Lua;
 
@@ -30,7 +30,7 @@ static constexpr char g_key_h[] = "h";
 
 bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, SDL_FRect & _rect)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return false;
 
@@ -49,7 +49,7 @@ bool Sol2D::Lua::tryGetRect(lua_State * _lua, int _idx, SDL_FRect & _rect)
 
 void Sol2D::Lua::pushRect(lua_State * _lua, const SDL_FRect & _rect)
 {
-    LuaTable table = LuaTable::pushNew(_lua);
+    LuaTableApi table = LuaTableApi::pushNew(_lua);
     table.setNumberValue(g_key_x, _rect.x);
     table.setNumberValue(g_key_y, _rect.y);
     table.setNumberValue(g_key_w, _rect.w);

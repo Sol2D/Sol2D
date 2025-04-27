@@ -17,13 +17,13 @@
 #include <Sol2D/Lua/LuaBodyOptionsApi.h>
 #include <Sol2D/Lua/LuaBodyPhysicsDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyShapePhysicsDefinitionApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D::World;
 
 bool Sol2D::Lua::tryGetBodyOptions(lua_State * _lua, int _idx, BodyOptions & _body_options)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
     {
         return false;

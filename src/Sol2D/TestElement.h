@@ -14,20 +14,22 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/LuaBodyPhysicsDefinitionApi.h>
-#include <Sol2D/Lua/Aux/LuaTableApi.h>
+#pragma once
 
-using namespace Sol2D::World;
+#include <Sol2D/Layouting/Element.h>
+#include <Sol2D/MediaLayer/MediaLayer.h>
 
-bool Sol2D::Lua::tryGetBodyPhysicsDefinition(lua_State * _lua, int _idx, BodyPhysicsDefinition & _physics)
+namespace Sol2D {
+
+class TestElement : public Layouting::Element
 {
-    LuaTableApi table(_lua, _idx);
-    if(table.isValid())
-    {
-        table.tryGetNumber("linearDamping", _physics.linear_damping);
-        table.tryGetNumber("angularDamping", _physics.angular_damping);
-        table.tryGetBoolean("fixedRotation", &_physics.fixed_rotation);
-        return true;
-    }
-    return false;
-}
+public:
+    TestElement(Renderer & _renderer, const SDL_FColor & _color, const Layouting::Node & _node);
+    void step(const StepState & _step);
+
+private:
+    Renderer & m_renderer;
+    SDL_FColor m_color;
+};
+
+} // namespace Sol2D

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
 

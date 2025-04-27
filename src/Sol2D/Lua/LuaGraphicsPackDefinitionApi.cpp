@@ -17,7 +17,7 @@
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
 #include <Sol2D/Lua/LuaGraphicsPackDefinitionApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -56,7 +56,7 @@ void addFrames(lua_State * _lua, int _idx, GraphicsPackDefinition & _pack_def)
 
 bool Sol2D::Lua::tryGetGraphicsPackDefinition(lua_State * _lua, int _idx, GraphicsPackDefinition & _result)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return false;
     table.tryGetPoint("position", _result.position);
@@ -73,7 +73,7 @@ bool Sol2D::Lua::tryGetGraphicsPackDefinition(lua_State * _lua, int _idx, Graphi
 
 bool Sol2D::Lua::tryGetGraphicsPackFrameDefinition(lua_State * _lua, int _idx, GraphicsPackFrameDefinition & _result)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return false;
     table.tryGetDuration("duration", &_result.duration);
@@ -88,7 +88,7 @@ bool Sol2D::Lua::tryGetGraphicsPackFrameDefinition(lua_State * _lua, int _idx, G
 
 bool Sol2D::Lua::tryGetGraphicsPackSpriteDefinition(lua_State * _lua, int _idx, GraphicsPackSpriteDefinition & _result)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid() || !table.tryGetValue("sprite"))
         return false;
 
@@ -99,7 +99,7 @@ bool Sol2D::Lua::tryGetGraphicsPackSpriteDefinition(lua_State * _lua, int _idx, 
     }
     else if(lua_istable(_lua, -1))
     {
-        LuaTable sprite_definition_table(_lua, -1);
+        LuaTableApi sprite_definition_table(_lua, -1);
         if(sprite_definition_table.tryGetValue("spriteSheet"))
         {
             std::shared_ptr<SpriteSheet> sprite_sheet = tryGetSpriteSheet(_lua, -1);

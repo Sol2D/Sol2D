@@ -14,24 +14,28 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/Aux/LuaMetatable.h>
-#include <Sol2D/Lua/Aux/LuaTableApi.h>
-#include <Sol2D/Lua/LuaBodyTypeApi.h>
-#include <Sol2D/Lua/Aux/LuaStrings.h>
-#include <Sol2D/World/BodyType.h>
+#include <Sol2D/Layouting/Layout.h>
+#include <yoga/Yoga.h>
 
-using namespace Sol2D::World;
-using namespace Sol2D::Lua;
+using namespace Sol2D::Layouting;
 
-void Sol2D::Lua::pushBodyTypeEnum(lua_State * _lua)
+Layout::Layout(const Style & _style) :
+    Node(nullptr, _style)
 {
-    lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::body_type) == MetatablePushResult::Created)
+}
+
+void Layout::forceRecalculation()
+{
+    m_force_recalculate = true;
+}
+
+void Layout::recalculate(float _width, float _height)
+{
+    if(m_force_recalculate || m_calculated_width != _width || m_calculated_height != _height)
     {
-        LuaTableApi table(_lua);
-        table.setIntegerValue("DYNAMIC", static_cast<lua_Integer>(BodyType::Dynamic));
-        table.setIntegerValue("STATIC", static_cast<lua_Integer>(BodyType::Static));
-        table.setIntegerValue("KINEMATIC", static_cast<lua_Integer>(BodyType::Kinematic));
+        YGNodeCalculateLayout(m_node, _width, _height, YGDirectionLTR);
+        m_force_recalculate = false;
+        m_calculated_width = _width;
+        m_calculated_height = _height;
     }
-    lua_setmetatable(_lua, -2);
 }

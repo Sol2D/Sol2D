@@ -28,7 +28,7 @@
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <Sol2D/Lua/Aux/LuaScript.h>
 #include <Sol2D/Lua/Aux/LuaUtils.h>
 #include <sstream>
@@ -326,7 +326,7 @@ int luaApi_CreateBody(lua_State * _lua)
     body_id = scene->createBody(position, *definition);
     if(const char * script_path = argToString(_lua, 4))
     {
-        LuaTable table = LuaTable::pushNew(_lua);
+        LuaTableApi table = LuaTableApi::pushNew(_lua);
         pushBodyApi(_lua, scene, body_id);
         table.setValueFromTop("body");
         lua_pushvalue(_lua, 1);

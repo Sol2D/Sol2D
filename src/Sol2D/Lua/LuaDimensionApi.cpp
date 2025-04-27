@@ -17,7 +17,7 @@
 #include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaMetatable.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <Sol2D/Lua/Aux/LuaUtils.h>
 #include <cstring>
 
@@ -49,7 +49,7 @@ long long strToLL(const char * _str, char ** _endptr)
     return std::strtoll(_str, _endptr, 10);
 }
 
-inline DimensionUnit getUnit(LuaTable & _table)
+inline DimensionUnit getUnit(LuaTableApi & _table)
 {
     int unit;
     return _table.tryGetInteger(g_key_unit, &unit) && unit == static_cast<int>(DimensionUnit::Percent)
@@ -64,7 +64,7 @@ void Sol2D::Lua::pushDimensionUnitEnum(lua_State * _lua)
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, LuaTypeName::dimension_unit_type) == MetatablePushResult::Created)
     {
-        LuaTable table(_lua);
+        LuaTableApi table(_lua);
         table.setIntegerValue("PIXEL", static_cast<lua_Integer>(DimensionUnit::Pixel));
         table.setIntegerValue("PERCENT", static_cast<lua_Integer>(DimensionUnit::Percent));
     }
@@ -73,14 +73,14 @@ void Sol2D::Lua::pushDimensionUnitEnum(lua_State * _lua)
 
 void Sol2D::Lua::pushDimensionD(lua_State * _lua, double _value, DimensionUnit _unit)
 {
-    LuaTable table = LuaTable::pushNew(_lua);
+    LuaTableApi table = LuaTableApi::pushNew(_lua);
     table.setNumberValue(g_key_value, _value);
     table.setIntegerValue(g_key_unit, static_cast<lua_Integer>(_unit));
 }
 
 void Sol2D::Lua::pushDimensionI(lua_State * _lua, long long _value, DimensionUnit _unit)
 {
-    LuaTable table = LuaTable::pushNew(_lua);
+    LuaTableApi table = LuaTableApi::pushNew(_lua);
     table.setIntegerValue(g_key_value, _value);
     table.setIntegerValue(g_key_unit, static_cast<lua_Integer>(_unit));
 }
@@ -97,7 +97,7 @@ bool Sol2D::Lua::tryGetDimensionD(lua_State * _lua, int _idx, double * _value, D
     {
         return parseDimension(str, _value, _unit, &std::strtod);
     }
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(table.isValid())
     {
         if(!table.tryGetNumber(g_key_value, _value))
@@ -120,7 +120,7 @@ bool Sol2D::Lua::tryGetDimensionI(lua_State * _lua, int _idx, long long * _value
     {
         return parseDimension(str, _value, _unit, &strToLL);
     }
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(table.isValid())
     {
         if(!table.tryGetInteger(g_key_value, _value))

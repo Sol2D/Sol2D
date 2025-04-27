@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaSizeApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D::Lua;
 
@@ -28,7 +28,7 @@ static constexpr char g_key_h[] = "h";
 
 bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, FSize & _size)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return false;
 
@@ -44,7 +44,7 @@ bool Sol2D::Lua::tryGetSize(lua_State * _lua, int _idx, FSize & _size)
 
 void Sol2D::Lua::pushSize(lua_State * _lua, float _w, float _h)
 {
-    LuaTable table = LuaTable::pushNew(_lua);
+    LuaTableApi table = LuaTableApi::pushNew(_lua);
     table.setNumberValue(g_key_h, _h);
     table.setNumberValue(g_key_w, _w);
 }

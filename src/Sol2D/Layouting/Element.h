@@ -14,24 +14,35 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/Aux/LuaMetatable.h>
-#include <Sol2D/Lua/Aux/LuaTableApi.h>
-#include <Sol2D/Lua/LuaBodyTypeApi.h>
-#include <Sol2D/Lua/Aux/LuaStrings.h>
-#include <Sol2D/World/BodyType.h>
+#pragma once
 
-using namespace Sol2D::World;
-using namespace Sol2D::Lua;
+#include <Sol2D/StepState.h>
+#include <Sol2D/MediaLayer/MediaLayer.h>
 
-void Sol2D::Lua::pushBodyTypeEnum(lua_State * _lua)
+namespace Sol2D::Layouting {
+
+class Node;
+
+class Element
 {
-    lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::body_type) == MetatablePushResult::Created)
+    S2_DISABLE_COPY_AND_MOVE(Element)
+
+public:
+    explicit Element(const Node & _node) :
+      m_node(_node)
     {
-        LuaTableApi table(_lua);
-        table.setIntegerValue("DYNAMIC", static_cast<lua_Integer>(BodyType::Dynamic));
-        table.setIntegerValue("STATIC", static_cast<lua_Integer>(BodyType::Static));
-        table.setIntegerValue("KINEMATIC", static_cast<lua_Integer>(BodyType::Kinematic));
     }
-    lua_setmetatable(_lua, -2);
-}
+
+    virtual ~Element() { }
+    virtual void step(const StepState & _step) = 0;
+    virtual const FSize * getDesiredSize() const { return nullptr; }
+    float getX() const;
+    float getY() const;
+    float getWidth() const;
+    float getHeight() const;
+
+protected:
+    const Node & m_node;
+};
+
+} // namespace Sol2D::Layouting

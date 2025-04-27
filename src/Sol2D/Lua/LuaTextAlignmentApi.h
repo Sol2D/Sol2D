@@ -21,8 +21,8 @@
 
 namespace Sol2D::Lua {
 
-void pushVerticalTextAlignmentEmum(lua_State * _lua);
-void pushHorizontalTextAlignmentEmum(lua_State * _lua);
+void pushVerticalTextAlignmentEnum(lua_State * _lua);
+void pushHorizontalTextAlignmentEnum(lua_State * _lua);
 bool tryGetVerticalTextAlignment(lua_State * _lua, int _idx, Forms::VerticalTextAlignment * _out);
 bool tryGetHorizontalTextAlignment(lua_State * _lua, int _idx, Forms::HorizontalTextAlignment * _out);
 

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <Sol2D/View.h>
+#include <Sol2D/Layouting/Layout.h>
 #include <memory>
 #include <list>
 
@@ -31,14 +32,21 @@ public:
     void step(const StepState & _state);
     void setView(std::shared_ptr<View> _view);
     std::shared_ptr<View> getView() const;
-    void resize();
+    void setLayout(std::shared_ptr<Layouting::Layout> _layout);
+    std::shared_ptr<Layouting::Layout> getLayout();
+    void resize(float _width, float _height);
 
 private:
     // The list is used to allow a new view to be set during step processing.
     // If the view is replaced during the step, the application will crash.
     // Instead, we add the new view to the list and continue using the old view until the next step.
     // The list is truncated before each step.
-    std::list<std::shared_ptr<View>> m_view_list;
+    std::list<std::shared_ptr<View>> m_view_list; // TODO: delete
+    // The list is used to allow a new layout to be set during step processing.
+    // If the layout is replaced during the step, the application will crash.
+    // Instead, we add the new layout to the list and continue using the old layout until the next step.
+    // The list is truncated before each step.
+    std::list<std::shared_ptr<Layouting::Layout>> m_layout_list;
 };
 
 inline Window::Window()
@@ -55,10 +63,23 @@ inline std::shared_ptr<View> Window::getView() const
     return m_view_list.empty() ? nullptr : m_view_list.back();
 }
 
-inline void Window::resize()
+inline void Window::setLayout(std::shared_ptr<Layouting::Layout> _layout)
+{
+    m_layout_list.push_front(_layout);
+
+}
+
+inline std::shared_ptr<Layouting::Layout> Window::getLayout()
+{
+    return m_layout_list.empty() ? nullptr : m_layout_list.back();
+}
+
+inline void Window::resize(float _width, float _height)
 {
     if(!m_view_list.empty())
-        m_view_list.back()->resize();
+        m_view_list.back()->resize(); // TODO: delete
+    if(!m_layout_list.empty())
+        m_layout_list.back()->recalculate(_width, _height);
 }
 
 } // namespace Sol2D

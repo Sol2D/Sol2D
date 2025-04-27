@@ -73,6 +73,7 @@ struct LuaTypeName
     static const char wheel_joint[];
     static const char font[];
     static const char form[];
+    static const char node[];
     static const char ui[];
     static const char ui_form[];
     static const char vertical_text_alignment[];
@@ -126,6 +127,7 @@ struct LuaMessage
     static const char view_is_destroyed[];
     static const char ui_is_destroyed[];
     static const char form_is_destroyed[];
+    static const char node_is_destroyed[];
     static const char widget_is_destroyed[];
     static const char music_is_destroyed[];
     static const char sound_effect_is_destroyed[];

@@ -49,7 +49,7 @@ private:
     std::unordered_map<uint16_t, std::unique_ptr<Outlet>> m_outlets;
     uint16_t m_next_fragment_id;
     std::list<Outlet *> m_ordered_outlets;
-    std::shared_ptr<UI> m_ui;
+    std::shared_ptr<UI> m_ui; // TODO: move to Window
 };
 
 inline View::View(Renderer & _renderer) :

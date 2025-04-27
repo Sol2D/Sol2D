@@ -20,7 +20,7 @@
 #include <Sol2D/Lua/LuaGraphicsPackDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyPhysicsDefinitionApi.h>
 #include <Sol2D/Lua/LuaBodyShapePhysicsDefinitionApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <Sol2D/Lua/Aux/LuaUtils.h>
 
 using namespace Sol2D;
@@ -30,24 +30,24 @@ using namespace Sol2D::Lua;
 namespace {
 
 template<BodyShapeType shape_type>
-void readBasicShape(LuaTable & _table, BodyBasicShapeDefinition<shape_type> & _shape);
+void readBasicShape(LuaTableApi & _table, BodyBasicShapeDefinition<shape_type> & _shape);
 
 bool tryGetPoints(lua_State * _lua, int _idx, std::vector<SDL_FPoint> & _points);
 
 void addPolygon(
-    LuaTable & _table,
+    LuaTableApi & _table,
     const std::string & _key,
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
 );
 
 void addCircle(
-    LuaTable & _table,
+    LuaTableApi & _table,
     const std::string & _key,
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
 );
 
 void addCapsule(
-    LuaTable & _table,
+    LuaTableApi & _table,
     const std::string & _key,
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
 );
@@ -82,7 +82,7 @@ void addShape(
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
 )
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return;
     lua_Integer value;
@@ -105,7 +105,7 @@ void addShape(
 }
 
 void addPolygon(
-    LuaTable & _table,
+    LuaTableApi & _table,
     const std::string & _key,
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
 )
@@ -133,7 +133,7 @@ void addPolygon(
 }
 
 template<BodyShapeType shape_type>
-void readBasicShape(LuaTable & _table, BodyBasicShapeDefinition<shape_type> & _shape)
+void readBasicShape(LuaTableApi & _table, BodyBasicShapeDefinition<shape_type> & _shape)
 {
     if(_table.tryGetValue("physics"))
     {
@@ -177,7 +177,7 @@ bool tryGetPoints(lua_State * _lua, int _idx, std::vector<SDL_FPoint> & _points)
 }
 
 void addCircle(
-    LuaTable & _table,
+    LuaTableApi & _table,
     const std::string & _key,
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
 )
@@ -196,7 +196,7 @@ void addCircle(
 }
 
 void addCapsule(
-    LuaTable & _table,
+    LuaTableApi & _table,
     const std::string & _key,
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> & _shapes
 )
@@ -215,7 +215,7 @@ void addCapsule(
 
 std::unique_ptr<BodyDefinition> Sol2D::Lua::tryGetBodyDefinition(lua_State * _lua, int _idx)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return nullptr;
     std::unique_ptr<BodyDefinition> def = std::make_unique<BodyDefinition>();

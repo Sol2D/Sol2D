@@ -20,7 +20,7 @@
 #include <Sol2D/Lua/LuaTextAlignmentApi.h>
 #include <Sol2D/Lua/LuaWidgetPaddingApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaUtils.h>
 #include <Sol2D/Lua/Aux/LuaCallbackStorage.h>
@@ -380,7 +380,7 @@ void Sol2D::Lua::pushWidgetStateEnum(lua_State * _lua)
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, LuaTypeName::widget_state) == MetatablePushResult::Created)
     {
-        LuaTable table(_lua);
+        LuaTableApi table(_lua);
         table.setIntegerValue("DEFAULT", static_cast<lua_Integer>(WidgetState::Default));
         table.setIntegerValue("FOCUSED", static_cast<lua_Integer>(WidgetState::Focused));
         table.setIntegerValue("ACTIVATED", static_cast<lua_Integer>(WidgetState::Activated));

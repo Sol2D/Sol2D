@@ -16,7 +16,7 @@
 
 #include <Sol2D/Lua/LuaAreaApi.h>
 #include <Sol2D/Lua/LuaDimensionApi.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
@@ -33,7 +33,7 @@ const char g_key_z_index[] = "zIndex";
 const char g_key_is_visible[] = "isVisible";
 
 template<std::integral Int>
-void setDimension(LuaTable & table, const char * _key, const std::optional<Dimension<Int>> & _dimension)
+void setDimension(LuaTableApi & table, const char * _key, const std::optional<Dimension<Int>> & _dimension)
 {
     if(_dimension.has_value())
     {
@@ -46,7 +46,7 @@ void setDimension(LuaTable & table, const char * _key, const std::optional<Dimen
 
 void Sol2D::Lua::pushArea(lua_State * _lua, const Area & _area)
 {
-    LuaTable table = LuaTable::pushNew(_lua);
+    LuaTableApi table = LuaTableApi::pushNew(_lua);
     setDimension(table, g_key_top, _area.top);
     setDimension(table, g_key_right, _area.right);
     setDimension(table, g_key_bottom, _area.bottom);
@@ -59,7 +59,7 @@ void Sol2D::Lua::pushArea(lua_State * _lua, const Area & _area)
 
 bool Sol2D::Lua::tryGetArea(lua_State * _lua, int _idx, Area & _area)
 {
-    LuaTable table(_lua, _idx);
+    LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return false;
     table.tryGetDimension(g_key_top, _area.top);

@@ -20,6 +20,7 @@
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
 #include <Sol2D/Lua/LuaViewApi.h>
+#include <Sol2D/Lua/LuaLayoutingApi.h>
 #include <Sol2D/Lua/LuaUIApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
@@ -101,6 +102,33 @@ int luaApi_GetView(lua_State * _lua)
     const Self * self = UserData::getUserData(_lua, 1);
     if(std::shared_ptr<View> view = self->getStore(_lua)->getObject<View>(argToStringOrError(_lua, 2)))
         pushViewApi(_lua, view);
+    else
+        lua_pushnil(_lua);
+    return 1;
+}
+
+// 1 self
+// 2 key
+int luaApi_CreateLayout(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    const char * key = argToStringOrError(_lua, 2);
+    std::shared_ptr<Layouting::Layout> layout =
+            self->getStore(_lua)->createObject<Layouting::Layout>(key, self->renderer);
+    pushLayoutNodeApi(_lua, std::static_pointer_cast<Layouting::Node>(layout));
+    self->holdReference(_lua, LuaTypeName::node, key);
+    return 1;
+}
+
+// 1 self
+// 2 key
+int luaApi_GetLayout(lua_State * _lua)
+{
+    const Self * self = UserData::getUserData(_lua, 1);
+    std::shared_ptr<Layouting::Layout> layout =
+            self->getStore(_lua)->getObject<Layouting::Layout>(argToStringOrError(_lua, 2));
+    if(layout)
+        pushLayoutNodeApi(_lua, std::static_pointer_cast<Layouting::Node>(layout));
     else
         lua_pushnil(_lua);
     return 1;
@@ -364,35 +392,38 @@ void Sol2D::Lua::pushStoreApi(
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] = {
-            {"__gc", UserData::luaGC},
-            {"createView", luaApi_CreateView},
-            {"getView", luaApi_GetView},
-            {"freeView", luaApi_FreeObject<View, LuaTypeName::view>},
-            {"createScene", luaApi_CreateScene},
-            {"getScene", luaApi_GetScene},
-            {"freeScene", luaApi_FreeObject<Scene, LuaTypeName::scene>},
-            {"createForm", luaApi_CreateForm},
-            {"getForm", luaApi_GetForm},
-            {"freeForm", luaApi_FreeObject<Form, LuaTypeName::form>},
-            {"createUI", luaApi_CreateUI},
-            {"getUI", luaApi_GetUI},
-            {"freeUI", luaApi_FreeObject<UI, LuaTypeName::ui>},
-            {"createSprite", luaApi_CreateSprite},
-            {"getSprite", luaApi_GetSprite},
-            {"freeSprite", luaApi_FreeObject<Sprite, LuaTypeName::sprite>},
-            {"createSpriteSheet", luaApi_CreateSpriteSheet},
-            {"getSpriteSheet", luaApi_GetSpriteSheet},
-            {"freeSpriteSheet", luaApi_FreeObject<SpriteSheet, LuaTypeName::sprite_sheet>},
-            {"createSoundEffect", luaApi_CreateSoundEffect},
-            {"getSoundEffect", luaApi_GetSoundEffect},
-            {"freeSoundEffect", luaApi_FreeObject<Mix_Chunk, LuaTypeName::sound_effect>},
-            {"createMusic", luaApi_CreateMusic},
-            {"getMusic", luaApi_GetMusic},
-            {"freeMusic", luaApi_FreeObject<Mix_Music, LuaTypeName::music>},
-            {"createFont", luaApi_CreateFont},
-            {"getFont", luaApi_GetFont},
-            {"freeFont", luaApi_FreeObject<TTF_Font, LuaTypeName::font>},
-            {nullptr, nullptr}
+            { "__gc", UserData::luaGC },
+            { "createView", luaApi_CreateView },
+            { "getView", luaApi_GetView },
+            { "freeView", luaApi_FreeObject<View, LuaTypeName::view> },
+            { "createLayout", luaApi_CreateLayout },
+            { "getLayout", luaApi_GetLayout },
+            { "freeLayout", luaApi_FreeObject<Layouting::Layout, LuaTypeName::node> },
+            { "createScene", luaApi_CreateScene },
+            { "getScene", luaApi_GetScene },
+            { "freeScene", luaApi_FreeObject<Scene, LuaTypeName::scene> },
+            { "createForm", luaApi_CreateForm },
+            { "getForm", luaApi_GetForm },
+            { "freeForm", luaApi_FreeObject<Form, LuaTypeName::form> },
+            { "createUI", luaApi_CreateUI },
+            { "getUI", luaApi_GetUI },
+            { "freeUI", luaApi_FreeObject<UI, LuaTypeName::ui> },
+            { "createSprite", luaApi_CreateSprite },
+            { "getSprite", luaApi_GetSprite },
+            { "freeSprite", luaApi_FreeObject<Sprite, LuaTypeName::sprite> },
+            { "createSpriteSheet", luaApi_CreateSpriteSheet },
+            { "getSpriteSheet", luaApi_GetSpriteSheet },
+            { "freeSpriteSheet", luaApi_FreeObject<SpriteSheet, LuaTypeName::sprite_sheet> },
+            { "createSoundEffect", luaApi_CreateSoundEffect },
+            { "getSoundEffect", luaApi_GetSoundEffect },
+            { "freeSoundEffect", luaApi_FreeObject<Mix_Chunk, LuaTypeName::sound_effect> },
+            { "createMusic", luaApi_CreateMusic },
+            { "getMusic", luaApi_GetMusic },
+            { "freeMusic", luaApi_FreeObject<Mix_Music, LuaTypeName::music> },
+            { "createFont", luaApi_CreateFont },
+            { "getFont", luaApi_GetFont },
+            { "freeFont", luaApi_FreeObject<TTF_Font, LuaTypeName::font> },
+            { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

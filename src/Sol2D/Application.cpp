@@ -23,6 +23,8 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
 
+#include <Sol2D/TestElement.h> // TODO: delete
+
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 
@@ -150,8 +152,49 @@ void Application::exec()
     ResourceManager resource_manager; // TODO: create in place
     Renderer renderer(resource_manager, m_sdl_window, m_device);
     StoreManager store_manager;
-    std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(m_workspace, store_manager, *m_window, renderer);
-    lua->executeMainScript();
+    // std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(m_workspace, store_manager, *m_window, renderer);
+
+
+
+
+    // BEGIN TEST
+
+    using namespace Sol2D::Layouting;
+
+
+    std::shared_ptr<Layout> layout(new Layout);
+    layout->setGap(GapGutter::Row, 10);
+
+    Node & node_1 = layout->addNode();
+    Node & node_2 = layout->addNode();
+
+    // node_1.setMargin(LayoutNode::Edge::All, 10);
+    // node_2.setMargin(LayoutNode::Edge::All, 20);
+
+    std::unique_ptr<TestElement> element_1(new TestElement(renderer, { .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f }, node_1)); // TODO: ????
+    std::unique_ptr<TestElement> element_2(new TestElement(renderer, { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f }, node_2)); // TODO: ????
+
+
+    node_1.setFlexGrow(1);
+    node_2.setFlexGrow(2);
+
+
+
+    node_1.setElement(std::move(element_1)); // TODO: shared_ptr
+    node_2.setElement(std::move(element_2)); // TODO: shared_ptr
+
+    m_window->setLayout(layout);
+    int w, h;
+    SDL_GetWindowSize(m_sdl_window, &w, &h);
+    m_window->resize(w, h);
+
+
+
+
+    // END TEST
+
+
+    // lua->executeMainScript();
     const uint32_t render_frame_delay = floor(1000 / m_workspace.getFrameRate());
     uint32_t last_rendering_ticks = SDL_GetTicks();
     SDL_Event event;
@@ -169,7 +212,13 @@ void Application::exec()
             m_step_state.mouse_state.buttons =
                 SDL_GetMouseState(&m_step_state.mouse_state.position.x, &m_step_state.mouse_state.position.y);
             renderer.beginStep();
+
+            renderer.beginDefaultRenderPass(); // TODO: move somewhere
+
             step();
+
+            renderer.endDefaultRenderPass(); // TODO: move somewhere
+
             renderer.submitStep();
             if(m_step_state.mouse_state.lb_click.state == MouseClickState::Finished)
                 m_step_state.mouse_state.lb_click.state = MouseClickState::None;
@@ -206,9 +255,9 @@ bool Application::handleEvent(const SDL_Event & _event)
     return false;
 }
 
-inline void Application::onWindowResized(const SDL_WindowEvent & /*_event*/)
+inline void Application::onWindowResized(const SDL_WindowEvent & _event)
 {
-    m_window->resize();
+    m_window->resize(static_cast<float>(_event.data1), static_cast<float>(_event.data2));
 }
 
 inline void Application::onMouseButtonDown(const SDL_MouseButtonEvent & _event)

@@ -18,7 +18,7 @@
 #include <Sol2D/Lua/LuaPointApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <SDL3/SDL_mouse.h>
 
 using namespace Sol2D;
@@ -38,7 +38,7 @@ int luaApi_GetState(lua_State * _lua)
     UserData::validateUserData(_lua, 1);
     SDL_FPoint point;
     SDL_MouseButtonFlags flags = SDL_GetMouseState(&point.x, &point.y);
-    LuaTable table = LuaTable::pushNew(_lua);
+    LuaTableApi table = LuaTableApi::pushNew(_lua);
     table.setBooleanValue("left", SDL_BUTTON_LMASK & flags);
     table.setBooleanValue("right", SDL_BUTTON_RMASK & flags);
     table.setBooleanValue("middle", SDL_BUTTON_MMASK & flags);

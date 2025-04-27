@@ -20,6 +20,7 @@
 #include <Sol2D/World/Scene.h>
 #include <Sol2D/Forms/Form.h>
 #include <Sol2D/UI.h>
+#include <Sol2D/Layouting/Layout.h>
 #include <Sol2D/Utils/ObjectStore.h>
 #include <filesystem>
 
@@ -82,6 +83,15 @@ struct Utils::ObjectFactory<UI>
 };
 
 template<>
+struct Utils::ObjectFactory<Layouting::Layout>
+{
+    std::shared_ptr<Layouting::Layout> produce(const Layouting::Style & _style = Layouting::Style()) const
+    {
+        return std::make_shared<Layouting::Layout>(_style);
+    }
+};
+
+template<>
 struct Utils::ObjectFactory<TTF_Font>
 {
     std::shared_ptr<TTF_Font> produce(const std::filesystem::path & _file_path, uint16_t _size) const
@@ -108,8 +118,18 @@ struct Utils::ObjectFactory<Mix_Music>
     }
 };
 
-using Store =
-    Utils::ObjectStore<View, Sprite, SpriteSheet, World::Scene, Forms::Form, UI, TTF_Font, Mix_Chunk, Mix_Music>;
+using Store = Utils::ObjectStore<
+    View,
+    Sprite,
+    SpriteSheet,
+    World::Scene,
+    Forms::Form,
+    UI,
+    Layouting::Layout,
+    TTF_Font,
+    Mix_Chunk,
+    Mix_Music
+>;
 
 class StoreManager
 {

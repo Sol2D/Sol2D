@@ -16,258 +16,187 @@
 
 #pragma once
 
-#include <Sol2D/Lua/LuaDimensionApi.h>
-#include <Sol2D/MediaLayer/MediaLayer.h>
+#include <Sol2D/Utils/Variant.h>
 #include <lua.hpp>
 #include <string>
 #include <optional>
-#include <chrono>
 
 namespace Sol2D::Lua {
 
-class LuaTable final
+template<const char * field_key, typename Type>
+struct LuaTableField
+{
+    static constexpr std::string key = field_key;
+    using ValueType = Type;
+    std::optional<Type> value;
+};
+
+template<typename... Fields>
+class LuaTable
 {
 public:
-    S2_DEFAULT_COPY_AND_MOVE(LuaTable)
-
-    explicit LuaTable(lua_State * _lua);
+    using IsLuaTable = void;
 
     LuaTable(lua_State * _lua, int _idx);
 
-    static LuaTable pushNew(lua_State * _lua);
+    template <const char * field_key>
+    auto tryGetValue() const;
 
-    lua_State * getLua() const;
+    template <const char * field_key, typename Default>
+    auto getValueOr(Default _default_value) const;
 
-    bool isValid() const;
+private:
+    template<typename... VariantTypes>
+    class VariantReader
+    {
+    public:
+        explicit VariantReader(LuaTable<Fields...> & _table) :
+            m_table(_table)
+        {
+        }
 
-    template<std::floating_point T>
-    bool tryGetNumber(const char * _key, T * _value) const;
+        std::optional<std::variant<VariantTypes...>> tryReadValue()
+        {
+            return tryReadType<VariantTypes...>();
+        }
 
-    template<std::floating_point T>
-    bool tryGetNumber(const char * _key, std::optional<T> & _value) const;
+    private:
+        template<typename Arg, typename... Rest>
+        std::optional<std::variant<VariantTypes...>> tryReadType()
+        {
+            if(auto value = m_table.tryReadValueFromTop<Arg>())
+                return value.value();
+            if constexpr(sizeof...(Rest) > 0)
+                return tryReadType<Rest...>();
+            return std::nullopt;
+        }
 
-    template<std::integral T>
-    bool tryGetInteger(const char * _key, T * _value) const;
+    private:
+        LuaTable<Fields...> & m_table;
+    };
 
-    template<std::integral T>
-    bool tryGetInteger(const char * _key, std::optional<T> & _value) const;
+    template<typename First, typename... Rest>
+    void loadValues(int _idx);
 
-    template<std::unsigned_integral T>
-    bool tryGetUnsignedInteger(const char * _key, T * _value) const;
+    template<const char * field_key, typename First, typename... Rest>
+    auto getValue() const;
 
-    template<std::unsigned_integral T>
-    bool tryGetUnsignedInteger(const char * _key, std::optional<T> & _value) const;
+    template<typename T>
+    std::optional<T> tryReadField(int _idx, const std::string & _key);
 
-    template<typename Rep, typename Period>
-    bool tryGetDuration(const char * _key, std::chrono::duration<Rep, Period> * _duration);
+    template<typename T>
+    std::optional<T> tryReadValueFromTop();
 
-    template<typename Rep, typename Period>
-    bool tryGetDuration(const char * _key, std::optional<std::chrono::duration<Rep, Period>> & _duration);
-
-    bool tryGetBoolean(const char * _key, bool * _value) const;
-
-    bool tryGetBoolean(const char * _key, std::optional<bool> _value) const;
-
-    bool tryGetString(const char * _key, std::string & _value) const;
-
-    bool tryGetString(const char * _key, std::optional<std::string> & _value) const;
-
-    bool tryGetPoint(const char * _key, SDL_FPoint & _value);
-
-    bool tryGetPoint(const char * _key, std::optional<SDL_FPoint> & _value);
-
-    bool tryGetSize(const char * _key, FSize & _value);
-
-    bool tryGetSize(const char * _key, std::optional<FSize> & _value);
-
-    bool tryGetRect(const char * _key, SDL_FRect & _value);
-
-    bool tryGetRect(const char * _key, std::optional<SDL_FRect> & _value);
-
-    bool tryGetColor(const char * _key, SDL_FColor & _value);
-
-    bool tryGetColor(const char * _key, std::optional<SDL_FColor> & _value);
-
-    template<DimensionValueConcept Number>
-    bool tryGetDimension(const char * _key, Dimension<Number> & _value);
-
-    template<DimensionValueConcept Number>
-    bool tryGetDimension(const char * _key, std::optional<Dimension<Number>> & _value);
-
-    bool tryGetValue(const char * _key) const;
-
-    void setValueFromTop(const char * _key);
-
-    void setIntegerValue(const char * _key, lua_Integer _value);
-
-    void setNumberValue(const char * _key, lua_Number _value);
-
-    void setBooleanValue(const char * _key, bool _value);
-
-    void setStringValue(const char * _key, const char * _value);
-
-    void setNullValue(const char * _key);
-
-    void setStringValue(const char * _key, const std::string & _value);
-
-    void setPointValue(const char * _key, const SDL_FPoint & _point);
+    template<typename... VariantTypes>
+    std::optional<std::variant<VariantTypes...>> tryReadVariantFromTop(const std::variant<VariantTypes...> &)
+    {
+        VariantReader<VariantTypes...> reader(*this);
+        return reader.tryReadValue();
+    }
 
 private:
     lua_State * m_lua;
-    int m_idx;
+    std::tuple<Fields...> m_fields;
 };
 
-inline LuaTable::LuaTable(lua_State * _lua) :
-    LuaTable(_lua, -1)
+template<typename... Fields>
+inline LuaTable<Fields...>::LuaTable(lua_State * _lua, int _idx) :
+    m_lua(_lua)
 {
+    loadValues<Fields...>(_idx);
 }
 
-inline LuaTable::LuaTable(lua_State * _lua, int _idx) :
-    m_lua(_lua),
-    m_idx(lua_absindex(_lua, _idx))
+template<typename... Fields>
+template<const char * field_key>
+inline auto LuaTable<Fields...>::tryGetValue() const
 {
+    return getValue<field_key, Fields...>();
 }
 
-inline LuaTable LuaTable::pushNew(lua_State * _lua)
+template<typename... Fields>
+template<const char * field_key, typename Default>
+inline auto LuaTable<Fields...>::getValueOr(Default _default_value) const
 {
-    lua_newtable(_lua);
-    return LuaTable(_lua);
+    return tryGetValue<field_key>().value_or(_default_value);
 }
 
-inline lua_State * LuaTable::getLua() const
+template<typename... Fields>
+template<typename First, typename... Rest>
+inline void LuaTable<Fields...>::loadValues(int _idx)
 {
-    return m_lua;
+    std::get<First>(m_fields).value = tryReadField<typename First::ValueType>(_idx, First::key);
+    if constexpr(sizeof...(Rest) > 0)
+        loadValues<Rest...>(_idx);
 }
 
-inline bool LuaTable::isValid() const
+template<typename... Fields>
+template<typename T>
+inline std::optional<T> LuaTable<Fields...>::tryReadField(int _idx, const std::string & _key)
 {
-    return lua_istable(m_lua, m_idx);
-}
-
-template<std::floating_point T>
-bool LuaTable::tryGetNumber(const char * _key, std::optional<T> & _value) const
-{
-    T value;
-    if(tryGetNumber(_key, &value))
-    {
-        _value = value;
-        return true;
-    }
-    return false;
-}
-
-template<std::floating_point T>
-bool LuaTable::tryGetNumber(const char * _key, T * _value) const
-{
-    bool result = lua_getfield(m_lua, m_idx, _key) == LUA_TNUMBER;
-    if(result)
-        *_value = static_cast<T>(lua_tonumber(m_lua, -1));
+    lua_getfield(m_lua, _idx, _key.c_str());
+    auto result = tryReadValueFromTop<T>();
     lua_pop(m_lua, 1);
     return result;
 }
 
-template<typename Rep, typename Period>
-bool LuaTable::tryGetDuration(const char * _key, std::optional<std::chrono::duration<Rep, Period>> & _duration)
+template<typename... Fields>
+template<typename T>
+std::optional<T> LuaTable<Fields...>::tryReadValueFromTop()
 {
-    Rep value;
-    if(tryGetInteger(_key, &value))
+    int type = lua_type(m_lua, -1);
+    if constexpr(std::is_same_v<T, bool>)
     {
-        _duration = std::chrono::duration<Rep, Period>(value);
-        return true;
+        if(type == LUA_TBOOLEAN)
+            return lua_toboolean(m_lua, -1) != 0;
+        if(type == LUA_TNUMBER)
+            return lua_tonumber(m_lua, -1) != 0.0;
     }
-    return false;
-}
-
-template<typename Rep, typename Period>
-bool LuaTable::tryGetDuration(const char * _key, std::chrono::duration<Rep, Period> * _duration)
-{
-    Rep value;
-    if(tryGetInteger(_key, &value))
+    else if constexpr(std::is_integral_v<T> || std::is_enum_v<T>)
     {
-        *_duration = std::chrono::duration<Rep, Period>(value);
-        return true;
+        if(type == LUA_TNUMBER)
+            return static_cast<T>(lua_tointeger(m_lua, -1));
     }
-    return false;
-}
-
-template<std::integral T>
-bool LuaTable::tryGetInteger(const char * _key, std::optional<T> & _value) const
-{
-    T value;
-    if(tryGetInteger(_key, &value))
+    else if constexpr(std::is_floating_point_v<T>)
     {
-        _value = value;
-        return true;
+        if(type == LUA_TNUMBER)
+            return static_cast<T>(lua_tonumber(m_lua, -1));
     }
-    return false;
-}
-
-template<std::integral T>
-bool LuaTable::tryGetInteger(const char * _key, T * _value) const
-{
-    lua_getfield(m_lua, m_idx, _key);
-    bool result = lua_isinteger(m_lua, -1);
-    if(result)
-        *_value = static_cast<T>(lua_tointeger(m_lua, -1));
-    lua_pop(m_lua, 1);
-    return result;
-}
-
-template<std::unsigned_integral T>
-bool LuaTable::tryGetUnsignedInteger(const char * _key, std::optional<T> & _value) const
-{
-    T value;
-    if(tryGetUnsignedInteger(_key, &value))
+    else if constexpr(std::is_same_v<T, std::string>)
     {
-        _value = value;
-        return true;
-    }
-    return false;
-}
-
-template<std::unsigned_integral T>
-bool LuaTable::tryGetUnsignedInteger(const char * _key, T * _value) const
-{
-    lua_getfield(m_lua, m_idx, _key);
-    bool result = false;
-    if(lua_isinteger(m_lua, -1))
-    {
-        lua_Integer value = lua_tointeger(m_lua, -1);
-        if(value >= 0)
+        if(type == LUA_TSTRING)
         {
-            *_value = static_cast<T>(value);
-            result = true;
+            const char * value = lua_tostring(m_lua, -1);
+            return value ? std::optional<std::string>(std::string(value)) : std::nullopt;
         }
     }
-    lua_pop(m_lua, 1);
-    return result;
-}
-
-template<DimensionValueConcept Number>
-bool LuaTable::tryGetDimension(const char * _key, std::optional<Dimension<Number>> & _value)
-{
-    if(tryGetValue(_key) && Lua::tryGetDimension(m_lua, -1, _value))
+    else if constexpr(Sol2D::Utils::is_variant_v<T>)
     {
-        lua_pop(m_lua, 1);
-        return true;
+        return tryReadVariantFromTop(T());
     }
-    return false;
-}
-
-template<DimensionValueConcept Number>
-bool LuaTable::tryGetDimension(const char * _key, Dimension<Number> & _value)
-{
-    if(tryGetValue(_key) && Lua::tryGetDimension(m_lua, -1, _value))
+    else if constexpr(requires { typename T::IsLuaTable; })
     {
-        lua_pop(m_lua, 1);
-        return true;
+        if(type == LUA_TTABLE)
+            return T(m_lua, -1);
     }
-    return false;
+    return std::nullopt;
 }
 
-inline void LuaTable::setStringValue(const char * _key, const std::string & _value)
+template<typename... Fields>
+template<const char * field_key, typename First, typename... Rest>
+inline auto LuaTable<Fields...>::getValue() const
 {
-    setStringValue(_key, _value.c_str());
+    if constexpr(First::key == field_key)
+    {
+        return std::get<First>(m_fields).value;
+    }
+    else
+    {
+        if constexpr(sizeof...(Rest) > 0)
+            return getValue<field_key, Rest...>();
+        else
+        return std::nullopt;
+    }
 }
 
 } // namespace Sol2D::Lua
+

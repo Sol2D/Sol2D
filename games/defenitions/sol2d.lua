@@ -8,11 +8,26 @@
 ---@field mouse sol.Mouse
 ---@field stores sol.StoreManager
 ---@field window sol.Window
+---@field style sol.StyleNS
 ---@field TileMapObjectType sol.TileMapObjectType
 ---@field DimensionUnit sol.DimensionUnit
 ---@field WidgetState sol.WidgetState
+
+---@class sol.StyleNS
 ---@field HorizontalTextAlignment sol.HorizontalTextAlignment
 ---@field VerticalTextAlignment sol.VerticalTextAlignment
+---@field ContentAlignment sol.ContentAlignment
+---@field ContentJustification sol.ContentJustification
+---@field ItemAlignment sol.ItemAlignment
+---@field DisplayMode sol.DisplayMode
+---@field FlexDirection sol.FlexDirection
+---@field FlexWrap sol.FlexWrap
+---@field Edge sol.Edge
+---@field GapGutter sol.GapGutter
+---@field PositionType sol.PositionType
+---@field PositionUnit sol.PositionUnit
+---@field SizeUnit sol.SizeUnit
+
 sol = nil
 
 ---@type sol.ScriptContext
@@ -276,6 +291,121 @@ function __view:bindFragment(fragment_id, target) end
 function __view:bindUI(ui) end
 
 function __view:deleteUI() end
+
+---@class sol.ContentAlignment
+---@field FLEX_START integer
+---@field FLEX_END integer
+---@field STRETCH integer
+---@field CENTER integer
+---@field SPACE_BETWEEN integer
+---@field SPACE_AROUND integer
+
+---@class sol.ContentJustification
+---@field FLEX_START integer
+---@field FLEX_END integer
+---@field CENTER integer
+---@field SPACE_BETWEEN integer
+---@field SPACE_AROUND integer
+---@field SPACE_EVENLY integer
+
+---@class sol.ItemAlignment
+---@field STRETCH integer
+---@field FLEX_START integer
+---@field FLEX_END integer
+---@field CENTER integer
+---@field BASELINE integer
+
+---@class sol.DisplayMode
+---@field FLEX integer
+---@field NONE integer
+
+---@class sol.FlexDirection
+---@field COLUMN integer
+---@field ROW integer
+---@field COLUMN_REVERSE integer
+---@field ROW_REVERSE integer
+
+---@class sol.FlexWrap
+---@field NONE integer
+---@field WRAP integer
+---@field WRAP_REVERSE integer
+
+---@class sol.Edge
+---@field LEFT integer
+---@field TOP integer
+---@field RIGHT integer
+---@field BOTTOM integer
+---@field START integer
+---@field END integer
+---@field HORIZONTAL integer
+---@field VERTICAL integer
+---@field ALL integer
+
+---@class sol.GapGutter
+---@field COLUMN integer
+---@field ROW integer
+---@field ALL integer
+
+---@class sol.PositionType
+---@field RELATIVE integer
+---@field ABSOLUTE integer
+---@field STATIC integer
+
+---@class sol.PositionUnit
+---@field AUTO integer
+---@field POINT integer
+---@field PERCENT integer
+
+---@class sol.SizeUnit
+---@field AUTO integer
+---@field POINT integer
+---@field PERCENT integer
+---@field MAX_CONTENT integer
+---@field FIT_CONTENT integer
+---@field STRETCH integer
+
+---@class sol.SizeLimitUnit
+---@field POINT integer
+---@field PERCENT integer
+---@field MAX_CONTENT integer
+---@field FIT_CONTENT integer
+---@field STRETCH integer
+
+---@class sol.Node
+local __node
+
+function __node:setPositionType() end -- TODO: signature
+function __node:setPosition() end -- TODO: signature
+function __node:setPosition() end -- TODO: signature
+function __node:setMargin() end -- TODO: signature
+function __node:setMargin() end -- TODO: signature
+function __node:setPadding() end -- TODO: signature
+function __node:setWidth() end -- TODO: signature
+function __node:setHeight() end -- TODO: signature
+function __node:setMinWidth() end -- TODO: signature
+function __node:setMinHeight() end -- TODO: signature
+function __node:setMaxWidth() end -- TODO: signature
+function __node:setMaxHeight() end -- TODO: signature
+function __node:setFlexBasis() end -- TODO: signature
+function __node:setFlexGrow() end -- TODO: signature
+function __node:setFlexShrink() end -- TODO: signature
+function __node:setFlexDirection() end -- TODO: signature
+function __node:setFlexWrap() end -- TODO: signature
+function __node:setGap() end -- TODO: signature
+function __node:setContentAlignment() end -- TODO: signature
+function __node:setContentJustification() end -- TODO: signature
+function __node:setItemsAlignment() end -- TODO: signature
+function __node:setSelfAlignment() end -- TODO: signature
+function __node:setAspectRatio() end -- TODO: signature
+function __node:setDisplayMode() end -- TODO: signature
+function __node:addNode() end -- TODO: signature
+function __node:getX() end -- TODO: signature
+function __node:getY() end -- TODO: signature
+function __node:getWidth() end -- TODO: signature
+function __node:getHeight() end -- TODO: signature
+function __node:getChildren() end -- TODO: signature
+function __node:getElement() end -- TODO: signature
+function __node:setElement() end -- TODO: signature
 
 ---@class sol.Scene
 local __scene
@@ -1028,6 +1158,18 @@ function __store:getView(key) end
 ---@param key string
 ---@return boolean
 function __store:freeView(key) end
+
+---@param key string
+---@return sol.Node
+function __store:createLayout(key) end
+
+---@param key string
+---@return sol.Node | nil
+function __store:getLayout(key) end
+
+---@param key string
+---@return boolean
+function __store:freeLayout(key) end
 
 ---@param key string
 ---@param options sol.SceneOptions?
