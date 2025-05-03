@@ -33,7 +33,7 @@ const char g_key_z_index[] = "zIndex";
 const char g_key_is_visible[] = "isVisible";
 
 template<std::integral Int>
-void setDimension(LuaTableApi & table, const char * _key, const std::optional<Dimension<Int>> & _dimension)
+void setDimension(LuaTableApi & table, const char * _key, const std::optional<Dimension_Obsolete<Int>> & _dimension)
 {
     if(_dimension.has_value())
     {

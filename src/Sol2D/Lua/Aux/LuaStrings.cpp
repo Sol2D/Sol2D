@@ -79,6 +79,7 @@ const char LuaTypeName::button[] = "sol.Button";
 const char LuaTypeName::label[] = "sol.Label";
 const char LuaTypeName::sound_effect[] = "sol.SoundEffect";
 const char LuaTypeName::music[] = "sol.Music";
+const char LuaTypeName::style[] = "sol.Style";
 
 const char LuaMessage::store_is_destroyed[] = "the store is invalid or has been destroyed";
 const char LuaMessage::scene_is_destroyed[] = "the scene is invalid or has been destroyed";

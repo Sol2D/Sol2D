@@ -30,14 +30,14 @@ class Widget : public Object
 
 public:
     ~Widget() override;
-    void setX(const Dimension<float> & _x);
-    const Dimension<float> & getX() const;
-    void setY(const Dimension<float> & _y);
-    const Dimension<float> & getY() const;
-    void setWidth(const Dimension<float> & _width);
-    const Dimension<float> & getWidth() const;
-    void setHeight(const Dimension<float> & _height);
-    const Dimension<float> & setHeight() const;
+    void setX(const Dimension_Obsolete<float> & _x);
+    const Dimension_Obsolete<float> & getX() const;
+    void setY(const Dimension_Obsolete<float> & _y);
+    const Dimension_Obsolete<float> & getY() const;
+    void setWidth(const Dimension_Obsolete<float> & _width);
+    const Dimension_Obsolete<float> & getWidth() const;
+    void setHeight(const Dimension_Obsolete<float> & _height);
+    const Dimension_Obsolete<float> & setHeight() const;
     virtual void step(const StepState & _state);
     virtual bool setState(WidgetState _state);
     WidgetState getState() const;
@@ -61,10 +61,10 @@ protected:
     const Canvas & m_parent;
     Renderer & m_renderer;
     WidgetState m_state;
-    Dimension<float> m_x;
-    Dimension<float> m_y;
-    Dimension<float> m_width;
-    Dimension<float> m_height;
+    Dimension_Obsolete<float> m_x;
+    Dimension_Obsolete<float> m_y;
+    Dimension_Obsolete<float> m_width;
+    Dimension_Obsolete<float> m_height;
 
     static constexpr SDL_FColor sc_default_foreground_color = {1.0f, 1.0f, 1.0f, 1.0f};
     static constexpr SDL_FColor sc_default_background_color = {.0f, .0f, .0f, .0f};
@@ -97,42 +97,42 @@ inline const Canvas & Widget::getParent() const
     return m_parent;
 }
 
-inline void Widget::setX(const Dimension<float> & _x)
+inline void Widget::setX(const Dimension_Obsolete<float> & _x)
 {
     m_x = _x;
 }
 
-inline const Dimension<float> & Widget::getX() const
+inline const Dimension_Obsolete<float> & Widget::getX() const
 {
     return m_x;
 }
 
-inline void Widget::setY(const Dimension<float> & _y)
+inline void Widget::setY(const Dimension_Obsolete<float> & _y)
 {
     m_y = _y;
 }
 
-inline const Dimension<float> & Widget::getY() const
+inline const Dimension_Obsolete<float> & Widget::getY() const
 {
     return m_y;
 }
 
-inline void Widget::setWidth(const Dimension<float> & _width)
+inline void Widget::setWidth(const Dimension_Obsolete<float> & _width)
 {
     m_width = _width;
 }
 
-inline const Dimension<float> & Widget::getWidth() const
+inline const Dimension_Obsolete<float> & Widget::getWidth() const
 {
     return m_width;
 }
 
-inline void Widget::setHeight(const Dimension<float> & _height)
+inline void Widget::setHeight(const Dimension_Obsolete<float> & _height)
 {
     m_height = _height;
 }
 
-inline const Dimension<float> & Widget::setHeight() const
+inline const Dimension_Obsolete<float> & Widget::setHeight() const
 {
     return m_height;
 }

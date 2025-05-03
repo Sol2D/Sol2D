@@ -26,7 +26,7 @@ namespace Sol2D::Lua {
 template<const char * field_key, typename Type>
 struct LuaTableField
 {
-    static constexpr std::string key = field_key;
+    static constexpr const char * key = field_key;
     using ValueType = Type;
     std::optional<Type> value;
 };

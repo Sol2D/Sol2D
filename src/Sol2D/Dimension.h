@@ -31,37 +31,37 @@ template<typename T>
 concept DimensionValueConcept = std::integral<T> || std::floating_point<T>;
 
 template<DimensionValueConcept Number>
-struct Dimension
+struct Dimension_Obsolete
 {
-    S2_DEFAULT_COPY_AND_MOVE(Dimension)
+    S2_DEFAULT_COPY_AND_MOVE(Dimension_Obsolete)
 
     // cppcheck-suppress noExplicitConstructor
-    Dimension(Number _pixels) :
-        Dimension(_pixels, DimensionUnit::Pixel)
+    Dimension_Obsolete(Number _pixels) :
+        Dimension_Obsolete(_pixels, DimensionUnit::Pixel)
     {
     }
 
-    Dimension(Number _value, DimensionUnit _unit) :
+    Dimension_Obsolete(Number _value, DimensionUnit _unit) :
         value(_value),
         unit(_unit)
     {
     }
 
-    Dimension & operator= (Number _pixels)
+    Dimension_Obsolete & operator= (Number _pixels)
     {
         value = _pixels;
         unit = DimensionUnit::Pixel;
         return *this;
     }
 
-    static Dimension<Number> fromPixels(Number _pixels)
+    static Dimension_Obsolete<Number> fromPixels(Number _pixels)
     {
-        return Dimension<Number>(_pixels, DimensionUnit::Pixel);
+        return Dimension_Obsolete<Number>(_pixels, DimensionUnit::Pixel);
     }
 
-    static Dimension<Number> fromPercents(Number _percents)
+    static Dimension_Obsolete<Number> fromPercents(Number _percents)
     {
-        return Dimension<Number>(_percents, DimensionUnit::Percent);
+        return Dimension_Obsolete<Number>(_percents, DimensionUnit::Percent);
     }
 
     float getPixels(Number _length) const

@@ -36,6 +36,7 @@
 using namespace Sol2D;
 using namespace Sol2D::World;
 using namespace Sol2D::Forms;
+using namespace Sol2D::Layouting;
 using namespace Sol2D::Lua;
 
 namespace {
@@ -109,12 +110,15 @@ int luaApi_GetView(lua_State * _lua)
 
 // 1 self
 // 2 key
+// 3 style (optional)
 int luaApi_CreateLayout(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = argToStringOrError(_lua, 2);
-    std::shared_ptr<Layouting::Layout> layout =
-            self->getStore(_lua)->createObject<Layouting::Layout>(key, self->renderer);
+    Style style;
+    if(lua_gettop(_lua) >= 3)
+        luaL_argexpected(_lua, tryGetStyle(_lua, 3, style), 3, LuaTypeName::style);
+    std::shared_ptr<Layouting::Layout> layout = self->getStore(_lua)->createObject<Layouting::Layout>(key, style);
     pushLayoutNodeApi(_lua, std::static_pointer_cast<Layouting::Node>(layout));
     self->holdReference(_lua, LuaTypeName::node, key);
     return 1;

@@ -42,12 +42,12 @@ public:
         return m_texture != nullptr;
     }
 
-    bool operator== (std::nullopt_t) const
+    bool operator == (std::nullptr_t) const
     {
         return m_texture == nullptr;
     }
 
-    bool operator!= (std::nullopt_t) const
+    bool operator != (std::nullptr_t) const
     {
         return m_texture != nullptr;
     }

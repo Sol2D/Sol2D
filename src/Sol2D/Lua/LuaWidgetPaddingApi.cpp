@@ -35,8 +35,8 @@ bool Sol2D::Lua::tryGetWidgetPadding(lua_State * _lua, int _idx, Forms::WidgetPa
     }
     else
     {
-        std::optional<Dimension<float>> dimension;
-        if(tryGetDimension<float>(_lua, _idx, dimension))
+        std::optional<Dimension_Obsolete<float>> dimension;
+        if(tryGetDimension_Obsolete<float>(_lua, _idx, dimension))
         {
             _padding.top = dimension.value();
             _padding.bottom = dimension.value();

@@ -28,23 +28,23 @@ public:
     void setPositionType(Position::Type _type);
     void setPosition(const std::unordered_map<Edge, Position> & _positions);
     void setPosition(Edge _edge, Position _posotion);
-    void setMargin(const std::unordered_map<Edge, float> & _margins);
-    void setMargin(Edge _edge, float _value);
-    void setPadding(const std::unordered_map<Edge, float> & _paddings);
-    void setPadding(Edge _edge, float _value);
-    void setWidth(const Size & _width);
-    void setHeight(const Size & _height);
-    void setMinWidth(const SizeLimit & _min_width);
-    void setMinHeight(const SizeLimit & _min_height);
-    void setMaxWidth(const SizeLimit & _max_width);
-    void setMaxHeight(const SizeLimit & _max_height);
-    void setFlexBasis(float _basis);
+    void setMargin(const std::unordered_map<Edge, Dimension> & _margins);
+    void setMargin(Edge _edge, const Dimension & _value);
+    void setPadding(const std::unordered_map<Edge, Dimension> & _paddings);
+    void setPadding(Edge _edge, Dimension _value);
+    void setWidth(const Dimension & _width);
+    void setHeight(const Dimension & _height);
+    void setMinWidth(const DimensionLimit & _min_width);
+    void setMinHeight(const DimensionLimit & _min_height);
+    void setMaxWidth(const DimensionLimit & _max_width);
+    void setMaxHeight(const DimensionLimit & _max_height);
+    void setFlexBasis(const Dimension & _basis);
     void setFlexGrow(float _grow);
     void setFlexShrink(float _shrink);
     void setFlexDirection(FlexDirection _direction);
     void setFlexWrap(FlexWrap _wrap);
-    void setGap(const std::unordered_map<GapGutter, float> & _gaps);
-    void setGap(GapGutter _gutter, float _gap);
+    void setGap(const std::unordered_map<GapGutter, Dimension> & _gaps);
+    void setGap(GapGutter _gutter, const Dimension & _gap);
     void setContentAlignment(ContentAlignment _alignment);
     void setContentJustification(ContentJustification _justification);
     void setItemsAlignment(ItemAlignment _alignment);
@@ -141,171 +141,214 @@ inline void YogaNodeWrapper::setPosition(Edge _edge, Position _posotion)
     }
 }
 
-inline void YogaNodeWrapper::setMargin(const std::unordered_map<Edge, float> & _margins)
+inline void YogaNodeWrapper::setMargin(const std::unordered_map<Edge, Dimension> & _margins)
 {
-    for(const auto margin_pair : _margins)
+    for(const auto & margin_pair : _margins)
         setMargin(margin_pair.first, margin_pair.second);
 }
 
-inline void YogaNodeWrapper::setMargin(Edge _edge, float _value)
+inline void YogaNodeWrapper::setMargin(Edge _edge, const Dimension & _value)
 {
-    YGNodeStyleSetMargin(m_node, edgeToYGEdge(_edge), _value);
+    switch(_value.unit)
+    {
+    case Dimension::Unit::Auto:
+        YGNodeStyleSetMarginAuto(m_node, edgeToYGEdge(_edge));
+        break;
+    case Dimension::Unit::Point:
+        YGNodeStyleSetMargin(m_node, edgeToYGEdge(_edge), _value.value);
+        break;
+    case Dimension::Unit::Percent:
+        YGNodeStyleSetMarginPercent(m_node, edgeToYGEdge(_edge), _value.value);
+        break;
+    default:
+        break;
+    }
 }
 
-inline void YogaNodeWrapper::setPadding(const std::unordered_map<Edge, float> & _paddings)
+inline void YogaNodeWrapper::setPadding(const std::unordered_map<Edge, Dimension> & _paddings)
 {
-    for(const auto padding_pair : _paddings)
+    for(const auto & padding_pair : _paddings)
         setPadding(padding_pair.first, padding_pair.second);
 }
 
-inline void YogaNodeWrapper::setPadding(Edge _edge, float _value)
+inline void YogaNodeWrapper::setPadding(Edge _edge, Dimension _value)
 {
-    YGNodeStyleSetPadding(m_node, edgeToYGEdge(_edge), _value);
+    switch(_value.unit)
+    {
+    case Dimension::Unit::Point:
+        YGNodeStyleSetPadding(m_node, edgeToYGEdge(_edge), _value.value);
+        break;
+    case Dimension::Unit::Percent:
+        YGNodeStyleSetPaddingPercent(m_node, edgeToYGEdge(_edge), _value.value);
+        break;
+    default:
+        break;
+    }
 }
 
-inline void YogaNodeWrapper::setWidth(const Size & _width)
+inline void YogaNodeWrapper::setWidth(const Dimension & _width)
 {
     switch(_width.unit)
     {
-    case Size::Unit::Points:
+    case Dimension::Unit::Point:
         YGNodeStyleSetWidth(m_node, _width.value);
         break;
-    case Size::Unit::Auto:
+    case Dimension::Unit::Auto:
         YGNodeStyleSetWidthAuto(m_node);
         break;
-    case Size::Unit::Percentage:
+    case Dimension::Unit::Percent:
         YGNodeStyleSetWidthPercent(m_node, _width.value);
         break;
-    case Size::Unit::MaxContent:
+    case Dimension::Unit::MaxContent:
         YGNodeStyleSetWidthMaxContent(m_node);
         break;
-    case Size::Unit::FitContent:
+    case Dimension::Unit::FitContent:
         YGNodeStyleSetWidthFitContent(m_node);
         break;
-    case Size::Unit::Stretch:
+    case Dimension::Unit::Stretch:
         YGNodeStyleSetWidthStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setHeight(const Size & _height)
+inline void YogaNodeWrapper::setHeight(const Dimension & _height)
 {
     switch(_height.unit)
     {
-    case Size::Unit::Points:
+    case Dimension::Unit::Point:
         YGNodeStyleSetHeight(m_node, _height.value);
         break;
-    case Size::Unit::Auto:
+    case Dimension::Unit::Auto:
         YGNodeStyleSetHeightAuto(m_node);
         break;
-    case Size::Unit::Percentage:
+    case Dimension::Unit::Percent:
         YGNodeStyleSetHeightPercent(m_node, _height.value);
         break;
-    case Size::Unit::MaxContent:
+    case Dimension::Unit::MaxContent:
         YGNodeStyleSetHeightMaxContent(m_node);
         break;
-    case Size::Unit::FitContent:
+    case Dimension::Unit::FitContent:
         YGNodeStyleSetHeightFitContent(m_node);
         break;
-    case Size::Unit::Stretch:
+    case Dimension::Unit::Stretch:
         YGNodeStyleSetHeightStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setMinWidth(const SizeLimit & _min_width)
+inline void YogaNodeWrapper::setMinWidth(const DimensionLimit & _min_width)
 {
     switch(_min_width.unit)
     {
-    case SizeLimit::Unit::Point:
+    case DimensionLimit::Unit::Point:
         YGNodeStyleSetMinWidth(m_node, _min_width.value);
         break;
-    case SizeLimit::Unit::Percentage:
+    case DimensionLimit::Unit::Percent:
         YGNodeStyleSetMinWidthPercent(m_node, _min_width.value);
         break;
-    case SizeLimit::Unit::MaxContent:
+    case DimensionLimit::Unit::MaxContent:
         YGNodeStyleSetMinWidthMaxContent(m_node);
         break;
-    case SizeLimit::Unit::FitContent:
+    case DimensionLimit::Unit::FitContent:
         YGNodeStyleSetMinWidthFitContent(m_node);
         break;
-    case SizeLimit::Unit::Stretch:
+    case DimensionLimit::Unit::Stretch:
         YGNodeStyleSetMinWidthStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setMinHeight(const SizeLimit & _min_height)
+inline void YogaNodeWrapper::setMinHeight(const DimensionLimit & _min_height)
 {
     switch(_min_height.unit)
     {
-    case SizeLimit::Unit::Point:
+    case DimensionLimit::Unit::Point:
         YGNodeStyleSetMinHeight(m_node, _min_height.value);
         break;
         break;
-    case SizeLimit::Unit::Percentage:
+    case DimensionLimit::Unit::Percent:
         YGNodeStyleSetMinHeightPercent(m_node, _min_height.value);
         break;
-    case SizeLimit::Unit::MaxContent:
+    case DimensionLimit::Unit::MaxContent:
         YGNodeStyleSetMinHeightMaxContent(m_node);
         break;
-    case SizeLimit::Unit::FitContent:
+    case DimensionLimit::Unit::FitContent:
         YGNodeStyleSetMinHeightFitContent(m_node);
         break;
-    case SizeLimit::Unit::Stretch:
+    case DimensionLimit::Unit::Stretch:
         YGNodeStyleSetMinHeightStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setMaxWidth(const SizeLimit & _max_width)
+inline void YogaNodeWrapper::setMaxWidth(const DimensionLimit & _max_width)
 {
     switch(_max_width.unit)
     {
-    case SizeLimit::Unit::Point:
+    case DimensionLimit::Unit::Point:
         YGNodeStyleSetMaxWidth(m_node, _max_width.value);
         break;
-    case SizeLimit::Unit::Percentage:
+    case DimensionLimit::Unit::Percent:
         YGNodeStyleSetMaxWidthPercent(m_node, _max_width.value);
         break;
-    case SizeLimit::Unit::MaxContent:
+    case DimensionLimit::Unit::MaxContent:
         YGNodeStyleSetMaxWidthMaxContent(m_node);
         break;
-    case SizeLimit::Unit::FitContent:
+    case DimensionLimit::Unit::FitContent:
         YGNodeStyleSetMaxWidthFitContent(m_node);
         break;
-    case SizeLimit::Unit::Stretch:
+    case DimensionLimit::Unit::Stretch:
         YGNodeStyleSetMaxWidthStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setMaxHeight(const SizeLimit & _max_height)
+inline void YogaNodeWrapper::setMaxHeight(const DimensionLimit & _max_height)
 {
     switch(_max_height.unit)
     {
-    case SizeLimit::Unit::Point:
+    case DimensionLimit::Unit::Point:
         YGNodeStyleSetMaxHeight(m_node, _max_height.value);
         break;
         break;
-    case SizeLimit::Unit::Percentage:
+    case DimensionLimit::Unit::Percent:
         YGNodeStyleSetMaxHeightPercent(m_node, _max_height.value);
         break;
-    case SizeLimit::Unit::MaxContent:
+    case DimensionLimit::Unit::MaxContent:
         YGNodeStyleSetMaxHeightMaxContent(m_node);
         break;
-    case SizeLimit::Unit::FitContent:
+    case DimensionLimit::Unit::FitContent:
         YGNodeStyleSetMaxHeightFitContent(m_node);
         break;
-    case SizeLimit::Unit::Stretch:
+    case DimensionLimit::Unit::Stretch:
         YGNodeStyleSetMaxHeightStretch(m_node);
         break;
     }
 }
 
-inline void YogaNodeWrapper::setFlexBasis(float _basis)
+inline void YogaNodeWrapper::setFlexBasis(const Dimension & _basis)
 {
-    YGNodeStyleSetFlexBasis(m_node, _basis);
+    switch(_basis.unit)
+    {
+    case Dimension::Unit::Auto:
+        YGNodeStyleSetFlexBasisAuto(m_node);
+        break;
+    case Dimension::Unit::Point:
+        YGNodeStyleSetFlexBasis(m_node, _basis.value);
+        break;
+    case Dimension::Unit::Percent:
+        YGNodeStyleSetFlexBasisPercent(m_node, _basis.value);
+        break;
+    case Dimension::Unit::MaxContent:
+        YGNodeStyleSetFlexBasisMaxContent(m_node);
+        break;
+    case Dimension::Unit::FitContent:
+        YGNodeStyleSetFlexBasisFitContent(m_node);
+        break;
+    case Dimension::Unit::Stretch:
+        YGNodeStyleSetFlexBasisStretch(m_node);
+        break;
+    }
 }
 
 inline void YogaNodeWrapper::setFlexGrow(float _grow)
@@ -328,15 +371,25 @@ inline void YogaNodeWrapper::setFlexWrap(FlexWrap _wrap)
     YGNodeStyleSetFlexWrap(m_node, flexWrapToYGWrap(_wrap));
 }
 
-inline void YogaNodeWrapper::setGap(const std::unordered_map<GapGutter, float> & _gaps)
+inline void YogaNodeWrapper::setGap(const std::unordered_map<GapGutter, Dimension> & _gaps)
 {
     for(const auto & gap_pair : _gaps)
         setGap(gap_pair.first, gap_pair.second);
 }
 
-inline void YogaNodeWrapper::setGap(GapGutter _gutter, float _gap)
+inline void YogaNodeWrapper::setGap(GapGutter _gutter, const Dimension & _gap)
 {
-    YGNodeStyleSetGap(m_node, gapGutterToYGGutter(_gutter), _gap);
+    switch(_gap.unit)
+    {
+    case Dimension::Unit::Point:
+        YGNodeStyleSetGap(m_node, gapGutterToYGGutter(_gutter), _gap.value);
+        break;
+    case Dimension::Unit::Percent:
+        YGNodeStyleSetGapPercent(m_node, gapGutterToYGGutter(_gutter), _gap.value);
+        break;
+    default:
+        break;
+    }
 }
 
 inline void YogaNodeWrapper::setContentAlignment(ContentAlignment _alignment)
@@ -610,67 +663,67 @@ void Node::setPosition(Edge _edge, Position _posotion)
     forceRecalculation();
 }
 
-void Node::setMargin(const std::unordered_map<Edge, float> & _margins)
+void Node::setMargin(const std::unordered_map<Edge, Dimension> & _margins)
 {
     YogaNodeWrapper(m_node).setMargin(_margins);
     forceRecalculation();
 }
 
-void Node::setMargin(Edge _edge, float _value)
+void Node::setMargin(Edge _edge, const Dimension & _value)
 {
     YogaNodeWrapper(m_node).setMargin(_edge, _value);
     forceRecalculation();
 }
 
-void Node::setPadding(const std::unordered_map<Edge, float> & _paddings)
+void Node::setPadding(const std::unordered_map<Edge, Dimension> & _paddings)
 {
     YogaNodeWrapper(m_node).setPadding(_paddings);
     forceRecalculation();
 }
 
-void Node::setPadding(Edge _edge, float _value)
+void Node::setPadding(Edge _edge, const Dimension & _value)
 {
     YogaNodeWrapper(m_node).setPadding(_edge, _value);
     forceRecalculation();
 }
 
-void Node::setWidth(const Size & _width)
+void Node::setWidth(const Dimension & _width)
 {
     YogaNodeWrapper(m_node).setWidth(_width);
     forceRecalculation();
 }
 
-void Node::setHeight(const Size & _height)
+void Node::setHeight(const Dimension & _height)
 {
     YogaNodeWrapper(m_node).setHeight(_height);
     forceRecalculation();
 }
 
-void Node::setMinWidth(const SizeLimit & _min_width)
+void Node::setMinWidth(const DimensionLimit & _min_width)
 {
     YogaNodeWrapper(m_node).setMinWidth(_min_width);
     forceRecalculation();
 }
 
-void Node::setMinHeight(const SizeLimit & _min_height)
+void Node::setMinHeight(const DimensionLimit & _min_height)
 {
     YogaNodeWrapper(m_node).setMinHeight(_min_height);
     forceRecalculation();
 }
 
-void Node::setMaxWidth(const SizeLimit & _max_width)
+void Node::setMaxWidth(const DimensionLimit & _max_width)
 {
     YogaNodeWrapper(m_node).setMaxWidth(_max_width);
     forceRecalculation();
 }
 
-void Node::setMaxHeight(const SizeLimit & _max_height)
+void Node::setMaxHeight(const DimensionLimit & _max_height)
 {
     YogaNodeWrapper(m_node).setMaxHeight(_max_height);
     forceRecalculation();
 }
 
-void Node::setFlexBasis(float _basis)
+void Node::setFlexBasis(const Dimension & _basis)
 {
     YogaNodeWrapper(m_node).setFlexBasis(_basis);
     forceRecalculation();
@@ -700,7 +753,7 @@ void Node::setFlexWrap(FlexWrap _wrap)
     forceRecalculation();
 }
 
-void Node::setGap(const std::unordered_map<GapGutter, float> & _gaps)
+void Node::setGap(const std::unordered_map<GapGutter, Dimension> & _gaps)
 {
     YogaNodeWrapper(m_node).setGap(_gaps);
     forceRecalculation();

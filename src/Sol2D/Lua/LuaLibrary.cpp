@@ -99,7 +99,7 @@ LuaLibrary::LuaLibrary(
         lua_setfield(m_lua, -2, "BodyShapeType");
         pushTileMapObjectTypeEnum(m_lua);
         lua_setfield(m_lua, -2, "TileMapObjectType");
-        pushDimensionUnitEnum(m_lua);
+        pushDimensionUnitEnum_Obsolete(m_lua);
         lua_setfield(m_lua, -2, "DimensionUnit");
         pushWidgetStateEnum(m_lua);
         lua_setfield(m_lua, -2, "WidgetState");        
@@ -129,10 +129,10 @@ LuaLibrary::LuaLibrary(
             lua_setfield(m_lua, -2, "PositionType");
             pushPositionUnitEnum(m_lua);
             lua_setfield(m_lua, -2, "PositionUnit");
-            pushSizeUnitEnum(m_lua);
-            lua_setfield(m_lua, -2, "SizeUnit");
-            pushSizeLimitUnitEnum(m_lua);
-            lua_setfield(m_lua, -2, "SizeLimitUnit");
+            pushDimensionUnitEnum(m_lua);
+            lua_setfield(m_lua, -2, "DimensionUnit");
+            pushDimensionLimitUnitEnum(m_lua);
+            lua_setfield(m_lua, -2, "DimensionLimitUnit");
             lua_setfield(m_lua, -2, "style");
         }
     }

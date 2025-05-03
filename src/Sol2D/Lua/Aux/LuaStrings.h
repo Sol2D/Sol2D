@@ -84,6 +84,7 @@ struct LuaTypeName
     static const char label[];
     static const char sound_effect[];
     static const char music[];
+    static const char style[];
 
     template<typename... T>
     static std::string joinTypes(const T... _type);

@@ -26,7 +26,7 @@
 ---@field GapGutter sol.GapGutter
 ---@field PositionType sol.PositionType
 ---@field PositionUnit sol.PositionUnit
----@field SizeUnit sol.SizeUnit
+---@field DimensionUnit sol.DimensionUnit
 
 sol = nil
 
@@ -356,7 +356,7 @@ function __view:deleteUI() end
 ---@field POINT integer
 ---@field PERCENT integer
 
----@class sol.SizeUnit
+---@class sol.DimensionUnit
 ---@field AUTO integer
 ---@field POINT integer
 ---@field PERCENT integer

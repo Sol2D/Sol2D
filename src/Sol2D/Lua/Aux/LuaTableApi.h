@@ -89,10 +89,10 @@ public:
     bool tryGetColor(const char * _key, std::optional<SDL_FColor> & _value);
 
     template<DimensionValueConcept Number>
-    bool tryGetDimension(const char * _key, Dimension<Number> & _value);
+    bool tryGetDimension(const char * _key, Dimension_Obsolete<Number> & _value);
 
     template<DimensionValueConcept Number>
-    bool tryGetDimension(const char * _key, std::optional<Dimension<Number>> & _value);
+    bool tryGetDimension(const char * _key, std::optional<Dimension_Obsolete<Number>> & _value);
 
     bool tryGetValue(const char * _key) const;
 
@@ -244,9 +244,9 @@ bool LuaTableApi::tryGetUnsignedInteger(const char * _key, T * _value) const
 }
 
 template<DimensionValueConcept Number>
-bool LuaTableApi::tryGetDimension(const char * _key, std::optional<Dimension<Number>> & _value)
+bool LuaTableApi::tryGetDimension(const char * _key, std::optional<Dimension_Obsolete<Number>> & _value)
 {
-    if(tryGetValue(_key) && Lua::tryGetDimension(m_lua, -1, _value))
+    if(tryGetValue(_key) && Lua::tryGetDimension_Obsolete(m_lua, -1, _value))
     {
         lua_pop(m_lua, 1);
         return true;
@@ -255,9 +255,9 @@ bool LuaTableApi::tryGetDimension(const char * _key, std::optional<Dimension<Num
 }
 
 template<DimensionValueConcept Number>
-bool LuaTableApi::tryGetDimension(const char * _key, Dimension<Number> & _value)
+bool LuaTableApi::tryGetDimension(const char * _key, Dimension_Obsolete<Number> & _value)
 {
-    if(tryGetValue(_key) && Lua::tryGetDimension(m_lua, -1, _value))
+    if(tryGetValue(_key) && Lua::tryGetDimension_Obsolete(m_lua, -1, _value))
     {
         lua_pop(m_lua, 1);
         return true;

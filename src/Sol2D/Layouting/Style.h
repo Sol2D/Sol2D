@@ -165,7 +165,7 @@ struct Position
     Unit unit;
 };
 
-struct Size
+struct Dimension
 {
     enum class Unit
     {
@@ -177,19 +177,19 @@ struct Size
         Stretch
     };
 
-    constexpr Size(Unit _unit = Unit::Auto) :
+    constexpr Dimension(Unit _unit = Unit::Auto) :
         value(.0f),
         unit(_unit)
     {
     }
 
-    constexpr Size(const Percentage _percentage) :
+    constexpr Dimension(const Percentage _percentage) :
         value(_percentage),
         unit(Unit::Percent)
     {
     }
 
-    constexpr Size(float _value = .0f, Unit _units = Unit::Point) :
+    constexpr Dimension(float _value, Unit _units = Unit::Point) :
         value(_value),
         unit(_units)
     {
@@ -206,7 +206,7 @@ struct Size
     Unit unit;
 };
 
-struct SizeLimit
+struct DimensionLimit
 {
     enum class Unit
     {
@@ -217,19 +217,19 @@ struct SizeLimit
         Stretch
     };
 
-    constexpr SizeLimit(Unit _unit = Unit::FitContent) :
+    constexpr DimensionLimit(Unit _unit = Unit::FitContent) :
         value(.0f),
         unit(_unit)
     {
     }
 
-    constexpr SizeLimit(float _value = .0f, Unit _unit = Unit::Point) :
+    constexpr DimensionLimit(float _value, Unit _unit = Unit::Point) :
         value(_value),
         unit(_unit)
     {
     }
 
-    constexpr SizeLimit(const Percentage & _percentage) :
+    constexpr DimensionLimit(const Percentage & _percentage) :
         value(_percentage),
         unit(Unit::Percent)
     {
@@ -247,15 +247,15 @@ struct SizeLimit
 
 struct Style
 {
-    std::unordered_map<Edge, float> margin;
-    std::unordered_map<Edge, float> padding;
-    std::optional<Size> width;
-    std::optional<Size> height;
-    std::optional<SizeLimit> min_width;
-    std::optional<SizeLimit> min_height;
-    std::optional<SizeLimit> max_width;
-    std::optional<SizeLimit> max_height;
-    std::optional<float> flex_basis;
+    std::unordered_map<Edge, Dimension> margin;
+    std::unordered_map<Edge, Dimension> padding;
+    std::optional<Dimension> width;
+    std::optional<Dimension> height;
+    std::optional<DimensionLimit> min_width;
+    std::optional<DimensionLimit> min_height;
+    std::optional<DimensionLimit> max_width;
+    std::optional<DimensionLimit> max_height;
+    std::optional<Dimension> flex_basis;
     std::optional<float> flex_grow;
     std::optional<float> flex_shrink;
     std::optional<FlexDirection> flex_direction;
@@ -266,7 +266,7 @@ struct Style
     std::optional<ItemAlignment> self_alignment;
     std::optional<float> aspect_ratio;
     std::optional<DisplayMode> display_mode;
-    std::unordered_map<GapGutter, float> gap;
+    std::unordered_map<GapGutter, Dimension> gap;
     std::unordered_map<Edge, Position> position;
     std::optional<Position::Type> position_type;
 

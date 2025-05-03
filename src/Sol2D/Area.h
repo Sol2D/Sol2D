@@ -37,12 +37,12 @@ struct Area
 
     SDL_FRect calculateRect(const FSize & _output_size) const;
 
-    std::optional<Dimension<int32_t>> top;
-    std::optional<Dimension<int32_t>> right;
-    std::optional<Dimension<int32_t>> left;
-    std::optional<Dimension<int32_t>> bottom;
-    std::optional<Dimension<uint32_t>> width;
-    std::optional<Dimension<uint32_t>> height;
+    std::optional<Dimension_Obsolete<int32_t>> top;
+    std::optional<Dimension_Obsolete<int32_t>> right;
+    std::optional<Dimension_Obsolete<int32_t>> left;
+    std::optional<Dimension_Obsolete<int32_t>> bottom;
+    std::optional<Dimension_Obsolete<uint32_t>> width;
+    std::optional<Dimension_Obsolete<uint32_t>> height;
     uint16_t z_index;
     bool is_visible;
 };

@@ -159,8 +159,8 @@ template<typename UserDataT>
 int luaApi_SetX(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    std::optional<Dimension<float>> dimension;
-    luaL_argexpected(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
+    std::optional<Dimension_Obsolete<float>> dimension;
+    luaL_argexpected(_lua, tryGetDimension_Obsolete<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
     self->getWidget(_lua)->setX(dimension.value());
     return 0;
 }
@@ -171,8 +171,8 @@ template<typename UserDataT>
 int luaApi_SetY(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    std::optional<Dimension<float>> dimension;
-    luaL_argexpected(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
+    std::optional<Dimension_Obsolete<float>> dimension;
+    luaL_argexpected(_lua, tryGetDimension_Obsolete<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
     self->getWidget(_lua)->setY(dimension.value());
     return 0;
 }
@@ -183,8 +183,8 @@ template<typename UserDataT>
 int luaApi_SetWidth(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    std::optional<Dimension<float>> dimension;
-    luaL_argexpected(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
+    std::optional<Dimension_Obsolete<float>> dimension;
+    luaL_argexpected(_lua, tryGetDimension_Obsolete<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
     self->getWidget(_lua)->setWidth(dimension.value());
     return 0;
 }
@@ -195,8 +195,8 @@ template<typename UserDataT>
 int luaApi_SetHeight(lua_State * _lua)
 {
     auto * self = UserDataT::getUserData(_lua, 1);
-    std::optional<Dimension<float>> dimension;
-    luaL_argexpected(_lua, tryGetDimension<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
+    std::optional<Dimension_Obsolete<float>> dimension;
+    luaL_argexpected(_lua, tryGetDimension_Obsolete<float>(_lua, 2, dimension), 2, LuaTypeName::dimension);
     self->getWidget(_lua)->setHeight(dimension.value());
     return 0;
 }

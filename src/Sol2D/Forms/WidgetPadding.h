@@ -36,16 +36,16 @@ struct WidgetPadding
     }
 
     // cppcheck-suppress noExplicitConstructor
-    WidgetPadding(const Dimension<float> & _padding) :
+    WidgetPadding(const Dimension_Obsolete<float> & _padding) :
         WidgetPadding(_padding, _padding, _padding, _padding)
     {
     }
 
     WidgetPadding(
-        const Dimension<float> & _top,
-        const Dimension<float> & _right,
-        const Dimension<float> & _bottom,
-        const Dimension<float> & _left
+        const Dimension_Obsolete<float> & _top,
+        const Dimension_Obsolete<float> & _right,
+        const Dimension_Obsolete<float> & _bottom,
+        const Dimension_Obsolete<float> & _left
     ) :
         top(_top),
         right(_right),
@@ -63,10 +63,10 @@ struct WidgetPadding
         return *this;
     }
 
-    Dimension<float> top;
-    Dimension<float> right;
-    Dimension<float> bottom;
-    Dimension<float> left;
+    Dimension_Obsolete<float> top;
+    Dimension_Obsolete<float> right;
+    Dimension_Obsolete<float> bottom;
+    Dimension_Obsolete<float> left;
 };
 
 } // namespace Sol2D::Forms

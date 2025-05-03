@@ -59,7 +59,7 @@ inline DimensionUnit getUnit(LuaTableApi & _table)
 
 } // namespace
 
-void Sol2D::Lua::pushDimensionUnitEnum(lua_State * _lua)
+void Sol2D::Lua::pushDimensionUnitEnum_Obsolete(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, LuaTypeName::dimension_unit_type) == MetatablePushResult::Created)

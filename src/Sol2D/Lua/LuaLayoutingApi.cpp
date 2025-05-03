@@ -18,10 +18,11 @@
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
+#include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D;
 using namespace Sol2D::Layouting;
-using namespace Sol2D::Lua;;
+using namespace Sol2D::Lua;
 
 namespace {
 
@@ -45,261 +46,399 @@ struct Self : LuaSelfBase
 
 using UserData = LuaUserData<Self, LuaTypeName::node>;
 
-constexpr const char g_size[] = "size";
-constexpr const char g_size_unit[] = "unit";
-constexpr const char g_size_value[] = "value";
+namespace Field
+{
+    namespace Style
+    {
+        constexpr const char margin[] = "margin";
+        constexpr const char padding[] = "padding";
+        constexpr const char width[] = "width";
+        constexpr const char height[] = "height";
+        constexpr const char min_width[] = "minWidth";
+        constexpr const char min_height[] = "minHeight";
+        constexpr const char max_width[] = "maxWidth";
+        constexpr const char max_height[] = "maxHeight";
+        constexpr const char flex_basis[] = "flexBasis";
+        constexpr const char flex_grow[] = "flexGrow";
+        constexpr const char flex_shrink[] = "flexShrink";
+        constexpr const char flex_direction[] = "flexDirection";
+        constexpr const char flex_wrap[] = "flexWrap";
+        constexpr const char content_alignment[] = "contentAlignment";
+        constexpr const char content_justification[] = "contentJustification";
+        constexpr const char items_alignment[] = "itemsAlignment";
+        constexpr const char self_alignment[] = "selfAlignment";
+        constexpr const char aspect_ratio[] = "aspectRatio";
+        constexpr const char display_mode[] = "displayMode";
+        constexpr const char gap[] = "gap";
+        constexpr const char position[] = "position";
+        constexpr const char position_type[] = "positionType";
+    }
 
-using SizeTable = LuaTable<
-    LuaTableField<g_size_unit, Sol2D::Layouting::Size::Unit>,
-    LuaTableField<g_size_value, float>
->;
+    namespace Edge
+    {
+        constexpr const char left[] = "left";
+        constexpr const char top[] = "top";
+        constexpr const char right[] = "right";
+        constexpr const char bottom[] = "bottom";
+        constexpr const char start[] = "start";
+        constexpr const char end[] = "end";
+        constexpr const char horizontal[] = "horizontal";
+        constexpr const char vertical[] = "vertical";
+        constexpr const char all[] = "all";
+    };
+
+    namespace UnitAndValue
+    {
+        constexpr const char unit[] = "unit";
+        constexpr const char value[] = "value";
+    }
+
+    namespace GapGutter
+    {
+        constexpr const char column[] = "column";
+        constexpr const char row[] = "row";
+        constexpr const char all[] = "all";
+    }
+}
+
+template<typename Unit>
+class UnitAndValue
+{
+public:
+    using Table = LuaTable<
+        LuaTableField<Field::UnitAndValue::unit, Unit>,
+        LuaTableField<Field::UnitAndValue::value, float>
+    >;
+
+    explicit UnitAndValue(const Table & _table) :
+        m_table(_table)
+    {
+    }
+
+    template<typename Agg>
+    std::optional<Agg> aggregate() const
+    {
+        auto unit = m_table.template tryGetValue<Field::UnitAndValue::unit>();
+        auto value = m_table.template tryGetValue<Field::UnitAndValue::value>();
+        if(unit && value)
+            return Agg(*value, *unit);
+        return std::nullopt;
+    }
+
+private:
+    const Table & m_table;
+};
+
+class GapGutterMap
+{
+public:
+    using Table = LuaTable<
+        LuaTableField<Field::GapGutter::column, UnitAndValue<Dimension::Unit>::Table>,
+        LuaTableField<Field::GapGutter::row, UnitAndValue<Dimension::Unit>::Table>,
+        LuaTableField<Field::GapGutter::all, UnitAndValue<Dimension::Unit>::Table>
+    >;
+
+    explicit GapGutterMap(const Table & _table) :
+        m_table(_table)
+    {
+    }
+
+    void read(std::unordered_map<GapGutter, Dimension> & _dest_map) const
+    {
+        readGutter<Field::GapGutter::column>(_dest_map, GapGutter::Column);
+        readGutter<Field::GapGutter::row>(_dest_map, GapGutter::Row);
+        readGutter<Field::GapGutter::all>(_dest_map, GapGutter::All);
+    }
+
+    template<const char name[]>
+    void readGutter(std::unordered_map<GapGutter, Dimension> & _dest_map, GapGutter _gutter) const
+    {
+        if(auto field = m_table.template tryGetValue<name>())
+        {
+            if(auto value = UnitAndValue<Dimension::Unit>(*field).aggregate<Dimension>())
+                _dest_map[_gutter] = *value;
+        }
+    }
+
+private:
+    const Table & m_table;
+};
+
+template<typename Unit>
+class EdgeMap
+{
+public:
+    using Table = LuaTable<
+        LuaTableField<Field::Edge::left, typename UnitAndValue<Unit>::Table>,
+        LuaTableField<Field::Edge::top, typename UnitAndValue<Unit>::Table>,
+        LuaTableField<Field::Edge::right, typename UnitAndValue<Unit>::Table>,
+        LuaTableField<Field::Edge::bottom, typename UnitAndValue<Unit>::Table>,
+        LuaTableField<Field::Edge::start, typename UnitAndValue<Unit>::Table>,
+        LuaTableField<Field::Edge::end, typename UnitAndValue<Unit>::Table>,
+        LuaTableField<Field::Edge::horizontal, typename UnitAndValue<Unit>::Table>,
+        LuaTableField<Field::Edge::vertical, typename UnitAndValue<Unit>::Table>,
+        LuaTableField<Field::Edge::all, typename UnitAndValue<Unit>::Table>
+    >;
+
+    explicit EdgeMap(const Table & _table) :
+        m_table(_table)
+    {
+    }
+
+    template<typename Value>
+    void read(std::unordered_map<Edge, Value> & _dest_map) const
+    {
+        readEdge<Field::Edge::left, Value>(_dest_map, Edge::Left);
+        readEdge<Field::Edge::top, Value>(_dest_map, Edge::Top);
+        readEdge<Field::Edge::right, Value>(_dest_map, Edge::Right);
+        readEdge<Field::Edge::bottom, Value>(_dest_map, Edge::Bottom);
+        readEdge<Field::Edge::start, Value>(_dest_map, Edge::Start);
+        readEdge<Field::Edge::end, Value>(_dest_map, Edge::End);
+        readEdge<Field::Edge::horizontal, Value>(_dest_map, Edge::Horizontal);
+        readEdge<Field::Edge::vertical, Value>(_dest_map, Edge::Vertical);
+        readEdge<Field::Edge::all, Value>(_dest_map, Edge::All);
+    }
+
+    template<const char name[], typename Value>
+    void readEdge(std::unordered_map<Edge, Value> & _dest_map, Edge _edge) const
+    {
+        if(auto field = m_table.template tryGetValue<name>())
+        {
+            if(auto value = UnitAndValue<Unit>(*field).template aggregate<Value>())
+                _dest_map[_edge] = *value;
+        }
+    }
+
+private:
+    const Table & m_table;
+};
 
 using StyleTable = LuaTable<
-    LuaTableField<g_size, SizeTable>
-    /*
-    std::unordered_map<Edge, float> margin;
-    std::unordered_map<Edge, float> padding;
-    std::optional<Size> width;
-    std::optional<Size> height;
-    std::optional<SizeLimit> min_width;
-    std::optional<SizeLimit> min_height;
-    std::optional<SizeLimit> max_width;
-    std::optional<SizeLimit> max_height;
-    std::optional<float> flex_basis;
-    std::optional<float> flex_grow;
-    std::optional<float> flex_shrink;
-    std::optional<FlexDirection> flex_direction;
-    std::optional<FlexWrap> flex_wrap;
-    std::optional<ContentAlignment> content_alignment;
-    std::optional<ContentJustification> content_justification;
-    std::optional<ItemAlignment> items_alignment;
-    std::optional<ItemAlignment> self_alignment;
-    std::optional<float> aspect_ratio;
-    std::optional<DisplayMode> display_mode;
-    std::unordered_map<GapGutter, float> gap;
-    std::unordered_map<Edge, Position> position;
-    std::optional<Position::Type> position_type;
-     */
+    LuaTableField<Field::Style::margin, EdgeMap<Dimension::Unit>::Table>,
+    LuaTableField<Field::Style::padding, EdgeMap<Dimension::Unit>::Table>,
+    LuaTableField<Field::Style::width, UnitAndValue<Dimension::Unit>::Table>,
+    LuaTableField<Field::Style::height, UnitAndValue<Dimension::Unit>::Table>,
+    LuaTableField<Field::Style::min_width, UnitAndValue<DimensionLimit::Unit>::Table>,
+    LuaTableField<Field::Style::min_height, UnitAndValue<DimensionLimit::Unit>::Table>,
+    LuaTableField<Field::Style::max_width, UnitAndValue<DimensionLimit::Unit>::Table>,
+    LuaTableField<Field::Style::max_height, UnitAndValue<DimensionLimit::Unit>::Table>,
+    LuaTableField<Field::Style::flex_basis, UnitAndValue<Dimension::Unit>::Table>,
+    LuaTableField<Field::Style::flex_grow, float>,
+    LuaTableField<Field::Style::flex_shrink, float>,
+    LuaTableField<Field::Style::flex_direction, FlexDirection>,
+    LuaTableField<Field::Style::flex_wrap, FlexWrap>,
+    LuaTableField<Field::Style::content_alignment, ContentAlignment>,
+    LuaTableField<Field::Style::content_justification, ContentJustification>,
+    LuaTableField<Field::Style::items_alignment, ItemAlignment>,
+    LuaTableField<Field::Style::self_alignment, ItemAlignment>,
+    LuaTableField<Field::Style::aspect_ratio, float>,
+    LuaTableField<Field::Style::display_mode, DisplayMode>,
+    LuaTableField<Field::Style::gap, GapGutterMap::Table>,
+    LuaTableField<Field::Style::position, EdgeMap<Position::Unit>::Table>,
+    LuaTableField<Field::Style::position_type, Position::Type>
 >;
-
-bool tryGetStyle(lua_State * _lua, int _idx, Style & _style)
-{
-    return false;
-}
 
 // 1 self
 // 2 type (int or string)
 int luaApi_SetPositionType(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
     std::optional<Position::Type> type;
-    if(lua_isstring(_lua, 2))
+    switch(lua_tointeger(_lua, 2))
     {
-        type = tryParsePositionType(lua_tostring(_lua, 2));
+    case static_cast<lua_Integer>(Position::Type::Absolute):
+        type = Position::Type::Absolute;
+        break;
+    case static_cast<lua_Integer>(Position::Type::Static):
+        type = Position::Type::Static;
+        break;
+    case static_cast<lua_Integer>(Position::Type::Relative):
+        type = Position::Type::Relative;
+        break;
     }
-    else if(lua_isinteger(_lua, 2))
-    {
-        switch(lua_tointeger(_lua, 2))
-        {
-        case static_cast<lua_Integer>(Position::Type::Absolute):
-            type = Position::Type::Absolute;
-            break;
-        case static_cast<lua_Integer>(Position::Type::Static):
-            type = Position::Type::Static;
-            break;
-        case static_cast<lua_Integer>(Position::Type::Relative):
-            type = Position::Type::Relative;
-            break;
-        }
-    }
-    luaL_argexpected(
-        _lua,
-        type.has_value(),
-        2,
-        LuaTypeName::joinTypes(LuaTypeName::integer, LuaTypeName::string).c_str()
-    );
     self->getNode(_lua)->setPositionType(type.value());
-    return 0;;
+    return 0;
 }
 
-// const std::unordered_map<Edge, Position> & _positions
-// OR Edge _edge, Position _posotion
-int luaApi_SetPosition(lua_State * _lua)
-{
-    return -1;
-}
+// // const std::unordered_map<Edge, Position> & _positions
+// // OR Edge _edge, Position _posotion
+// int luaApi_SetPosition(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const std::unordered_map<Edge, float> & _margins
-// OR Edge _edge, float _value
-int luaApi_SetMargin(lua_State * _lua)
-{
-    return -1;
-}
+// // const std::unordered_map<Edge, float> & _margins
+// // OR Edge _edge, float _value
+// int luaApi_SetMargin(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const std::unordered_map<Edge, float> & _paddings
-// OR // Edge _edge, float _value
-int luaApi_SetPadding(lua_State * _lua)
-{
-    return -1;
-}
+// // const std::unordered_map<Edge, float> & _paddings
+// // OR // Edge _edge, float _value
+// int luaApi_SetPadding(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const Size & _width
-int luaApi_SetWidth(lua_State * _lua)
-{
-    return -1;
-}
+// // const Size & _width
+// int luaApi_SetWidth(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const Size & _height
-int luaApi_SetHeight(lua_State * _lua)
-{
-    return -1;
-}
+// // const Size & _height
+// int luaApi_SetHeight(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const SizeLimit & _min_width
-int luaApi_SetMinWidth(lua_State * _lua)
-{
-    return -1;
-}
+// // const SizeLimit & _min_width
+// int luaApi_SetMinWidth(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const SizeLimit & _min_height
-int luaApi_SetMinHeight(lua_State * _lua)
-{
-    return -1;
-}
+// // const SizeLimit & _min_height
+// int luaApi_SetMinHeight(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const SizeLimit & _max_width
-int luaApi_SetMaxWidth(lua_State * _lua)
-{
-    return -1;
-}
+// // const SizeLimit & _max_width
+// int luaApi_SetMaxWidth(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const SizeLimit & _max_height
-int luaApi_SetMaxHeight(lua_State * _lua)
-{
-    return -1;
-}
+// // const SizeLimit & _max_height
+// int luaApi_SetMaxHeight(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// float _basis
-int luaApi_SetFlexBasis(lua_State * _lua)
-{
-    return -1;
-}
+// // float _basis
+// int luaApi_SetFlexBasis(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// float _grow
-int luaApi_SetFlexGrow(lua_State * _lua)
-{
-    return -1;
-}
+// // float _grow
+// int luaApi_SetFlexGrow(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// float _shrink
-int luaApi_SetFlexShrink(lua_State * _lua)
-{
-    return -1;
-}
+// // float _shrink
+// int luaApi_SetFlexShrink(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// FlexDirection _direction
-int luaApi_SetFlexDirection(lua_State * _lua)
-{
-    return -1;
-}
+// // FlexDirection _direction
+// int luaApi_SetFlexDirection(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// FlexWrap _wrap
-int luaApi_SetFlexWrap(lua_State * _lua)
-{
-    return -1;
-}
+// // FlexWrap _wrap
+// int luaApi_SetFlexWrap(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const std::unordered_map<GapGutter, float> & _gaps
-// OR // GapGutter _gutter, float _gap
-int luaApi_SetGap(lua_State * _lua)
-{
-    return -1;
-}
+// // const std::unordered_map<GapGutter, float> & _gaps
+// // OR // GapGutter _gutter, float _gap
+// int luaApi_SetGap(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// ContentAlignment _alignment
-int luaApi_SetContentAlignment(lua_State * _lua)
-{
-    return -1;
-}
+// // ContentAlignment _alignment
+// int luaApi_SetContentAlignment(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// ContentJustification _justification
-int luaApi_SetContentJustification(lua_State * _lua)
-{
-    return -1;
-}
+// // ContentJustification _justification
+// int luaApi_SetContentJustification(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// ItemAlignment _alignment
-int luaApi_SetItemsAlignment(lua_State * _lua)
-{
-    return -1;
-}
+// // ItemAlignment _alignment
+// int luaApi_SetItemsAlignment(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// ItemAlignment _alignment
-int luaApi_SetSelfAlignment(lua_State * _lua)
-{
-    return -1;
-}
+// // ItemAlignment _alignment
+// int luaApi_SetSelfAlignment(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// float _ratio
-int luaApi_SetAspectRatio(lua_State * _lua)
-{
-    return -1;
-}
+// // float _ratio
+// int luaApi_SetAspectRatio(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// DisplayMode _mode
-int luaApi_SetDisplayMode(lua_State * _lua)
-{
-    return -1;
-}
+// // DisplayMode _mode
+// int luaApi_SetDisplayMode(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// const Style & _style = Style()
-// return LayoutNode &
-int luaApi_AddNode(lua_State * _lua)
-{
-    return -1;
-}
+// // const Style & _style = Style()
+// // return LayoutNode &
+// int luaApi_AddNode(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// return float
-int luaApi_GetX(lua_State * _lua)
-{
-    return -1;
-}
+// // return float
+// int luaApi_GetX(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// return float
-int luaApi_GetY(lua_State * _lua)
-{
-    return -1;
-}
+// // return float
+// int luaApi_GetY(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// return float
-int luaApi_GetWidth(lua_State * _lua)
-{
-    return -1;
-}
+// // return float
+// int luaApi_GetWidth(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// return float
-int luaApi_GetHeight(lua_State * _lua)
-{
-    return -1;
-}
+// // return float
+// int luaApi_GetHeight(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// return Children
-int luaApi_GetChildren(lua_State * _lua)
-{
-    return -1;
-}
+// // return Children
+// int luaApi_GetChildren(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// return Element *
-int luaApi_GetElement(lua_State * _lua)
-{
-    return -1;
-}
+// // return Element *
+// int luaApi_GetElement(lua_State * _lua)
+// {
+//     return -1;
+// }
 
-// std::unique_ptr<Element> && _element
-int luaApi_SetElement(lua_State * _lua)
-{
-    return -1;
-}
+// // std::unique_ptr<Element> && _element
+// int luaApi_SetElement(lua_State * _lua)
+// {
+//     return -1;
+// }
 
 } // namespace name
 
@@ -447,35 +586,76 @@ void Sol2D::Lua::pushPositionUnitEnum(lua_State * _lua)
     lua_setmetatable(_lua, -2);
 }
 
-void Sol2D::Lua::pushSizeUnitEnum(lua_State * _lua)
+void Sol2D::Lua::pushDimensionUnitEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
-        table.setIntegerValue("AUTO", static_cast<lua_Integer>(Layouting::Size::Unit::Auto));
-        table.setIntegerValue("POINT", static_cast<lua_Integer>(Layouting::Size::Unit::Point));
-        table.setIntegerValue("PERCENT", static_cast<lua_Integer>(Layouting::Size::Unit::Percent));
-        table.setIntegerValue("MAX_CONTENT", static_cast<lua_Integer>(Layouting::Size::Unit::MaxContent));
-        table.setIntegerValue("FIT_CONTENT", static_cast<lua_Integer>(Layouting::Size::Unit::FitContent));
-        table.setIntegerValue("STRETCH", static_cast<lua_Integer>(Layouting::Size::Unit::Stretch));
+        table.setIntegerValue("AUTO", static_cast<lua_Integer>(Layouting::Dimension::Unit::Auto));
+        table.setIntegerValue("POINT", static_cast<lua_Integer>(Layouting::Dimension::Unit::Point));
+        table.setIntegerValue("PERCENT", static_cast<lua_Integer>(Layouting::Dimension::Unit::Percent));
+        table.setIntegerValue("MAX_CONTENT", static_cast<lua_Integer>(Layouting::Dimension::Unit::MaxContent));
+        table.setIntegerValue("FIT_CONTENT", static_cast<lua_Integer>(Layouting::Dimension::Unit::FitContent));
+        table.setIntegerValue("STRETCH", static_cast<lua_Integer>(Layouting::Dimension::Unit::Stretch));
     }
     lua_setmetatable(_lua, -2);
 }
 
-void Sol2D::Lua::pushSizeLimitUnitEnum(lua_State * _lua)
+void Sol2D::Lua::pushDimensionLimitUnitEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
     if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
-        table.setIntegerValue("POINT", static_cast<lua_Integer>(SizeLimit::Unit::Point));
-        table.setIntegerValue("PERCENT", static_cast<lua_Integer>(SizeLimit::Unit::Percent));
-        table.setIntegerValue("MAX_CONTENT", static_cast<lua_Integer>(SizeLimit::Unit::MaxContent));
-        table.setIntegerValue("FIT_CONTENT", static_cast<lua_Integer>(SizeLimit::Unit::FitContent));
-        table.setIntegerValue("STRETCH", static_cast<lua_Integer>(SizeLimit::Unit::Stretch));
+        table.setIntegerValue("POINT", static_cast<lua_Integer>(DimensionLimit::Unit::Point));
+        table.setIntegerValue("PERCENT", static_cast<lua_Integer>(DimensionLimit::Unit::Percent));
+        table.setIntegerValue("MAX_CONTENT", static_cast<lua_Integer>(DimensionLimit::Unit::MaxContent));
+        table.setIntegerValue("FIT_CONTENT", static_cast<lua_Integer>(DimensionLimit::Unit::FitContent));
+        table.setIntegerValue("STRETCH", static_cast<lua_Integer>(DimensionLimit::Unit::Stretch));
     }
     lua_setmetatable(_lua, -2);
+}
+
+bool Sol2D::Lua::tryGetStyle(lua_State * _lua, int _idx, Style & _style)
+{
+    if(!lua_istable(_lua, _idx))
+        return false;
+    StyleTable table(_lua, _idx);
+    if(auto margin_table = table.tryGetValue<Field::Style::margin>())
+        EdgeMap<Dimension::Unit>(*margin_table).read<Dimension>(_style.margin);
+    if(auto padding_table = table.tryGetValue<Field::Style::padding>())
+        EdgeMap<Dimension::Unit>(*padding_table).read<Dimension>(_style.padding);
+    if(auto width_table = table.tryGetValue<Field::Style::width>())
+        _style.width = UnitAndValue<Dimension::Unit>(*width_table).aggregate<Dimension>();
+    if(auto height_table = table.tryGetValue<Field::Style::height>())
+        _style.height = UnitAndValue<Dimension::Unit>(*height_table).aggregate<Dimension>();
+    if(auto min_width_table = table.tryGetValue<Field::Style::min_width>())
+        _style.min_width = UnitAndValue<DimensionLimit::Unit>(*min_width_table).aggregate<DimensionLimit>();
+    if(auto min_height_table = table.tryGetValue<Field::Style::min_height>())
+        _style.min_height = UnitAndValue<DimensionLimit::Unit>(*min_height_table).aggregate<DimensionLimit>();
+    if(auto max_width_table = table.tryGetValue<Field::Style::max_width>())
+        _style.max_width = UnitAndValue<DimensionLimit::Unit>(*max_width_table).aggregate<DimensionLimit>();
+    if(auto max_height_table = table.tryGetValue<Field::Style::max_height>())
+        _style.max_height = UnitAndValue<DimensionLimit::Unit>(*max_height_table).aggregate<DimensionLimit>();
+    if(auto flex_basis_table = table.tryGetValue<Field::Style::flex_basis>())
+        _style.flex_basis = UnitAndValue<Dimension::Unit>(*flex_basis_table).aggregate<Dimension>();
+    _style.flex_grow = table.tryGetValue<Field::Style::flex_grow>();
+    _style.flex_shrink = table.tryGetValue<Field::Style::flex_shrink>();
+    _style.flex_direction = table.tryGetValue<Field::Style::flex_direction>();
+    _style.flex_wrap = table.tryGetValue<Field::Style::flex_wrap>();
+    _style.content_alignment = table.tryGetValue<Field::Style::content_alignment>();
+    _style.content_justification = table.tryGetValue<Field::Style::content_justification>();
+    _style.items_alignment = table.tryGetValue<Field::Style::items_alignment>();
+    _style.self_alignment = table.tryGetValue<Field::Style::self_alignment>();
+    _style.aspect_ratio = table.tryGetValue<Field::Style::aspect_ratio>();
+    _style.display_mode = table.tryGetValue<Field::Style::display_mode>();
+    if(auto gap_table = table.tryGetValue<Field::Style::gap>())
+        GapGutterMap(*gap_table).read(_style.gap);
+    if(auto position_table = table.tryGetValue<Field::Style::position>())
+        EdgeMap<Position::Unit>(*position_table).read<Position>(_style.position);
+    _style.position_type = table.tryGetValue<Field::Style::position_type>();
+    return true;
 }
 
 void Sol2D::Lua::pushLayoutNodeApi(lua_State * _lua, std::shared_ptr<Node> _node)
@@ -486,35 +666,35 @@ void Sol2D::Lua::pushLayoutNodeApi(lua_State * _lua, std::shared_ptr<Node> _node
         luaL_Reg funcs[] = {
             { "__gc", UserData::luaGC },
             { "setPositionType", luaApi_SetPositionType },
-            { "setPosition", luaApi_SetPosition },
-            { "setMargin", luaApi_SetMargin },
-            { "setPadding", luaApi_SetPadding },
-            { "setWidth", luaApi_SetWidth },
-            { "setHeight", luaApi_SetHeight },
-            { "setMinWidth", luaApi_SetMinWidth },
-            { "setMinHeight", luaApi_SetMinHeight },
-            { "setMaxWidth", luaApi_SetMaxWidth },
-            { "setMaxHeight", luaApi_SetMaxHeight },
-            { "setFlexBasis", luaApi_SetFlexBasis },
-            { "setFlexGrow", luaApi_SetFlexGrow },
-            { "setFlexShrink", luaApi_SetFlexShrink },
-            { "setFlexDirection", luaApi_SetFlexDirection },
-            { "setFlexWrap", luaApi_SetFlexWrap },
-            { "setGap", luaApi_SetGap },
-            { "setContentAlignment", luaApi_SetContentAlignment },
-            { "setContentJustification", luaApi_SetContentJustification },
-            { "setItemsAlignment", luaApi_SetItemsAlignment },
-            { "setSelfAlignment", luaApi_SetSelfAlignment },
-            { "setAspectRatio", luaApi_SetAspectRatio },
-            { "setDisplayMode", luaApi_SetDisplayMode },
-            { "addNode", luaApi_AddNode },
-            { "getX", luaApi_GetX },
-            { "getY", luaApi_GetY },
-            { "getWidth", luaApi_GetWidth },
-            { "getHeight", luaApi_GetHeight },
-            { "getChildren", luaApi_GetChildren },
-            { "getElement", luaApi_GetElement },
-            { "setElement", luaApi_SetElement },
+            // { "setPosition", luaApi_SetPosition },
+            // { "setMargin", luaApi_SetMargin },
+            // { "setPadding", luaApi_SetPadding },
+            // { "setWidth", luaApi_SetWidth },
+            // { "setHeight", luaApi_SetHeight },
+            // { "setMinWidth", luaApi_SetMinWidth },
+            // { "setMinHeight", luaApi_SetMinHeight },
+            // { "setMaxWidth", luaApi_SetMaxWidth },
+            // { "setMaxHeight", luaApi_SetMaxHeight },
+            // { "setFlexBasis", luaApi_SetFlexBasis },
+            // { "setFlexGrow", luaApi_SetFlexGrow },
+            // { "setFlexShrink", luaApi_SetFlexShrink },
+            // { "setFlexDirection", luaApi_SetFlexDirection },
+            // { "setFlexWrap", luaApi_SetFlexWrap },
+            // { "setGap", luaApi_SetGap },
+            // { "setContentAlignment", luaApi_SetContentAlignment },
+            // { "setContentJustification", luaApi_SetContentJustification },
+            // { "setItemsAlignment", luaApi_SetItemsAlignment },
+            // { "setSelfAlignment", luaApi_SetSelfAlignment },
+            // { "setAspectRatio", luaApi_SetAspectRatio },
+            // { "setDisplayMode", luaApi_SetDisplayMode },
+            // { "addNode", luaApi_AddNode },
+            // { "getX", luaApi_GetX },
+            // { "getY", luaApi_GetY },
+            // { "getWidth", luaApi_GetWidth },
+            // { "getHeight", luaApi_GetHeight },
+            // { "getChildren", luaApi_GetChildren },
+            // { "getElement", luaApi_GetElement },
+            // { "setElement", luaApi_SetElement },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);

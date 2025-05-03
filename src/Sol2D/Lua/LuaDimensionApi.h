@@ -22,27 +22,27 @@
 
 namespace Sol2D::Lua {
 
-void pushDimensionUnitEnum(lua_State * _lua);
+void pushDimensionUnitEnum_Obsolete(lua_State * _lua);
 void pushDimensionD(lua_State * _lua, double _value, DimensionUnit _unit);
 void pushDimensionI(lua_State * _lua, long long _value, DimensionUnit _unit);
 bool tryGetDimensionD(lua_State * _lua, int _idx, double * _value, DimensionUnit * _unit);
 bool tryGetDimensionI(lua_State * _lua, int _idx, long long * _value, DimensionUnit * _unit);
 
 template<std::integral Number>
-bool tryGetDimension(lua_State * _lua, int _idx, std::optional<Dimension<Number>> & _value)
+bool tryGetDimension_Obsolete(lua_State * _lua, int _idx, std::optional<Dimension_Obsolete<Number>> & _value)
 {
     long long value;
     DimensionUnit unit;
     if(tryGetDimensionI(_lua, _idx, &value, &unit))
     {
-        _value = Dimension<Number>(static_cast<Number>(value), unit);
+        _value = Dimension_Obsolete<Number>(static_cast<Number>(value), unit);
         return true;
     }
     return false;
 }
 
 template<std::integral Number>
-bool tryGetDimension(lua_State * _lua, int _idx, Dimension<Number> & _value)
+bool tryGetDimension_Obsolete(lua_State * _lua, int _idx, Dimension_Obsolete<Number> & _value)
 {
     long long value;
     if(tryGetDimensionI(_lua, _idx, &value, &_value.unit))
@@ -54,20 +54,20 @@ bool tryGetDimension(lua_State * _lua, int _idx, Dimension<Number> & _value)
 }
 
 template<std::floating_point Number>
-bool tryGetDimension(lua_State * _lua, int _idx, std::optional<Dimension<Number>> & _value)
+bool tryGetDimension_Obsolete(lua_State * _lua, int _idx, std::optional<Dimension_Obsolete<Number>> & _value)
 {
     double value;
     DimensionUnit unit;
     if(tryGetDimensionD(_lua, _idx, &value, &unit))
     {
-        _value = Dimension<Number>(static_cast<Number>(value), unit);
+        _value = Dimension_Obsolete<Number>(static_cast<Number>(value), unit);
         return true;
     }
     return false;
 }
 
 template<std::floating_point Number>
-bool tryGetDimension(lua_State * _lua, int _idx, Dimension<Number> & _value)
+bool tryGetDimension_Obsolete(lua_State * _lua, int _idx, Dimension_Obsolete<Number> & _value)
 {
     double value;
     if(tryGetDimensionD(_lua, _idx, &value, &_value.unit))

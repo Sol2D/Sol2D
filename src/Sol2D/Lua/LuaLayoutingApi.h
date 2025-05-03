@@ -31,8 +31,9 @@ void pushEdgeEnum(lua_State * _lua);
 void pushGapGutterEnum(lua_State * _lua);
 void pushPositionTypeEnum(lua_State * _lua);
 void pushPositionUnitEnum(lua_State * _lua);
-void pushSizeUnitEnum(lua_State * _lua);
-void pushSizeLimitUnitEnum(lua_State * _lua);
+void pushDimensionUnitEnum(lua_State * _lua);
+void pushDimensionLimitUnitEnum(lua_State * _lua);
 void pushLayoutNodeApi(lua_State * _lua, std::shared_ptr<Layouting::Node> _node);
+bool tryGetStyle(lua_State * _lua, int _idx, Layouting::Style & _style);
 
 } // namespace Sol2D::Lua
