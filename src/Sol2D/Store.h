@@ -18,7 +18,7 @@
 
 #include <Sol2D/View.h>
 #include <Sol2D/World/Scene.h>
-#include <Sol2D/Forms/Form.h>
+// #include <Sol2D/Forms/Form.h>
 #include <Sol2D/UI.h>
 #include <Sol2D/Layouting/Layout.h>
 #include <Sol2D/Utils/ObjectStore.h>
@@ -64,14 +64,14 @@ struct Utils::ObjectFactory<World::Scene>
     }
 };
 
-template<>
-struct Utils::ObjectFactory<Forms::Form>
-{
-    std::shared_ptr<Forms::Form> produce(Renderer & _renderer) const
-    {
-        return std::make_shared<Forms::Form>(_renderer);
-    }
-};
+// template<>
+// struct Utils::ObjectFactory<Forms::Form>
+// {
+//     std::shared_ptr<Forms::Form> produce(Renderer & _renderer) const
+//     {
+//         return std::make_shared<Forms::Form>(_renderer);
+//     }
+// };
 
 template<>
 struct Utils::ObjectFactory<UI>
@@ -123,7 +123,7 @@ using Store = Utils::ObjectStore<
     Sprite,
     SpriteSheet,
     World::Scene,
-    Forms::Form,
+    // Forms::Form,
     UI,
     Layouting::Layout,
     TTF_Font,

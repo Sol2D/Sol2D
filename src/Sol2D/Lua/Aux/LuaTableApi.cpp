@@ -18,7 +18,6 @@
 #include <Sol2D/Lua/LuaRectApi.h>
 #include <Sol2D/Lua/LuaSizeApi.h>
 #include <Sol2D/Lua/LuaColorApi.h>
-#include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D::Lua;

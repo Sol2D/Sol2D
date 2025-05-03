@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaLibrary.h>
-#include <Sol2D/Lua/LuaWindowApi.h>
+// #include <Sol2D/Lua/LuaWindowApi.h>
 #include <Sol2D/Lua/LuaStoreManagerApi.h>
 #include <Sol2D/Lua/LuaScancodeApi.h>
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
@@ -23,10 +23,6 @@
 #include <Sol2D/Lua/LuaKeyboardApi.h>
 #include <Sol2D/Lua/LuaMouseApi.h>
 #include <Sol2D/Lua/LuaTileMapObjectApi.h>
-#include <Sol2D/Lua/LuaAreaApi.h>
-#include <Sol2D/Lua/LuaDimensionApi.h>
-#include <Sol2D/Lua/LuaWidgetApi.h>
-#include <Sol2D/Lua/LuaTextAlignmentApi.h>
 #include <Sol2D/Lua/LuaLayoutingApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
@@ -70,7 +66,7 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
 } // namespace
 
 LuaLibrary::LuaLibrary(
-    const Workspace & _workspace, StoreManager & _store_manager, Window & _window, Renderer & _renderer
+    const Workspace & _workspace, StoreManager & _store_manager, Window & /*_window*/, Renderer & _renderer
 ) :
     m_lua(luaL_newstate()),
     m_workspace(_workspace)
@@ -83,8 +79,8 @@ LuaLibrary::LuaLibrary(
     lua_newuserdata(m_lua, 1);
     if(pushMetatable(m_lua, LuaTypeName::lib) == MetatablePushResult::Created)
     {
-        pushWindowApi(m_lua, _window);
-        lua_setfield(m_lua, -2, "window");
+        // pushWindowApi(m_lua, _window);
+        // lua_setfield(m_lua, -2, "window");
         pushKeyboardApi(m_lua);
         lua_setfield(m_lua, -2, "keyboard");
         pushMouseApi(m_lua);
@@ -99,16 +95,10 @@ LuaLibrary::LuaLibrary(
         lua_setfield(m_lua, -2, "BodyShapeType");
         pushTileMapObjectTypeEnum(m_lua);
         lua_setfield(m_lua, -2, "TileMapObjectType");
-        pushDimensionUnitEnum_Obsolete(m_lua);
-        lua_setfield(m_lua, -2, "DimensionUnit");
-        pushWidgetStateEnum(m_lua);
-        lua_setfield(m_lua, -2, "WidgetState");        
+        // pushWidgetStateEnum(m_lua);
+        // lua_setfield(m_lua, -2, "WidgetState");
         { // Style enums
             lua_newtable(m_lua);
-            pushVerticalTextAlignmentEnum(m_lua);
-            lua_setfield(m_lua, -2, "VerticalTextAlignment");
-            pushHorizontalTextAlignmentEnum(m_lua);
-            lua_setfield(m_lua, -2, "HorizontalTextAlignment");
             pushContentAlignmentEnum(m_lua);
             lua_setfield(m_lua, -2, "ContentAlignment");
             pushContentJustificationEnum(m_lua);

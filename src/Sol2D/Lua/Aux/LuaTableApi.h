@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <Sol2D/Lua/LuaDimensionApi.h>
 #include <Sol2D/MediaLayer/MediaLayer.h>
 #include <lua.hpp>
 #include <string>
@@ -87,12 +86,6 @@ public:
     bool tryGetColor(const char * _key, SDL_FColor & _value);
 
     bool tryGetColor(const char * _key, std::optional<SDL_FColor> & _value);
-
-    template<DimensionValueConcept Number>
-    bool tryGetDimension(const char * _key, Dimension_Obsolete<Number> & _value);
-
-    template<DimensionValueConcept Number>
-    bool tryGetDimension(const char * _key, std::optional<Dimension_Obsolete<Number>> & _value);
 
     bool tryGetValue(const char * _key) const;
 
@@ -241,28 +234,6 @@ bool LuaTableApi::tryGetUnsignedInteger(const char * _key, T * _value) const
     }
     lua_pop(m_lua, 1);
     return result;
-}
-
-template<DimensionValueConcept Number>
-bool LuaTableApi::tryGetDimension(const char * _key, std::optional<Dimension_Obsolete<Number>> & _value)
-{
-    if(tryGetValue(_key) && Lua::tryGetDimension_Obsolete(m_lua, -1, _value))
-    {
-        lua_pop(m_lua, 1);
-        return true;
-    }
-    return false;
-}
-
-template<DimensionValueConcept Number>
-bool LuaTableApi::tryGetDimension(const char * _key, Dimension_Obsolete<Number> & _value)
-{
-    if(tryGetValue(_key) && Lua::tryGetDimension_Obsolete(m_lua, -1, _value))
-    {
-        lua_pop(m_lua, 1);
-        return true;
-    }
-    return false;
 }
 
 inline void LuaTableApi::setStringValue(const char * _key, const std::string & _value)

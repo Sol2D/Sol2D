@@ -16,10 +16,9 @@
 
 #include <Sol2D/Lua/LuaSceneOptionsApi.h>
 #include <Sol2D/Lua/LuaStoreApi.h>
-#include <Sol2D/Lua/LuaFormApi.h>
+// #include <Sol2D/Lua/LuaFormApi.h>
 #include <Sol2D/Lua/LuaSceneApi.h>
 #include <Sol2D/Lua/LuaBodyDefinitionApi.h>
-#include <Sol2D/Lua/LuaViewApi.h>
 #include <Sol2D/Lua/LuaLayoutingApi.h>
 #include <Sol2D/Lua/LuaUIApi.h>
 #include <Sol2D/Lua/LuaSpriteApi.h>
@@ -35,7 +34,7 @@
 
 using namespace Sol2D;
 using namespace Sol2D::World;
-using namespace Sol2D::Forms;
+// using namespace Sol2D::Forms;
 using namespace Sol2D::Layouting;
 using namespace Sol2D::Lua;
 
@@ -83,30 +82,6 @@ struct Self : LuaSelfBase
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::store>;
-
-// 1 self
-// 2 key
-int luaApi_CreateView(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    const char * key = argToStringOrError(_lua, 2);
-    std::shared_ptr<View> view = self->getStore(_lua)->createObject<View>(key, self->renderer);
-    pushViewApi(_lua, view);
-    self->holdReference(_lua, LuaTypeName::view, key);
-    return 1;
-}
-
-// 1 self
-// 2 key
-int luaApi_GetView(lua_State * _lua)
-{
-    const Self * self = UserData::getUserData(_lua, 1);
-    if(std::shared_ptr<View> view = self->getStore(_lua)->getObject<View>(argToStringOrError(_lua, 2)))
-        pushViewApi(_lua, view);
-    else
-        lua_pushnil(_lua);
-    return 1;
-}
 
 // 1 self
 // 2 key
@@ -166,29 +141,29 @@ int luaApi_GetScene(lua_State * _lua)
     return 1;
 }
 
-// 1 self
-// 2 key
-int luaApi_CreateForm(lua_State * _lua)
-{
-    Self * self = UserData::getUserData(_lua, 1);
-    const char * key = argToStringOrError(_lua, 2);
-    std::shared_ptr<Form> form = self->getStore(_lua)->createObject<Form>(key, self->renderer);
-    pushFormApi(_lua, self->workspace, form);
-    self->holdReference(_lua, LuaTypeName::form, key);
-    return 1;
-}
+// // 1 self
+// // 2 key
+// int luaApi_CreateForm(lua_State * _lua)
+// {
+//     Self * self = UserData::getUserData(_lua, 1);
+//     const char * key = argToStringOrError(_lua, 2);
+//     std::shared_ptr<Form> form = self->getStore(_lua)->createObject<Form>(key, self->renderer);
+//     pushFormApi(_lua, self->workspace, form);
+//     self->holdReference(_lua, LuaTypeName::form, key);
+//     return 1;
+// }
 
-// 1 self
-// 2 key
-int luaApi_GetForm(lua_State * _lua)
-{
-    const Self * self = UserData::getUserData(_lua, 1);
-    if(std::shared_ptr<Form> form = self->getStore(_lua)->getObject<Form>(argToStringOrError(_lua, 2)))
-        pushFormApi(_lua, self->workspace, form);
-    else
-        lua_pushnil(_lua);
-    return 1;
-}
+// // 1 self
+// // 2 key
+// int luaApi_GetForm(lua_State * _lua)
+// {
+//     const Self * self = UserData::getUserData(_lua, 1);
+//     if(std::shared_ptr<Form> form = self->getStore(_lua)->getObject<Form>(argToStringOrError(_lua, 2)))
+//         pushFormApi(_lua, self->workspace, form);
+//     else
+//         lua_pushnil(_lua);
+//     return 1;
+// }
 
 // 1 self
 // 2 key
@@ -397,8 +372,6 @@ void Sol2D::Lua::pushStoreApi(
     {
         luaL_Reg funcs[] = {
             { "__gc", UserData::luaGC },
-            { "createView", luaApi_CreateView },
-            { "getView", luaApi_GetView },
             { "freeView", luaApi_FreeObject<View, LuaTypeName::view> },
             { "createLayout", luaApi_CreateLayout },
             { "getLayout", luaApi_GetLayout },
@@ -406,9 +379,9 @@ void Sol2D::Lua::pushStoreApi(
             { "createScene", luaApi_CreateScene },
             { "getScene", luaApi_GetScene },
             { "freeScene", luaApi_FreeObject<Scene, LuaTypeName::scene> },
-            { "createForm", luaApi_CreateForm },
-            { "getForm", luaApi_GetForm },
-            { "freeForm", luaApi_FreeObject<Form, LuaTypeName::form> },
+            // { "createForm", luaApi_CreateForm },
+            // { "getForm", luaApi_GetForm },
+            // { "freeForm", luaApi_FreeObject<Form, LuaTypeName::form> },
             { "createUI", luaApi_CreateUI },
             { "getUI", luaApi_GetUI },
             { "freeUI", luaApi_FreeObject<UI, LuaTypeName::ui> },
