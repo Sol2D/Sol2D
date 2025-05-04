@@ -15,90 +15,80 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/View.h>
+#include <yoga/Yoga.h>
 
 using namespace Sol2D;
 
-uint16_t View::createFragment(const Area & _area)
+View::View(const Style & _style) :
+    m_layout(Node(*this, nullptr, _style)),
+    m_calculated_width(.0f),
+    m_calculated_height(.0f),
+    m_force_recalculate(false),
+    m_destroying(false)
 {
-    uint16_t id = m_next_fragment_id++;
-    Outlet * outlet = new Outlet(_area, m_renderer);
-    m_outlets[id] = std::unique_ptr<Outlet>(outlet);
-    emplaceOrderedOutlet(outlet);
-    return id;
 }
 
-const Area * View::getFragmentArea(uint16_t _id) const
+View::~View()
 {
-    auto it = m_outlets.find(_id);
-    return it == m_outlets.cend() ? nullptr : &it->second->getFragmentArea();
+    m_destroying = true;
 }
 
-bool View::updateFragment(uint16_t _id, const Area & _area)
+void View::forceRecalculation()
 {
-    auto it = m_outlets.find(_id);
-    if(it == m_outlets.end())
-        return false;
-    bool need_to_reorder = _area.z_index != it->second->getFragmentArea().z_index;
-    it->second->reconfigure(_area);
-    if(need_to_reorder)
+    m_force_recalculate = true;
+}
+
+void View::recalculate(float _width, float _height)
+{
+    if(m_force_recalculate || m_calculated_width != _width || m_calculated_height != _height)
     {
-        eraseOrderedOutlet(it->second.get());
-        emplaceOrderedOutlet(it->second.get());
+        YGNodeCalculateLayout(m_layout.m_node, _width, _height, YGDirectionLTR);
+        m_force_recalculate = false;
+        m_calculated_width = _width;
+        m_calculated_height = _height;
     }
-    return true;
 }
 
-void View::emplaceOrderedOutlet(Outlet * _outlet)
+void View::registerElement(Element & _element)
 {
-    uint16_t z_index = _outlet->getFragmentArea().z_index;
-    auto it = std::find_if(m_ordered_outlets.begin(), m_ordered_outlets.end(), [z_index](const Outlet * __outlet) {
-        return z_index < __outlet->getFragmentArea().z_index;
-    });
-    m_ordered_outlets.insert(it, _outlet);
+    m_elements.push_back(&_element);
 }
 
-void View::eraseOrderedOutlet(Outlet * _outlet)
+void View::unregisterElement(Element & _element)
 {
-    auto it = std::find(m_ordered_outlets.begin(), m_ordered_outlets.end(), _outlet);
-    if(it != m_ordered_outlets.end())
-        m_ordered_outlets.erase(it);
-}
-
-bool View::deleteFragment(uint16_t _id)
-{
-    auto it = m_outlets.find(_id);
-    if(it == m_outlets.end())
-        return false;
-    eraseOrderedOutlet(it->second.get());
-    m_outlets.erase(_id);
-    return true;
-}
-
-bool View::bindFragment(uint16_t _fragment_id, std::shared_ptr<Canvas> _canvas)
-{
-    auto outlet_it = m_outlets.find(_fragment_id);
-    if(outlet_it == m_outlets.end())
-        return false;
-    outlet_it->second->bind(_canvas);
-    return true;
-}
-
-void View::resize()
-{
-    for(auto & pair : m_outlets)
-        pair.second->resize();
-}
-
-void View::step(const StepState & _state)
-{
-    for(auto & pair : m_outlets)
+    if(!m_destroying)
     {
-        pair.second->step(_state);
+        auto end = std::remove(m_elements.begin(), m_elements.end(), &_element);
+        m_elements.resize(end - m_elements.begin());
     }
-    if(m_ui)
+}
+
+void View::step(const StepState & _step)
+{
+    bool is_render_pass_started = false;
+    for(Element * element : m_elements)
     {
-        m_renderer.beginDefaultRenderPass();
-        m_renderer.renderUI(*m_ui);
-        m_renderer.endDefaultRenderPass();
+        if(element->isCustomRenderPassEnabled())
+        {
+            if(is_render_pass_started)
+            {
+                // submit defalt render pass
+                is_render_pass_started = false;
+            }
+            element->step(_step);
+        }
+        else
+        {
+            if(!is_render_pass_started)
+            {
+                // start render pass
+                is_render_pass_started = true;
+            }
+            element->step(_step);
+        }
+    }
+    if(is_render_pass_started)
+    {
+        // submit defalt render pass
     }
 }

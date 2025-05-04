@@ -16,71 +16,25 @@
 
 #pragma once
 
-#include <Sol2D/StepState.h>
-#include <Sol2D/Object.h>
-#include <Sol2D/Def.h>
+#include <Sol2D/Element.h>
 
 namespace Sol2D {
 
-class Canvas : public Object
+class Canvas : public Element
 {
-    S2_DISABLE_COPY_AND_MOVE(Canvas)
-
 public:
-    Canvas() :
-        m_rect {.0f, .0f, .0f, .0f},
-        m_clear_color {.0f, .0f, .0f, 1.0f}
+    explicit Canvas(const Node & _node) :
+        Element(_node, true)
     {
     }
 
-    void setClearColor(const SDL_FColor & _color);
-    const SDL_FColor & getClearColor() const;
-    void reconfigure(const SDL_FRect & _rect);
-    float getWidth() const;
-    float getHeight() const;
-    virtual void step(const StepState & _state) = 0;
-    SDL_FPoint getTranslatedPoint(float _x, float _y) const;
-    void translatePoint(float * _x, float * _y) const;
+    void setClearColor(const SDL_FColor & _color)
+    {
+        m_clear_color = _color;
+    }
 
 private:
-    SDL_FRect m_rect;
     SDL_FColor m_clear_color;
 };
-
-inline void Canvas::setClearColor(const SDL_FColor & _color)
-{
-    m_clear_color = _color;
-}
-
-inline const SDL_FColor & Canvas::getClearColor() const
-{
-    return m_clear_color;
-}
-
-inline void Canvas::reconfigure(const SDL_FRect & _rect)
-{
-    m_rect = _rect;
-}
-
-inline float Canvas::getWidth() const
-{
-    return m_rect.w;
-}
-
-inline float Canvas::getHeight() const
-{
-    return m_rect.h;
-}
-
-inline SDL_FPoint Canvas::getTranslatedPoint(float _x, float _y) const
-{
-    return {.x = _x - m_rect.x, .y = _y - m_rect.y};
-}
-
-inline void Canvas::translatePoint(float * _x, float * _y) const
-{
-    *_x -= m_rect.x;
-    *_y -= m_rect.y;
-}
 
 } // namespace Sol2D

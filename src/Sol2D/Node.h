@@ -16,16 +16,20 @@
 
 #pragma once
 
-#include <Sol2D/Layouting/Element.h>
-#include <Sol2D/Layouting/Style.h>
+#include <Sol2D/Element.h>
+#include <Sol2D/Style.h>
 #include <list>
 
 struct YGNode;
 
-namespace Sol2D::Layouting {
+namespace Sol2D {
 
-class Node
+class View;
+
+class Node final
 {
+    friend class View;
+
 public:
     class Children
     {
@@ -81,16 +85,10 @@ public:
         const std::list<Node *> & m_children;
     };
     
-protected:
-    Node(Node * _parent, const Style & _style);
-    Node(const Node &) = delete;
-    Node(Node &&) = delete;
-    Node & operator= (const Node &) = delete;
-    Node & operator= (Node &&) = delete;
-    virtual void forceRecalculation();
-    
 public:
-    virtual ~Node();
+    S2_DISABLE_COPY_AND_MOVE(Node)
+    Node(View & _view, Node * _parent, const Style & _style);
+    ~Node();
     void setPositionType(Position::Type _type);
     void setPosition(const std::unordered_map<Edge, Position> & _positions);
     void setPosition(Edge _edge, Position _posotion);
@@ -143,14 +141,14 @@ public:
         return m_element.get();
     }
     
-    void setElement(std::unique_ptr<Element> && _element);
-    void step(const StepState & _step);
+    void setElement(std::shared_ptr<Element> _element);
     
-protected:
+private:
     YGNode * m_node;
+    View & m_view;
     Node * m_parent;
     std::list<Node *> m_children;
-    std::unique_ptr<Element> m_element;
+    std::shared_ptr<Element> m_element;
 };
 
-} // namespace Sol2D::Layouting
+} // namespace Sol2D

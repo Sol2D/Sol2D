@@ -15,11 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/TestElement.h>
-#include <Sol2D/Layouting/Node.h>
-#include <iostream>
+#include <Sol2D/Node.h>
+// #include <iostream>
 
 using namespace Sol2D;
-using namespace Sol2D::Layouting;
 
 TestElement::TestElement(Renderer & _renderer, const SDL_FColor & _color, const Node & _node) :
     Element(_node),
@@ -30,7 +29,7 @@ TestElement::TestElement(Renderer & _renderer, const SDL_FColor & _color, const 
 
 void TestElement::step(const StepState & /*_step*/)
 {
-    static unsigned long frame = 0;
+    // static unsigned long frame = 0;
 
     m_renderer.renderRect(
         SolidRectRenderingData(
@@ -39,5 +38,5 @@ void TestElement::step(const StepState & /*_step*/)
         )
     );
 
-    std::cout << "rendering (" << ++frame << "): " << m_node.getWidth() << "x" << m_node.getHeight() << std::endl;
+    // std::cout << "rendering (" << ++frame << "): " << m_node.getWidth() << "x" << m_node.getHeight() << std::endl;
 }

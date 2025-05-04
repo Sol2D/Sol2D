@@ -79,7 +79,7 @@ LuaLibrary::LuaLibrary(
     lua_newuserdata(m_lua, 1);
     if(pushMetatable(m_lua, LuaTypeName::lib) == MetatablePushResult::Created)
     {
-        // pushWindowApi(m_lua, _window);
+        // pushWindowApi(m_lua, _window); // TODO: Layouting: restore
         // lua_setfield(m_lua, -2, "window");
         pushKeyboardApi(m_lua);
         lua_setfield(m_lua, -2, "keyboard");
@@ -95,7 +95,7 @@ LuaLibrary::LuaLibrary(
         lua_setfield(m_lua, -2, "BodyShapeType");
         pushTileMapObjectTypeEnum(m_lua);
         lua_setfield(m_lua, -2, "TileMapObjectType");
-        // pushWidgetStateEnum(m_lua);
+        // pushWidgetStateEnum(m_lua); // TODO: Layouting: restore
         // lua_setfield(m_lua, -2, "WidgetState");
         { // Style enums
             lua_newtable(m_lua);

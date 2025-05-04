@@ -16,24 +16,14 @@
 
 #pragma once
 
-#include <Sol2D/View.h>
 #include <Sol2D/World/Scene.h>
 // #include <Sol2D/Forms/Form.h>
 #include <Sol2D/UI.h>
-#include <Sol2D/Layouting/Layout.h>
+#include <Sol2D/View.h>
 #include <Sol2D/Utils/ObjectStore.h>
 #include <filesystem>
 
 namespace Sol2D {
-
-template<>
-struct Utils::ObjectFactory<View>
-{
-    std::shared_ptr<View> produce(Renderer & _renderer) const
-    {
-        return std::make_shared<View>(_renderer);
-    }
-};
 
 template<>
 struct Utils::ObjectFactory<Sprite>
@@ -57,10 +47,12 @@ template<>
 struct Utils::ObjectFactory<World::Scene>
 {
     std::shared_ptr<World::Scene> produce(
-        const World::SceneOptions & _options, const Workspace & _workspace, Renderer & _renderer
-    ) const
+        const Node & _node,
+        const World::SceneOptions & _options,
+        const Workspace & _workspace,
+        Renderer & _renderer) const
     {
-        return std::make_shared<World::Scene>(_options, _workspace, _renderer);
+        return std::make_shared<World::Scene>(_node, _options, _workspace, _renderer);
     }
 };
 
@@ -83,11 +75,11 @@ struct Utils::ObjectFactory<UI>
 };
 
 template<>
-struct Utils::ObjectFactory<Layouting::Layout>
+struct Utils::ObjectFactory<View>
 {
-    std::shared_ptr<Layouting::Layout> produce(const Layouting::Style & _style = Layouting::Style()) const
+    std::shared_ptr<View> produce(const Style & _style = Style()) const
     {
-        return std::make_shared<Layouting::Layout>(_style);
+        return std::make_shared<View>(_style);
     }
 };
 
@@ -119,13 +111,12 @@ struct Utils::ObjectFactory<Mix_Music>
 };
 
 using Store = Utils::ObjectStore<
-    View,
     Sprite,
     SpriteSheet,
     World::Scene,
     // Forms::Form,
     UI,
-    Layouting::Layout,
+    View,
     TTF_Font,
     Mix_Chunk,
     Mix_Music

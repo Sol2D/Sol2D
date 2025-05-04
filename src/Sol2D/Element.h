@@ -18,22 +18,24 @@
 
 #include <Sol2D/StepState.h>
 #include <Sol2D/MediaLayer/MediaLayer.h>
+#include <Sol2D/Object.h>
 
-namespace Sol2D::Layouting {
+namespace Sol2D {
 
 class Node;
 
-class Element
+class Element : public Object
 {
     S2_DISABLE_COPY_AND_MOVE(Element)
 
 public:
-    explicit Element(const Node & _node) :
-      m_node(_node)
+    explicit Element(const Node & _node, bool _enable_custom_render_pass = false) :
+        m_node(_node),
+        m_is_custom_render_pass_enabled(_enable_custom_render_pass)
     {
     }
 
-    virtual ~Element() { }
+    bool isCustomRenderPassEnabled() const { return m_is_custom_render_pass_enabled; }
     virtual void step(const StepState & _step) = 0;
     virtual const FSize * getDesiredSize() const { return nullptr; }
     float getX() const;
@@ -43,6 +45,7 @@ public:
 
 protected:
     const Node & m_node;
+    const bool m_is_custom_render_pass_enabled;
 };
 
-} // namespace Sol2D::Layouting
+} // namespace Sol2D

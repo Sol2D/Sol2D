@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <Sol2D/Canvas.h>
 #include <Sol2D/World/Body.h>
 #include <Sol2D/World/BodyDefinition.h>
 #include <Sol2D/World/Joint.h>
@@ -27,7 +28,6 @@
 #include <Sol2D/Tiles/TileMap.h>
 #include <Sol2D/Utils/Observable.h>
 #include <Sol2D/Utils/PreHashedMap.h>
-#include <Sol2D/Canvas.h>
 #include <Sol2D/Workspace.h>
 #include <filesystem>
 #include <unordered_set>
@@ -57,7 +57,10 @@ public:
     virtual void onStepComplete(const StepState & _state) = 0;
 };
 
-class Scene final : public Canvas, public Utils::Observable<ContactObserver>, public Utils::Observable<StepObserver>
+class Scene final :
+    public Canvas,
+    public Utils::Observable<ContactObserver>,
+    public Utils::Observable<StepObserver>
 {
 private:
     class BodyShapeCreator;
@@ -70,7 +73,12 @@ public:
     using Utils::Observable<StepObserver>::removeObserver;
 
 public:
-    Scene(const SceneOptions & _options, const Workspace & _workspace, Renderer & _renderer);
+    Scene(
+        const Node & _node,
+        const SceneOptions & _options,
+        const Workspace & _workspace,
+        Renderer & _renderer
+    );
     ~Scene() override;
     void setGravity(const SDL_FPoint & _vector);
     uint64_t createBody(const SDL_FPoint & _position, const BodyDefinition & _definition);
@@ -119,7 +127,10 @@ public:
     bool doesBodyExist(uint64_t _body_id) const;
     bool doesBodyShapeExist(uint64_t _body_id, const Utils::PreHashedKey<std::string> & _shape_key) const;
     std::optional<std::vector<SDL_FPoint>> findPath(
-        uint64_t _body_id, const SDL_FPoint & _destination, bool _allow_diagonal_steps, bool _avoid_sensors
+        uint64_t _body_id,
+        const SDL_FPoint & _destination,
+        bool _allow_diagonal_steps,
+        bool _avoid_sensors
     ) const;
 
 private:
@@ -128,7 +139,10 @@ private:
     void deinitializeTileMap();
     static b2BodyType mapBodyType(BodyType _type);
     static bool box2dPreSolveContact(
-        b2ShapeId _shape_id_a, b2ShapeId _shape_id_b, b2Manifold * _manifold, void * _context
+        b2ShapeId _shape_id_a,
+        b2ShapeId _shape_id_b,
+        b2Manifold * _manifold,
+        void * _context
     );
     void handleBox2dContactEvents();
     static bool tryGetContactSide(b2ShapeId _shape_id, ContactSide & _contact_side);

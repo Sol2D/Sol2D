@@ -35,7 +35,6 @@
 using namespace Sol2D;
 using namespace Sol2D::World;
 // using namespace Sol2D::Forms;
-using namespace Sol2D::Layouting;
 using namespace Sol2D::Lua;
 
 namespace {
@@ -86,46 +85,52 @@ using UserData = LuaUserData<Self, LuaTypeName::store>;
 // 1 self
 // 2 key
 // 3 style (optional)
-int luaApi_CreateLayout(lua_State * _lua)
+int luaApi_CreateLayout(lua_State * /*_lua*/)
 {
-    Self * self = UserData::getUserData(_lua, 1);
-    const char * key = argToStringOrError(_lua, 2);
-    Style style;
-    if(lua_gettop(_lua) >= 3)
-        luaL_argexpected(_lua, tryGetStyle(_lua, 3, style), 3, LuaTypeName::style);
-    std::shared_ptr<Layouting::Layout> layout = self->getStore(_lua)->createObject<Layouting::Layout>(key, style);
-    pushLayoutNodeApi(_lua, std::static_pointer_cast<Layouting::Node>(layout));
-    self->holdReference(_lua, LuaTypeName::node, key);
+    // TODO: Layouting: restore
+
+    // Self * self = UserData::getUserData(_lua, 1);
+    // const char * key = argToStringOrError(_lua, 2);
+    // Style style;
+    // if(lua_gettop(_lua) >= 3)
+    //     luaL_argexpected(_lua, tryGetStyle(_lua, 3, style), 3, LuaTypeName::style);
+    // std::shared_ptr<Layouting::Layout> layout = self->getStore(_lua)->createObject<Layouting::Layout>(key, style);
+    // pushLayoutNodeApi(_lua, std::static_pointer_cast<Layouting::Node>(layout));
+    // self->holdReference(_lua, LuaTypeName::node, key);
     return 1;
 }
 
 // 1 self
 // 2 key
-int luaApi_GetLayout(lua_State * _lua)
+int luaApi_GetLayout(lua_State * /*_lua*/)
 {
-    const Self * self = UserData::getUserData(_lua, 1);
-    std::shared_ptr<Layouting::Layout> layout =
-            self->getStore(_lua)->getObject<Layouting::Layout>(argToStringOrError(_lua, 2));
-    if(layout)
-        pushLayoutNodeApi(_lua, std::static_pointer_cast<Layouting::Node>(layout));
-    else
-        lua_pushnil(_lua);
+    // TODO: Layouting: restore
+
+    // const Self * self = UserData::getUserData(_lua, 1);
+    // std::shared_ptr<Layouting::Layout> layout =
+    //         self->getStore(_lua)->getObject<Layouting::Layout>(argToStringOrError(_lua, 2));
+    // if(layout)
+    //     pushLayoutNodeApi(_lua, std::static_pointer_cast<Layouting::Node>(layout));
+    // else
+    //     lua_pushnil(_lua);
     return 1;
 }
 
 // 1 self
 // 2 key
 // 3 options (optional)
-int luaApi_CreateScene(lua_State * _lua)
+int luaApi_CreateScene(lua_State * /*_lua*/)
 {
-    Self * self = UserData::getUserData(_lua, 1);
-    SceneOptions options;
-    tryGetSceneOptions(_lua, 3, options);
-    const char * key = argToStringOrError(_lua, 2);
-    std::shared_ptr<Scene> scene =
-        self->getStore(_lua)->createObject<Scene>(key, options, self->workspace, self->renderer);
-    pushSceneApi(_lua, self->workspace, scene);
-    self->holdReference(_lua, LuaTypeName::scene, key);
+    // TODO: Layouting: restore
+
+    // Self * self = UserData::getUserData(_lua, 1);
+    // SceneOptions options;
+    // tryGetSceneOptions(_lua, 3, options);
+    // const char * key = argToStringOrError(_lua, 2);
+    // std::shared_ptr<Scene> scene =
+    //     self->getStore(_lua)->createObject<Scene>(key, options, self->workspace, self->renderer);
+    // pushSceneApi(_lua, self->workspace, scene);
+    // self->holdReference(_lua, LuaTypeName::scene, key);
     return 1;
 }
 
@@ -372,10 +377,9 @@ void Sol2D::Lua::pushStoreApi(
     {
         luaL_Reg funcs[] = {
             { "__gc", UserData::luaGC },
-            { "freeView", luaApi_FreeObject<View, LuaTypeName::view> },
             { "createLayout", luaApi_CreateLayout },
             { "getLayout", luaApi_GetLayout },
-            { "freeLayout", luaApi_FreeObject<Layouting::Layout, LuaTypeName::node> },
+            { "freeLayout", luaApi_FreeObject<View, LuaTypeName::node> },
             { "createScene", luaApi_CreateScene },
             { "getScene", luaApi_GetScene },
             { "freeScene", luaApi_FreeObject<Scene, LuaTypeName::scene> },

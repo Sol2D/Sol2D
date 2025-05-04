@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <optional>
 
-namespace Sol2D::Layouting {
+namespace Sol2D {
 
 enum class ContentAlignment
 {
@@ -274,4 +274,4 @@ struct Style
     // NOTE: no direction
 };
 
-} // namespace Sol2D::Layouting
+} // namespace Sol2D

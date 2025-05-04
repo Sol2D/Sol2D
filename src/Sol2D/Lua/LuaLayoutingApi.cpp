@@ -21,7 +21,6 @@
 #include <Sol2D/Lua/Aux/LuaTableApi.h>
 
 using namespace Sol2D;
-using namespace Sol2D::Layouting;
 using namespace Sol2D::Lua;
 
 namespace {
@@ -592,12 +591,12 @@ void Sol2D::Lua::pushDimensionUnitEnum(lua_State * _lua)
     if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
-        table.setIntegerValue("AUTO", static_cast<lua_Integer>(Layouting::Dimension::Unit::Auto));
-        table.setIntegerValue("POINT", static_cast<lua_Integer>(Layouting::Dimension::Unit::Point));
-        table.setIntegerValue("PERCENT", static_cast<lua_Integer>(Layouting::Dimension::Unit::Percent));
-        table.setIntegerValue("MAX_CONTENT", static_cast<lua_Integer>(Layouting::Dimension::Unit::MaxContent));
-        table.setIntegerValue("FIT_CONTENT", static_cast<lua_Integer>(Layouting::Dimension::Unit::FitContent));
-        table.setIntegerValue("STRETCH", static_cast<lua_Integer>(Layouting::Dimension::Unit::Stretch));
+        table.setIntegerValue("AUTO", static_cast<lua_Integer>(Dimension::Unit::Auto));
+        table.setIntegerValue("POINT", static_cast<lua_Integer>(Dimension::Unit::Point));
+        table.setIntegerValue("PERCENT", static_cast<lua_Integer>(Dimension::Unit::Percent));
+        table.setIntegerValue("MAX_CONTENT", static_cast<lua_Integer>(Dimension::Unit::MaxContent));
+        table.setIntegerValue("FIT_CONTENT", static_cast<lua_Integer>(Dimension::Unit::FitContent));
+        table.setIntegerValue("STRETCH", static_cast<lua_Integer>(Dimension::Unit::Stretch));
     }
     lua_setmetatable(_lua, -2);
 }

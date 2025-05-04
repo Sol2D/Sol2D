@@ -159,20 +159,21 @@ void Application::exec()
 
     // BEGIN TEST
 
-    using namespace Sol2D::Layouting;
+    std::shared_ptr<View> view(new View);
+    view->getLayout().setGap(GapGutter::Row, 10);
 
-
-    std::shared_ptr<Layout> layout(new Layout);
-    layout->setGap(GapGutter::Row, 10);
-
-    Node & node_1 = layout->addNode();
-    Node & node_2 = layout->addNode();
+    Node & node_1 = view->addNode();
+    Node & node_2 = view->addNode();
 
     // node_1.setMargin(LayoutNode::Edge::All, 10);
     // node_2.setMargin(LayoutNode::Edge::All, 20);
 
-    std::unique_ptr<TestElement> element_1(new TestElement(renderer, { .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f }, node_1)); // TODO: ????
-    std::unique_ptr<TestElement> element_2(new TestElement(renderer, { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f }, node_2)); // TODO: ????
+    std::shared_ptr<TestElement> element_1(new TestElement(renderer, { .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f }, node_1)); // TODO: ????
+    // std::shared_ptr<TestElement> element_2(new TestElement(renderer, { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f }, node_2)); // TODO: ????
+
+
+    std::shared_ptr<World::Scene> scene(new World::Scene(node_2, World::SceneOptions(), m_workspace, renderer));
+    scene->loadTileMap("/home/brainstream/projects/sol2d/build/Desktop-Debug/games/rpg/tiled/tmx/level-01.tmx");
 
 
     node_1.setFlexGrow(1);
@@ -180,10 +181,10 @@ void Application::exec()
 
 
 
-    node_1.setElement(std::move(element_1)); // TODO: shared_ptr
-    node_2.setElement(std::move(element_2)); // TODO: shared_ptr
+    node_1.setElement(element_1);
+    node_2.setElement(scene);
 
-    m_window->setLayout(layout);
+    m_window->setLayout(view);
     int w, h;
     SDL_GetWindowSize(m_sdl_window, &w, &h);
     m_window->resize(w, h);

@@ -14,28 +14,28 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Layouting/Layout.h>
-#include <yoga/Yoga.h>
+#include <Sol2D/Element.h>
+#include <Sol2D/Node.h>
 
-using namespace Sol2D::Layouting;
+using namespace Sol2D;
 
-Layout::Layout(const Style & _style) :
-    Node(nullptr, _style)
+float Element::getX() const
 {
+    return m_node.getX();
 }
 
-void Layout::forceRecalculation()
+float Element::getY() const
 {
-    m_force_recalculate = true;
+    return m_node.getY();
 }
 
-void Layout::recalculate(float _width, float _height)
+float Element::getWidth() const
 {
-    if(m_force_recalculate || m_calculated_width != _width || m_calculated_height != _height)
-    {
-        YGNodeCalculateLayout(m_node, _width, _height, YGDirectionLTR);
-        m_force_recalculate = false;
-        m_calculated_width = _width;
-        m_calculated_height = _height;
-    }
+    return m_node.getWidth();
 }
+
+float Element::getHeight() const
+{
+    return m_node.getHeight();
+}
+

@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Layouting/Node.h>
+#include <Sol2D/Node.h>
+#include <Sol2D/View.h>
 #include <yoga/Yoga.h>
 
-using namespace Sol2D::Layouting;
+using namespace Sol2D;
 
 namespace {
 
@@ -67,6 +68,7 @@ private:
     YGNodeRef m_node;
 };
 
+// TODO: Layouting: delete?
 // YGSize yogaMeasure(
 //     YGNodeConstRef _node,
 //     float _width,
@@ -585,15 +587,17 @@ YGPositionType YogaNodeWrapper::positionTypeToYGPositionType(Position::Type _typ
     }
 }
 
-Node::Node(Node * _parent, const Style & _style) :
+Node::Node(View & _view, Node * _parent, const Style & _style) :
     m_node(YGNodeNew()),
+    m_view(_view),
     m_parent(_parent)
 {
     if(m_parent)
         YGNodeInsertChild(m_parent->m_node, m_node, YGNodeGetChildCount(m_parent->m_node));
     YGNodeSetContext(m_node, this);
-    // YGNodeSetMeasureFunc(m_node, yogaMeasure);
-    
+    // YGNodeSetMeasureFunc(m_node, yogaMeasure); // TODO: Layouting: delete?
+
+
     YogaNodeWrapper wrapper(m_node);
     wrapper.setPosition(_style.position);
     wrapper.setMargin(_style.margin);
@@ -639,6 +643,8 @@ Node::Node(Node * _parent, const Style & _style) :
 
 Node::~Node()
 {
+    if(m_element)
+        m_view.unregisterElement(*m_element);
     for(auto * child : m_children)
         delete child;
     YGNodeFree(m_node);
@@ -647,172 +653,165 @@ Node::~Node()
 void Node::setPositionType(Position::Type _type)
 {
     YogaNodeWrapper(m_node).setPositionType(_type);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
-void Node::setPosition(
-        const std::unordered_map<Edge, Position> & _positions)
+void Node::setPosition(const std::unordered_map<Edge, Position> & _positions)
 {
     YogaNodeWrapper(m_node).setPosition(_positions);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setPosition(Edge _edge, Position _posotion)
 {
     YogaNodeWrapper(m_node).setPosition(_edge, _posotion);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setMargin(const std::unordered_map<Edge, Dimension> & _margins)
 {
     YogaNodeWrapper(m_node).setMargin(_margins);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setMargin(Edge _edge, const Dimension & _value)
 {
     YogaNodeWrapper(m_node).setMargin(_edge, _value);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setPadding(const std::unordered_map<Edge, Dimension> & _paddings)
 {
     YogaNodeWrapper(m_node).setPadding(_paddings);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setPadding(Edge _edge, const Dimension & _value)
 {
     YogaNodeWrapper(m_node).setPadding(_edge, _value);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setWidth(const Dimension & _width)
 {
     YogaNodeWrapper(m_node).setWidth(_width);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setHeight(const Dimension & _height)
 {
     YogaNodeWrapper(m_node).setHeight(_height);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setMinWidth(const DimensionLimit & _min_width)
 {
     YogaNodeWrapper(m_node).setMinWidth(_min_width);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setMinHeight(const DimensionLimit & _min_height)
 {
     YogaNodeWrapper(m_node).setMinHeight(_min_height);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setMaxWidth(const DimensionLimit & _max_width)
 {
     YogaNodeWrapper(m_node).setMaxWidth(_max_width);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setMaxHeight(const DimensionLimit & _max_height)
 {
     YogaNodeWrapper(m_node).setMaxHeight(_max_height);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setFlexBasis(const Dimension & _basis)
 {
     YogaNodeWrapper(m_node).setFlexBasis(_basis);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setFlexGrow(float _grow)
 {
     YogaNodeWrapper(m_node).setFlexGrow(_grow);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setFlexShrink(float _shrink)
 {
     YogaNodeWrapper(m_node).setFlexShrink(_shrink);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setFlexDirection(FlexDirection _direction)
 {
     YogaNodeWrapper(m_node).setFlexDirection(_direction);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setFlexWrap(FlexWrap _wrap)
 {
     YogaNodeWrapper(m_node).setFlexWrap(_wrap);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setGap(const std::unordered_map<GapGutter, Dimension> & _gaps)
 {
     YogaNodeWrapper(m_node).setGap(_gaps);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setGap(GapGutter _gutter, float _gap)
 {
     YogaNodeWrapper(m_node).setGap(_gutter, _gap);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setContentAlignment(ContentAlignment _alignment)
 {
     YogaNodeWrapper(m_node).setContentAlignment(_alignment);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setContentJustification(ContentJustification _justification)
 {
     YogaNodeWrapper(m_node).setContentJustification(_justification);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setItemsAlignment(ItemAlignment _alignment)
 {
     YogaNodeWrapper(m_node).setItemsAlignment(_alignment);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setSelfAlignment(ItemAlignment _alignment)
 {
     YogaNodeWrapper(m_node).setSelfAlignment(_alignment);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setAspectRatio(float _ratio)
 {
     YogaNodeWrapper(m_node).setAspectRatio(_ratio);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 void Node::setDisplayMode(DisplayMode _mode)
 {
     YogaNodeWrapper(m_node).setDisplayMode(_mode);
-    forceRecalculation();
+    m_view.forceRecalculation();
 }
 
 Node & Node::addNode(const Style & _style)
 {
-    Node * node = new Node(this, _style);
+    Node * node = new Node(m_view, this, _style);
     m_children.push_back(node);
-    forceRecalculation();
+    m_view.forceRecalculation();
     return *node;
-}
-
-void Node::forceRecalculation()
-{
-    if(m_parent)
-        m_parent->forceRecalculation();
 }
 
 float Node::getX() const
@@ -841,18 +840,12 @@ float Node::getHeight() const
     return YGNodeLayoutGetHeight(m_node);
 }
 
-void Node::setElement(std::unique_ptr<Element> && _element)
-{
-    
-    m_element = std::move(_element);
-    // YGNodeMarkDirty(m_node);
-    forceRecalculation();
-}
-
-void Node::step(const StepState & _step)
+void Node::setElement(std::shared_ptr<Element> _element)
 {
     if(m_element)
-        m_element->step(_step);
-    for(auto * child : m_children)
-        child->step(_step);
+        m_view.unregisterElement(*m_element);
+    m_element = _element;
+    if(m_element)
+        m_view.registerElement(*m_element);
+    m_view.forceRecalculation();
 }

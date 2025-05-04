@@ -16,56 +16,36 @@
 
 #pragma once
 
-#include <Sol2D/StepState.h>
-#include <Sol2D/Outlet.h>
-#include <Sol2D/UI.h>
-#include <unordered_map>
-#include <list>
+#include <Sol2D/Node.h>
+#include <vector>
 
 namespace Sol2D {
 
 class View final
 {
-    S2_DISABLE_COPY_AND_MOVE(View)
+    friend class Node;
 
 public:
-    explicit View(Renderer & _renderer);
-    uint16_t createFragment(const Area & _aria);
-    const Area * getFragmentArea(uint16_t _id) const;
-    bool updateFragment(uint16_t _id, const Area & _aria);
-    bool deleteFragment(uint16_t _id);
-    bool bindFragment(uint16_t _fragment_id, std::shared_ptr<Canvas> _canvas);
-    void bindUI(std::shared_ptr<UI> _ui);
-    void deleteUI();
-    void resize();
-    void step(const StepState & _state);
+    explicit View(const Style & _style = Style());
+    ~View();
+    void recalculate(float _width, float _height);
+    Node & getLayout() { return m_layout; }
+    const Node & getLayout() const { return m_layout; }
+    Node & addNode(const Style & _style = Style()) { return m_layout.addNode(_style); }
+    void step(const StepState & _step);
 
 private:
-    void emplaceOrderedOutlet(Outlet * _outlet);
-    void eraseOrderedOutlet(Outlet * _outlet);
+    void forceRecalculation();
+    void registerElement(Element & _element);
+    void unregisterElement(Element & _element);
 
 private:
-    Renderer & m_renderer;
-    std::unordered_map<uint16_t, std::unique_ptr<Outlet>> m_outlets;
-    uint16_t m_next_fragment_id;
-    std::list<Outlet *> m_ordered_outlets;
-    std::shared_ptr<UI> m_ui; // TODO: move to Window
+    Node m_layout;
+    std::vector<Element *> m_elements;
+    float m_calculated_width;
+    float m_calculated_height;
+    bool m_force_recalculate;
+    bool m_destroying;
 };
-
-inline View::View(Renderer & _renderer) :
-    m_renderer(_renderer),
-    m_next_fragment_id(1)
-{
-}
-
-inline void View::bindUI(std::shared_ptr<UI> _ui)
-{
-    m_ui = _ui;
-}
-
-inline void View::deleteUI()
-{
-    m_ui.reset();
-}
 
 } // namespace Sol2D

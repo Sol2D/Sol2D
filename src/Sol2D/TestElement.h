@@ -16,15 +16,15 @@
 
 #pragma once
 
-#include <Sol2D/Layouting/Element.h>
+#include <Sol2D/Element.h>
 #include <Sol2D/MediaLayer/MediaLayer.h>
 
 namespace Sol2D {
 
-class TestElement : public Layouting::Element
+class TestElement : public Element
 {
 public:
-    TestElement(Renderer & _renderer, const SDL_FColor & _color, const Layouting::Node & _node);
+    TestElement(Renderer & _renderer, const SDL_FColor & _color, const Node & _node);
     void step(const StepState & _step);
 
 private:

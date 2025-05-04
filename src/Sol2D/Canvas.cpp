@@ -14,25 +14,4 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#pragma once
-
-#include <Sol2D/Layouting/Node.h>
-
-namespace Sol2D::Layouting {
-
-class Layout final : public Node
-{
-public:
-    explicit Layout(const Style & _style = Style());
-    void recalculate(float _width, float _height);
-
-protected:
-    void forceRecalculation() override;
-
-private:
-    float m_calculated_width;
-    float m_calculated_height;
-    bool m_force_recalculate;
-};
-
-} // namespace Sol2D::Layouting
+#include <Sol2D/Canvas.h>

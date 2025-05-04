@@ -229,12 +229,12 @@ using UserData = LuaUserData<Self, LuaTypeName::scene>;
 
 // 1 self
 // 2 color
-int luaApi_SetBackgroundColor(lua_State * _lua)
+int luaApi_SetBackgroundColor(lua_State * /*_lua*/) // TODO: Layouting: restore
 {
-    Self * self = UserData::getUserData(_lua, 1);
-    SDL_FColor color;
-    luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
-    self->getScene(_lua)->setClearColor(color);
+    // Self * self = UserData::getUserData(_lua, 1);
+    // SDL_FColor color;
+    // luaL_argexpected(_lua, tryGetColor(_lua, 2, color), 2, LuaTypeName::color);
+    // self->getScene(_lua)->setClearColor(color);
     return 0;
 }
 
