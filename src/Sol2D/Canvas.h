@@ -23,8 +23,9 @@ namespace Sol2D {
 class Canvas : public Element
 {
 public:
-    explicit Canvas(const Node & _node) :
-        Element(_node, true)
+    Canvas(Renderer & _renderer, const Node & _node) :
+        Element(_node, true),
+        m_renderer(_renderer)
     {
     }
 
@@ -33,8 +34,30 @@ public:
         m_clear_color = _color;
     }
 
+    const SDL_FColor & getClearColor() const
+    {
+        return m_clear_color;
+    }
+
+    void step(const StepState & _step) override;
+
+protected:
+    virtual const char * getTextureName() const
+    {
+        return "Canvas";
+    }
+
+    Texture & getTexture()
+    {
+        return m_texture;
+    }
+
+    virtual void executeStep(const StepState & _step) = 0;
+
 private:
+    Renderer & m_renderer;
     SDL_FColor m_clear_color;
+    Texture m_texture;
 };
 
 } // namespace Sol2D

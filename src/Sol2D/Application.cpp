@@ -159,7 +159,7 @@ void Application::exec()
 
     // BEGIN TEST
 
-    std::shared_ptr<View> view(new View);
+    std::shared_ptr<View> view(new View(renderer));
     view->getLayout().setGap(GapGutter::Row, 10);
 
     Node & node_1 = view->addNode();
@@ -184,7 +184,7 @@ void Application::exec()
     node_1.setElement(element_1);
     node_2.setElement(scene);
 
-    m_window->setLayout(view);
+    m_window->setView(view);
     int w, h;
     SDL_GetWindowSize(m_sdl_window, &w, &h);
     m_window->resize(w, h);
@@ -213,13 +213,7 @@ void Application::exec()
             m_step_state.mouse_state.buttons =
                 SDL_GetMouseState(&m_step_state.mouse_state.position.x, &m_step_state.mouse_state.position.y);
             renderer.beginStep();
-
-            renderer.beginDefaultRenderPass(); // TODO: move somewhere
-
             step();
-
-            renderer.endDefaultRenderPass(); // TODO: move somewhere
-
             renderer.submitStep();
             if(m_step_state.mouse_state.lb_click.state == MouseClickState::Finished)
                 m_step_state.mouse_state.lb_click.state = MouseClickState::None;

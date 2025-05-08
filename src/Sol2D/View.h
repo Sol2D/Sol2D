@@ -17,6 +17,7 @@
 #pragma once
 
 #include <Sol2D/Node.h>
+#include <Sol2D/MediaLayer/Renderer.h>
 #include <vector>
 
 namespace Sol2D {
@@ -26,7 +27,7 @@ class View final
     friend class Node;
 
 public:
-    explicit View(const Style & _style = Style());
+    explicit View(Renderer & _renderer, const Style & _style = Style());
     ~View();
     void recalculate(float _width, float _height);
     Node & getLayout() { return m_layout; }
@@ -40,6 +41,7 @@ private:
     void unregisterElement(Element & _element);
 
 private:
+    Renderer & m_renderer;
     Node m_layout;
     std::vector<Element *> m_elements;
     float m_calculated_width;

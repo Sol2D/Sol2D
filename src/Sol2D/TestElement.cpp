@@ -38,5 +38,23 @@ void TestElement::step(const StepState & /*_step*/)
         )
     );
 
+    m_renderer.renderCircle(
+        CircleRenderingData(
+            { 120.0f, 120.0f },
+            100.0f,
+            { .0f, .5f, 1.0f, 1.0f },
+            5.0f
+        )
+    );
+
+    m_renderer.renderCircle(
+        CircleRenderingData(
+            { 520.0f, 120.0f },
+            100.0f,
+            { .0f, .5f, 1.0f, 1.0f },
+            5.0f
+        )
+    );
+
     // std::cout << "rendering (" << ++frame << "): " << m_node.getWidth() << "x" << m_node.getHeight() << std::endl;
 }

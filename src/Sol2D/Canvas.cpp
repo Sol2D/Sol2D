@@ -15,3 +15,19 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Canvas.h>
+
+using namespace Sol2D;
+
+void Canvas::step(const StepState & _step)
+{
+    const float width = getWidth();
+    const float height = getHeight();
+    if(std::isnormal(width) && std::isnormal(height))
+    {
+        if(m_texture.getWidth() != width || m_texture.getHeight() != height)
+            m_texture = m_renderer.createTexture(width, height, getTextureName());
+        m_renderer.beginRenderPass(m_texture, &m_clear_color);
+        executeStep(_step);
+        m_renderer.endRenderPass(m_texture, { getX(), getY(), width, height });
+    }
+}

@@ -123,7 +123,7 @@ public:
     const Tiles::TileMapObject * getTileMapObjectById(uint32_t _id) const;
     const Tiles::TileMapObject * getTileMapObjectByName(const std::string & _name) const;
     boost::container::slist<const Tiles::TileMapObject *> getTileMapObjectsByClass(const std::string & _class) const;
-    void step(const StepState & _state) override;
+    void executeStep(const StepState & _state) override;
     bool doesBodyExist(uint64_t _body_id) const;
     bool doesBodyShapeExist(uint64_t _body_id, const Utils::PreHashedKey<std::string> & _shape_key) const;
     std::optional<std::vector<SDL_FPoint>> findPath(
@@ -132,6 +132,9 @@ public:
         bool _allow_diagonal_steps,
         bool _avoid_sensors
     ) const;
+
+protected:
+    const char * getTextureName() const override;
 
 private:
     float physicalToGraphical(float _value);
@@ -178,6 +181,11 @@ private:
     ActionAccumulator m_defers;
     Box2dDebugDraw * m_box2d_debug_draw;
 };
+
+inline const char * Scene::getTextureName() const
+{
+    return "Scene";
+}
 
 inline float Scene::physicalToGraphical(float _value)
 {

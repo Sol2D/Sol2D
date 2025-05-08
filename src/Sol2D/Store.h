@@ -77,9 +77,9 @@ struct Utils::ObjectFactory<UI>
 template<>
 struct Utils::ObjectFactory<View>
 {
-    std::shared_ptr<View> produce(const Style & _style = Style()) const
+    std::shared_ptr<View> produce(Renderer & _renderer, const Style & _style = Style()) const
     {
-        return std::make_shared<View>(_style);
+        return std::make_shared<View>(_renderer, _style);
     }
 };
 

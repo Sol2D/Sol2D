@@ -179,7 +179,7 @@ void Scene::BodyShapeCreator::operator() (const BodyCapsuleShapeDefinition & _ca
 }
 
 Scene::Scene(const Node & _node, const SceneOptions & _options, const Workspace & _workspace, Renderer & _renderer) :
-    Canvas(_node),
+    Canvas(_renderer, _node),
     m_workspace(_workspace),
     m_renderer(_renderer),
     m_world_offset {.0f, .0f},
@@ -756,7 +756,7 @@ bool Scene::loadTileMap(const std::filesystem::path & _file_path)
     return m_tile_map_ptr != nullptr; // TODO: only exceptions
 }
 
-void Scene::step(const StepState & _state)
+void Scene::executeStep(const StepState & _state)
 {
     if(!m_tile_map_ptr)
     {

@@ -18,7 +18,6 @@
 
 #include <Sol2D/View.h>
 #include <memory>
-#include <list>
 
 namespace Sol2D {
 
@@ -29,37 +28,38 @@ class Window final
 public:
     Window();
     void step(const StepState & _state);
-    void setLayout(std::shared_ptr<View> _layout);
-    std::shared_ptr<View> getLayout();
+    void setView(std::shared_ptr<View> _view);
+    std::shared_ptr<View> getView();
     void resize(float _width, float _height);
 
 private:
-    // The list is used to allow a new layout to be set during step processing.
-    // If the layout is replaced during the step, the application will crash.
-    // Instead, we add the new layout to the list and continue using the old layout until the next step.
-    // The list is truncated before each step.
-    std::list<std::shared_ptr<View>> m_layout_list;
+    std::shared_ptr<View> m_view;
+    // This variable is used to set a new view during step processing.
+    // If the view is replaced during the step, the application will crash.
+    // Instead, we store the new view in this variable and continue using the old view until the next step.
+    std::shared_ptr<View> m_next_view;
 };
 
 inline Window::Window()
 {
 }
 
-inline void Window::setLayout(std::shared_ptr<View> _layout)
+inline void Window::setView(std::shared_ptr<View> _view)
 {
-    m_layout_list.push_front(_layout);
-
+    m_next_view = _view;
 }
 
-inline std::shared_ptr<View> Window::getLayout()
+inline std::shared_ptr<View> Window::getView()
 {
-    return m_layout_list.empty() ? nullptr : m_layout_list.back();
+    return m_view;
 }
 
 inline void Window::resize(float _width, float _height)
 {
-    if(!m_layout_list.empty())
-        m_layout_list.back()->recalculate(_width, _height);
+    if(m_next_view)
+        m_next_view->recalculate(_width, _height);
+    else if(m_view)
+        m_view->recalculate(_width, _height);
 }
 
 } // namespace Sol2D

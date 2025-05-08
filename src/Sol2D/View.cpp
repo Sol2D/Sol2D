@@ -19,7 +19,8 @@
 
 using namespace Sol2D;
 
-View::View(const Style & _style) :
+View::View(Renderer & _renderer, const Style & _style) :
+    m_renderer(_renderer),
     m_layout(Node(*this, nullptr, _style)),
     m_calculated_width(.0f),
     m_calculated_height(.0f),
@@ -72,7 +73,7 @@ void View::step(const StepState & _step)
         {
             if(is_render_pass_started)
             {
-                // submit defalt render pass
+                m_renderer.endDefaultRenderPass();
                 is_render_pass_started = false;
             }
             element->step(_step);
@@ -81,7 +82,7 @@ void View::step(const StepState & _step)
         {
             if(!is_render_pass_started)
             {
-                // start render pass
+                m_renderer.beginDefaultRenderPass();
                 is_render_pass_started = true;
             }
             element->step(_step);
@@ -89,6 +90,6 @@ void View::step(const StepState & _step)
     }
     if(is_render_pass_started)
     {
-        // submit defalt render pass
+        m_renderer.endDefaultRenderPass();
     }
 }

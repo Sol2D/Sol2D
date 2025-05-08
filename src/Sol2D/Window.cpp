@@ -20,12 +20,10 @@ using namespace Sol2D;
 
 void Window::step(const StepState & _state)
 {
-    // if(m_view_list.empty())
-    //     return;
-    // m_view_list.resize(1);
-    // m_view_list.back()->step(_state);
-    if(m_layout_list.empty())
-        return;
-    m_layout_list.resize(1);
-    m_layout_list.back()->step(_state);
+    if(m_next_view)
+    {
+        m_view = m_next_view;
+        m_next_view = nullptr;
+    }
+    if(m_view) m_view->step(_state);
 }
