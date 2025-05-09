@@ -106,7 +106,7 @@ public:
         bool _flip_horizontally,
         bool _flip_vertically
     );
-    uint64_t createJoint(const DistanceJointDefenition & _definition);
+    uint64_t createJoint(const DistanceJointDefinition & _definition);
     uint64_t createJoint(const MotorJointDefinition & _definition);
     uint64_t createJoint(const MouseJointDefinition & _definition);
     uint64_t createJoint(const PrismaticJointDefinition & _definition);

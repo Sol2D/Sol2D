@@ -143,7 +143,7 @@ public:
         b2DistanceJoint_SetSpringHertz(m_b2_joint_id, _hertz);
     }
 
-    bool isLimtEnabled() const
+    bool isLimitEnabled() const
     {
         return b2DistanceJoint_IsLimitEnabled(m_b2_joint_id);
     }

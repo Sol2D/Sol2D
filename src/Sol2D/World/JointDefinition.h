@@ -35,9 +35,9 @@ struct JointDefinition
     bool is_collide_connected_enabled;
 };
 
-struct DistanceJointDefenition : JointDefinition
+struct DistanceJointDefinition : JointDefinition
 {
-    DistanceJointDefenition() :
+    DistanceJointDefinition() :
         is_spring_enabled(false),
         is_motor_enabled(false),
         is_limit_enabled(false)

@@ -60,14 +60,14 @@ bool tryGetJointDefinition(const LuaTableApi & _table, World::JointDefinition & 
 
 } // namespace
 
-bool Sol2D::Lua::tryGetDistanceJointDefenition(lua_State * _lua, int _idx, World::DistanceJointDefenition & _result)
+bool Sol2D::Lua::tryGetDistanceJointDefinition(lua_State * _lua, int _idx, World::DistanceJointDefinition & _result)
 {
     LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
-    table.tryGetBoolean("isSpringEnbaled", &_result.is_spring_enabled);
-    table.tryGetBoolean("isMotorEnbaled", &_result.is_motor_enabled);
-    table.tryGetBoolean("isLimitEnbaled", &_result.is_limit_enabled);
+    table.tryGetBoolean("isSpringEnabled", &_result.is_spring_enabled);
+    table.tryGetBoolean("isMotorEnabled", &_result.is_motor_enabled);
+    table.tryGetBoolean("isLimitEnabled", &_result.is_limit_enabled);
     table.tryGetPoint("localAnchorA", _result.local_anchor_a);
     table.tryGetPoint("localAnchorB", _result.local_anchor_b);
     table.tryGetNumber("minLength", _result.min_length);
@@ -110,9 +110,9 @@ bool Sol2D::Lua::tryGetPrismaticJointDefinition(lua_State * _lua, int _idx, Worl
     LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
-    table.tryGetBoolean("isSpringEnbaled", &_result.is_spring_enabled);
-    table.tryGetBoolean("isMotorEnbaled", &_result.is_motor_enabled);
-    table.tryGetBoolean("isLimitEnbaled", &_result.is_limit_enabled);
+    table.tryGetBoolean("isSpringEnabled", &_result.is_spring_enabled);
+    table.tryGetBoolean("isMotorEnabled", &_result.is_motor_enabled);
+    table.tryGetBoolean("isLimitEnabled", &_result.is_limit_enabled);
     table.tryGetPoint("localAnchorA", _result.local_anchor_a);
     table.tryGetPoint("localAnchorB", _result.local_anchor_b);
     table.tryGetPoint("localAxisA", _result.local_axis_a);
@@ -146,9 +146,9 @@ bool Sol2D::Lua::tryGetWheelJointDefinition(lua_State * _lua, int _idx, World::W
     LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
-    table.tryGetBoolean("isSpringEnbaled", &_result.is_spring_enabled);
-    table.tryGetBoolean("isMotorEnbaled", &_result.is_motor_enabled);
-    table.tryGetBoolean("isLimitEnbaled", &_result.is_limit_enabled);
+    table.tryGetBoolean("isSpringEnabled", &_result.is_spring_enabled);
+    table.tryGetBoolean("isMotorEnabled", &_result.is_motor_enabled);
+    table.tryGetBoolean("isLimitEnabled", &_result.is_limit_enabled);
     table.tryGetPoint("localAnchorA", _result.local_anchor_a);
     table.tryGetPoint("localAnchorB", _result.local_anchor_b);
     table.tryGetPoint("localAxisA", _result.local_axis_a);

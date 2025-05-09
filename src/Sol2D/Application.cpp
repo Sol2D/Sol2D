@@ -152,7 +152,8 @@ void Application::exec()
     ResourceManager resource_manager; // TODO: create in place
     Renderer renderer(resource_manager, m_sdl_window, m_device);
     StoreManager store_manager;
-    // std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(m_workspace, store_manager, *m_window, renderer);
+    std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(m_workspace, store_manager, *m_window, renderer);
+    lua->executeMainScript();
 
 
 
@@ -160,7 +161,7 @@ void Application::exec()
     // BEGIN TEST
 
     std::shared_ptr<View> view(new View(renderer));
-    view->getLayout().setGap(GapGutter::Row, 10);
+    view->getLayout().setGap(GapGutter::Row, 40);
 
     Node & node_1 = view->addNode();
     Node & node_2 = view->addNode();

@@ -433,7 +433,7 @@ bool Scene::flipBodyShapeGraphics(
     return shape->flipGraphics(_graphic_key, _flip_horizontally, _flip_vertically);
 }
 
-uint64_t Scene::createJoint(const DistanceJointDefenition & _definition)
+uint64_t Scene::createJoint(const DistanceJointDefinition & _definition)
 {
     b2DistanceJointDef b2_joint_def = b2DefaultDistanceJointDef();
     b2_joint_def.bodyIdA = findBox2dBody(_definition.body_a_id);

@@ -367,10 +367,10 @@ int luaApi_SetSpringHertz(lua_State * _lua)
 }
 
 // 1 self
-int luaApi_IsLimtEnabled(lua_State * _lua)
+int luaApi_IsLimitEnabled(lua_State * _lua)
 {
     DistanceJointSelf * self = DistanceJointUserData::getUserData(_lua, 1);
-    lua_pushboolean(_lua, self->getDistanceJoint().isLimtEnabled());
+    lua_pushboolean(_lua, self->getDistanceJoint().isLimitEnabled());
     return 1;
 }
 
@@ -1331,7 +1331,7 @@ constexpr std::array<luaL_Reg, 21> g_distance_joint_funcs = {
      {"setSpringDampingRatio", DistanceJointApi::luaApi_SetSpringDampingRatio},
      {"getSpringHertz", DistanceJointApi::luaApi_GetSpringHertz},
      {"setSpringHertz", DistanceJointApi::luaApi_SetSpringHertz},
-     {"isLimtEnabled", DistanceJointApi::luaApi_IsLimtEnabled},
+     {"isLimitEnabled", DistanceJointApi::luaApi_IsLimitEnabled},
      {"enableLimit", DistanceJointApi::luaApi_EnableLimit},
      {"getMinLength", DistanceJointApi::luaApi_GetMinLength},
      {"getMaxLength", DistanceJointApi::luaApi_GetMaxLength},

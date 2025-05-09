@@ -486,7 +486,7 @@ int luaApi_SubscribeToSensorEndContact(lua_State * _lua)
 
 // 1 self
 // 2 subscription ID
-int luaApi_UnsubscribeFromSesnsorEndContact(lua_State * _lua)
+int luaApi_UnsubscribeFromSensorEndContact(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
@@ -544,9 +544,9 @@ int luaApi_UnsubscribeFromStep(lua_State * _lua)
 int luaApi_CreateDistanceJoint(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
-    DistanceJointDefenition definition;
+    DistanceJointDefinition definition;
     luaL_argexpected(
-        _lua, tryGetDistanceJointDefenition(_lua, 2, definition), 2, LuaTypeName::distance_joint_definition
+        _lua, tryGetDistanceJointDefinition(_lua, 2, definition), 2, LuaTypeName::distance_joint_definition
     );
     std::shared_ptr<Scene> scene = self->getScene(_lua);
     uint64_t id = scene->createJoint(definition);
@@ -801,7 +801,7 @@ void Sol2D::Lua::pushSceneApi(lua_State * _lua, const Workspace & _workspace, st
             {"subscribeToSensorBeginContact",     luaApi_SubscribeToSensorBeginContact    },
             {"unsubscribeFromSensorBeginContact", luaApi_UnsubscribeFromSensorBeginContact},
             {"subscribeToSensorEndContact",       luaApi_SubscribeToSensorEndContact      },
-            {"unsubscribeFromSesnsorEndContact",  luaApi_UnsubscribeFromSesnsorEndContact },
+            {"unsubscribeFromSensorEndContact",   luaApi_UnsubscribeFromSensorEndContact  },
             {"subscribeToPreSolveContact",        luaApi_SubscribeToPreSolveContact       },
             {"unsubscribeFromPreSolveContact",    luaApi_UnsubscribeFromPreSolveContact   },
             {"subscribeToStep",                   luaApi_SubscribeToStep                  },

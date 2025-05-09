@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<game directory="games/test">
+    <engine>
+        <graphics fps="60" />
+        <debug rendering="true" />
+        <logging level="trace" />
+    </engine>
+    <application name="My Game">
+        <scripts entry="main.lua" />
+        <logging level="trace" />
+    </application>
+</game>
