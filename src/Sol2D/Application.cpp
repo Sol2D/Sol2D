@@ -163,8 +163,8 @@ void Application::exec()
     std::shared_ptr<View> view(new View(renderer));
     view->getLayout().setGap(GapGutter::Row, 40);
 
-    Node & node_1 = view->addNode();
-    Node & node_2 = view->addNode();
+    Node & node_1 = view->getLayout().addNode();
+    Node & node_2 = view->getLayout().addNode();
 
     // node_1.setMargin(LayoutNode::Edge::All, 10);
     // node_2.setMargin(LayoutNode::Edge::All, 20);

@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaLibrary.h>
-// #include <Sol2D/Lua/LuaWindowApi.h>
+#include <Sol2D/Lua/LuaWindowApi.h>
 #include <Sol2D/Lua/LuaStoreManagerApi.h>
 #include <Sol2D/Lua/LuaScancodeApi.h>
 #include <Sol2D/Lua/LuaBodyTypeApi.h>
@@ -66,7 +66,7 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
 } // namespace
 
 LuaLibrary::LuaLibrary(
-    const Workspace & _workspace, StoreManager & _store_manager, Window & /*_window*/, Renderer & _renderer
+    const Workspace & _workspace, StoreManager & _store_manager, Window & _window, Renderer & _renderer
 ) :
     m_lua(luaL_newstate()),
     m_workspace(_workspace)
@@ -79,8 +79,8 @@ LuaLibrary::LuaLibrary(
     lua_newuserdata(m_lua, 1);
     if(pushMetatable(m_lua, LuaTypeName::lib) == MetatablePushResult::Created)
     {
-        // pushWindowApi(m_lua, _window); // TODO: Layouting: restore
-        // lua_setfield(m_lua, -2, "window");
+        pushWindowApi(m_lua, _window);
+        lua_setfield(m_lua, -2, "window");
         pushKeyboardApi(m_lua);
         lua_setfield(m_lua, -2, "keyboard");
         pushMouseApi(m_lua);
@@ -97,34 +97,30 @@ LuaLibrary::LuaLibrary(
         lua_setfield(m_lua, -2, "TileMapObjectType");
         // pushWidgetStateEnum(m_lua); // TODO: Layouting: restore
         // lua_setfield(m_lua, -2, "WidgetState");
-        { // Style enums
-            lua_newtable(m_lua);
-            pushContentAlignmentEnum(m_lua);
-            lua_setfield(m_lua, -2, "ContentAlignment");
-            pushContentJustificationEnum(m_lua);
-            lua_setfield(m_lua, -2, "ContentJustification");
-            pushItemAlignmentEnum(m_lua);
-            lua_setfield(m_lua, -2, "ItemAlignment");
-            pushDisplayModeEnum(m_lua);
-            lua_setfield(m_lua, -2, "DisplayMode");
-            pushFlexDirectionEnum(m_lua);
-            lua_setfield(m_lua, -2, "FlexDirection");
-            pushFlexWrapEnum(m_lua);
-            lua_setfield(m_lua, -2, "FlexWrap");
-            pushEdgeEnum(m_lua);
-            lua_setfield(m_lua, -2, "Edge");
-            pushGapGutterEnum(m_lua);
-            lua_setfield(m_lua, -2, "GapGutter");
-            pushPositionTypeEnum(m_lua);
-            lua_setfield(m_lua, -2, "PositionType");
-            pushPositionUnitEnum(m_lua);
-            lua_setfield(m_lua, -2, "PositionUnit");
-            pushDimensionUnitEnum(m_lua);
-            lua_setfield(m_lua, -2, "DimensionUnit");
-            pushDimensionLimitUnitEnum(m_lua);
-            lua_setfield(m_lua, -2, "DimensionLimitUnit");
-            lua_setfield(m_lua, -2, "style");
-        }
+        pushContentAlignmentEnum(m_lua);
+        lua_setfield(m_lua, -2, "ContentAlignment");
+        pushContentJustificationEnum(m_lua);
+        lua_setfield(m_lua, -2, "ContentJustification");
+        pushItemAlignmentEnum(m_lua);
+        lua_setfield(m_lua, -2, "ItemAlignment");
+        pushDisplayModeEnum(m_lua);
+        lua_setfield(m_lua, -2, "DisplayMode");
+        pushFlexDirectionEnum(m_lua);
+        lua_setfield(m_lua, -2, "FlexDirection");
+        pushFlexWrapEnum(m_lua);
+        lua_setfield(m_lua, -2, "FlexWrap");
+        pushEdgeEnum(m_lua);
+        lua_setfield(m_lua, -2, "Edge");
+        pushGapGutterEnum(m_lua);
+        lua_setfield(m_lua, -2, "GapGutter");
+        pushPositionTypeEnum(m_lua);
+        lua_setfield(m_lua, -2, "PositionType");
+        pushPositionUnitEnum(m_lua);
+        lua_setfield(m_lua, -2, "PositionUnit");
+        pushDimensionUnitEnum(m_lua);
+        lua_setfield(m_lua, -2, "DimensionUnit");
+        pushDimensionLimitUnitEnum(m_lua);
+        lua_setfield(m_lua, -2, "DimensionLimitUnit");
     }
     lua_setmetatable(m_lua, -2);
     lua_setglobal(m_lua, "sol");

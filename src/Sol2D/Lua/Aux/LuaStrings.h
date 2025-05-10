@@ -35,7 +35,6 @@ struct LuaTypeName
     static const char color[];
     static const char store_manager[];
     static const char window[];
-    static const char area[];
     static const char view[];
     static const char scene[];
     static const char body[];
@@ -72,16 +71,11 @@ struct LuaTypeName
     static const char weld_joint[];
     static const char wheel_joint[];
     static const char font[];
-    static const char form[];
     static const char node[];
     static const char ui[];
     static const char ui_form[];
     static const char vertical_text_alignment[];
     static const char horizontal_text_alignment[];
-    static const char widget_state[];
-    static const char widget_padding[];
-    static const char button[];
-    static const char label[];
     static const char sound_effect[];
     static const char music[];
     static const char style[];
@@ -127,9 +121,7 @@ struct LuaMessage
     static const char sprite_sheet_is_destroyed[];
     static const char view_is_destroyed[];
     static const char ui_is_destroyed[];
-    static const char form_is_destroyed[];
     static const char node_is_destroyed[];
-    static const char widget_is_destroyed[];
     static const char music_is_destroyed[];
     static const char sound_effect_is_destroyed[];
     static const char body_with_id_not_found_template[];

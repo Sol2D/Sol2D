@@ -32,7 +32,6 @@ public:
     void recalculate(float _width, float _height);
     Node & getLayout() { return m_layout; }
     const Node & getLayout() const { return m_layout; }
-    Node & addNode(const Style & _style = Style()) { return m_layout.addNode(_style); }
     void step(const StepState & _step);
 
 private:
