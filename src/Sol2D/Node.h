@@ -18,7 +18,7 @@
 
 #include <Sol2D/Element.h>
 #include <Sol2D/Style.h>
-#include <list>
+#include <Sol2D/Object.h>
 
 struct YGNode;
 
@@ -26,63 +26,149 @@ namespace Sol2D {
 
 class View;
 
-class Node final
+class Node final : public Object
 {
+private:
     friend class View;
 
+    class ChildrenIteratorBase
+    {
+    public:
+        S2_DEFAULT_COPY(ChildrenIteratorBase);
+
+        virtual ~ChildrenIteratorBase() { }
+
+    protected:
+        ChildrenIteratorBase(YGNode * _node, size_t _index, size_t _count) :
+            m_node(_node),
+            m_index(_index),
+            m_count(_count)
+        {
+        }
+
+        Node * getNode() const;
+
+    protected:
+        YGNode * m_node;
+        size_t m_index;
+        size_t m_count;
+    };
+
 public:
+    template<typename NodeType>
+    class ChildrenIterator : private ChildrenIteratorBase
+    {
+    public:
+        S2_DEFAULT_COPY(ChildrenIterator);
+
+        ChildrenIterator(YGNode * _node, size_t _index, size_t _count) :
+            ChildrenIteratorBase(_node, _index, _count)
+        {
+        }
+
+        ChildrenIterator<NodeType> & operator ++ ()
+        {
+            ++m_index;
+            return *this;
+        }
+
+        ChildrenIterator<NodeType> operator ++ (int)
+        {
+            ChildrenIterator<NodeType> it = *this;
+            ++m_index;
+            return it;
+        }
+
+        ChildrenIterator<NodeType> & operator += (size_t _n)
+        {
+            m_index += _n;
+            return *this;
+        }
+
+        ChildrenIterator<NodeType> & operator -- ()
+        {
+            if(m_index > 0)
+                --m_index;
+            return *this;
+        }
+
+        ChildrenIterator<NodeType> operator -- (int)
+        {
+            ChildrenIterator<NodeType> it = *this;
+            if(m_index > 0)
+                --m_index;
+            return it;
+        }
+
+        ChildrenIterator<NodeType> & operator -= (size_t _n)
+        {
+            if(m_index < _n)
+                m_index = 0;
+            else
+                m_index -= _n;
+            return *this;
+        }
+
+        NodeType * operator * () const
+        {
+            return getNode();
+        }
+
+        NodeType & operator -> () const
+        {
+            return *getNode();
+        }
+
+        bool operator == (const ChildrenIterator<NodeType> & _other) const
+        {
+            return _other.m_node == m_node &&
+                (_other.m_index == m_index || (_other.m_index >= _other.m_count && m_index >= m_count));
+        }
+
+        bool operator != (const ChildrenIterator<NodeType> & _other) const
+        {
+            return !(_other == *this);
+        }
+    };
+
     class Children
     {
     public:
-        explicit Children(std::list<Node *> & _children) :
-            m_children(_children)
+        explicit Children(YGNode * _node) :
+            m_node(_node)
         {
         }
-        
-        std::list<Node *>::iterator begin()
-        {
-            return m_children.begin();
-        }
-        
-        std::list<Node *>::iterator end()
-        {
-            return m_children.end();
-        }
-        
+
+        ChildrenIterator<Node> begin();
+        ChildrenIterator<Node> end();
+
     private:
-        std::list<Node *> & m_children;
+        YGNode * m_node;
     };
-    
+
     class ConstChildren
     {
     public:
-        explicit ConstChildren(const std::list<Node *> & _children) :
-            m_children(_children)
+        explicit ConstChildren(YGNode * _node) :
+            m_node(_node)
         {
         }
-        
-        std::list<Node *>::const_iterator begin() const
+
+        ChildrenIterator<const Node> begin() const
         {
-            return m_children.begin();
+            return cbegin();
         }
-        
-        std::list<Node *>::const_iterator end() const
+
+        ChildrenIterator<const Node> end() const
         {
-            return m_children.end();
+            return cend();
         }
-        
-        std::list<Node *>::const_iterator cbegin() const
-        {
-            return m_children.cbegin();
-        }
-        
-        std::list<Node *>::const_iterator cend() const
-        {
-            return m_children.cend();
-        }
-        
+
+        ChildrenIterator<const Node> cbegin() const;
+        ChildrenIterator<const Node> cend() const;
+
     private:
-        const std::list<Node *> & m_children;
+        YGNode * m_node;
     };
     
 public:
@@ -123,12 +209,12 @@ public:
     
     ConstChildren getChildren() const
     {
-        return ConstChildren(m_children);
+        return ConstChildren(m_node);
     }
     
     Children getChildren()
     {
-        return Children(m_children);
+        return Children(m_node);
     }
     
     const Element * getElement() const
@@ -147,7 +233,6 @@ private:
     YGNode * m_node;
     View & m_view;
     Node * m_parent;
-    std::list<Node *> m_children;
     std::shared_ptr<Element> m_element;
 };
 

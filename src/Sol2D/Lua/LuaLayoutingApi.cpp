@@ -19,28 +19,59 @@
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaTableApi.h>
+#include <functional>
 
 using namespace Sol2D;
 using namespace Sol2D::Lua;
 
 namespace {
 
+class NodeCompanion : public ObjectCompanion
+{
+public:
+    explicit NodeCompanion(std::function<void()> _on_destroyed) :
+        m_on_destroyed(_on_destroyed)
+    {
+    }
+
+    ~NodeCompanion() override
+    {
+        m_on_destroyed();
+    }
+
+private:
+    std::function<void()> m_on_destroyed;
+};
+
 struct Self : LuaSelfBase
 {
-    Self(std::shared_ptr<Node> & _node) :
-        node(_node)
+public:
+    Self(Node & _node) :
+        m_node(&_node)
     {
+        auto companion = std::make_unique<NodeCompanion>([this]() {
+            m_node = nullptr;
+        });
+        m_companion_id = _node.addCompanion(std::move(companion));
     }
 
-    std::shared_ptr<Node> getNode(lua_State * _lua) const
+    void beforeDelete(lua_State *) override
     {
-        std::shared_ptr<Node> ptr = node.lock();
-        if(!ptr)
-            luaL_error(_lua, LuaMessage::node_is_destroyed);
-        return ptr;
+        if(m_node)
+            m_node->removeCompanion(m_companion_id);
     }
 
-    std::weak_ptr<Node> node;
+    Node * getNode(lua_State * _lua) const
+    {
+        if(m_node)
+            return m_node;
+        luaL_error(_lua, LuaMessage::node_is_destroyed);
+        return nullptr;
+    }
+
+private:
+    Node * m_node;
+    uint64_t m_companion_id;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::node>;
@@ -238,7 +269,7 @@ using StyleTable = LuaTable<
 >;
 
 // 1 self
-// 2 type (int or string)
+// 2 type
 int luaApi_SetPositionType(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
@@ -657,7 +688,7 @@ bool Sol2D::Lua::tryGetStyle(lua_State * _lua, int _idx, Style & _style)
     return true;
 }
 
-void Sol2D::Lua::pushLayoutNodeApi(lua_State * _lua, std::shared_ptr<Node> _node)
+void Sol2D::Lua::pushLayoutNodeApi(lua_State * _lua, Node & _node)
 {
     UserData::pushUserData(_lua, _node);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)

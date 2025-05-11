@@ -33,7 +33,7 @@ void pushPositionTypeEnum(lua_State * _lua);
 void pushPositionUnitEnum(lua_State * _lua);
 void pushDimensionUnitEnum(lua_State * _lua);
 void pushDimensionLimitUnitEnum(lua_State * _lua);
-void pushLayoutNodeApi(lua_State * _lua, std::shared_ptr<Node> _node);
+void pushLayoutNodeApi(lua_State * _lua, Node & _node);
 bool tryGetStyle(lua_State * _lua, int _idx, Style & _style);
 
 } // namespace Sol2D::Lua

@@ -145,3 +145,10 @@
 ---@field gap sol.GapGutterMap?
 ---@field position sol.PositionMap?
 ---@field positionType sol.PositionType?
+
+---@class sol.Node
+local __node
+
+---@param _type integer
+---@see sol.PositionType
+function __node:setPositionType(_type) end

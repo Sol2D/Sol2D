@@ -31,6 +31,7 @@ public:
     virtual ~LuaSelfBase()
     {
     }
+
     virtual void beforeDelete(lua_State *)
     {
     }

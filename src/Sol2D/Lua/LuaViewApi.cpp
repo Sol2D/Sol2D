@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Lua/LuaViewApi.h>
+#include <Sol2D/Lua/LuaLayoutingApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
@@ -43,6 +44,14 @@ struct Self : LuaSelfBase
 
 using UserData = LuaUserData<Self, LuaTypeName::view>;
 
+// 1 self
+int luaApi_GetLayout(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    pushLayoutNodeApi(_lua, self->getView(_lua)->getLayout());
+    return 1;
+}
+
 } // namespace
 
 void Sol2D::Lua::pushViewApi(lua_State * _lua, std::shared_ptr<View> _view)
@@ -53,6 +62,7 @@ void Sol2D::Lua::pushViewApi(lua_State * _lua, std::shared_ptr<View> _view)
         luaL_Reg funcs[] =
         {
             { "__gc", UserData::luaGC },
+            { "getLayout", luaApi_GetLayout },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);

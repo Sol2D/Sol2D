@@ -587,6 +587,36 @@ YGPositionType YogaNodeWrapper::positionTypeToYGPositionType(Position::Type _typ
     }
 }
 
+Node * Node::ChildrenIteratorBase::getNode() const
+{
+    YGNodeRef child = YGNodeGetChild(m_node, m_index);
+    return child ? static_cast<Node *>(YGNodeGetContext(child)) : nullptr;
+}
+
+Node::ChildrenIterator<Node> Node::Children::begin()
+{
+    size_t count = YGNodeGetChildCount(m_node);
+    return Node::ChildrenIterator<Node>(m_node, 0, count);
+}
+
+Node::ChildrenIterator<Node> Node::Children::end()
+{
+    size_t count = YGNodeGetChildCount(m_node);
+    return Node::ChildrenIterator<Node>(m_node, count, count);
+}
+
+Node::ChildrenIterator<const Node> Node::ConstChildren::cbegin() const
+{
+    size_t count = YGNodeGetChildCount(m_node);
+    return Node::ChildrenIterator<const Node>(m_node, 0, count);
+}
+
+Node::ChildrenIterator<const Node> Node::ConstChildren::cend() const
+{
+    size_t count = YGNodeGetChildCount(m_node);
+    return Node::ChildrenIterator<const Node>(m_node, count, count);
+}
+
 Node::Node(View & _view, Node * _parent, const Style & _style) :
     m_node(YGNodeNew()),
     m_view(_view),
@@ -645,7 +675,7 @@ Node::~Node()
 {
     if(m_element)
         m_view.unregisterElement(*m_element);
-    for(auto * child : m_children)
+    for(auto * child : getChildren())
         delete child;
     YGNodeFree(m_node);
 }
@@ -809,7 +839,6 @@ void Node::setDisplayMode(DisplayMode _mode)
 Node & Node::addNode(const Style & _style)
 {
     Node * node = new Node(m_view, this, _style);
-    m_children.push_back(node);
     m_view.forceRecalculation();
     return *node;
 }

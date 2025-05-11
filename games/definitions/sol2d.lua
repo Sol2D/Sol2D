@@ -23,5 +23,4 @@
 ---@field PositionUnit sol.PositionUnit
 ---@field DimensionUnit sol.DimensionUnit
 ---@field DimensionLimitUnit sol.DimensionLimitUnit
-
 sol = {}
