@@ -87,6 +87,8 @@ public:
 
     bool tryGetColor(const char * _key, std::optional<SDL_FColor> & _value);
 
+    bool tryGetTable(const char * _key) const;
+
     bool tryGetValue(const char * _key) const;
 
     void setValueFromTop(const char * _key);

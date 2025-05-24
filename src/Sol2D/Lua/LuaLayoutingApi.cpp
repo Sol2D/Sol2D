@@ -17,7 +17,6 @@
 #include <Sol2D/Lua/LuaLayoutingApi.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
-#include <Sol2D/Lua/Aux/LuaTable.h>
 #include <Sol2D/Lua/Aux/LuaTableApi.h>
 #include <functional>
 
@@ -131,142 +130,240 @@ namespace Field
     }
 }
 
-template<typename Unit>
-class UnitAndValue
+std::optional<Dimension> tryGetDimension(const LuaTableApi & _table)
 {
-public:
-    using Table = LuaTable<
-        LuaTableField<Field::UnitAndValue::unit, Unit>,
-        LuaTableField<Field::UnitAndValue::value, float>
-    >;
-
-    explicit UnitAndValue(const Table & _table) :
-        m_table(_table)
+    Dimension dimension;
+    int unit_int;
+    if(!_table.tryGetNumber(Field::UnitAndValue::value, &dimension.value) ||
+       !_table.tryGetInteger(Field::UnitAndValue::unit, &unit_int))
     {
-    }
-
-    template<typename Agg>
-    std::optional<Agg> aggregate() const
-    {
-        auto unit = m_table.template tryGetValue<Field::UnitAndValue::unit>();
-        auto value = m_table.template tryGetValue<Field::UnitAndValue::value>();
-        if(unit && value)
-            return Agg(*value, *unit);
         return std::nullopt;
     }
+    switch(unit_int)
+    {
+    case static_cast<int>(Dimension::Unit::Auto):
+        dimension.unit = Dimension::Unit::Auto;
+        break;
+    case static_cast<int>(Dimension::Unit::Point):
+        dimension.unit = Dimension::Unit::Point;
+        break;
+    case static_cast<int>(Dimension::Unit::Percent):
+        dimension.unit = Dimension::Unit::Percent;
+        break;
+    case static_cast<int>(Dimension::Unit::MaxContent):
+        dimension.unit = Dimension::Unit::MaxContent;
+        break;
+    case static_cast<int>(Dimension::Unit::FitContent):
+        dimension.unit = Dimension::Unit::FitContent;
+        break;
+    case static_cast<int>(Dimension::Unit::Stretch):
+        dimension.unit = Dimension::Unit::Stretch;
+        break;
+    default:
+        return std::nullopt;
+    }
+    return dimension;
+}
 
-private:
-    const Table & m_table;
-};
-
-class GapGutterMap
+std::optional<DimensionLimit> tryGetDimensionLimit(const LuaTableApi & _table)
 {
-public:
-    using Table = LuaTable<
-        LuaTableField<Field::GapGutter::column, UnitAndValue<Dimension::Unit>::Table>,
-        LuaTableField<Field::GapGutter::row, UnitAndValue<Dimension::Unit>::Table>,
-        LuaTableField<Field::GapGutter::all, UnitAndValue<Dimension::Unit>::Table>
-    >;
-
-    explicit GapGutterMap(const Table & _table) :
-        m_table(_table)
+    DimensionLimit limit;
+    int unit_int;
+    if(!_table.tryGetNumber(Field::UnitAndValue::value, &limit.value) ||
+       !_table.tryGetInteger(Field::UnitAndValue::unit, &unit_int))
     {
+        return std::nullopt;
     }
-
-    void read(std::unordered_map<GapGutter, Dimension> & _dest_map) const
+    switch(unit_int)
     {
-        readGutter<Field::GapGutter::column>(_dest_map, GapGutter::Column);
-        readGutter<Field::GapGutter::row>(_dest_map, GapGutter::Row);
-        readGutter<Field::GapGutter::all>(_dest_map, GapGutter::All);
+    case static_cast<int>(DimensionLimit::Unit::Point):
+        limit.unit = DimensionLimit::Unit::Point;
+        break;
+    case static_cast<int>(DimensionLimit::Unit::Percent):
+        limit.unit = DimensionLimit::Unit::Percent;
+        break;
+    case static_cast<int>(DimensionLimit::Unit::MaxContent):
+        limit.unit = DimensionLimit::Unit::MaxContent;
+        break;
+    case static_cast<int>(DimensionLimit::Unit::FitContent):
+        limit.unit = DimensionLimit::Unit::FitContent;
+        break;
+    case static_cast<int>(DimensionLimit::Unit::Stretch):
+        limit.unit = DimensionLimit::Unit::Stretch;
+        break;
+    default:
+        return std::nullopt;
     }
+    return limit;
+}
 
-    template<const char name[]>
-    void readGutter(std::unordered_map<GapGutter, Dimension> & _dest_map, GapGutter _gutter) const
+std::optional<Position> tryGetPosition(const LuaTableApi & _table)
+{
+    Position position;
+    int unit_int;
+    if(!_table.tryGetNumber(Field::UnitAndValue::value, &position.value) ||
+       !_table.tryGetInteger(Field::UnitAndValue::unit, &unit_int))
     {
-        if(auto field = m_table.template tryGetValue<name>())
+        return std::nullopt;
+    }
+    switch(unit_int)
+    {
+    case static_cast<int>(Position::Unit::Auto):
+        position.unit = Position::Unit::Auto;
+        break;
+    case static_cast<int>(Position::Unit::Point):
+        position.unit = Position::Unit::Point;
+        break;
+    case static_cast<int>(Position::Unit::Percent):
+        position.unit = Position::Unit::Percent;
+        break;
+    default:
+        return std::nullopt;
+    }
+    return position;
+}
+
+template<typename Enum, typename Value>
+void fillMap(
+    const LuaTableApi & _table,
+    const std::unordered_map<std::string, Enum> & _enum_map,
+    std::unordered_map<Enum, Value> & _out,
+    std::optional<Value> (* _get_value)(const LuaTableApi &))
+{
+    for(const auto & pair : _enum_map)
+    {
+        if(_table.tryGetTable(pair.first.c_str()))
         {
-            if(auto value = UnitAndValue<Dimension::Unit>(*field).aggregate<Dimension>())
-                _dest_map[_gutter] = *value;
+            LuaTableApi sub_table(_table.getLua());
+            if(std::optional<Value> value = _get_value(sub_table))
+                _out[pair.second] = value.value();
+            lua_pop(_table.getLua(), 1);
         }
     }
+}
 
-private:
-    const Table & m_table;
-};
-
-template<typename Unit>
-class EdgeMap
+std::optional<FlexDirection> tryGetFlexDirection(int _value)
 {
-public:
-    using Table = LuaTable<
-        LuaTableField<Field::Edge::left, typename UnitAndValue<Unit>::Table>,
-        LuaTableField<Field::Edge::top, typename UnitAndValue<Unit>::Table>,
-        LuaTableField<Field::Edge::right, typename UnitAndValue<Unit>::Table>,
-        LuaTableField<Field::Edge::bottom, typename UnitAndValue<Unit>::Table>,
-        LuaTableField<Field::Edge::start, typename UnitAndValue<Unit>::Table>,
-        LuaTableField<Field::Edge::end, typename UnitAndValue<Unit>::Table>,
-        LuaTableField<Field::Edge::horizontal, typename UnitAndValue<Unit>::Table>,
-        LuaTableField<Field::Edge::vertical, typename UnitAndValue<Unit>::Table>,
-        LuaTableField<Field::Edge::all, typename UnitAndValue<Unit>::Table>
-    >;
-
-    explicit EdgeMap(const Table & _table) :
-        m_table(_table)
+    switch(_value)
     {
+    case static_cast<int>(FlexDirection::Column):
+        return FlexDirection::Column;
+    case static_cast<int>(FlexDirection::Row):
+        return FlexDirection::Row;
+    case static_cast<int>(FlexDirection::ColumnReverse):
+        return FlexDirection::ColumnReverse;
+    case static_cast<int>(FlexDirection::RowReverse):
+        return FlexDirection::RowReverse;
+    default:
+        return std::nullopt;
     }
+}
 
-    template<typename Value>
-    void read(std::unordered_map<Edge, Value> & _dest_map) const
+std::optional<FlexWrap> tryGetFlexWrap(int _value)
+{
+    switch(_value)
     {
-        readEdge<Field::Edge::left, Value>(_dest_map, Edge::Left);
-        readEdge<Field::Edge::top, Value>(_dest_map, Edge::Top);
-        readEdge<Field::Edge::right, Value>(_dest_map, Edge::Right);
-        readEdge<Field::Edge::bottom, Value>(_dest_map, Edge::Bottom);
-        readEdge<Field::Edge::start, Value>(_dest_map, Edge::Start);
-        readEdge<Field::Edge::end, Value>(_dest_map, Edge::End);
-        readEdge<Field::Edge::horizontal, Value>(_dest_map, Edge::Horizontal);
-        readEdge<Field::Edge::vertical, Value>(_dest_map, Edge::Vertical);
-        readEdge<Field::Edge::all, Value>(_dest_map, Edge::All);
+    case static_cast<int>(FlexWrap::None):
+        return FlexWrap::None;
+    case static_cast<int>(FlexWrap::Wrap):
+        return FlexWrap::Wrap;
+    case static_cast<int>(FlexWrap::WrapReverse):
+        return FlexWrap::WrapReverse;
+    default:
+        return std::nullopt;
     }
+}
 
-    template<const char name[], typename Value>
-    void readEdge(std::unordered_map<Edge, Value> & _dest_map, Edge _edge) const
+std::optional<ContentAlignment> tryGetContentAlignment(int _value)
+{
+    switch(_value)
     {
-        if(auto field = m_table.template tryGetValue<name>())
-        {
-            if(auto value = UnitAndValue<Unit>(*field).template aggregate<Value>())
-                _dest_map[_edge] = *value;
-        }
+    case static_cast<int>(ContentAlignment::FlexStart):
+        return ContentAlignment::FlexStart;
+    case static_cast<int>(ContentAlignment::FlexEnd):
+        return ContentAlignment::FlexEnd;
+    case static_cast<int>(ContentAlignment::Stretch):
+        return ContentAlignment::Stretch;
+    case static_cast<int>(ContentAlignment::Center):
+        return ContentAlignment::Center;
+    case static_cast<int>(ContentAlignment::SpaceBetween):
+        return ContentAlignment::SpaceBetween;
+    case static_cast<int>(ContentAlignment::SpaceAround):
+        return ContentAlignment::SpaceAround;
+    default:
+        return std::nullopt;
     }
+}
 
-private:
-    const Table & m_table;
-};
+std::optional<ContentJustification> tryGetContentJustification(int _value)
+{
+    switch(_value)
+    {
+    case static_cast<int>(ContentJustification::FlexStart):
+        return ContentJustification::FlexStart;
+    case static_cast<int>(ContentJustification::FlexEnd):
+        return ContentJustification::FlexEnd;
+    case static_cast<int>(ContentJustification::Center):
+        return ContentJustification::Center;
+    case static_cast<int>(ContentJustification::SpaceBetween):
+        return ContentJustification::SpaceBetween;
+    case static_cast<int>(ContentJustification::SpaceAround):
+        return ContentJustification::SpaceAround;
+    case static_cast<int>(ContentJustification::SpaceEvenly):
+        return ContentJustification::SpaceEvenly;
+    default:
+        return std::nullopt;
+    }
+}
 
-using StyleTable = LuaTable<
-    LuaTableField<Field::Style::margin, EdgeMap<Dimension::Unit>::Table>,
-    LuaTableField<Field::Style::padding, EdgeMap<Dimension::Unit>::Table>,
-    LuaTableField<Field::Style::width, UnitAndValue<Dimension::Unit>::Table>,
-    LuaTableField<Field::Style::height, UnitAndValue<Dimension::Unit>::Table>,
-    LuaTableField<Field::Style::min_width, UnitAndValue<DimensionLimit::Unit>::Table>,
-    LuaTableField<Field::Style::min_height, UnitAndValue<DimensionLimit::Unit>::Table>,
-    LuaTableField<Field::Style::max_width, UnitAndValue<DimensionLimit::Unit>::Table>,
-    LuaTableField<Field::Style::max_height, UnitAndValue<DimensionLimit::Unit>::Table>,
-    LuaTableField<Field::Style::flex_basis, UnitAndValue<Dimension::Unit>::Table>,
-    LuaTableField<Field::Style::flex_grow, float>,
-    LuaTableField<Field::Style::flex_shrink, float>,
-    LuaTableField<Field::Style::flex_direction, FlexDirection>,
-    LuaTableField<Field::Style::flex_wrap, FlexWrap>,
-    LuaTableField<Field::Style::content_alignment, ContentAlignment>,
-    LuaTableField<Field::Style::content_justification, ContentJustification>,
-    LuaTableField<Field::Style::items_alignment, ItemAlignment>,
-    LuaTableField<Field::Style::self_alignment, ItemAlignment>,
-    LuaTableField<Field::Style::aspect_ratio, float>,
-    LuaTableField<Field::Style::display_mode, DisplayMode>,
-    LuaTableField<Field::Style::gap, GapGutterMap::Table>,
-    LuaTableField<Field::Style::position, EdgeMap<Position::Unit>::Table>,
-    LuaTableField<Field::Style::position_type, Position::Type>
->;
+std::optional<ItemAlignment> tryGetItemAlignment(int _value)
+{
+    switch(_value)
+    {
+    case static_cast<int>(ItemAlignment::Stretch):
+        return ItemAlignment::Stretch;
+    case static_cast<int>(ItemAlignment::FlexStart):
+        return ItemAlignment::FlexStart;
+    case static_cast<int>(ItemAlignment::FlexEnd):
+        return ItemAlignment::FlexEnd;
+    case static_cast<int>(ItemAlignment::Center):
+        return ItemAlignment::Center;
+    case static_cast<int>(ItemAlignment::Baseline):
+        return ItemAlignment::Baseline;
+    default:
+        return std::nullopt;
+    }
+}
+
+std::optional<DisplayMode> tryGetDisplayMode(int _value)
+{
+    switch(_value)
+    {
+    case static_cast<int>(DisplayMode::Flex):
+        return DisplayMode::Flex;
+    case static_cast<int>(DisplayMode::None):
+        return DisplayMode::None;
+    default:
+        return std::nullopt;
+    }
+}
+
+std::optional<Position::Type> tryGetPositionType(int _value)
+{
+    switch(_value)
+    {
+    case static_cast<int>(Position::Type::Relative):
+        return Position::Type::Relative;
+    case static_cast<int>(Position::Type::Absolute):
+        return Position::Type::Absolute;
+    case static_cast<int>(Position::Type::Static):
+        return Position::Type::Static;
+    default:
+        return std::nullopt;
+    }
+}
+
+
 
 // 1 self
 // 2 type
@@ -421,12 +518,18 @@ int luaApi_SetPositionType(lua_State * _lua)
 //     return -1;
 // }
 
-// // const Style & _style = Style()
-// // return LayoutNode &
-// int luaApi_AddNode(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 style (optional)
+int luaApi_AddNode(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    Style style;
+    if(lua_gettop(_lua) > 1)
+        luaL_argexpected(_lua, tryGetStyle(_lua, 2, style), 2, LuaTypeName::style);
+    Node & node = self->getNode(_lua)->addNode(style);
+    pushLayoutNodeApi(_lua, node);
+    return 1;
+}
 
 // // return float
 // int luaApi_GetX(lua_State * _lua)
@@ -649,42 +752,110 @@ void Sol2D::Lua::pushDimensionLimitUnitEnum(lua_State * _lua)
 
 bool Sol2D::Lua::tryGetStyle(lua_State * _lua, int _idx, Style & _style)
 {
-    if(!lua_istable(_lua, _idx))
+    LuaTableApi table(_lua, _idx);
+    if(!table.isValid())
         return false;
-    StyleTable table(_lua, _idx);
-    if(auto margin_table = table.tryGetValue<Field::Style::margin>())
-        EdgeMap<Dimension::Unit>(*margin_table).read<Dimension>(_style.margin);
-    if(auto padding_table = table.tryGetValue<Field::Style::padding>())
-        EdgeMap<Dimension::Unit>(*padding_table).read<Dimension>(_style.padding);
-    if(auto width_table = table.tryGetValue<Field::Style::width>())
-        _style.width = UnitAndValue<Dimension::Unit>(*width_table).aggregate<Dimension>();
-    if(auto height_table = table.tryGetValue<Field::Style::height>())
-        _style.height = UnitAndValue<Dimension::Unit>(*height_table).aggregate<Dimension>();
-    if(auto min_width_table = table.tryGetValue<Field::Style::min_width>())
-        _style.min_width = UnitAndValue<DimensionLimit::Unit>(*min_width_table).aggregate<DimensionLimit>();
-    if(auto min_height_table = table.tryGetValue<Field::Style::min_height>())
-        _style.min_height = UnitAndValue<DimensionLimit::Unit>(*min_height_table).aggregate<DimensionLimit>();
-    if(auto max_width_table = table.tryGetValue<Field::Style::max_width>())
-        _style.max_width = UnitAndValue<DimensionLimit::Unit>(*max_width_table).aggregate<DimensionLimit>();
-    if(auto max_height_table = table.tryGetValue<Field::Style::max_height>())
-        _style.max_height = UnitAndValue<DimensionLimit::Unit>(*max_height_table).aggregate<DimensionLimit>();
-    if(auto flex_basis_table = table.tryGetValue<Field::Style::flex_basis>())
-        _style.flex_basis = UnitAndValue<Dimension::Unit>(*flex_basis_table).aggregate<Dimension>();
-    _style.flex_grow = table.tryGetValue<Field::Style::flex_grow>();
-    _style.flex_shrink = table.tryGetValue<Field::Style::flex_shrink>();
-    _style.flex_direction = table.tryGetValue<Field::Style::flex_direction>();
-    _style.flex_wrap = table.tryGetValue<Field::Style::flex_wrap>();
-    _style.content_alignment = table.tryGetValue<Field::Style::content_alignment>();
-    _style.content_justification = table.tryGetValue<Field::Style::content_justification>();
-    _style.items_alignment = table.tryGetValue<Field::Style::items_alignment>();
-    _style.self_alignment = table.tryGetValue<Field::Style::self_alignment>();
-    _style.aspect_ratio = table.tryGetValue<Field::Style::aspect_ratio>();
-    _style.display_mode = table.tryGetValue<Field::Style::display_mode>();
-    if(auto gap_table = table.tryGetValue<Field::Style::gap>())
-        GapGutterMap(*gap_table).read(_style.gap);
-    if(auto position_table = table.tryGetValue<Field::Style::position>())
-        EdgeMap<Position::Unit>(*position_table).read<Position>(_style.position);
-    _style.position_type = table.tryGetValue<Field::Style::position_type>();
+    const std::unordered_map<std::string, Edge> edge_map
+    {
+        { Field::Edge::left, Edge::Left },
+        { Field::Edge::top, Edge::Top },
+        { Field::Edge::right, Edge::Right },
+        { Field::Edge::bottom, Edge::Bottom },
+        { Field::Edge::start, Edge::Start },
+        { Field::Edge::end, Edge::End },
+        { Field::Edge::horizontal, Edge::Horizontal },
+        { Field::Edge::vertical, Edge::Vertical },
+        { Field::Edge::all, Edge::All }
+    };
+    const std::unordered_map<std::string, GapGutter> gap_gutter_map
+    {
+        { Field::GapGutter::column, GapGutter::Column},
+        { Field::GapGutter::row, GapGutter::Row },
+        { Field::GapGutter::all, GapGutter::All }
+    };
+    if(table.tryGetTable(Field::Style::margin))
+    {
+        fillMap(LuaTableApi(_lua), edge_map, _style.margin, tryGetDimension);
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::padding))
+    {
+        fillMap(LuaTableApi(_lua), edge_map, _style.padding, tryGetDimension);
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::gap))
+    {
+        fillMap(LuaTableApi(_lua), gap_gutter_map, _style.gap, tryGetDimension);
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::position))
+    {
+        fillMap(LuaTableApi(_lua), edge_map, _style.position, tryGetPosition);
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::width))
+    {
+        _style.width = tryGetDimension(LuaTableApi(_lua));
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::height))
+    {
+        _style.height = tryGetDimension(LuaTableApi(_lua));
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::min_width))
+    {
+        _style.min_width = tryGetDimensionLimit(LuaTableApi(_lua));
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::min_height))
+    {
+        _style.min_height = tryGetDimensionLimit(LuaTableApi(_lua));
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::max_width))
+    {
+        _style.max_width = tryGetDimensionLimit(LuaTableApi(_lua));
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::max_height))
+    {
+        _style.max_height = tryGetDimensionLimit(LuaTableApi(_lua));
+        lua_pop(_lua, 1);
+    }
+    if(table.tryGetTable(Field::Style::flex_basis))
+    {
+        _style.flex_basis = tryGetDimension(LuaTableApi(_lua));
+        lua_pop(_lua, 1);
+    }
+    {
+        float f_value;
+        if(table.tryGetNumber(Field::Style::flex_grow, &f_value))
+            _style.flex_grow = f_value;
+        if(table.tryGetNumber(Field::Style::flex_shrink, &f_value))
+            _style.flex_shrink = f_value;
+        if(table.tryGetNumber(Field::Style::aspect_ratio, &f_value))
+            _style.aspect_ratio = f_value;
+    }
+    {
+        int f_int;
+        if(table.tryGetInteger(Field::Style::flex_direction, &f_int))
+            _style.flex_direction = tryGetFlexDirection(f_int);
+        if(table.tryGetInteger(Field::Style::flex_wrap, &f_int))
+            _style.flex_wrap = tryGetFlexWrap(f_int);
+        if(table.tryGetInteger(Field::Style::content_alignment, &f_int))
+            _style.content_alignment = tryGetContentAlignment(f_int);
+        if(table.tryGetInteger(Field::Style::content_justification, &f_int))
+            _style.content_justification = tryGetContentJustification(f_int);
+        if(table.tryGetInteger(Field::Style::items_alignment, &f_int))
+            _style.items_alignment = tryGetItemAlignment(f_int);
+        if(table.tryGetInteger(Field::Style::self_alignment, &f_int))
+            _style.self_alignment = tryGetItemAlignment(f_int);
+        if(table.tryGetInteger(Field::Style::display_mode, &f_int))
+            _style.display_mode = tryGetDisplayMode(f_int);
+        if(table.tryGetInteger(Field::Style::position_type, &f_int))
+            _style.position_type = tryGetPositionType(f_int);
+    }
     return true;
 }
 
@@ -717,7 +888,7 @@ void Sol2D::Lua::pushLayoutNodeApi(lua_State * _lua, Node & _node)
             // { "setSelfAlignment", luaApi_SetSelfAlignment },
             // { "setAspectRatio", luaApi_SetAspectRatio },
             // { "setDisplayMode", luaApi_SetDisplayMode },
-            // { "addNode", luaApi_AddNode },
+            { "addNode", luaApi_AddNode },
             // { "getX", luaApi_GetX },
             // { "getY", luaApi_GetY },
             // { "getWidth", luaApi_GetWidth },

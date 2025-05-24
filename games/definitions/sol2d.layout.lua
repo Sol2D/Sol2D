@@ -152,3 +152,7 @@ local __node
 ---@param _type integer
 ---@see sol.PositionType
 function __node:setPositionType(_type) end
+
+---@param style sol.Style?
+---@return sol.Node
+function __node:addNode(style) end

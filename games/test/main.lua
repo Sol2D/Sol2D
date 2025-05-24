@@ -6,4 +6,9 @@ print('LB: ' .. tostring(mouse.left) .. '\nRB: ' .. tostring(mouse.right))
 
 local store = sol.stores:createStore('main_store')
 local view = store:createView('main_view')
-print('Layout: ' .. tostring(view:getLayout()))
+local layout = view:getLayout()
+
+layout:addNode({
+    minHeight = { value = 50, unit = sol.DimensionUnit.POINT },
+    minWidth = { value = 50, unit = sol.DimensionUnit.POINT }
+})
