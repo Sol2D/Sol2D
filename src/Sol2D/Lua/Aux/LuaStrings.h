@@ -78,7 +78,19 @@ struct LuaTypeName
     static const char horizontal_text_alignment[];
     static const char sound_effect[];
     static const char music[];
-    static const char style[];
+    static const char style[];    
+    static const char content_alignment[];
+    static const char content_justification[];
+    static const char item_alignment[];
+    static const char display_mode[];
+    static const char flex_direction[];
+    static const char flex_wrap[];
+    static const char edge[];
+    static const char gap_gutter[];
+    static const char position_type[];
+    static const char position_unit[];
+    static const char dimension_unit[];
+    static const char dimension_limit_unit[];
 
     template<typename... T>
     static std::string joinTypes(const T... _type);

@@ -144,7 +144,7 @@ bool LuaTableApi::tryGetColor(const char * _key, SDL_FColor & _value)
 
 bool LuaTableApi::tryGetTable(const char * _key) const
 {
-    if(lua_getfield(m_lua, m_idx, _key) == LUA_TTABLE)
+    if(lua_getfield(m_lua, m_idx, _key) != LUA_TTABLE)
     {
         lua_pop(m_lua, 1);
         return false;

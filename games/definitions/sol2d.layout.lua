@@ -134,17 +134,17 @@
 ---@field flexBasis sol.Dimension?
 ---@field flexGrow number?
 ---@field flexShrink number?
----@field flexDirection sol.FlexDirection?
----@field flexWrap sol.FlexWrap?
----@field contentAlignment sol.ContentAlignment?
----@field contentJustification sol.ContentJustification?
----@field itemsAlignment sol.ItemAlignment?
----@field selfAlignment sol.ItemAlignment?
+---@field flexDirection integer?
+---@field flexWrap integer?
+---@field contentAlignment integer?
+---@field contentJustification integer?
+---@field itemsAlignment integer?
+---@field selfAlignment integer?
 ---@field aspectRatio number?
----@field displayMode sol.DisplayMode?
+---@field displayMode integer?
 ---@field gap sol.GapGutterMap?
 ---@field position sol.PositionMap?
----@field positionType sol.PositionType?
+---@field positionType integer?
 
 ---@class sol.Node
 local __node

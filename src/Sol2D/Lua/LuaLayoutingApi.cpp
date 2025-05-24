@@ -578,7 +578,7 @@ int luaApi_AddNode(lua_State * _lua)
 void Sol2D::Lua::pushContentAlignmentEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::content_alignment) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("FLEX_START", static_cast<lua_Integer>(ContentAlignment::FlexStart));
@@ -594,7 +594,7 @@ void Sol2D::Lua::pushContentAlignmentEnum(lua_State * _lua)
 void Sol2D::Lua::pushContentJustificationEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::content_justification) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("FLEX_START", static_cast<lua_Integer>(ContentJustification::FlexStart));
@@ -610,7 +610,7 @@ void Sol2D::Lua::pushContentJustificationEnum(lua_State * _lua)
 void Sol2D::Lua::pushItemAlignmentEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::item_alignment) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("STRETCH", static_cast<lua_Integer>(ItemAlignment::Stretch));
@@ -625,7 +625,7 @@ void Sol2D::Lua::pushItemAlignmentEnum(lua_State * _lua)
 void Sol2D::Lua::pushDisplayModeEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::display_mode) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("FLEX", static_cast<lua_Integer>(DisplayMode::Flex));
@@ -637,7 +637,7 @@ void Sol2D::Lua::pushDisplayModeEnum(lua_State * _lua)
 void Sol2D::Lua::pushFlexDirectionEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::flex_direction) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("COLUMN", static_cast<lua_Integer>(FlexDirection::Column));
@@ -651,7 +651,7 @@ void Sol2D::Lua::pushFlexDirectionEnum(lua_State * _lua)
 void Sol2D::Lua::pushFlexWrapEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::flex_wrap) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("NONE", static_cast<lua_Integer>(FlexWrap::None));
@@ -664,7 +664,7 @@ void Sol2D::Lua::pushFlexWrapEnum(lua_State * _lua)
 void Sol2D::Lua::pushEdgeEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::edge) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("LEFT", static_cast<lua_Integer>(Edge::Left));
@@ -683,7 +683,7 @@ void Sol2D::Lua::pushEdgeEnum(lua_State * _lua)
 void Sol2D::Lua::pushGapGutterEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::gap_gutter) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("COLUMN", static_cast<lua_Integer>(GapGutter::Column));
@@ -696,7 +696,7 @@ void Sol2D::Lua::pushGapGutterEnum(lua_State * _lua)
 void Sol2D::Lua::pushPositionTypeEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::position_type) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("RELATIVE", static_cast<lua_Integer>(Position::Type::Relative));
@@ -709,7 +709,7 @@ void Sol2D::Lua::pushPositionTypeEnum(lua_State * _lua)
 void Sol2D::Lua::pushPositionUnitEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::position_unit) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("AUTO", static_cast<lua_Integer>(Position::Unit::Auto));
@@ -722,7 +722,7 @@ void Sol2D::Lua::pushPositionUnitEnum(lua_State * _lua)
 void Sol2D::Lua::pushDimensionUnitEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::dimension_unit) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("AUTO", static_cast<lua_Integer>(Dimension::Unit::Auto));
@@ -738,7 +738,7 @@ void Sol2D::Lua::pushDimensionUnitEnum(lua_State * _lua)
 void Sol2D::Lua::pushDimensionLimitUnitEnum(lua_State * _lua)
 {
     lua_newuserdata(_lua, 1);
-    if(pushMetatable(_lua, LuaTypeName::horizontal_text_alignment) == MetatablePushResult::Created)
+    if(pushMetatable(_lua, LuaTypeName::dimension_limit_unit) == MetatablePushResult::Created)
     {
         LuaTableApi table(_lua);
         table.setIntegerValue("POINT", static_cast<lua_Integer>(DimensionLimit::Unit::Point));
