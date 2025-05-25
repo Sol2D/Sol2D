@@ -68,46 +68,6 @@ private:
     YGNodeRef m_node;
 };
 
-// TODO: Layouting: delete?
-// YGSize yogaMeasure(
-//     YGNodeConstRef _node,
-//     float _width,
-//     YGMeasureMode _width_mode,
-//     float _height,
-//     YGMeasureMode _height_mode)
-// {
-//     const Element * element = static_cast<const LayoutNode *>(YGNodeGetContext(_node))->getElement();
-//     if(!element)
-//         return { .width = _width, .height = _height };
-//     const FSize * size = element->getDesiredSize();
-//     if(!size)
-//         return { .width = _width, .height = _height };
-//     YGSize result { .width = size->w, .height = size->h };
-//     switch(_width_mode)
-//     {
-//     case YGMeasureModeExactly:
-//         result.width = _width;
-//         break;
-//     case YGMeasureModeAtMost:
-//         if(result.width > _width)
-//             result.width = _width;
-//     default:
-//         break;
-//     }
-//     switch(_height_mode)
-//     {
-//     case YGMeasureModeExactly:
-//         result.height = _height;
-//         break;
-//     case YGMeasureModeAtMost:
-//         if(result.height > _height)
-//             result.height = _height;
-//     default:
-//         break;
-//     }
-//     return result;
-// }
-
 } // namespace
 
 inline YogaNodeWrapper::YogaNodeWrapper(YGNodeRef _node) :
@@ -625,9 +585,6 @@ Node::Node(View & _view, Node * _parent, const Style & _style) :
     if(m_parent)
         YGNodeInsertChild(m_parent->m_node, m_node, YGNodeGetChildCount(m_parent->m_node));
     YGNodeSetContext(m_node, this);
-    // YGNodeSetMeasureFunc(m_node, yogaMeasure); // TODO: Layouting: delete?
-
-
     YogaNodeWrapper wrapper(m_node);
     wrapper.setPosition(_style.position);
     wrapper.setMargin(_style.margin);

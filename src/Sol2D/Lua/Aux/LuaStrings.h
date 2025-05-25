@@ -89,6 +89,8 @@ struct LuaTypeName
     static const char gap_gutter[];
     static const char position_type[];
     static const char position_unit[];
+    static const char position[];
+    static const char position_map[];
     static const char dimension_unit[];
     static const char dimension_limit_unit[];
 

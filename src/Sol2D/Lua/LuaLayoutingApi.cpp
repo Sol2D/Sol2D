@@ -130,11 +130,32 @@ namespace Field
     }
 }
 
+static const std::unordered_map<std::string, Edge> gs_edge_map
+{
+    { Field::Edge::left, Edge::Left },
+    { Field::Edge::top, Edge::Top },
+    { Field::Edge::right, Edge::Right },
+    { Field::Edge::bottom, Edge::Bottom },
+    { Field::Edge::start, Edge::Start },
+    { Field::Edge::end, Edge::End },
+    { Field::Edge::horizontal, Edge::Horizontal },
+    { Field::Edge::vertical, Edge::Vertical },
+    { Field::Edge::all, Edge::All }
+};
+
+static const std::unordered_map<std::string, GapGutter> gs_gap_gutter_map
+{
+    { Field::GapGutter::column, GapGutter::Column},
+    { Field::GapGutter::row, GapGutter::Row },
+    { Field::GapGutter::all, GapGutter::All }
+};
+
 std::optional<Dimension> tryGetDimension(const LuaTableApi & _table)
 {
     Dimension dimension;
     int unit_int;
-    if(!_table.tryGetNumber(Field::UnitAndValue::value, &dimension.value) ||
+    if(!_table.isValid() ||
+       !_table.tryGetNumber(Field::UnitAndValue::value, &dimension.value) ||
        !_table.tryGetInteger(Field::UnitAndValue::unit, &unit_int))
     {
         return std::nullopt;
@@ -169,7 +190,8 @@ std::optional<DimensionLimit> tryGetDimensionLimit(const LuaTableApi & _table)
 {
     DimensionLimit limit;
     int unit_int;
-    if(!_table.tryGetNumber(Field::UnitAndValue::value, &limit.value) ||
+    if(!_table.isValid() ||
+       !_table.tryGetNumber(Field::UnitAndValue::value, &limit.value) ||
        !_table.tryGetInteger(Field::UnitAndValue::unit, &unit_int))
     {
         return std::nullopt;
@@ -201,7 +223,8 @@ std::optional<Position> tryGetPosition(const LuaTableApi & _table)
 {
     Position position;
     int unit_int;
-    if(!_table.tryGetNumber(Field::UnitAndValue::value, &position.value) ||
+    if(!_table.isValid() ||
+       !_table.tryGetNumber(Field::UnitAndValue::value, &position.value) ||
        !_table.tryGetInteger(Field::UnitAndValue::unit, &unit_int))
     {
         return std::nullopt;
@@ -363,7 +386,32 @@ std::optional<Position::Type> tryGetPositionType(int _value)
     }
 }
 
-
+std::optional<Edge> tryGetEdge(int _value)
+{
+    switch(_value)
+    {
+    case static_cast<int>(Edge::Left):
+        return Edge::Left;
+    case static_cast<int>(Edge::Top):
+        return Edge::Top;
+    case static_cast<int>(Edge::Right):
+        return Edge::Right;
+    case static_cast<int>(Edge::Bottom):
+        return Edge::Bottom;
+    case static_cast<int>(Edge::Start):
+        return Edge::Start;
+    case static_cast<int>(Edge::End):
+        return Edge::End;
+    case static_cast<int>(Edge::Horizontal):
+        return Edge::Horizontal;
+    case static_cast<int>(Edge::Vertical):
+        return Edge::Vertical;
+    case static_cast<int>(Edge::All):
+        return Edge::All;
+    default:
+        return std::nullopt;
+    }
+}
 
 // 1 self
 // 2 type
@@ -388,12 +436,36 @@ int luaApi_SetPositionType(lua_State * _lua)
     return 0;
 }
 
-// // const std::unordered_map<Edge, Position> & _positions
-// // OR Edge _edge, Position _posotion
-// int luaApi_SetPosition(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self     | 1 self
+// 2 edge     | 2 position map
+// 3 position |
+int luaApi_SetPosition(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<Edge> edge = tryGetEdge(lua_tointeger(_lua, 2));
+        std::optional<Position> position = tryGetPosition(LuaTableApi(_lua, 3));
+        if(edge && position)
+        {
+            self->getNode(_lua)->setPosition(*edge, *position);
+            return 0;
+        }
+    }
+    else
+    {
+        LuaTableApi position_map_table(_lua, 2);
+        if(position_map_table.isValid())
+        {
+            std::unordered_map<Edge, Position> position_map;
+            fillMap(LuaTableApi(_lua), gs_edge_map, position_map, tryGetPosition);
+            self->getNode(_lua)->setPosition(position_map);
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, 2,  LuaTypeName::joinTypes(LuaTypeName::edge, LuaTypeName::position_map).c_str());
+    return 0;
+}
 
 // // const std::unordered_map<Edge, float> & _margins
 // // OR Edge _edge, float _value
@@ -755,42 +827,24 @@ bool Sol2D::Lua::tryGetStyle(lua_State * _lua, int _idx, Style & _style)
     LuaTableApi table(_lua, _idx);
     if(!table.isValid())
         return false;
-    const std::unordered_map<std::string, Edge> edge_map
-    {
-        { Field::Edge::left, Edge::Left },
-        { Field::Edge::top, Edge::Top },
-        { Field::Edge::right, Edge::Right },
-        { Field::Edge::bottom, Edge::Bottom },
-        { Field::Edge::start, Edge::Start },
-        { Field::Edge::end, Edge::End },
-        { Field::Edge::horizontal, Edge::Horizontal },
-        { Field::Edge::vertical, Edge::Vertical },
-        { Field::Edge::all, Edge::All }
-    };
-    const std::unordered_map<std::string, GapGutter> gap_gutter_map
-    {
-        { Field::GapGutter::column, GapGutter::Column},
-        { Field::GapGutter::row, GapGutter::Row },
-        { Field::GapGutter::all, GapGutter::All }
-    };
     if(table.tryGetTable(Field::Style::margin))
     {
-        fillMap(LuaTableApi(_lua), edge_map, _style.margin, tryGetDimension);
+        fillMap(LuaTableApi(_lua), gs_edge_map, _style.margin, tryGetDimension);
         lua_pop(_lua, 1);
     }
     if(table.tryGetTable(Field::Style::padding))
     {
-        fillMap(LuaTableApi(_lua), edge_map, _style.padding, tryGetDimension);
+        fillMap(LuaTableApi(_lua), gs_edge_map, _style.padding, tryGetDimension);
         lua_pop(_lua, 1);
     }
     if(table.tryGetTable(Field::Style::gap))
     {
-        fillMap(LuaTableApi(_lua), gap_gutter_map, _style.gap, tryGetDimension);
+        fillMap(LuaTableApi(_lua), gs_gap_gutter_map, _style.gap, tryGetDimension);
         lua_pop(_lua, 1);
     }
     if(table.tryGetTable(Field::Style::position))
     {
-        fillMap(LuaTableApi(_lua), edge_map, _style.position, tryGetPosition);
+        fillMap(LuaTableApi(_lua), gs_edge_map, _style.position, tryGetPosition);
         lua_pop(_lua, 1);
     }
     if(table.tryGetTable(Field::Style::width))
@@ -874,7 +928,7 @@ void Sol2D::Lua::pushLayoutNodeApi(lua_State * _lua, Node & _node)
         luaL_Reg funcs[] = {
             { "__gc", UserData::luaGC },
             { "setPositionType", luaApi_SetPositionType },
-            // { "setPosition", luaApi_SetPosition },
+            { "setPosition", luaApi_SetPosition },
             // { "setMargin", luaApi_SetMargin },
             // { "setPadding", luaApi_SetPadding },
             // { "setWidth", luaApi_SetWidth },

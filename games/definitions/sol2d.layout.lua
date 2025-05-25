@@ -76,6 +76,11 @@
 ---@field POINT integer
 ---@field PERCENT integer
 
+---@class sol.Position
+---@field unit integer
+---@field value integer
+---@see sol.PositionUnit
+
 ---@class sol.DimensionUnit
 ---@field AUTO integer
 ---@field POINT integer
@@ -94,6 +99,7 @@
 ---@class sol.Dimension
 ---@field unit integer
 ---@field value integer
+---@see sol.DimensionUnit
 
 ---@class sol.DimensionLimitUnit
 ---@field POINT integer
@@ -105,6 +111,7 @@
 ---@class sol.DimensionLimit
 ---@field unit integer
 ---@field value integer
+---@see sol.DimensionLimitUnit
 
 ---@class sol.GapGutterMap
 ---@field column sol.Dimension?
@@ -149,9 +156,17 @@
 ---@class sol.Node
 local __node
 
----@param _type integer
+---@param type integer
 ---@see sol.PositionType
-function __node:setPositionType(_type) end
+function __node:setPositionType(type) end
+
+---@param edge integer
+---@param position sol.Position
+---@see sol.Edge
+function __node:setPosition(edge, position) end
+
+---@param position_map sol.PositionMap
+function __node:setPosition(position_map) end
 
 ---@param style sol.Style?
 ---@return sol.Node
