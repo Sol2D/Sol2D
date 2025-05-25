@@ -25,6 +25,7 @@ namespace Sol2D {
 class View final
 {
     friend class Node;
+    friend class Element;
 
 public:
     explicit View(Renderer & _renderer, const Style & _style = Style());
@@ -37,7 +38,7 @@ public:
 private:
     void forceRecalculation();
     void registerElement(Element & _element);
-    void unregisterElement(Element & _element);
+    void unregisterElement(const Element & _element);
 
 private:
     Renderer & m_renderer;

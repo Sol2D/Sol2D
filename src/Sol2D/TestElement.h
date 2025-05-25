@@ -24,7 +24,7 @@ namespace Sol2D {
 class TestElement : public Element
 {
 public:
-    TestElement(Renderer & _renderer, const SDL_FColor & _color, const Node & _node);
+    TestElement(Renderer & _renderer, const SDL_FColor & _color, Node & _node);
     void step(const StepState & _step);
 
 private:

@@ -44,9 +44,10 @@ function __store:getView(key) end
 function __store:freeView(key) end
 
 ---@param key string
+---@param node sol.Node
 ---@param options sol.SceneOptions?
 ---@return sol.Scene
-function __store:createScene(key, options) end
+function __store:createScene(key, node, options) end
 
 ---@param key string
 ---@return sol.Scene | nil

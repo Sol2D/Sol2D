@@ -23,7 +23,7 @@ namespace Sol2D {
 class Canvas : public Element
 {
 public:
-    Canvas(Renderer & _renderer, const Node & _node) :
+    Canvas(Renderer & _renderer, Node & _node) :
         Element(_node, true),
         m_renderer(_renderer)
     {

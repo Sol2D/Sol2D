@@ -47,7 +47,7 @@ template<>
 struct Utils::ObjectFactory<World::Scene>
 {
     std::shared_ptr<World::Scene> produce(
-        const Node & _node,
+        Node & _node,
         const World::SceneOptions & _options,
         const Workspace & _workspace,
         Renderer & _renderer) const

@@ -154,49 +154,11 @@ void Application::exec()
     StoreManager store_manager;
     std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(m_workspace, store_manager, *m_window, renderer);
     lua->executeMainScript();
-
-
-
-
-    // BEGIN TEST
-
-    std::shared_ptr<View> view(new View(renderer));
-    view->getLayout().setGap(GapGutter::Row, 40);
-
-    Node & node_1 = view->getLayout().addNode();
-    Node & node_2 = view->getLayout().addNode();
-
-    // node_1.setMargin(LayoutNode::Edge::All, 10);
-    // node_2.setMargin(LayoutNode::Edge::All, 20);
-
-    std::shared_ptr<TestElement> element_1(new TestElement(renderer, { .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f }, node_1)); // TODO: ????
-    // std::shared_ptr<TestElement> element_2(new TestElement(renderer, { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f }, node_2)); // TODO: ????
-
-
-    std::shared_ptr<World::Scene> scene(new World::Scene(node_2, World::SceneOptions(), m_workspace, renderer));
-    scene->loadTileMap("/home/brainstream/projects/sol2d/build/Desktop-Debug/games/rpg/tiled/tmx/level-01.tmx");
-
-
-    node_1.setFlexGrow(1);
-    node_2.setFlexGrow(2);
-
-
-
-    node_1.setElement(element_1);
-    node_2.setElement(scene);
-
-    m_window->setView(view);
-    int w, h;
-    SDL_GetWindowSize(m_sdl_window, &w, &h);
-    m_window->resize(w, h);
-
-
-
-
-    // END TEST
-
-
-    // lua->executeMainScript();
+    {
+        int w, h;
+        SDL_GetWindowSize(m_sdl_window, &w, &h);
+        m_window->resize(w, h);
+    }
     const uint32_t render_frame_delay = floor(1000 / m_workspace.getFrameRate());
     uint32_t last_rendering_ticks = SDL_GetTicks();
     SDL_Event event;

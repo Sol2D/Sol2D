@@ -16,8 +16,22 @@
 
 #include <Sol2D/Element.h>
 #include <Sol2D/Node.h>
+#include <Sol2D/View.h>
 
 using namespace Sol2D;
+
+Element::Element(Node & _node, bool _enable_custom_render_pass) :
+    m_view(_node.getView()),
+    m_node(_node),
+    m_is_custom_render_pass_enabled(_enable_custom_render_pass)
+{
+    m_view.registerElement(*this);
+}
+
+Element::~Element()
+{
+    m_view.unregisterElement(*this);
+}
 
 float Element::getX() const
 {

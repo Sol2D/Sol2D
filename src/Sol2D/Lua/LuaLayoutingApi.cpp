@@ -859,6 +859,13 @@ bool Sol2D::Lua::tryGetStyle(lua_State * _lua, int _idx, Style & _style)
     return true;
 }
 
+Node * Sol2D::Lua::tryGetNode(lua_State * _lua, int _idx)
+{
+    if(const Self * self = UserData::tryGetUserData(_lua, _idx))
+        return self->getNode(_lua);
+    return nullptr;
+}
+
 void Sol2D::Lua::pushLayoutNodeApi(lua_State * _lua, Node & _node)
 {
     UserData::pushUserData(_lua, _node);

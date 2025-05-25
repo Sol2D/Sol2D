@@ -112,19 +112,20 @@ int luaApi_GetView(lua_State * _lua)
 
 // 1 self
 // 2 key
-// 3 options (optional)
-int luaApi_CreateScene(lua_State * /*_lua*/)
+// 3 node
+// 4 options (optional)
+int luaApi_CreateScene(lua_State * _lua)
 {
-    // TODO: Layouting: restore
-
-    // Self * self = UserData::getUserData(_lua, 1);
-    // SceneOptions options;
-    // tryGetSceneOptions(_lua, 3, options);
-    // const char * key = argToStringOrError(_lua, 2);
-    // std::shared_ptr<Scene> scene =
-    //     self->getStore(_lua)->createObject<Scene>(key, options, self->workspace, self->renderer);
-    // pushSceneApi(_lua, self->workspace, scene);
-    // self->holdReference(_lua, LuaTypeName::scene, key);
+    Self * self = UserData::getUserData(_lua, 1);
+    const char * key = argToStringOrError(_lua, 2);
+    SceneOptions options;
+    tryGetSceneOptions(_lua, 4, options);
+    Node * node = tryGetNode(_lua, 3);
+    luaL_argexpected(_lua, node, 3, LuaTypeName::node);
+    std::shared_ptr<Scene> scene =
+        self->getStore(_lua)->createObject<Scene>(key, *node, options, self->workspace, self->renderer);
+    pushSceneApi(_lua, self->workspace, scene);
+    self->holdReference(_lua, LuaTypeName::scene, key);
     return 1;
 }
 

@@ -74,7 +74,7 @@ public:
 
 public:
     Scene(
-        const Node & _node,
+        Node & _node,
         const SceneOptions & _options,
         const Workspace & _workspace,
         Renderer & _renderer

@@ -178,7 +178,7 @@ void Scene::BodyShapeCreator::operator() (const BodyCapsuleShapeDefinition & _ca
     b2Shape_SetUserData(b2_shape_id, &body_shape);
 }
 
-Scene::Scene(const Node & _node, const SceneOptions & _options, const Workspace & _workspace, Renderer & _renderer) :
+Scene::Scene(Node & _node, const SceneOptions & _options, const Workspace & _workspace, Renderer & _renderer) :
     Canvas(_renderer, _node),
     m_workspace(_workspace),
     m_renderer(_renderer),

@@ -13,11 +13,15 @@ print('sol.PositionUnit.POINT: ' .. tostring(sol.PositionUnit.POINT))
 local node = layout:addNode({
     minHeight = { value = 50, unit = sol.DimensionLimitUnit.POINT },
     minWidth = { value = 50, unit = sol.DimensionLimitUnit.POINT },
-    position = {
-        left = { value = 10, unit = sol.PositionUnit.POINT },
-        top = { value = 10, unit = sol.PositionUnit.POINT }
-    },
-    positionType = sol.PositionType.ABSOLUTE
+    -- position = {
+    --     left = { value = 10, unit = sol.PositionUnit.POINT },
+    --     top = { value = 10, unit = sol.PositionUnit.POINT }
+    -- },
+    -- positionType = sol.PositionType.ABSOLUTE
+    flexGrow = 2
 })
 
-print('Node: ' .. tostring(node))
+local scene = store:createScene('scene', node)
+scene:loadTileMap('/home/brainstream/projects/sol2d/build/Desktop-Debug/games/rpg/tiled/tmx/level-01.tmx')
+
+sol.window:setView(view)

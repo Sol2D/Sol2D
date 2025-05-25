@@ -53,14 +53,16 @@ void View::recalculate(float _width, float _height)
 void View::registerElement(Element & _element)
 {
     m_elements.push_back(&_element);
+    forceRecalculation();
 }
 
-void View::unregisterElement(Element & _element)
+void View::unregisterElement(const Element & _element)
 {
     if(!m_destroying)
     {
         auto end = std::remove(m_elements.begin(), m_elements.end(), &_element);
         m_elements.resize(end - m_elements.begin());
+        forceRecalculation();
     }
 }
 

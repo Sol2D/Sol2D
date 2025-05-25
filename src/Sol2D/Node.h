@@ -175,6 +175,8 @@ public:
     S2_DISABLE_COPY_AND_MOVE(Node)
     Node(View & _view, Node * _parent, const Style & _style);
     ~Node();
+    View & getView() { return m_view; }
+    const View & getView() const { return m_view; }
     void setPositionType(Position::Type _type);
     void setPosition(const std::unordered_map<Edge, Position> & _positions);
     void setPosition(Edge _edge, Position _posotion);
@@ -217,23 +219,10 @@ public:
         return Children(m_node);
     }
     
-    const Element * getElement() const
-    {
-        return m_element.get();
-    }
-    
-    Element * getElement()
-    {
-        return m_element.get();
-    }
-    
-    void setElement(std::shared_ptr<Element> _element);
-    
 private:
     YGNode * m_node;
     View & m_view;
     Node * m_parent;
-    std::shared_ptr<Element> m_element;
 };
 
 } // namespace Sol2D

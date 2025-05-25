@@ -673,8 +673,6 @@ Node::Node(View & _view, Node * _parent, const Style & _style) :
 
 Node::~Node()
 {
-    if(m_element)
-        m_view.unregisterElement(*m_element);
     for(auto * child : getChildren())
         delete child;
     YGNodeFree(m_node);
@@ -867,14 +865,4 @@ float Node::getWidth() const
 float Node::getHeight() const
 {
     return YGNodeLayoutGetHeight(m_node);
-}
-
-void Node::setElement(std::shared_ptr<Element> _element)
-{
-    if(m_element)
-        m_view.unregisterElement(*m_element);
-    m_element = _element;
-    if(m_element)
-        m_view.registerElement(*m_element);
-    m_view.forceRecalculation();
 }

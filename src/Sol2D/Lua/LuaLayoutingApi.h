@@ -35,5 +35,6 @@ void pushDimensionUnitEnum(lua_State * _lua);
 void pushDimensionLimitUnitEnum(lua_State * _lua);
 void pushLayoutNodeApi(lua_State * _lua, Node & _node);
 bool tryGetStyle(lua_State * _lua, int _idx, Style & _style);
+Node * tryGetNode(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

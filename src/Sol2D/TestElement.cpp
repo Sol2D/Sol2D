@@ -20,7 +20,7 @@
 
 using namespace Sol2D;
 
-TestElement::TestElement(Renderer & _renderer, const SDL_FColor & _color, const Node & _node) :
+TestElement::TestElement(Renderer & _renderer, const SDL_FColor & _color, Node & _node) :
     Element(_node),
     m_renderer(_renderer),
     m_color(_color)

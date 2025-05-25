@@ -23,18 +23,15 @@
 namespace Sol2D {
 
 class Node;
+class View;
 
 class Element : public Object
 {
     S2_DISABLE_COPY_AND_MOVE(Element)
 
 public:
-    explicit Element(const Node & _node, bool _enable_custom_render_pass = false) :
-        m_node(_node),
-        m_is_custom_render_pass_enabled(_enable_custom_render_pass)
-    {
-    }
-
+    explicit Element(Node & _node, bool _enable_custom_render_pass = false);
+    ~Element() override;
     bool isCustomRenderPassEnabled() const { return m_is_custom_render_pass_enabled; }
     virtual void step(const StepState & _step) = 0;
     virtual const FSize * getDesiredSize() const { return nullptr; }
@@ -44,6 +41,7 @@ public:
     float getHeight() const;
 
 protected:
+    View & m_view;
     const Node & m_node;
     const bool m_is_custom_render_pass_enabled;
 };
