@@ -109,9 +109,9 @@ public:
             return *this;
         }
 
-        NodeType * operator * () const
+        NodeType & operator * () const
         {
-            return getNode();
+            return *getNode();
         }
 
         NodeType & operator -> () const
@@ -196,7 +196,7 @@ public:
     void setFlexDirection(FlexDirection _direction);
     void setFlexWrap(FlexWrap _wrap);
     void setGap(const std::unordered_map<GapGutter, Dimension> & _gaps);
-    void setGap(GapGutter _gutter, float _gap);
+    void setGap(GapGutter _gutter, const Dimension & _gap);
     void setContentAlignment(ContentAlignment _alignment);
     void setContentJustification(ContentJustification _justification);
     void setItemsAlignment(ItemAlignment _alignment);

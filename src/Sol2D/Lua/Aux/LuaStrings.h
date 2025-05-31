@@ -92,7 +92,9 @@ struct LuaTypeName
     static const char position[];
     static const char position_map[];
     static const char dimension_unit[];
+    static const char dimension_limit[];
     static const char dimension_limit_unit[];
+    static const char dimension_map[];
 
     template<typename... T>
     static std::string joinTypes(const T... _type);

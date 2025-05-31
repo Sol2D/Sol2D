@@ -630,8 +630,8 @@ Node::Node(View & _view, Node * _parent, const Style & _style) :
 
 Node::~Node()
 {
-    for(auto * child : getChildren())
-        delete child;
+    for(Node & child : getChildren())
+        delete &child;
     YGNodeFree(m_node);
 }
 
@@ -749,7 +749,7 @@ void Node::setGap(const std::unordered_map<GapGutter, Dimension> & _gaps)
     m_view.forceRecalculation();
 }
 
-void Node::setGap(GapGutter _gutter, float _gap)
+void Node::setGap(GapGutter _gutter, const Dimension & _gap)
 {
     YogaNodeWrapper(m_node).setGap(_gutter, _gap);
     m_view.forceRecalculation();

@@ -60,7 +60,7 @@ public:
             m_node->removeCompanion(m_companion_id);
     }
 
-    Node * getNode(lua_State * _lua) const
+    Node * getNode(lua_State * _lua)
     {
         if(m_node)
             return m_node;
@@ -413,6 +413,21 @@ std::optional<Edge> tryGetEdge(int _value)
     }
 }
 
+std::optional<GapGutter> tryGetGapGutter(int _value)
+{
+    switch(_value)
+    {
+    case static_cast<int>(GapGutter::Column):
+        return GapGutter::Column;
+    case static_cast<int>(GapGutter::Row):
+        return GapGutter::Row;
+    case static_cast<int>(GapGutter::All):
+        return GapGutter::All;
+    default:
+        return std::nullopt;
+    }
+}
+
 // 1 self
 // 2 type
 int luaApi_SetPositionType(lua_State * _lua)
@@ -467,128 +482,335 @@ int luaApi_SetPosition(lua_State * _lua)
     return 0;
 }
 
-// // const std::unordered_map<Edge, float> & _margins
-// // OR Edge _edge, float _value
-// int luaApi_SetMargin(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self   | 1 self
+// 2 edge   | 2 margin map
+// 3 margin |
+int luaApi_SetMargin(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<Edge> edge = tryGetEdge(lua_tointeger(_lua, 2));
+        std::optional<Dimension> margin = tryGetDimension(LuaTableApi(_lua, 3));
+        if(edge && margin)
+        {
+            self->getNode(_lua)->setMargin(*edge, *margin);
+            return 0;
+        }
+    }
+    else
+    {
+        LuaTableApi margin_map_table(_lua, 2);
+        if(margin_map_table.isValid())
+        {
+            std::unordered_map<Edge, Dimension> margin_map;
+            fillMap(LuaTableApi(_lua), gs_edge_map, margin_map, tryGetDimension);
+            self->getNode(_lua)->setMargin(margin_map);
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, 2,  LuaTypeName::joinTypes(LuaTypeName::edge, LuaTypeName::dimension_map).c_str());
+    return 0;
+}
 
-// // const std::unordered_map<Edge, float> & _paddings
-// // OR // Edge _edge, float _value
-// int luaApi_SetPadding(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self    | 1 self
+// 2 edge    | 2 padding map
+// 3 padding |
+int luaApi_SetPadding(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<Edge> edge = tryGetEdge(lua_tointeger(_lua, 2));
+        std::optional<Dimension> padding = tryGetDimension(LuaTableApi(_lua, 3));
+        if(edge && padding)
+        {
+            self->getNode(_lua)->setPadding(*edge, *padding);
+            return 0;
+        }
+    }
+    else
+    {
+        LuaTableApi padding_map_table(_lua, 2);
+        if(padding_map_table.isValid())
+        {
+            std::unordered_map<Edge, Dimension> padding_map;
+            fillMap(LuaTableApi(_lua), gs_edge_map, padding_map, tryGetDimension);
+            self->getNode(_lua)->setPadding(padding_map);
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, 2,  LuaTypeName::joinTypes(LuaTypeName::edge, LuaTypeName::dimension_map).c_str());
+    return 0;
+}
 
-// // const Size & _width
-// int luaApi_SetWidth(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 width
+int luaApi_SetWidth(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    std::optional<Dimension> width = tryGetDimension(LuaTableApi(_lua, 2));
+    luaL_argexpected(_lua, false, width.has_value(), LuaTypeName::dimension);
+    self->getNode(_lua)->setWidth(width.value());
+    return 0;
+}
 
-// // const Size & _height
-// int luaApi_SetHeight(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 height
+int luaApi_SetHeight(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    std::optional<Dimension> height = tryGetDimension(LuaTableApi(_lua, 2));
+    luaL_argexpected(_lua, false, height.has_value(), LuaTypeName::dimension);
+    self->getNode(_lua)->setWidth(height.value());
+    return 0;
+}
 
-// // const SizeLimit & _min_width
-// int luaApi_SetMinWidth(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 limit
+int luaApi_SetMinWidth(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    std::optional<DimensionLimit> limit = tryGetDimensionLimit(LuaTableApi(_lua, 2));
+    luaL_argexpected(_lua, false, limit.has_value(), LuaTypeName::dimension_limit);
+    self->getNode(_lua)->setMinWidth(limit.value());
+    return 0;
+}
 
-// // const SizeLimit & _min_height
-// int luaApi_SetMinHeight(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 limit
+int luaApi_SetMinHeight(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    std::optional<DimensionLimit> limit = tryGetDimensionLimit(LuaTableApi(_lua, 2));
+    luaL_argexpected(_lua, false, limit.has_value(), LuaTypeName::dimension_limit);
+    self->getNode(_lua)->setMinHeight(limit.value());
+    return 0;
+}
 
-// // const SizeLimit & _max_width
-// int luaApi_SetMaxWidth(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 limit
+int luaApi_SetMaxWidth(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    std::optional<DimensionLimit> limit = tryGetDimensionLimit(LuaTableApi(_lua, 2));
+    luaL_argexpected(_lua, false, limit.has_value(), LuaTypeName::dimension_limit);
+    self->getNode(_lua)->setMaxWidth(limit.value());
+    return 0;
+}
 
-// // const SizeLimit & _max_height
-// int luaApi_SetMaxHeight(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 limit
+int luaApi_SetMaxHeight(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    std::optional<DimensionLimit> limit = tryGetDimensionLimit(LuaTableApi(_lua, 2));
+    luaL_argexpected(_lua, false, limit.has_value(), LuaTypeName::dimension_limit);
+    self->getNode(_lua)->setMaxHeight(limit.value());
+    return 0;
+}
 
-// // float _basis
-// int luaApi_SetFlexBasis(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 basis
+int luaApi_SetFlexBasis(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    std::optional<Dimension> basis = tryGetDimension(LuaTableApi(_lua, 2));
+    luaL_argexpected(_lua, false, basis.has_value(), LuaTypeName::dimension);
+    self->getNode(_lua)->setFlexBasis(basis.value());
+    return 0;
+}
 
-// // float _grow
-// int luaApi_SetFlexGrow(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 grow
+int luaApi_SetFlexGrow(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::number);
+    self->getNode(_lua)->setFlexGrow(static_cast<float>(lua_tonumber(_lua, 2)));
+    return 0;
+}
 
-// // float _shrink
-// int luaApi_SetFlexShrink(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 shrink
+int luaApi_SetFlexShrink(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::number);
+    self->getNode(_lua)->setFlexShrink(static_cast<float>(lua_tonumber(_lua, 2)));
+    return 0;
+}
 
-// // FlexDirection _direction
-// int luaApi_SetFlexDirection(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 direction
+int luaApi_SetFlexDirection(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<FlexDirection> direction = tryGetFlexDirection(lua_tointeger(_lua, 2));
+        if(direction.has_value())
+        {
+            self->getNode(_lua)->setFlexDirection(direction.value());
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::integer);
+    return 0;
+}
 
-// // FlexWrap _wrap
-// int luaApi_SetFlexWrap(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 wrap
+int luaApi_SetFlexWrap(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<FlexWrap> wrap = tryGetFlexWrap(lua_tointeger(_lua, 2));
+        if(wrap.has_value())
+        {
+            self->getNode(_lua)->setFlexWrap(wrap.value());
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::integer);
+    return 0;
+}
 
-// // const std::unordered_map<GapGutter, float> & _gaps
-// // OR // GapGutter _gutter, float _gap
-// int luaApi_SetGap(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self       | 1 self
+// 2 gap gutter | 2 gap gutter map
+// 3 gap        |
+int luaApi_SetGap(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<GapGutter> gap_gutter = tryGetGapGutter(lua_tointeger(_lua, 2));
+        std::optional<Dimension> gap = tryGetDimension(LuaTableApi(_lua, 3));
+        if(gap_gutter && gap)
+        {
+            self->getNode(_lua)->setGap(*gap_gutter, *gap);
+            return 0;
+        }
+    }
+    else
+    {
+        LuaTableApi gap_gutter_map_table(_lua, 2);
+        if(gap_gutter_map_table.isValid())
+        {
+            std::unordered_map<GapGutter, Dimension> gap_gutter_map;
+            fillMap(LuaTableApi(_lua), gs_gap_gutter_map, gap_gutter_map, tryGetDimension);
+            self->getNode(_lua)->setGap(gap_gutter_map);
+            return 0;
+        }
+    }
+    luaL_argexpected(
+        _lua,
+        false,
+        2,
+        LuaTypeName::joinTypes(LuaTypeName::gap_gutter, LuaTypeName::dimension_map).c_str());
+    return 0;
+}
 
-// // ContentAlignment _alignment
-// int luaApi_SetContentAlignment(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 alignment
+int luaApi_SetContentAlignment(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<ContentAlignment> alignment = tryGetContentAlignment(lua_tointeger(_lua, 2));
+        if(alignment.has_value())
+        {
+            self->getNode(_lua)->setContentAlignment(alignment.value());
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::integer);
+    return 0;
+}
 
-// // ContentJustification _justification
-// int luaApi_SetContentJustification(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 justification
+int luaApi_SetContentJustification(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<ContentJustification> justification = tryGetContentJustification(lua_tointeger(_lua, 2));
+        if(justification.has_value())
+        {
+            self->getNode(_lua)->setContentJustification(justification.value());
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::integer);
+    return 0;
+}
 
-// // ItemAlignment _alignment
-// int luaApi_SetItemsAlignment(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 alignment
+int luaApi_SetItemsAlignment(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<ItemAlignment> alignment = tryGetItemAlignment(lua_tointeger(_lua, 2));
+        if(alignment.has_value())
+        {
+            self->getNode(_lua)->setItemsAlignment(alignment.value());
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::integer);
+    return 0;
+}
 
-// // ItemAlignment _alignment
-// int luaApi_SetSelfAlignment(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 alignment
+int luaApi_SetSelfAlignment(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<ItemAlignment> alignment = tryGetItemAlignment(lua_tointeger(_lua, 2));
+        if(alignment.has_value())
+        {
+            self->getNode(_lua)->setSelfAlignment(alignment.value());
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::integer);
+    return 0;
+}
 
-// // float _ratio
-// int luaApi_SetAspectRatio(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 ratio
+int luaApi_SetAspectRatio(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::number);
+    self->getNode(_lua)->setAspectRatio(static_cast<float>(lua_tonumber(_lua, 2)));
+    return 0;
+}
 
-// // DisplayMode _mode
-// int luaApi_SetDisplayMode(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+// 2 mode
+int luaApi_SetDisplayMode(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    if(lua_isinteger(_lua, 2))
+    {
+        std::optional<DisplayMode> mode = tryGetDisplayMode(lua_tointeger(_lua, 2));
+        if(mode.has_value())
+        {
+            self->getNode(_lua)->setDisplayMode(mode.value());
+            return 0;
+        }
+    }
+    luaL_argexpected(_lua, false, lua_isnumber(_lua, 2), LuaTypeName::integer);
+    return 0;
+}
 
 // 1 self
 // 2 style (optional)
@@ -603,47 +825,51 @@ int luaApi_AddNode(lua_State * _lua)
     return 1;
 }
 
-// // return float
-// int luaApi_GetX(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+int luaApi_GetX(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    lua_pushnumber(_lua, self->getNode(_lua)->getX());
+    return 1;
+}
 
-// // return float
-// int luaApi_GetY(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+int luaApi_GetY(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    lua_pushnumber(_lua, self->getNode(_lua)->getY());
+    return 1;
+}
 
-// // return float
-// int luaApi_GetWidth(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+int luaApi_GetWidth(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    lua_pushnumber(_lua, self->getNode(_lua)->getWidth());
+    return 1;
+}
 
-// // return float
-// int luaApi_GetHeight(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+int luaApi_GetHeight(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    lua_pushnumber(_lua, self->getNode(_lua)->getHeight());
+    return 1;
+}
 
-// // return Children
-// int luaApi_GetChildren(lua_State * _lua)
-// {
-//     return -1;
-// }
-
-// // return Element *
-// int luaApi_GetElement(lua_State * _lua)
-// {
-//     return -1;
-// }
-
-// // std::unique_ptr<Element> && _element
-// int luaApi_SetElement(lua_State * _lua)
-// {
-//     return -1;
-// }
+// 1 self
+int luaApi_GetChildren(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    lua_newtable(_lua);
+    int idx = 0;
+    for(Node & node : self->getNode(_lua)->getChildren())
+    {
+        pushLayoutNodeApi(_lua, node);
+        lua_rawseti(_lua, -2, ++idx);
+    }
+    return 1;
+}
 
 } // namespace name
 
@@ -915,7 +1141,7 @@ bool Sol2D::Lua::tryGetStyle(lua_State * _lua, int _idx, Style & _style)
 
 Node * Sol2D::Lua::tryGetNode(lua_State * _lua, int _idx)
 {
-    if(const Self * self = UserData::tryGetUserData(_lua, _idx))
+    if(Self * self = UserData::tryGetUserData(_lua, _idx))
         return self->getNode(_lua);
     return nullptr;
 }
@@ -925,38 +1151,37 @@ void Sol2D::Lua::pushLayoutNodeApi(lua_State * _lua, Node & _node)
     UserData::pushUserData(_lua, _node);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] = {
+        luaL_Reg funcs[] =
+        {
             { "__gc", UserData::luaGC },
             { "setPositionType", luaApi_SetPositionType },
             { "setPosition", luaApi_SetPosition },
-            // { "setMargin", luaApi_SetMargin },
-            // { "setPadding", luaApi_SetPadding },
-            // { "setWidth", luaApi_SetWidth },
-            // { "setHeight", luaApi_SetHeight },
-            // { "setMinWidth", luaApi_SetMinWidth },
-            // { "setMinHeight", luaApi_SetMinHeight },
-            // { "setMaxWidth", luaApi_SetMaxWidth },
-            // { "setMaxHeight", luaApi_SetMaxHeight },
-            // { "setFlexBasis", luaApi_SetFlexBasis },
-            // { "setFlexGrow", luaApi_SetFlexGrow },
-            // { "setFlexShrink", luaApi_SetFlexShrink },
-            // { "setFlexDirection", luaApi_SetFlexDirection },
-            // { "setFlexWrap", luaApi_SetFlexWrap },
-            // { "setGap", luaApi_SetGap },
-            // { "setContentAlignment", luaApi_SetContentAlignment },
-            // { "setContentJustification", luaApi_SetContentJustification },
-            // { "setItemsAlignment", luaApi_SetItemsAlignment },
-            // { "setSelfAlignment", luaApi_SetSelfAlignment },
-            // { "setAspectRatio", luaApi_SetAspectRatio },
-            // { "setDisplayMode", luaApi_SetDisplayMode },
+            { "setMargin", luaApi_SetMargin },
+            { "setPadding", luaApi_SetPadding },
+            { "setWidth", luaApi_SetWidth },
+            { "setHeight", luaApi_SetHeight },
+            { "setMinWidth", luaApi_SetMinWidth },
+            { "setMinHeight", luaApi_SetMinHeight },
+            { "setMaxWidth", luaApi_SetMaxWidth },
+            { "setMaxHeight", luaApi_SetMaxHeight },
+            { "setFlexBasis", luaApi_SetFlexBasis },
+            { "setFlexGrow", luaApi_SetFlexGrow },
+            { "setFlexShrink", luaApi_SetFlexShrink },
+            { "setFlexDirection", luaApi_SetFlexDirection },
+            { "setFlexWrap", luaApi_SetFlexWrap },
+            { "setGap", luaApi_SetGap },
+            { "setContentAlignment", luaApi_SetContentAlignment },
+            { "setContentJustification", luaApi_SetContentJustification },
+            { "setItemsAlignment", luaApi_SetItemsAlignment },
+            { "setSelfAlignment", luaApi_SetSelfAlignment },
+            { "setAspectRatio", luaApi_SetAspectRatio },
+            { "setDisplayMode", luaApi_SetDisplayMode },
             { "addNode", luaApi_AddNode },
-            // { "getX", luaApi_GetX },
-            // { "getY", luaApi_GetY },
-            // { "getWidth", luaApi_GetWidth },
-            // { "getHeight", luaApi_GetHeight },
-            // { "getChildren", luaApi_GetChildren },
-            // { "getElement", luaApi_GetElement },
-            // { "setElement", luaApi_SetElement },
+            { "getX", luaApi_GetX },
+            { "getY", luaApi_GetY },
+            { "getWidth", luaApi_GetWidth },
+            { "getHeight", luaApi_GetHeight },
+            { "getChildren", luaApi_GetChildren },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);
