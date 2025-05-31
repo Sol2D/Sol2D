@@ -4,6 +4,7 @@
         "NUMLOCK",
         "Scancode",
         "SCROLLOCK",
+        "tilemaps",
         "vararg"
     ]
 }

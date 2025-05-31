@@ -6,10 +6,12 @@ local function createLevel02()
     local store = sol.stores:createStore(STORE_KEY)
     local level = {}
 
+    ---@param view sol.View
     ---@return sol.Scene
-    function level:createScene()
+    function level:createScene(view)
         local scene = store:createScene(
-            'level-01',
+            'level-02',
+            view:getLayout(),
             {
                 gravity = { x = 0, y = 80 },
                 metersPerPixel = self.METERS_PER_PIXEL

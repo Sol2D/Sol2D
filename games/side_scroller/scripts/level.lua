@@ -84,15 +84,15 @@ local function createLevel()
     end
 
     local function createFlyingPlatforms(scene)
-        local platfroms = scene:getTileMapObjectsByClass('platform')
-        for _, platfrom in ipairs(platfroms) do
+        local platforms = scene:getTileMapObjectsByClass('platform')
+        for _, platform in ipairs(platforms) do
             local points = {}
-            for _, point in ipairs(platfrom.points) do
+            for _, point in ipairs(platform.points) do
                 table.insert(
                     points,
                     pixelPontToMeters({
-                        x = platfrom.position.x + point.x,
-                        y = platfrom.position.y + point.y
+                        x = platform.position.x + point.x,
+                        y = platform.position.y + point.y
                     })
                 )
             end
@@ -111,15 +111,14 @@ local function createLevel()
     end
 
     ---@param view sol.View
-    ---@param fragmet_id integer
     ---@param on_finish function
-    function level:run(view, fragmet_id, on_finish)
+    function level:run(view, on_finish)
         ---@type sol.Scene
-        level.scene = self:createScene()
+        level.scene = self:createScene(view)
         level.scene:createBodiesFromMapObjects('obstacle')
         level.scene:createBodiesFromMapObjects('sensor', { shapePhysics = { isSensor = true } })
         level.scene:createBodiesFromMapObjects(
-            'one-way-platfrom',
+            'one-way-platform',
             {
                 shapeKey = keys.shapes.ONE_WAY_PLATFORM,
                 shapePhysics = {
@@ -137,7 +136,6 @@ local function createLevel()
             }
         )
         createFlyingPlatforms(level.scene)
-        view:bindFragment(fragmet_id, level.scene)
 
         level.player = {
             body = Player.new(

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#ddf8ff" nextlayerid="12" nextobjectid="40">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="100" height="20" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#ddf8ff" nextlayerid="12" nextobjectid="40">
  <tileset firstgid="1" source="freetileset/tiles.tsx"/>
  <tileset firstgid="19" source="freetileset/objects.tsx"/>
  <tileset firstgid="32" source="freetileset/background.tsx"/>
@@ -32,14 +32,14 @@
    <point/>
   </object>
   <object id="13" name="finish" type="sensor" x="12416" y="0" width="382" height="900"/>
-  <object id="17" type="one-way-platfrom" x="1537" y="1664" width="894" height="57"/>
-  <object id="18" type="one-way-platfrom" x="2047" y="1408" width="1663" height="59"/>
-  <object id="19" type="one-way-platfrom" x="4481" y="1280" width="1020" height="65"/>
-  <object id="20" type="one-way-platfrom" x="8962" y="894" width="891" height="56"/>
-  <object id="22" type="one-way-platfrom" x="9857" y="255" width="767" height="65"/>
-  <object id="23" type="one-way-platfrom" x="10112" y="1151" width="255" height="65"/>
-  <object id="24" type="one-way-platfrom" x="10498.7" y="1668" width="1018.67" height="82.6667"/>
-  <object id="25" type="one-way-platfrom" x="10626.7" y="1408" width="762.667" height="76"/>
+  <object id="17" type="one-way-platform" x="1537" y="1664" width="894" height="57"/>
+  <object id="18" type="one-way-platform" x="2047" y="1408" width="1663" height="59"/>
+  <object id="19" type="one-way-platform" x="4481" y="1280" width="1020" height="65"/>
+  <object id="20" type="one-way-platform" x="8962" y="894" width="891" height="56"/>
+  <object id="22" type="one-way-platform" x="9857" y="255" width="767" height="65"/>
+  <object id="23" type="one-way-platform" x="10112" y="1151" width="255" height="65"/>
+  <object id="24" type="one-way-platform" x="10498.7" y="1668" width="1018.67" height="82.6667"/>
+  <object id="25" type="one-way-platform" x="10626.7" y="1408" width="762.667" height="76"/>
   <object id="26" type="obstacle" x="10751.5" y="512.121" width="764.848" height="636"/>
   <object id="27" type="obstacle" x="11520" y="642.667" width="381.333" height="505.333"/>
   <object id="28" type="obstacle" x="11904" y="897.333" width="893.333" height="253.333"/>
@@ -55,8 +55,8 @@
   <object id="34" name="platform-04" type="platform" x="10236.4" y="1009.09">
    <polyline points="0,0 4.9697,-549.758"/>
   </object>
-  <object id="35" type="one-way-platfrom" x="9088" y="510" width="640" height="60"/>
+  <object id="35" type="one-way-platform" x="9088" y="510" width="640" height="60"/>
   <object id="36" type="obstacle" x="7297" y="1715.67" width="75.6667" height="76"/>
-  <object id="37" type="one-way-platfrom" x="255" y="1793" width="383" height="44"/>
+  <object id="37" type="one-way-platform" x="255" y="1793" width="383" height="44"/>
  </objectgroup>
 </map>
