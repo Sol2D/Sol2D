@@ -42,7 +42,7 @@ struct Size
     {
     }
 
-    Size & operator= (const Size & _size)
+    Size & operator = (const Size & _size)
     {
         if(this != &_size)
         {
@@ -52,48 +52,48 @@ struct Size
         return *this;
     }
 
-    Size operator+ (const Size & _size) const
+    Size operator + (const Size & _size) const
     {
         return SizeF(w + _size.w, h + _size.h);
     }
 
-    Size & operator+= (const Size & _size)
+    Size & operator += (const Size & _size)
     {
         w += _size.w;
         h += _size.h;
         return *this;
     }
 
-    Size operator- (const Size & _size) const
+    Size operator - (const Size & _size) const
     {
         return SizeF(w - _size.w, h - _size.h);
     }
 
-    Size & operator-= (const Size & _size)
+    Size & operator -= (const Size & _size)
     {
         w -= _size.w;
         h -= _size.h;
         return *this;
     }
 
-    Size operator* (float _n) const
+    Size operator * (float _n) const
     {
         return SizeF(w * _n, h * _n);
     }
 
-    Size & operator*= (float _n)
+    Size & operator *= (float _n)
     {
         w *= _n;
         h *= _n;
         return *this;
     }
 
-    Size operator/ (float _n) const
+    Size operator / (float _n) const
     {
         return SizeF(w / _n, h / _n);
     }
 
-    Size & operator/= (float _n)
+    Size & operator /= (float _n)
     {
         w /= _n;
         h /= _n;

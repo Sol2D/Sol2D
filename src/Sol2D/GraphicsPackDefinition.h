@@ -49,58 +49,41 @@ struct GraphicsPackSpriteDefinition
 
     explicit GraphicsPackSpriteDefinition(std::shared_ptr<Sprite> _sprite) :
         sprite(_sprite),
-        is_visible(true),
         position {.0f, .0f},
-        scale_factor {1.0f, 1.0f}
+        scale_factor {1.0f, 1.0f},
+        is_visible(true)
     {
     }
 
     GraphicsPackSpriteDefinition(std::shared_ptr<SpriteSheet> _sprite_sheet, size_t _sprite_index) :
         sprite(GraphicsPackSpriteSheetSpriteDefinition(_sprite_sheet, _sprite_index)),
-        is_visible(true),
         position {.0f, .0f},
-        scale_factor {1.0f, 1.0f}
-    {
-    }
-
-    std::variant<std::shared_ptr<Sprite>, GraphicsPackSpriteSheetSpriteDefinition> sprite;
-    bool is_visible;
-    SDL_FPoint position;
-    SDL_FPoint scale_factor;
-};
-
-struct GraphicsPackFrameDefinition
-{
-    S2_DEFAULT_COPY_AND_MOVE(GraphicsPackFrameDefinition)
-
-    GraphicsPackFrameDefinition() :
-        duration(std::chrono::milliseconds::zero()),
+        scale_factor {1.0f, 1.0f},
         is_visible(true)
     {
     }
 
-    std::chrono::milliseconds duration;
-    std::vector<GraphicsPackSpriteDefinition> sprites;
+    std::variant<std::shared_ptr<Sprite>, GraphicsPackSpriteSheetSpriteDefinition> sprite;
+    SDL_FPoint position;
+    SDL_FPoint scale_factor;
+    uint16_t z_index = 0;
     bool is_visible;
+};
+
+struct GraphicsPackFrameDefinition
+{
+    std::chrono::milliseconds duration = std::chrono::milliseconds::zero();
+    std::vector<GraphicsPackSpriteDefinition> sprites;
+    bool is_visible = true;
 };
 
 struct GraphicsPackDefinition
 {
-    S2_DEFAULT_COPY_AND_MOVE(GraphicsPackDefinition)
-
-    GraphicsPackDefinition() :
-        position {.0f, .0f},
-        is_flipped_horizontally(false),
-        is_flipped_vertically(false),
-        animation_iterations(-1)
-    {
-    }
-
-    SDL_FPoint position;
+    SDL_FPoint position = { .0f, .0f };
     std::vector<GraphicsPackFrameDefinition> frames;
-    bool is_flipped_horizontally;
-    bool is_flipped_vertically;
-    int32_t animation_iterations;
+    int32_t animation_iterations = -1;
+    bool is_flipped_horizontally = false;
+    bool is_flipped_vertically = false;
 };
 
 } // namespace Sol2D

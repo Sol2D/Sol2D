@@ -18,13 +18,10 @@
 
 #include <Sol2D/Tiles/TileMap.h>
 #include <Sol2D/Workspace.h>
-#include <Sol2D/Exception.h>
 #include <Sol2D/Def.h>
 #include <filesystem>
 
 namespace Sol2D::Tiles {
-
-S2_DEFINE_EXCEPTION(TiledXmlException)
 
 struct Tmx
 {

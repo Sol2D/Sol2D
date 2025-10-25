@@ -14,9 +14,103 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+#include <Sol2D/Xml/XmlLoader.h>
 #include <Sol2D/SpriteSheet.h>
+#include <boost/container/slist.hpp>
 
 using namespace Sol2D;
+using namespace tinyxml2;
+
+namespace {
+
+class AtlasXmlLoader : public Xml::XmlLoader
+{
+public:
+    explicit AtlasXmlLoader(const std::filesystem::path & _path);
+    bool load();
+    const std::string & getTextureName() const;
+    const boost::container::slist<SpriteSheetFrame> & getFrames() const;
+
+private:
+    std::string m_texture_name;
+    boost::container::slist<SpriteSheetFrame> m_frames;
+};
+
+} // namespace
+
+AtlasXmlLoader::AtlasXmlLoader(const std::filesystem::path & _path) :
+    Xml::XmlLoader(_path)
+{
+}
+
+bool AtlasXmlLoader::load()
+{
+    const char * const tag_atlas = "atlas";
+    const char * const tag_frame = "frame";
+
+    XMLDocument xml;
+    loadDocument(xml);
+    const XMLElement * xml_root = xml.RootElement();
+    if(strcmp(tag_atlas, xml_root->Name()) != 0)
+        throw Xml::XmlException(formatXmlRootElemetErrorMessage(tag_atlas));
+    {
+        uint32_t version = readRequiredPositiveUintAttribute(*xml_root, "version");
+        if(version != 1)
+        {
+            throw InvalidOperationException(
+                std::format("Unsupported atlas version: {}. Latest supported version is {}", version, 1));
+        }
+    }
+
+    m_texture_name = readRequiredAttribute(*xml_root, "texture");
+    m_frames.clear();
+
+    for(
+        const XMLElement * xml_frame = xml_root->FirstChildElement(tag_frame);
+        xml_frame;
+        xml_frame = xml_frame->NextSiblingElement(tag_frame))
+    {
+        SpriteSheetFrame frame
+        {
+            .texture_rect =
+            {
+                .x = static_cast<float>(readRequiredIntAttribute(*xml_frame, "tx")),
+                .y = static_cast<float>(readRequiredIntAttribute(*xml_frame, "ty")),
+                .w = static_cast<float>(readRequiredIntAttribute(*xml_frame, "tw")),
+                .h = static_cast<float>(readRequiredIntAttribute(*xml_frame, "th"))
+            },
+            .sprite_size = FSize(
+                static_cast<float>(xml_frame->IntAttribute("sw")),
+                static_cast<float>(xml_frame->IntAttribute("sh"))),
+            .sprite_point =
+            {
+                .x = static_cast<float>(xml_frame->IntAttribute("sx")),
+                .y = static_cast<float>(xml_frame->IntAttribute("sy")),
+            },
+            .is_rotated = xml_frame->BoolAttribute("rotated")
+        };
+        if(frame.sprite_size.w == .0f)
+            frame.sprite_size.w = frame.texture_rect.w;
+        if(frame.sprite_size.h == .0f)
+            frame.sprite_size.h = frame.texture_rect.h;
+        m_frames.push_front(frame);
+    }
+
+    if(m_frames.empty())
+        return false;
+
+    return true;
+}
+
+inline const std::string & AtlasXmlLoader::getTextureName() const
+{
+    return m_texture_name;
+}
+
+inline const boost::container::slist<SpriteSheetFrame> & AtlasXmlLoader::getFrames() const
+{
+    return m_frames;
+}
 
 SpriteSheet::SpriteSheet(Renderer & _renderer) :
     m_renderer(&_renderer)
@@ -36,9 +130,12 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
         const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
         SDL_SetSurfaceColorKey(surface, true, SDL_MapRGBA(pixel_format, nullptr, color.r, color.g, color.b, color.a));
     }
-    m_texture = m_renderer->createTexture(*surface, "Sprite Sheet");
+    m_texture = m_renderer->createTexture(
+        *surface,
+        std::format("Sprite Sheet {}", _path.filename().string()).c_str());
     SDL_DestroySurface(surface);
-    SDL_FRect rect = {
+    SDL_FRect rect
+    {
         .x = .0f,
         .y = .0f,
         .w = static_cast<float>(_options.sprite_width),
@@ -50,8 +147,38 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
         for(uint16_t col = 0; col < _options.col_count; ++col)
         {
             rect.x = _options.margin_left + col * _options.sprite_width + col * _options.horizontal_spacing;
-            m_rects.push_back(rect);
+            m_frames.push_back(
+                SpriteSheetFrame
+                {
+                    .texture_rect = rect,
+                    .sprite_size = FSize(rect.w, rect.h),
+                    .sprite_point = { .x = .0f, .y = .0f },
+                    .is_rotated = false
+                });
         }
     }
     return true;
+}
+
+bool SpriteSheet::loadFromAtlas(const std::filesystem::path & _path)
+{
+    AtlasXmlLoader loader(_path);
+    if(loader.load())
+    {
+        std::filesystem::path texture_path(loader.getTextureName());
+        if(texture_path.is_relative())
+            texture_path = _path / texture_path;
+        SDL_Surface * surface = IMG_Load(texture_path.c_str());
+        if(!surface)
+            return false;
+        m_texture = m_renderer->createTexture(
+            *surface,
+            std::format("Atlas {}", texture_path.filename().string()).c_str());
+        SDL_DestroySurface(surface);
+        const auto & frames = loader.getFrames();
+        m_frames.clear();
+        m_frames.assign(frames.begin(), frames.end());
+        return true;
+    }
+    return false;
 }

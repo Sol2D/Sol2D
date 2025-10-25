@@ -16,6 +16,7 @@
 ---@field isVisible boolean? default is true
 ---@field position sol.Point?
 ---@field scaleFactor sol.Point?
+---@field zIndex integer? default is 0
 ---@field sprite sol.Sprite | { spriteSheet: sol.SpriteSheet, spriteIndex: integer }
 
 ---@class SpriteOptions
@@ -45,14 +46,8 @@ function __sprite:loadFromFile(path, options) end
 ---@return boolean
 function __sprite:isValid() end
 
----@return sol.Rectangle
-function __sprite:getSourceRect() end
-
----@return sol.Size
-function __sprite:getDestinationSize() end
-
 ---@param size sol.Size
-function __sprite:setDestinationSize(size) end
+function __sprite:scaleTo(size) end
 
 function __sprite:scale() end
 
@@ -120,12 +115,3 @@ function __graphics_pack:switchToFirstVisibleFrame() end
 
 ---@return boolean
 function __graphics_pack:switchToNextVisibleFrame() end
-
----@param frame_index integer
----@param definition? sol.GraphicsPackSpriteDefinition
-function __graphics_pack:addSprite(frame_index, definition) end
-
----@param frame_index integer
----@param sprite_index integer
----@return boolean
-function __graphics_pack:removeSprite(frame_index, sprite_index) end

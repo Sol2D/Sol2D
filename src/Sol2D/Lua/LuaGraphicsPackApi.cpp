@@ -217,35 +217,6 @@ int luaApi_SwitchToNextVisibleFrame(lua_State * _lua)
     return 1;
 }
 
-// 1 self
-// 2 frame
-// 3 sprite definition
-int luaApi_AddSprite(lua_State * _lua)
-{
-    const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
-    size_t frame_index = static_cast<size_t>(lua_tointeger(_lua, 2));
-    GraphicsPackSpriteDefinition definition;
-    luaL_argexpected(_lua, tryGetGraphicsPackSpriteDefinition(_lua, 3, definition), 3, LuaTypeName::sprite_definition);
-    self->getGraphicsPack(_lua)->addSprite(frame_index, definition);
-    return 0;
-}
-
-// 1 self
-// 2 frame
-// 3 sprite
-int luaApi_RemoveSprite(lua_State * _lua)
-{
-    const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
-    luaL_argexpected(_lua, lua_isinteger(_lua, 3), 3, LuaTypeName::integer);
-    size_t frame_index = static_cast<size_t>(lua_tointeger(_lua, 2));
-    size_t sprite_index = static_cast<size_t>(lua_tointeger(_lua, 3));
-    bool result = self->getGraphicsPack(_lua)->removeSprite(frame_index, sprite_index);
-    lua_pushboolean(_lua, result);
-    return 1;
-}
-
 template<typename UserDataType>
 struct GraphicsPackApiPusher
 {
@@ -255,23 +226,22 @@ struct GraphicsPackApiPusher
         UserDataType::pushUserData(_lua, _args...);
         if(UserDataType::pushMetatable(_lua) == MetatablePushResult::Created)
         {
-            luaL_Reg funcs[] = {
-                {"__gc",                         UserData::luaGC                    },
-                {"addFrame",                     luaApi_AddFrame                    },
-                {"insertFrame",                  luaApi_InsertFrame                 },
-                {"removeFrame",                  luaApi_RemoveFrame                 },
-                {"setFrameVisibility",           luaApi_SetFrameVisibility          },
-                {"isFrameVisible",               luaApi_IsFrameVisible              },
-                {"setFrameDuration",             luaApi_SetFrameDuration            },
-                {"getFrameDuration",             luaApi_GetFrameDuration            },
-                {"getCurrentFrameIndex",         luaApi_GetCurrentFrameIndex        },
-                {"setCurrentFrameIndex",         luaApi_SetCurrentFrameIndex        },
-                {"getCurrentAnimationIteration", luaApi_GetCurrentAnimationIteration},
-                {"switchToFirstVisibleFrame",    luaApi_SwitchToFirstVisibleFrame   },
-                {"switchToNextVisibleFrame",     luaApi_SwitchToNextVisibleFrame    },
-                {"addSprite",                    luaApi_AddSprite                   },
-                {"removeSprite",                 luaApi_RemoveSprite                },
-                {nullptr,                        nullptr                            }
+            luaL_Reg funcs[]
+            {
+                { "__gc", UserData::luaGC },
+                { "addFrame", luaApi_AddFrame },
+                { "insertFrame", luaApi_InsertFrame },
+                { "removeFrame", luaApi_RemoveFrame },
+                { "setFrameVisibility", luaApi_SetFrameVisibility },
+                { "isFrameVisible", luaApi_IsFrameVisible },
+                { "setFrameDuration", luaApi_SetFrameDuration },
+                { "getFrameDuration", luaApi_GetFrameDuration },
+                { "getCurrentFrameIndex", luaApi_GetCurrentFrameIndex },
+                { "setCurrentFrameIndex", luaApi_SetCurrentFrameIndex },
+                { "getCurrentAnimationIteration", luaApi_GetCurrentAnimationIteration },
+                { "switchToFirstVisibleFrame", luaApi_SwitchToFirstVisibleFrame },
+                { "switchToNextVisibleFrame", luaApi_SwitchToNextVisibleFrame },
+                { nullptr, nullptr }
             };
             luaL_setfuncs(_lua, funcs, 0);
         }
@@ -286,8 +256,7 @@ void Sol2D::Lua::pushGraphicsPackApi(
     std::shared_ptr<Scene> _scene,
     uint64_t _body_id,
     const Utils::PreHashedKey<std::string> & _shape_key,
-    const Utils::PreHashedKey<std::string> & _graphics_pack_key
-)
+    const Utils::PreHashedKey<std::string> & _graphics_pack_key)
 {
     GraphicsPackApiPusher<UserDataForBodyShape>::push(_lua, _scene, _body_id, _shape_key, _graphics_pack_key);
 }

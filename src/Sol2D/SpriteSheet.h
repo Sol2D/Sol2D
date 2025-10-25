@@ -36,6 +36,14 @@ struct SpriteSheetOptions
     std::optional<SDL_FColor> color_to_alpha;
 };
 
+struct SpriteSheetFrame
+{
+    SDL_FRect texture_rect;
+    FSize sprite_size;
+    SDL_FPoint sprite_point;
+    bool is_rotated;
+};
+
 class SpriteSheet final
 {
 public:
@@ -44,36 +52,37 @@ public:
 
     explicit SpriteSheet(Renderer & _renderer);
     bool loadFromFile(const std::filesystem::path & _path, const SpriteSheetOptions & _options);
+    bool loadFromAtlas(const std::filesystem::path & _path);
     bool isValid() const;
     size_t getSpriteCount() const;
     Sprite toSprite(size_t _idx) const;
-    const std::vector<SDL_FRect> & getRects() const; // TODO: delete
+    const std::vector<SpriteSheetFrame> & getFrames() const; // TODO: delete
     const Texture & getTexture() const; // TODO: delete
 
 private:
     Renderer * m_renderer;
     Texture m_texture;
-    std::vector<SDL_FRect> m_rects;
+    std::vector<SpriteSheetFrame> m_frames;
 };
 
 inline bool SpriteSheet::isValid() const
 {
-    return m_texture && !m_rects.empty();
+    return m_texture && !m_frames.empty();
 }
 
 inline size_t SpriteSheet::getSpriteCount() const
 {
-    return m_rects.size();
+    return m_frames.size();
 }
 
 inline Sprite SpriteSheet::toSprite(size_t _idx) const
 {
-    return _idx >= m_rects.size() ? Sprite(*m_renderer) : Sprite(*m_renderer, m_texture, m_rects[_idx]);
+    return _idx >= m_frames.size() ? Sprite(*m_renderer) : Sprite(*m_renderer, m_texture, m_frames[_idx].texture_rect); // TODO: Frame
 }
 
-inline const std::vector<SDL_FRect> & SpriteSheet::getRects() const
+inline const std::vector<SpriteSheetFrame> & SpriteSheet::getFrames() const
 {
-    return m_rects;
+    return m_frames;
 }
 
 inline const Texture & SpriteSheet::getTexture() const

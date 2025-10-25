@@ -43,7 +43,6 @@ public:
 
     void setFilippedHorizontally(bool _flipped);
     void setFilippedVertically(bool _flipped);
-    void setCenter(const SDL_FPoint & _center);
     size_t addFrame(const GraphicsPackFrameDefinition & _definition);
     size_t insertFrame(size_t _index, const GraphicsPackFrameDefinition & _definition);
     bool removeFrame(size_t _index);
@@ -56,8 +55,6 @@ public:
     bool switchToFirstVisibleFrame();
     bool switchToNextVisibleFrame();
     size_t getCurrentAnimationIteration() const;
-    std::pair<bool, size_t> addSprite(size_t _frame, const GraphicsPackSpriteDefinition & _definition);
-    bool removeSprite(size_t _frame, size_t _sprite);
     void render(const SDL_FPoint & _position, const Rotation & _rotation, std::chrono::milliseconds _delta_time);
 
 private:

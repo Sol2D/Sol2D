@@ -53,17 +53,60 @@ bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptio
         m_source_rect.w = static_cast<float>(surface->w);
         m_source_rect.h = static_cast<float>(surface->h);
     }
-    m_desination_size.w = m_source_rect.w;
-    m_desination_size.h = m_source_rect.h;
+    m_paddings = _options.paddings.has_value()
+        ? _options.paddings.value()
+        : SpritePaddings();
+    m_desination_rect =
+    {
+        .x = m_paddings.left,
+        .y = m_paddings.top,
+        .w = m_source_rect.w,
+        .h = m_source_rect.h
+    };
     m_texture = m_renderer->createTexture(*surface, "Sprite");
     SDL_DestroySurface(surface);
     return true;
+}
+
+void Sol2D::Sprite::scale(float _scale_factor)
+{
+    if(std::isgreater(_scale_factor, .0f))
+    {
+        m_desination_rect.x = m_paddings.left * _scale_factor;
+        m_desination_rect.y = m_paddings.top * _scale_factor;
+        m_desination_rect.w = m_source_rect.w * _scale_factor;
+        m_desination_rect.h = m_source_rect.h * _scale_factor;
+    }
+}
+
+void Sprite::scaleTo(const FSize & _size)
+{
+    const float full_width = m_source_rect.w + m_paddings.left + m_paddings.right;
+    const float full_height = m_source_rect.h + m_paddings.top + m_paddings.bottom;
+    scale(_size.w / full_width, _size.h / full_height);
+}
+
+void Sol2D::Sprite::scale(float _scale_factor_x, float _scale_factor_y)
+{
+    if(std::isgreater(_scale_factor_x, .0f) && std::isgreater(_scale_factor_y, .0f))
+    {
+        m_desination_rect.x = m_paddings.left * _scale_factor_x;
+        m_desination_rect.y = m_paddings.top * _scale_factor_y;
+        m_desination_rect.w = m_source_rect.w * _scale_factor_x;
+        m_desination_rect.h = m_source_rect.h * _scale_factor_y;
+    }
 }
 
 void Sprite::render(const SDL_FPoint & _point, const Rotation & _rotation, SDL_FlipMode _flip_mode)
 {
     if(!isValid())
         return;
-    SDL_FRect dest_rect = {.x = _point.x, .y = _point.y, .w = m_desination_size.w, .h = m_desination_size.h};
+    SDL_FRect dest_rect
+    {
+        .x = _point.x + m_desination_rect.x,
+        .y = _point.y + m_desination_rect.y,
+        .w = m_desination_rect.w,
+        .h = m_desination_rect.h
+    };
     m_renderer->renderTexture(TextureRenderingData(dest_rect, m_texture, m_source_rect, _rotation, _flip_mode));
 }

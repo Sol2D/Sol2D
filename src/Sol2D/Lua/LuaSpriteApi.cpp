@@ -72,30 +72,13 @@ int luaApi_IsValid(lua_State * _lua)
 }
 
 // 1 self
-int luaApi_GetSourceRect(lua_State * _lua)
-{
-    const Self * self = UserData::getUserData(_lua, 1);
-    pushRect(_lua, self->getSprite(_lua)->getSourceRect());
-    return 1;
-}
-
-// 1 self
-int luaApi_GetDestinationSize(lua_State * _lua)
-{
-    const Self * self = UserData::getUserData(_lua, 1);
-    const FSize & size = self->getSprite(_lua)->getDestinationSize();
-    pushSize(_lua, size);
-    return 1;
-}
-
-// 1 self
 // 2 size
-int luaApi_SetDestinationSize(lua_State * _lua)
+int luaApi_ScaleTo(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
     FSize size;
     luaL_argexpected(_lua, tryGetSize(_lua, 2, size), 2, LuaTypeName::size);
-    self->getSprite(_lua)->setDesinationSize(size);
+    self->getSprite(_lua)->scaleTo(size);
     return 0;
 }
 
@@ -127,15 +110,14 @@ void Sol2D::Lua::pushSpriteApi(lua_State * _lua, const Workspace & _workspace, s
     UserData::pushUserData(_lua, _workspace, _sprite);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] = {
-            {"__gc",               UserData::luaGC          },
-            {"loadFromFile",       luaApi_LoadFromFile      },
-            {"isValid",            luaApi_IsValid           },
-            {"getSourceRect",      luaApi_GetSourceRect     },
-            {"getDestinationSize", luaApi_GetDestinationSize},
-            {"setDestinationSize", luaApi_SetDestinationSize},
-            {"scale",              luaApi_Scale             },
-            {nullptr,              nullptr                  }
+        luaL_Reg funcs[]
+        {
+            { "__gc", UserData::luaGC },
+            { "loadFromFile", luaApi_LoadFromFile },
+            { "isValid", luaApi_IsValid },
+            { "scaleTo", luaApi_ScaleTo },
+            { "scale", luaApi_Scale },
+            { nullptr,nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

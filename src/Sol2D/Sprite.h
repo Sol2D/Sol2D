@@ -22,6 +22,38 @@
 
 namespace Sol2D {
 
+struct SpritePaddings
+{
+    SpritePaddings(float _value = .0f) :
+        top(_value),
+        right(_value),
+        bottom(_value),
+        left(_value)
+    {
+    }
+
+    SpritePaddings(float _top_bottom, float _right_left) :
+        top(_top_bottom),
+        right(_right_left),
+        bottom(_top_bottom),
+        left(_right_left)
+    {
+    }
+
+    SpritePaddings(float _top, float _right, float _bottom, float _left) :
+        top(_top),
+        right(_right),
+        bottom(_bottom),
+        left(_left)
+    {
+    }
+
+    float top;
+    float right;
+    float bottom;
+    float left;
+};
+
 struct SpriteOptions
 {
     SpriteOptions() :
@@ -29,9 +61,10 @@ struct SpriteOptions
     {
     }
 
-    bool autodetect_rect;
+    std::optional<SpritePaddings> paddings;
     std::optional<SDL_FRect> rect;
     std::optional<SDL_FColor> color_to_alpha;
+    bool autodetect_rect;
 };
 
 class Sprite final
@@ -40,13 +73,14 @@ public:
     S2_DEFAULT_COPY_AND_MOVE(Sprite)
 
     explicit Sprite(Renderer & _renderer);
-    Sprite(Renderer & _renderer, const Texture & _texture, const SDL_FRect & _rect);
+    Sprite(
+        Renderer & _renderer,
+        const Texture & _texture,
+        const SDL_FRect & _rect,
+        const SpritePaddings & _paddings = .0f);
     bool loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options = SpriteOptions());
     bool isValid() const;
-    const Texture & getTexture() const;
-    const SDL_FRect & getSourceRect() const;
-    const FSize & getDestinationSize() const;
-    void setDesinationSize(const FSize & _size);
+    void scaleTo(const FSize & _size);
     void scale(float _scale_factor);
     void scale(float _scale_factor_x, float _scale_factor_y);
     void render(const SDL_FPoint & _point, const Rotation & _rotation, SDL_FlipMode _flip_mode);
@@ -55,65 +89,34 @@ private:
     Renderer * m_renderer;
     Texture m_texture;
     SDL_FRect m_source_rect;
-    FSize m_desination_size;
+    SpritePaddings m_paddings;
+    SDL_FRect m_desination_rect;
 };
 
 inline Sprite::Sprite(Renderer & _renderer) :
     m_renderer(&_renderer),
     m_source_rect(.0f, .0f, .0f, .0f),
-    m_desination_size(.0f, .0f)
+    m_desination_rect(.0f, .0f, .0f, .0f)
 {
 }
 
-inline Sprite::Sprite(Renderer & _renderer, const Texture & _texture, const SDL_FRect & _rect) :
+inline Sprite::Sprite(
+    Renderer & _renderer,
+    const Texture & _texture,
+    const SDL_FRect & _rect,
+    const SpritePaddings & _paddings
+) :
     m_renderer(&_renderer),
     m_texture(_texture),
     m_source_rect(_rect),
-    m_desination_size(_rect.w, _rect.h)
+    m_paddings(_paddings),
+    m_desination_rect(.0f, .0f, _rect.w, _rect.h)
 {
 }
 
 inline bool Sprite::isValid() const
 {
     return m_texture != nullptr;
-}
-
-inline const Texture & Sprite::getTexture() const
-{
-    return m_texture;
-}
-
-inline const SDL_FRect & Sprite::getSourceRect() const
-{
-    return m_source_rect;
-}
-
-inline const FSize & Sprite::getDestinationSize() const
-{
-    return m_desination_size;
-}
-
-inline void Sprite::setDesinationSize(const FSize & _size)
-{
-    m_desination_size = _size;
-}
-
-inline void Sprite::scale(float _scale_factor)
-{
-    if(_scale_factor != .0f)
-    {
-        m_desination_size.w = m_source_rect.w * _scale_factor;
-        m_desination_size.h = m_source_rect.h * _scale_factor;
-    }
-}
-
-inline void Sprite::scale(float _scale_factor_x, float _scale_factor_y)
-{
-    if(_scale_factor_x != .0 && _scale_factor_y != .0f)
-    {
-        m_desination_size.w = m_source_rect.w * _scale_factor_x;
-        m_desination_size.h = m_source_rect.h * _scale_factor_y;
-    }
 }
 
 } // namespace Sol2D

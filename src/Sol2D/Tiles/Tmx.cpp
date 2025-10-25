@@ -15,12 +15,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Tiles/Tmx.h>
+#include <Sol2D/Xml/XmlLoader.h>
 #include <Sol2D/Utils/Zlib.h>
 #include <Sol2D/Utils/Zstd.h>
 #include <Sol2D/Utils/Base64.h>
 #include <Sol2D/Utils/String.h>
-#include <Sol2D/Def.h>
-#include <tinyxml2.h>
 #include <list>
 
 using namespace Sol2D;
@@ -63,7 +62,7 @@ struct TileMapLayerDefinition
     const char * name;
 };
 
-class XmlLoader
+class XmlLoader : public Xml::XmlLoader
 {
     S2_DISABLE_COPY_AND_MOVE(XmlLoader)
 
@@ -75,13 +74,7 @@ protected:
         TileMap & _map,
         const std::filesystem::path & _path
     );
-    uint32_t readRequiredUintAttribute(const XMLElement & _xml_element, const char * _attr);
-    uint32_t readRequiredPositiveUintAttribute(const XMLElement & _xml_element, const char * _attr);
-    int32_t readRequiredIntAttribute(const XMLElement & _xml_element, const char * _attr);
-    const char * readRequiredAttribute(const XMLElement & _xml_element, const char * _attr);
-    std::string formatFileReadErrorMessage() const;
-    std::string formatFileReadErrorMessage(const std::filesystem::path & _path) const;
-    std::string formatXmlRootElemetErrorMessage(const char * _expected) const;
+
     bool tryParseColor(const char * _value, SDL_Color & _color) const;
     Texture parseImage(const XMLElement & _xml);
 
@@ -90,7 +83,6 @@ protected:
     TileHeap & m_tile_heap;
     ObjectHeap & m_object_heap;
     TileMap & m_map;
-    const std::filesystem::path & m_path;
 };
 
 class TileMapXmlLoader : private XmlLoader
@@ -253,82 +245,12 @@ inline XmlLoader::XmlLoader(
     TileMap & _map,
     const std::filesystem::path & _path
 ) :
+    Xml::XmlLoader(_path),
     m_renderer(_renderer),
     m_tile_heap(_tile_heap),
     m_object_heap(_object_heap),
-    m_map(_map),
-    m_path(_path)
+    m_map(_map)
 {
-}
-
-uint32_t XmlLoader::readRequiredUintAttribute(const XMLElement & _xml_element, const char * _attr)
-{
-    int int_val = readRequiredIntAttribute(_xml_element, _attr);
-    if(int_val < 0)
-    {
-        std::stringstream ss;
-        ss << "The attribute \"" << _attr << "\" of the tag \"" << _xml_element.Name() << "\" in the XML file "
-           << m_path << " must be a non-negative integer";
-        throw TiledXmlException(ss.str());
-    }
-    return static_cast<uint32_t>(int_val);
-}
-
-uint32_t XmlLoader::readRequiredPositiveUintAttribute(const XMLElement & _xml_element, const char * _attr)
-{
-    int int_val = readRequiredIntAttribute(_xml_element, _attr);
-    if(int_val <= 0)
-    {
-        std::stringstream ss;
-        ss << "The attribute \"" << _attr << "\" of the tag \"" << _xml_element.Name() << "\" in the XML file "
-           << m_path << " must be a positive integer";
-        throw TiledXmlException(ss.str());
-    }
-    return static_cast<uint32_t>(int_val);
-}
-
-int32_t XmlLoader::readRequiredIntAttribute(const XMLElement & _xml_element, const char * _attr)
-{
-    const char * value = readRequiredAttribute(_xml_element, _attr);
-    size_t len = strlen(value);
-    char * end;
-    long int_val = std::strtol(value, &end, 10);
-    if(end != (value + len))
-    {
-        std::stringstream ss;
-        ss << "The attribute \"" << _attr << "\" of the tag \"" << _xml_element.Name() << "\" in the XML file "
-           << m_path << " must be an integer";
-        throw TiledXmlException(ss.str());
-    }
-    return static_cast<int32_t>(int_val);
-}
-
-const char * XmlLoader::readRequiredAttribute(const XMLElement & _xml_element, const char * _attr)
-{
-    const char * value = _xml_element.Attribute(_attr);
-    if(value == nullptr)
-    {
-        std::stringstream ss;
-        ss << "The attribute \"" << _attr << "\" is required for the tag \"" << _xml_element.Name()
-           << "\" in the XML file " << m_path;
-        throw TiledXmlException(ss.str());
-    }
-    return value;
-}
-
-inline std::string XmlLoader::formatFileReadErrorMessage() const
-{
-    return formatFileReadErrorMessage(m_path);
-}
-
-inline std::string XmlLoader::formatFileReadErrorMessage(const std::filesystem::path & _path) const
-{
-    return std::format("Unable to read file: {}", _path.string());
-}
-
-std::string XmlLoader::formatXmlRootElemetErrorMessage(const char * _expected) const
-{
-    return std::format("The root element of the XML file {}: must be \"{}\"", m_path.string(), _expected);
 }
 
 bool XmlLoader::tryParseColor(const char * _value, SDL_Color & _color) const
@@ -433,8 +355,7 @@ inline TileMapXmlLoader::TileMapXmlLoader(
 void TileMapXmlLoader::loadFromFile()
 {
     XMLDocument xml;
-    if(xml.LoadFile(m_path.c_str()) != XML_SUCCESS)
-        throw IOException(formatFileReadErrorMessage());
+    loadDocument(xml);
     loadFromXml(xml);
 }
 
@@ -443,7 +364,7 @@ void TileMapXmlLoader::loadFromXml(const XMLDocument & _xml)
     static const char * tag_name_map = "map";
     const XMLElement * xmap = _xml.RootElement();
     if(strcmp(tag_name_map, xmap->Name()) != 0)
-        throw TiledXmlException(formatXmlRootElemetErrorMessage(tag_name_map));
+        throw Xml::XmlException(formatXmlRootElemetErrorMessage(tag_name_map));
     m_is_map_infinite = xmap->BoolAttribute("infinite");
     m_map.setClass(xmap->Attribute("class"));
     m_map.setWidth(xmap->UnsignedAttribute("width"));
@@ -625,7 +546,7 @@ void TileMapXmlLoader::loadTileLayerChunk(
     {
         std::stringstream ss;
         ss << "Unknown encoding type: \"" << _encoding << "\"";
-        throw TiledXmlException(ss.str());
+        throw Xml::XmlException(ss.str());
     }
 }
 
@@ -667,7 +588,7 @@ void TileMapXmlLoader::loadTileLayerDataBase64(
     std::shared_ptr<std::vector<uint8_t>> data = decodeBase64(trimString(_xml.GetText()));
     if(data == nullptr)
     {
-        throw TiledXmlException("Unable to decode base64-encoded data");
+        throw Xml::XmlException("Unable to decode base64-encoded data");
     }
     if(_compression != nullptr)
     {
@@ -687,7 +608,7 @@ void TileMapXmlLoader::loadTileLayerDataBase64(
         {
             std::stringstream ss;
             ss << "Unknown compression type: \"" << _compression << "\"";
-            throw TiledXmlException(ss.str());
+            throw Xml::XmlException(ss.str());
         }
     }
     if(data) // TODO: error handling?
@@ -935,11 +856,10 @@ inline TileSetXmlLoader::TileSetXmlLoader(
 void TileSetXmlLoader::loadFromFile(uint32_t _first_gid)
 {
     XMLDocument xml;
-    if(xml.LoadFile(m_path.c_str()) != XML_SUCCESS)
-        throw IOException(formatFileReadErrorMessage());
+    loadDocument(xml);
     const XMLElement * xml_root = xml.RootElement();
     if(strcmp(sc_root_tag_name, xml_root->Name()) != 0)
-        throw TiledXmlException(formatXmlRootElemetErrorMessage(sc_root_tag_name));
+        throw Xml::XmlException(formatXmlRootElemetErrorMessage(sc_root_tag_name));
     loadFromXml(*xml_root, _first_gid);
 }
 

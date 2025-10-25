@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/GraphicsPack.h>
+#include <boost/container/slist.hpp>
 
 using namespace Sol2D;
 
@@ -26,8 +27,9 @@ public:
 
 public:
     std::optional<Sprite> sprite;
-    bool is_visible;
     SDL_FPoint position;
+    uint16_t z_index;
+    bool is_visible;
 
 private:
     static std::optional<Sprite> getSprite(const GraphicsPackSpriteDefinition & _definition);
@@ -35,8 +37,9 @@ private:
 
 inline GraphicsPack::Graphics::Graphics(const GraphicsPackSpriteDefinition & _definition) :
     sprite(getSprite(_definition)),
-    is_visible(_definition.is_visible),
-    position(_definition.position)
+    position(_definition.position),
+    z_index(_definition.z_index),
+    is_visible(_definition.is_visible)
 {
     sprite->scale(_definition.scale_factor.x, _definition.scale_factor.y);
 }
@@ -67,7 +70,7 @@ struct GraphicsPack::Frame
     S2_DEFAULT_COPY_AND_MOVE(Frame)
     explicit Frame(const GraphicsPackFrameDefinition & _definition);
     std::chrono::milliseconds duration;
-    std::vector<Graphics> graphics;
+    boost::container::slist<Graphics> graphics;
     bool is_visible;
 };
 
@@ -75,14 +78,19 @@ GraphicsPack::Frame::Frame(const GraphicsPackFrameDefinition & _definition) :
     duration(_definition.duration),
     is_visible(_definition.is_visible)
 {
-    graphics.reserve(_definition.sprites.size());
     for(const auto & sprite_def : _definition.sprites)
-        graphics.emplace_back(sprite_def); // cppcheck-suppress useStlAlgorithm
+    {
+        auto it = graphics.begin();
+        for(; it != graphics.end(); ++it)
+        {
+            if(sprite_def.z_index < it->z_index)
+                break;
+        }
+        graphics.emplace(it, sprite_def);
+    }
 }
 
-GraphicsPack::GraphicsPack(
-    Renderer & _renderer, const GraphicsPackDefinition & _definition /*= GraphicsPackDefinition()*/
-) :
+GraphicsPack::GraphicsPack(Renderer & _renderer, const GraphicsPackDefinition & _definition) :
     m_renderer(&_renderer),
     m_position(_definition.position),
     m_flip_mode(SDL_FLIP_NONE),
@@ -139,7 +147,7 @@ GraphicsPack::~GraphicsPack()
     destroy();
 }
 
-GraphicsPack & GraphicsPack::operator= (const GraphicsPack & _graphics_pack)
+GraphicsPack & GraphicsPack::operator = (const GraphicsPack & _graphics_pack)
 {
     if(this != &_graphics_pack)
     {
@@ -159,7 +167,7 @@ GraphicsPack & GraphicsPack::operator= (const GraphicsPack & _graphics_pack)
     return *this;
 }
 
-GraphicsPack & GraphicsPack::operator= (GraphicsPack && _graphics_pack)
+GraphicsPack & GraphicsPack::operator = (GraphicsPack && _graphics_pack)
 {
     if(this != &_graphics_pack)
     {
@@ -283,29 +291,10 @@ bool GraphicsPack::setCurrentFrameIndex(size_t _index)
     return true;
 }
 
-std::pair<bool, size_t> GraphicsPack::addSprite(size_t _frame, const GraphicsPackSpriteDefinition & _definition)
-{
-    if(_frame >= m_frames.size())
-        return std::make_pair(false, 0);
-    std::vector<Graphics> & graphics = m_frames[_frame]->graphics;
-    graphics.emplace_back(_definition);
-    return std::make_pair(true, graphics.size() - 1);
-}
-
-bool GraphicsPack::removeSprite(size_t _frame, size_t _sprite)
-{
-    if(_frame >= m_frames.size())
-        return false;
-    std::vector<Graphics> & graphics = m_frames[_frame]->graphics;
-    if(_sprite >= graphics.size())
-        return false;
-    graphics.erase(graphics.begin() + _sprite);
-    return true;
-}
-
 void GraphicsPack::render(
-    const SDL_FPoint & _position, const Rotation & _rotation, std::chrono::milliseconds _delta_time
-)
+    const SDL_FPoint & _position,
+    const Rotation & _rotation,
+    std::chrono::milliseconds _delta_time)
 {
     if(m_max_iterations == 0 || m_total_duration == std::chrono::milliseconds::zero())
     {
