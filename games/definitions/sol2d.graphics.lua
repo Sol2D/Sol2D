@@ -66,6 +66,10 @@ local __sprite_sheet
 ---@return boolean
 function __sprite_sheet:loadFromFile(path, options) end
 
+---@param path string
+---@return boolean
+function __sprite_sheet:loadFromAtlas(path) end
+
 ---@class sol.GraphicsPack
 local __graphics_pack
 

@@ -61,19 +61,31 @@ int luaApi_LoadFromFile(lua_State * _lua)
     return 1;
 }
 
+// 1 self
+// 2 path
+int luaApi_LoadFromAtlas(lua_State * _lua)
+{
+    Self * self = UserData::getUserData(_lua, 1);
+    const char * path = argToStringOrError(_lua, 2);
+    bool result = self->getSpriteSheet(_lua)->loadFromAtlas(self->workspace.getResourceFullPath(path));
+    lua_pushboolean(_lua, result);
+    return 1;
+}
+
 } // namespace
 
 void Sol2D::Lua::pushSpriteSheetApi(
-    lua_State * _lua, const Workspace & _workspace, std::shared_ptr<SpriteSheet> _sprite_sheet
-)
+    lua_State * _lua, const Workspace & _workspace, std::shared_ptr<SpriteSheet> _sprite_sheet)
 {
     UserData::pushUserData(_lua, _workspace, _sprite_sheet);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] = {
-            {"__gc",         UserData::luaGC    },
-            {"loadFromFile", luaApi_LoadFromFile},
-            {nullptr,        nullptr            }
+        luaL_Reg funcs[]
+        {
+            { "__gc", UserData::luaGC},
+            { "loadFromFile", luaApi_LoadFromFile },
+            { "lFromAtlas", luaApi_LoadFromAtlas },
+            { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }
