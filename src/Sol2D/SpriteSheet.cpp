@@ -15,10 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <Sol2D/Xml/XmlLoader.h>
+#include <Sol2D/Utils/Color.h>
 #include <Sol2D/SpriteSheet.h>
 #include <boost/container/slist.hpp>
 
 using namespace Sol2D;
+using namespace Sol2D::Utils;
 using namespace tinyxml2;
 
 namespace {
@@ -30,9 +32,11 @@ public:
     bool load();
     const std::string & getTextureName() const;
     const boost::container::slist<SpriteSheetFrame> & getFrames() const;
+    std::optional<SDL_Color> getColorToAlpha() const;
 
 private:
     std::string m_texture_name;
+    std::optional<SDL_Color> m_color_to_alpha;
     boost::container::slist<SpriteSheetFrame> m_frames;
 };
 
@@ -47,6 +51,7 @@ bool AtlasXmlLoader::load()
 {
     const char * const tag_atlas = "atlas";
     const char * const tag_frame = "frame";
+    const char * const attr_alpha = "alpha";
 
     XMLDocument xml;
     loadDocument(xml);
@@ -64,6 +69,16 @@ bool AtlasXmlLoader::load()
 
     m_texture_name = readRequiredAttribute(*xml_root, "texture");
     m_frames.clear();
+
+    if(const char * alpha = xml_root->Attribute(attr_alpha))
+    {
+        m_color_to_alpha = tryParseHexColorString(alpha);
+        if(!m_color_to_alpha.has_value())
+            throw Xml::XmlException(std::format(
+                "The \"{}\" attribute of the \"{}\" tag contains an invalid color value",
+                attr_alpha,
+                tag_atlas));
+    }
 
     for(
         const XMLElement * xml_frame = xml_root->FirstChildElement(tag_frame);
@@ -110,6 +125,11 @@ inline const std::string & AtlasXmlLoader::getTextureName() const
 inline const boost::container::slist<SpriteSheetFrame> & AtlasXmlLoader::getFrames() const
 {
     return m_frames;
+}
+
+inline std::optional<SDL_Color> AtlasXmlLoader::getColorToAlpha() const
+{
+    return m_color_to_alpha;
 }
 
 SpriteSheet::SpriteSheet(Renderer & _renderer) :
@@ -174,6 +194,18 @@ bool SpriteSheet::loadFromAtlas(const std::filesystem::path & _path)
         m_texture = m_renderer->createTexture(
             *surface,
             std::format("Atlas {}", texture_path.filename().string()).c_str());
+        std::optional<SDL_Color> color_to_alpha = loader.getColorToAlpha();
+        if(color_to_alpha.has_value())
+        {
+            const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
+            SDL_SetSurfaceColorKey(surface, true, SDL_MapRGBA(
+                pixel_format,
+                nullptr,
+                color_to_alpha->r,
+                color_to_alpha->g,
+                color_to_alpha->b,
+                color_to_alpha->a));
+        }
         SDL_DestroySurface(surface);
         const auto & frames = loader.getFrames();
         m_frames.clear();
