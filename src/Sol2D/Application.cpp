@@ -73,6 +73,7 @@ private:
     StepState m_step_state;
     SDL_Window * m_sdl_window;
     SDL_GPUDevice * m_device;
+    MIX_Mixer * m_mixer;
     Window * m_window;
 };
 
@@ -90,14 +91,16 @@ Application::Application(const Workspace & _workspace) :
     m_step_state {},
     m_sdl_window(nullptr),
     m_device(nullptr),
+    m_mixer(nullptr),
     m_window(new Window)
 {
-    if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
+    if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_AUDIO))
         throw SDLException("Unable to initialize SDL.");
     if(!TTF_Init())
         throw SDLException("SDL_TTF initialization failed.");
-    if(!Mix_OpenAudio(0, nullptr)) // TODO: allow user to select a device
+    if(!MIX_Init())
         throw SDLException("SDL_Mixer initialization failed.");
+    m_mixer = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr); // TODO: provide ability to specify format to user (the second argument)
     SDL_SetAssertionHandler(sdlAssertionHandler, &m_sdl_assertion_handler);
     m_sdl_window =
         SDL_CreateWindow(m_workspace.getApplicationName().c_str(), 1024, 768, SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
@@ -109,8 +112,7 @@ Application::Application(const Workspace & _workspace) :
     if(!SDL_ClaimWindowForGPUDevice(m_device, m_sdl_window))
         throw SDLException("Unable to claim window for GPU device.");
     if(!SDL_SetGPUSwapchainParameters(
-           m_device, m_sdl_window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_MAILBOX
-       ))
+        m_device, m_sdl_window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_MAILBOX))
     {
         throw SDLException("Unable to configuire GPU swapchain.");
     }
@@ -142,8 +144,10 @@ Application::~Application()
         SDL_DestroyGPUDevice(m_device);
     if(m_sdl_window)
         SDL_DestroyWindow(m_sdl_window);
+    if(m_mixer)
+        MIX_DestroyMixer(m_mixer);
     TTF_Quit();
-    Mix_Quit();
+    MIX_Quit();
     SDL_Quit();
 }
 
@@ -152,7 +156,12 @@ void Application::exec()
     ResourceManager resource_manager; // TODO: create in place
     Renderer renderer(resource_manager, m_sdl_window, m_device);
     StoreManager store_manager;
-    std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(m_workspace, store_manager, *m_window, renderer);
+    std::unique_ptr<LuaLibrary> lua = std::make_unique<LuaLibrary>(
+        m_workspace,
+        store_manager,
+        *m_window,
+        renderer,
+        *m_mixer);
     lua->executeMainScript();
     {
         int w, h;

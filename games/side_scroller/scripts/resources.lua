@@ -94,7 +94,7 @@ end
 ---@param key string
 ---@param file string
 local function loadSoundEffect(store, key, file)
-    local sound_effect = store:createSoundEffect(key, file)
+    local sound_effect = store:createAudio(key, file, true)
     if not sound_effect then
         error('Unable to load sound effect form ' .. file)
     end
@@ -196,9 +196,9 @@ local function construct()
     ---@param key string
     ---@return sol.SoundEffect
     function resources.getSoundEffect(key)
-        local sound_effect = getStore():getSoundEffect(key)
+        local sound_effect = getStore():getAudio(key)
         if not sound_effect then
-            error('Sound effect' .. key .. ' not found')
+            error('Audio ' .. key .. ' not found')
         end
         return sound_effect
     end

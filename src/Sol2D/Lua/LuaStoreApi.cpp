@@ -25,8 +25,8 @@
 #include <Sol2D/Lua/LuaSpriteSheetApi.h>
 #include <Sol2D/Lua/LuaGraphicsPackApi.h>
 #include <Sol2D/Lua/LuaFontApi.h>
-#include <Sol2D/Lua/LuaSoundEffectApi.h>
-#include <Sol2D/Lua/LuaMusicApi.h>
+#include <Sol2D/Lua/LuaAudioTrackApi.h>
+#include <Sol2D/Lua/LuaAudioApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 #include <Sol2D/Lua/Aux/LuaUtils.h>
@@ -40,9 +40,15 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    explicit Self(const Workspace & _workspace, Renderer & _renderer, std::shared_ptr<Store> & _store) :
+    explicit Self(
+        const Workspace & _workspace,
+        Renderer & _renderer,
+        MIX_Mixer & _mixer,
+        std::shared_ptr<Store> & _store
+    ) :
         workspace(_workspace),
         renderer(_renderer),
+        mixer(_mixer),
         store(_store)
     {
     }
@@ -76,6 +82,7 @@ struct Self : LuaSelfBase
 
     const Workspace & workspace;
     Renderer & renderer;
+    MIX_Mixer & mixer;
     std::weak_ptr<Store> store;
 };
 
@@ -255,19 +262,15 @@ int luaApi_GetFont(lua_State * _lua)
 
 // 1 self
 // 2 key
-// 3 file path
-int luaApi_CreateSoundEffect(lua_State * _lua)
+int luaApi_CreateAudioTrack(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = argToStringOrError(_lua, 2);
-    const char * path = argToStringOrError(_lua, 3);
-    std::shared_ptr<Mix_Chunk> chunk = self->getStore(_lua)->createObject<Mix_Chunk>(
-        key, self->workspace.getResourceFullPath(std::filesystem::path(path))
-    );
-    if(chunk)
+    std::shared_ptr<MIX_Track> track = self->getStore(_lua)->createObject<MIX_Track>(key, self->mixer);
+    if(track)
     {
-        pushSoundEffectApi(_lua, chunk);
-        self->holdReference(_lua, LuaTypeName::sound_effect, key);
+        pushAudioTrackApi(_lua, track);
+        self->holdReference(_lua, LuaTypeName::audio_track, key);
     }
     else
     {
@@ -278,11 +281,11 @@ int luaApi_CreateSoundEffect(lua_State * _lua)
 
 // 1 self
 // 2 key
-int luaApi_GetSoundEffect(lua_State * _lua)
+int luaApi_GetAudioTrack(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    if(std::shared_ptr<Mix_Chunk> chunk = self->getStore(_lua)->getObject<Mix_Chunk>(argToStringOrError(_lua, 2)))
-        pushSoundEffectApi(_lua, chunk);
+    if(std::shared_ptr<MIX_Track> track = self->getStore(_lua)->getObject<MIX_Track>(argToStringOrError(_lua, 2)))
+        pushAudioTrackApi(_lua, track);
     else
         lua_pushnil(_lua);
     return 1;
@@ -291,18 +294,23 @@ int luaApi_GetSoundEffect(lua_State * _lua)
 // 1 self
 // 2 key
 // 3 file path
-int luaApi_CreateMusic(lua_State * _lua)
+// 4 predecode (optional)
+int luaApi_CreateAudio(lua_State * _lua)
 {
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = argToStringOrError(_lua, 2);
     const char * path = argToStringOrError(_lua, 3);
-    std::shared_ptr<Mix_Music> music = self->getStore(_lua)->createObject<Mix_Music>(
-        key, self->workspace.getResourceFullPath(std::filesystem::path(path))
+    bool predecode = lua_gettop(_lua) > 3 ? lua_toboolean(_lua, 4) : false;
+    std::shared_ptr<MIX_Audio> audio = self->getStore(_lua)->createObject<MIX_Audio>(
+        key,
+        self->mixer,
+        self->workspace.getResourceFullPath(std::filesystem::path(path)),
+        predecode
     );
-    if(music)
+    if(audio)
     {
-        pushMusicApi(_lua, music);
-        self->holdReference(_lua, LuaTypeName::music, key);
+        pushAudioApi(_lua, self->mixer, audio);
+        self->holdReference(_lua, LuaTypeName::audio, key);
     }
     else
     {
@@ -313,11 +321,11 @@ int luaApi_CreateMusic(lua_State * _lua)
 
 // 1 self
 // 2 key
-int luaApi_GetMusic(lua_State * _lua)
+int luaApi_GetAudio(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    if(std::shared_ptr<Mix_Music> music = self->getStore(_lua)->getObject<Mix_Music>(argToStringOrError(_lua, 2)))
-        pushMusicApi(_lua, music);
+    if(std::shared_ptr<MIX_Audio> audio = self->getStore(_lua)->getObject<MIX_Audio>(argToStringOrError(_lua, 2)))
+        pushAudioApi(_lua, self->mixer, audio);
     else
         lua_pushnil(_lua);
     return 1;
@@ -343,9 +351,10 @@ void Sol2D::Lua::pushStoreApi(
     lua_State * _lua,
     const Workspace & _workspace,
     Renderer & _renderer,
+    MIX_Mixer & _mixer,
     std::shared_ptr<Store> _store)
 {
-    UserData::pushUserData(_lua, _workspace, _renderer, _store);
+    UserData::pushUserData(_lua, _workspace, _renderer, _mixer, _store);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
         luaL_Reg funcs[] =
@@ -366,12 +375,12 @@ void Sol2D::Lua::pushStoreApi(
             { "createSpriteSheet", luaApi_CreateSpriteSheet },
             { "getSpriteSheet", luaApi_GetSpriteSheet },
             { "freeSpriteSheet", luaApi_FreeObject<SpriteSheet, LuaTypeName::sprite_sheet> },
-            { "createSoundEffect", luaApi_CreateSoundEffect },
-            { "getSoundEffect", luaApi_GetSoundEffect },
-            { "freeSoundEffect", luaApi_FreeObject<Mix_Chunk, LuaTypeName::sound_effect> },
-            { "createMusic", luaApi_CreateMusic },
-            { "getMusic", luaApi_GetMusic },
-            { "freeMusic", luaApi_FreeObject<Mix_Music, LuaTypeName::music> },
+            { "createAudioTrack", luaApi_CreateAudioTrack },
+            { "getAudioTrack", luaApi_GetAudioTrack },
+            { "freeAudioTrack", luaApi_FreeObject<MIX_Track, LuaTypeName::audio_track> },
+            { "createAudio", luaApi_CreateAudio },
+            { "getAudio", luaApi_GetAudio },
+            { "freeAudio", luaApi_FreeObject<MIX_Audio, LuaTypeName::audio> },
             { "createFont", luaApi_CreateFont },
             { "getFont", luaApi_GetFont },
             { "freeFont", luaApi_FreeObject<TTF_Font, LuaTypeName::font> },

@@ -2,7 +2,8 @@ local createBaseLevel = require 'level'
 
 local STORE_KEY = 'level-01'
 
-local function createLevel01()
+--@param game Game
+local function createLevel01(game)
     local store = sol.stores:createStore(STORE_KEY)
     local level = {}
 
@@ -24,14 +25,14 @@ local function createLevel01()
     end
 
     function level:createMusic()
-        return store:createMusic('level-01', 'sounds/level-01/level-01.wav')
+        return store:createAudio('level-01', 'sounds/level-01/level-01.wav')
     end
 
     function level:destroy()
         sol.stores:deleteStore(STORE_KEY)
     end
 
-    return setmetatable(level, createBaseLevel())
+    return setmetatable(level, createBaseLevel(game))
 end
 
 return createLevel01

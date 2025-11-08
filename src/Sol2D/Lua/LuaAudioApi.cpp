@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <Sol2D/Lua/LuaMusicApi.h>
+#include <Sol2D/Lua/LuaAudioApi.h>
 #include <Sol2D/Lua/Aux/LuaStrings.h>
 #include <Sol2D/Lua/Aux/LuaUserData.h>
 
@@ -24,58 +24,55 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    explicit Self(std::shared_ptr<Mix_Music> & _music) :
-        music(_music)
+    Self(MIX_Mixer & _mixer, std::shared_ptr<MIX_Audio> & _audio) :
+        mixer(&_mixer),
+        audio(_audio)
     {
     }
 
-    std::shared_ptr<Mix_Music> getMusic(lua_State * _lua) const
+    std::shared_ptr<MIX_Audio> getAudio(lua_State * _lua) const
     {
-        std::shared_ptr<Mix_Music> ptr = music.lock();
+        std::shared_ptr<MIX_Audio> ptr = audio.lock();
         if(!ptr)
             luaL_error(_lua, LuaMessage::music_is_destroyed);
         return ptr;
     }
 
-    std::weak_ptr<Mix_Music> music;
+    MIX_Mixer * mixer;
+    std::weak_ptr<MIX_Audio> audio;
 };
 
-using UserData = LuaUserData<Self, LuaTypeName::music>;
+using UserData = LuaUserData<Self, LuaTypeName::audio>;
 
 // 1 self
 int luaApi_Play(lua_State * _lua)
 {
     const Self * self = UserData::getUserData(_lua, 1);
-    bool result = Mix_PlayMusic(self->getMusic(_lua).get(), 0) == 0;
-    lua_pushboolean(_lua, result);
-    return 1;
-}
-
-// 1 self
-// 2 iteration count
-int luaApi_Loop(lua_State * _lua)
-{
-    const Self * self = UserData::getUserData(_lua, 1);
-    luaL_argexpected(_lua, lua_isinteger(_lua, 2), 2, LuaTypeName::integer);
-    bool result = Mix_PlayMusic(self->getMusic(_lua).get(), lua_tointeger(_lua, 2)) == 0;
+    bool result = MIX_PlayAudio(self->mixer, self->getAudio(_lua).get());
     lua_pushboolean(_lua, result);
     return 1;
 }
 
 } // namespace
 
-void Sol2D::Lua::pushMusicApi(lua_State * _lua, std::shared_ptr<Mix_Music> _music)
+void Sol2D::Lua::pushAudioApi(lua_State * _lua, MIX_Mixer & _mixer, std::shared_ptr<MIX_Audio> _audio)
 {
-    UserData::pushUserData(_lua, _music);
+    UserData::pushUserData(_lua, std::ref(_mixer), _audio);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] = {
-            {"__gc",  UserData::luaGC},
-            {"play",  luaApi_Play    },
-            {"loop",  luaApi_Loop    },
-            {nullptr, nullptr        }
+        luaL_Reg funcs[] =
+        {
+            { "__gc", UserData::luaGC },
+            { "play", luaApi_Play },
+            { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }
     lua_setmetatable(_lua, -2);
+}
+
+std::shared_ptr<MIX_Audio> Sol2D::Lua::tryGetAudio(lua_State * _lua, int _idx)
+{
+    Self * self = UserData::getUserData(_lua, _idx);
+    return self ? self->getAudio(_lua) : nullptr;
 }

@@ -76,8 +76,8 @@ struct LuaTypeName
     static const char ui_form[];
     static const char vertical_text_alignment[];
     static const char horizontal_text_alignment[];
-    static const char sound_effect[];
-    static const char music[];
+    static const char audio_track[];
+    static const char audio[];
     static const char style[];    
     static const char content_alignment[];
     static const char content_justification[];

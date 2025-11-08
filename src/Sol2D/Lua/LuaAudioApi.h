@@ -22,6 +22,8 @@
 
 namespace Sol2D::Lua {
 
-void pushSoundEffectApi(lua_State * _lua, std::shared_ptr<Mix_Chunk> _chunk);
+void pushAudioApi(lua_State * _lua, MIX_Mixer & _mixer, std::shared_ptr<MIX_Audio> _audio);
+
+std::shared_ptr<MIX_Audio> tryGetAudio(lua_State * _lua, int _idx);
 
 } // namespace Sol2D::Lua

@@ -93,20 +93,23 @@ struct Utils::ObjectFactory<TTF_Font>
 };
 
 template<>
-struct Utils::ObjectFactory<Mix_Chunk>
+struct Utils::ObjectFactory<MIX_Audio>
 {
-    std::shared_ptr<Mix_Chunk> produce(const std::filesystem::path & _file_path) const
+    std::shared_ptr<MIX_Audio> produce(
+        MIX_Mixer & _mixer,
+        const std::filesystem::path & _file_path,
+        bool _predecode) const
     {
-        return SDLPtr::make(Mix_LoadWAV(_file_path.c_str()));
+        return SDLPtr::make(MIX_LoadAudio(&_mixer, _file_path.c_str(), _predecode));
     }
 };
 
 template<>
-struct Utils::ObjectFactory<Mix_Music>
+struct Utils::ObjectFactory<MIX_Track>
 {
-    std::shared_ptr<Mix_Music> produce(const std::filesystem::path & _file_path) const
+    std::shared_ptr<MIX_Track> produce(MIX_Mixer & _mixer) const
     {
-        return SDLPtr::make(Mix_LoadMUS(_file_path.c_str()));
+        return SDLPtr::make(MIX_CreateTrack(&_mixer));
     }
 };
 
@@ -118,8 +121,8 @@ using Store = Utils::ObjectStore<
     UI,
     View,
     TTF_Font,
-    Mix_Chunk,
-    Mix_Music
+    MIX_Audio,
+    MIX_Track
 >;
 
 class StoreManager

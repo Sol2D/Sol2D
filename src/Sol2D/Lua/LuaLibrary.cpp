@@ -66,7 +66,11 @@ bool addPackagePath(lua_State * _lua, const std::filesystem::path & _path)
 } // namespace
 
 LuaLibrary::LuaLibrary(
-    const Workspace & _workspace, StoreManager & _store_manager, Window & _window, Renderer & _renderer
+    const Workspace & _workspace,
+    StoreManager & _store_manager,
+    Window & _window,
+    Renderer & _renderer,
+    MIX_Mixer & _mixer
 ) :
     m_lua(luaL_newstate()),
     m_workspace(_workspace)
@@ -85,7 +89,7 @@ LuaLibrary::LuaLibrary(
         lua_setfield(m_lua, -2, "keyboard");
         pushMouseApi(m_lua);
         lua_setfield(m_lua, -2, "mouse");
-        pushStoreManagerApi(m_lua, _workspace, _renderer, _store_manager);
+        pushStoreManagerApi(m_lua, _workspace, _renderer, _mixer, _store_manager);
         lua_setfield(m_lua, -2, "stores");
         pushScancodeEnum(m_lua);
         lua_setfield(m_lua, -2, "Scancode");

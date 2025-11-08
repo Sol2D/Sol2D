@@ -98,30 +98,30 @@ function __store:getSpriteSheet(key) end
 function __store:freeSpriteSheet(key) end
 
 ---@param key string
----@param file_path string
----@return sol.SoundEffect
-function __store:createSoundEffect(key, file_path) end
+---@return sol.AudioTrack
+function __store:createAudioTrack(key) end
 
 ---@param key string
----@return sol.SoundEffect | nil
-function __store:getSoundEffect(key) end
-
----@param key string
----@return boolean
-function __store:freeSoundEffect(key) end
-
----@param key string
----@param file_path string
----@return sol.Music | nil
-function __store:createMusic(key, file_path) end
-
----@param key string
----@return sol.Music | nil
-function __store:getMusic(key) end
+---@return sol.AudioTrack | nil
+function __store:getAudioTrack(key) end
 
 ---@param key string
 ---@return boolean
-function __store:freeMusic(key) end
+function __store:freeAudioTrack(key) end
+
+---@param key string
+---@param file_path string
+---@param predecode? boolean
+---@return sol.Audio | nil
+function __store:createAudio(key, file_path, predecode) end
+
+---@param key string
+---@return sol.Audio | nil
+function __store:getAudio(key) end
+
+---@param key string
+---@return boolean
+function __store:freeAudio(key) end
 
 ---@param key string
 ---@param file_path string

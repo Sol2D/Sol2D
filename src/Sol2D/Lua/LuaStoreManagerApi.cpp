@@ -27,16 +27,18 @@ namespace {
 
 struct Self : LuaSelfBase
 {
-    explicit Self(StoreManager & _manager, const Workspace & _workspace, Renderer & _renderer) :
+    explicit Self(StoreManager & _manager, const Workspace & _workspace, Renderer & _renderer, MIX_Mixer & _mixer) :
         manager(_manager),
         workspace(_workspace),
-        renderer(_renderer)
+        renderer(_renderer),
+        mixer(_mixer)
     {
     }
 
     StoreManager & manager;
     const Workspace & workspace;
     Renderer & renderer;
+    MIX_Mixer & mixer;
 };
 
 using UserData = LuaUserData<Self, LuaTypeName::store_manager>;
@@ -48,7 +50,7 @@ int luaApi_CreateStore(lua_State * _lua)
     Self * self = UserData::getUserData(_lua, 1);
     const char * key = argToStringOrError(_lua, 2);
     std::shared_ptr<Store> store = self->manager.createStore(key);
-    pushStoreApi(_lua, self->workspace, self->renderer, store);
+    pushStoreApi(_lua, self->workspace, self->renderer, self->mixer, store);
     return 1;
 }
 
@@ -60,7 +62,7 @@ int luaApi_GetStore(lua_State * _lua)
     const char * key = argToStringOrError(_lua, 2);
     std::shared_ptr<Store> store = self->manager.getStore(key);
     if(store)
-        pushStoreApi(_lua, self->workspace, self->renderer, store);
+        pushStoreApi(_lua, self->workspace, self->renderer, self->mixer, store);
     else
         lua_pushnil(_lua);
     return 1;
@@ -79,18 +81,22 @@ int luaApi_DeleteStore(lua_State * _lua)
 } // namespace
 
 void Sol2D::Lua::pushStoreManagerApi(
-    lua_State * _lua, const Workspace & _workspace, Renderer & _renderer, StoreManager & _store_manager
-)
+    lua_State * _lua,
+    const Workspace & _workspace,
+    Renderer & _renderer,
+    MIX_Mixer & _mixer,
+    StoreManager & _store_manager)
 {
-    UserData::pushUserData(_lua, _store_manager, _workspace, _renderer);
+    UserData::pushUserData(_lua, _store_manager, _workspace, _renderer, _mixer);
     if(UserData::pushMetatable(_lua) == MetatablePushResult::Created)
     {
-        luaL_Reg funcs[] = {
-            {"__gc",        UserData::luaGC   },
-            {"createStore", luaApi_CreateStore},
-            {"getStore",    luaApi_GetStore   },
-            {"deleteStore", luaApi_DeleteStore},
-            {nullptr,       nullptr           }
+        luaL_Reg funcs[] =
+        {
+            { "__gc", UserData::luaGC },
+            { "createStore", luaApi_CreateStore },
+            { "getStore", luaApi_GetStore },
+            { "deleteStore", luaApi_DeleteStore },
+            { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);
     }

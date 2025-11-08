@@ -3,3 +3,4 @@ CMakeLists.txt.user*
 *.tiled-session
 *.kdev*
 .cache
+.qtcreator

@@ -27,7 +27,12 @@ class LuaLibrary final
 {
 public:
     S2_DISABLE_COPY_AND_MOVE(LuaLibrary)
-    LuaLibrary(const Workspace & _workspace, StoreManager & _store_manager, Window & _window, Renderer & _renderer);
+    LuaLibrary(
+        const Workspace & _workspace,
+        StoreManager & _store_manager,
+        Window & _window,
+        Renderer & _renderer,
+        MIX_Mixer & _mixer);
     ~LuaLibrary();
     void executeMainScript();
 

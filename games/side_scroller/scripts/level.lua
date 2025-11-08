@@ -15,7 +15,8 @@ local keys = {
     }
 }
 
-local function createLevel()
+--@param game Game
+local function createLevel(game)
     local level = {}
     level.__index = level
     level.METERS_PER_PIXEL = 0.01
@@ -151,7 +152,7 @@ local function createLevel()
         if self.createMusic then
             local music = self:createMusic()
             if music then
-                music:loop(-1)
+                game.playMusic(music)
             end
         end
     end

@@ -22,6 +22,6 @@
 
 namespace Sol2D::Lua {
 
-void pushMusicApi(lua_State * _lua, std::shared_ptr<Mix_Music> _music);
+void pushAudioTrackApi(lua_State * _lua, std::shared_ptr<MIX_Track> _track);
 
 } // namespace Sol2D::Lua

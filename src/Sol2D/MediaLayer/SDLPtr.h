@@ -28,7 +28,7 @@ class SDLPtr
     class TextureDeleter
     {
     public:
-        TextureDeleter(SDL_GPUDevice * _device) :
+        explicit TextureDeleter(SDL_GPUDevice * _device) :
             m_device(_device)
         {
         }
@@ -54,14 +54,14 @@ public:
         return std::shared_ptr<TTF_Font>(_font, TTF_CloseFont);
     }
 
-    static std::shared_ptr<Mix_Chunk> make(Mix_Chunk * _chunk)
+    static std::shared_ptr<MIX_Audio> make(MIX_Audio * _audio)
     {
-        return std::shared_ptr<Mix_Chunk>(_chunk, Mix_FreeChunk);
+        return std::shared_ptr<MIX_Audio>(_audio, MIX_DestroyAudio);
     }
 
-    static std::shared_ptr<Mix_Music> make(Mix_Music * _music)
+    static std::shared_ptr<MIX_Track> make(MIX_Track * _track)
     {
-        return std::shared_ptr<Mix_Music>(_music, Mix_FreeMusic);
+        return std::shared_ptr<MIX_Track>(_track, MIX_DestroyTrack);
     }
 };
 
