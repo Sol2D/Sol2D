@@ -36,7 +36,7 @@ void UIRenderer::render(const RenderingContext & _ctx, const UI & _ui) const
     for(const auto & form : _ui.getForms())
     {
         ImDrawData * draw_data = form->getDrawData();
-        Imgui_ImplSDLGPU3_PrepareDrawData(draw_data, prepare_cmd_buffer);
+        ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, prepare_cmd_buffer);
     }
     SDL_SubmitGPUCommandBuffer(prepare_cmd_buffer);
 
