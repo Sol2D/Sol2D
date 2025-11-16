@@ -8,7 +8,7 @@ local sound_effect_armor = resources.getSoundEffect(resources.keys.soundEffects.
 local sound_effect_swing = resources.getSoundEffect(resources.keys.soundEffects.SWING)
 
 local State = {
-    IDLE = 'idel',
+    IDLE = 'idle',
     WALK = 'walk',
     JUMP = 'jump',
     FALL = 'fall',

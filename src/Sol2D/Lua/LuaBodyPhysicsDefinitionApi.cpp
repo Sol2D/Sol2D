@@ -22,12 +22,32 @@ using namespace Sol2D::World;
 bool Sol2D::Lua::tryGetBodyPhysicsDefinition(lua_State * _lua, int _idx, BodyPhysicsDefinition & _physics)
 {
     LuaTableApi table(_lua, _idx);
-    if(table.isValid())
+    if(!table.isValid())
+        return false;
     {
-        table.tryGetNumber("linearDamping", _physics.linear_damping);
-        table.tryGetNumber("angularDamping", _physics.angular_damping);
-        table.tryGetBoolean("fixedRotation", &_physics.fixed_rotation);
-        return true;
+        lua_Integer lua_int;
+        if(table.tryGetInteger("type", &lua_int))
+        {
+            std::optional<BodyType> body_type = castToBodyType(lua_int);
+            if(body_type.has_value())
+                _physics.type = body_type.value();
+        }
     }
-    return false;
+    table.tryGetPoint("position", _physics.position);
+    table.tryGetPoint("linearVelocity", _physics.linear_velocity);
+    table.tryGetNumber("linearDamping", _physics.linear_damping);
+    table.tryGetNumber("angularDamping", _physics.angular_damping);
+    table.tryGetNumber("angularVelocity", _physics.angular_velocity);
+    table.tryGetNumber("gravityScale", _physics.gravity_scale);
+    table.tryGetNumber("sleepThreshold", _physics.sleep_threshold);
+    table.tryGetRotation("rotation", _physics.rotation);
+    table.tryGetBoolean("isRotationAllowed", &_physics.is_rotation_allowed);
+    table.tryGetBoolean("isMotionXAllowed", &_physics.is_motion_x_allowed);
+    table.tryGetBoolean("isMotionYAllowed", &_physics.is_motion_y_allowed);
+    table.tryGetBoolean("isSleepEnabled", &_physics.is_sleep_enabled);
+    table.tryGetBoolean("isAwake", &_physics.is_awake);
+    table.tryGetBoolean("isBullet", &_physics.is_bullet);
+    table.tryGetBoolean("isEnabled", &_physics.is_enabled);
+    table.tryGetBoolean("isFastRotationAllowed", &_physics.is_fast_rotation_allowed);
+    return true;
 }

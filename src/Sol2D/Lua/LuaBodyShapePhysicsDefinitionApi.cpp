@@ -24,11 +24,23 @@ bool Sol2D::Lua::tryGetBodyShapePhysicsDefinition(lua_State * _lua, int _idx, Bo
     LuaTableApi table(_lua, _idx);
     if(table.isValid())
     {
+        if(table.tryGetTable("material"))
+        {
+            LuaTableApi material_table(_lua, -1);
+            b2SurfaceMaterial material = b2DefaultSurfaceMaterial();
+            material_table.tryGetNumber("friction", &material.friction);
+            material_table.tryGetNumber("restitution", &material.restitution);
+            material_table.tryGetNumber("rollingResistance", &material.rollingResistance);
+            material_table.tryGetNumber("tangentSpeed", &material.tangentSpeed);
+            _definition.material = material;
+            lua_pop(_lua, 1);
+        }
         table.tryGetNumber("density", _definition.density);
-        table.tryGetNumber("restitution", _definition.restitution);
-        table.tryGetNumber("friction", _definition.friction);
         table.tryGetBoolean("isSensor", &_definition.is_sensor);
-        table.tryGetBoolean("isPreSolveEnabled", &_definition.is_pre_solve_enabled);
+        table.tryGetBoolean("arePreSolveEventsEnabled", &_definition.are_pre_solve_events_enabled);
+        table.tryGetBoolean("areSensorEventsEnabled", &_definition.are_sensor_events_enabled);
+        table.tryGetBoolean("areContactEventsEnabled", &_definition.are_contact_events_enabled);
+        table.tryGetBoolean("areHitEventsEnabled", &_definition.are_hit_events_enabled);
         return true;
     }
     return false;

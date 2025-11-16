@@ -58,14 +58,12 @@ struct LuaTypeName
     static const char body_prototype[];
     static const char distance_joint_definition[];
     static const char motor_joint_definition[];
-    static const char mouse_joint_definition[];
     static const char prismatic_joint_definition[];
     static const char revolute_joint_definition[];
     static const char weld_joint_definition[];
     static const char wheel_joint_definition[];
     static const char distance_joint[];
     static const char motor_joint[];
-    static const char mouse_joint[];
     static const char prismatic_joint[];
     static const char revolute_joint[];
     static const char weld_joint[];
@@ -117,10 +115,10 @@ std::string LuaTypeName::joinTypes(const T... _type)
 
 constexpr std::vector<const char *> getAllJointTypes()
 {
-    return std::vector<const char *> {
+    return std::vector<const char *>
+    {
         LuaTypeName::distance_joint,
         LuaTypeName::motor_joint,
-        LuaTypeName::mouse_joint,
         LuaTypeName::prismatic_joint,
         LuaTypeName::revolute_joint,
         LuaTypeName::weld_joint,

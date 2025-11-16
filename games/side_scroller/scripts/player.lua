@@ -9,14 +9,14 @@ local module = {
             BOTTOM_SENSOR = 'bottom-sensor'
         },
         shapeGraphics = {
-            IDLE_LEFT = 'ilde-left',
-            IDLE_RIGHT = 'ilde-right',
+            IDLE_LEFT = 'idle-left',
+            IDLE_RIGHT = 'idle-right',
             WALK_LEFT = 'walk-left',
             WALK_RIGHT = 'walk-right',
             JUMP_LEFT = 'jump-left',
             JUMP_RIGHT = 'jump-right',
-            ATTACK_LEFT = 'attac-left',
-            ATTACK_RIGHT = 'attac-right'
+            ATTACK_LEFT = 'attack-left',
+            ATTACK_RIGHT = 'attack-right'
         }
     }
 }
@@ -159,8 +159,9 @@ local function addAttackAnimations(graphics_defs)
     }
 end
 
+---@param position sol.Point
 ---@return sol.BodyDefinition
-local function getDefinition()
+local function getDefinition(position)
     local hit_box = {
         w = 240 * SCALE_FACTOR,
         h = 525 * SCALE_FACTOR
@@ -172,14 +173,17 @@ local function getDefinition()
     local definition = {
         type = sol.BodyType.DYNAMIC,
         physics = {
-            fixedRotation = true
+            position = position,
+            isRotationAllowed = false
         },
         shapes = {
             [module.keys.shapes.MAIN] = {
                 type = sol.BodyShapeType.CAPSULE,
                 physics = {
-                    friction = 1.1,
-                    density = 80
+                    material = {
+                        friction = 1.1,
+                        density = 80
+                    }
                 },
                 radius = radius,
                 center1 = { x = hit_box.x + radius, y = hit_box.y + radius },
@@ -212,7 +216,7 @@ end
 ---@param script_argument any?
 ---@return sol.Body
 function module.new(scene, position, script_argument)
-    local player = scene:createBody(position, getDefinition(), 'player-script.lua', script_argument)
+    local player = scene:createBody(getDefinition(position), 'player-script.lua', script_argument)
     local main_shape = player:getShape(module.keys.shapes.MAIN)
     if main_shape then
         main_shape:setCurrentGraphics(module.keys.shapeGraphics.IDLE_RIGHT)

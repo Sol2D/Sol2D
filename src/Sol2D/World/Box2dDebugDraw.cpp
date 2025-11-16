@@ -47,16 +47,16 @@ Box2dDebugDraw::Box2dDebugDraw(
 {
     m_b2_debug_draw.context = this;
     m_b2_debug_draw.drawShapes = true; // TODO: from user config
-    m_b2_debug_draw.drawAABBs = false; // TODO: from user config
+    m_b2_debug_draw.drawBounds = false; // TODO: from user config
     m_b2_debug_draw.drawJoints = true; // TODO: from user config
-    m_b2_debug_draw.drawContacts = true; // TODO: from user config
-    m_b2_debug_draw.DrawPolygon = &Box2dDebugDraw::drawPolygon;
-    m_b2_debug_draw.DrawSolidPolygon = &Box2dDebugDraw::drawSolidPolygon;
-    m_b2_debug_draw.DrawCircle = &Box2dDebugDraw::drawCircle;
-    m_b2_debug_draw.DrawSolidCircle = &Box2dDebugDraw::drawSolidCircle;
-    m_b2_debug_draw.DrawPoint = &Box2dDebugDraw::drawPoint;
-    m_b2_debug_draw.DrawSegment = &Box2dDebugDraw::drawSegment;
-    m_b2_debug_draw.DrawSolidCapsule = &Box2dDebugDraw::drawSolidCapsule;
+    m_b2_debug_draw.drawContactPoints = true; // TODO: from user config
+    m_b2_debug_draw.DrawPolygonFcn = &Box2dDebugDraw::drawPolygon;
+    m_b2_debug_draw.DrawSolidPolygonFcn = &Box2dDebugDraw::drawSolidPolygon;
+    m_b2_debug_draw.DrawCircleFcn = &Box2dDebugDraw::drawCircle;
+    m_b2_debug_draw.DrawSolidCircleFcn = &Box2dDebugDraw::drawSolidCircle;
+    m_b2_debug_draw.DrawPointFcn = &Box2dDebugDraw::drawPoint;
+    m_b2_debug_draw.DrawLineFcn = &Box2dDebugDraw::drawLine;
+    m_b2_debug_draw.DrawSolidCapsuleFcn = &Box2dDebugDraw::drawSolidCapsule;
 }
 
 void Box2dDebugDraw::draw()
@@ -126,7 +126,7 @@ void Box2dDebugDraw::drawPoint(b2Vec2 _point, float _size, b2HexColor _color, vo
     );
 }
 
-void Box2dDebugDraw::drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void * _context)
+void Box2dDebugDraw::drawLine(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void * _context)
 {
     Box2dDebugDraw * self = static_cast<Box2dDebugDraw *>(_context);
     self->m_renderer->renderLine(

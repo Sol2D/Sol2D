@@ -16,20 +16,31 @@
 
 #pragma once
 
+#include <Sol2D/MediaLayer/MediaLayer.h>
+#include <Sol2D/World/BodyType.h>
 #include <optional>
 
 namespace Sol2D::World {
 
 struct BodyPhysicsDefinition
 {
-    BodyPhysicsDefinition() :
-        fixed_rotation(false)
-    {
-    }
-
+    BodyType type = BodyType::Static;
+    SDL_FPoint position;
     std::optional<float> linear_damping;
     std::optional<float> angular_damping;
-    bool fixed_rotation;
+    std::optional<b2Rot> rotation;
+    std::optional<SDL_FPoint> linear_velocity;
+    std::optional<float> angular_velocity;
+    std::optional<float> gravity_scale;
+    std::optional<float> sleep_threshold;
+    bool is_rotation_allowed = true;
+    bool is_motion_x_allowed = true;
+    bool is_motion_y_allowed = true;
+    bool is_sleep_enabled = true;
+    bool is_awake = true;
+    bool is_bullet = false;
+    bool is_enabled = true;
+    bool is_fast_rotation_allowed = false;
 };
 
 } // namespace Sol2D::World

@@ -28,15 +28,6 @@ bool Sol2D::Lua::tryGetBodyOptions(lua_State * _lua, int _idx, BodyOptions & _bo
     {
         return false;
     }
-    {
-        lua_Integer lua_int;
-        if(table.tryGetInteger("type", &lua_int))
-        {
-            std::optional<BodyType> body_type = castToBodyType(lua_int);
-            if(body_type.has_value())
-                _body_options.type = body_type.value();
-        }
-    }
     if(table.tryGetValue("bodyPhysics"))
     {
         tryGetBodyPhysicsDefinition(_lua, -1, _body_options.body_physics);

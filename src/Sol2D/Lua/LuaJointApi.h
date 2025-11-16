@@ -24,7 +24,6 @@ namespace Sol2D::Lua {
 
 void pushJointApi(lua_State * _lua, std::shared_ptr<World::Scene> _scene, World::DistanceJoint && _joint);
 void pushJointApi(lua_State * _lua, std::shared_ptr<World::Scene> _scene, World::MotorJoint && _joint);
-void pushJointApi(lua_State * _lua, std::shared_ptr<World::Scene> _scene, World::MouseJoint && _joint);
 void pushJointApi(lua_State * _lua, std::shared_ptr<World::Scene> _scene, World::PrismaticJoint && _joint);
 void pushJointApi(lua_State * _lua, std::shared_ptr<World::Scene> _scene, World::RevoluteJoint && _joint);
 void pushJointApi(lua_State * _lua, std::shared_ptr<World::Scene> _scene, World::WeldJoint && _joint);

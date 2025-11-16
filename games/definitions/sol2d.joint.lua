@@ -3,14 +3,18 @@
 ---@class sol.JointDefinition
 ---@field bodyA integer | sol.Body
 ---@field bodyB integer | sol.Body
+---@field localFrameA sol.Transform?
+---@field localFrameB sol.Transform?
+---@field forceThreshold number?
+---@field torqueThreshold number?
+---@field constraintHertz number?
+---@field constraintDampingRatio number?
 ---@field isCollideConnectedEnabled boolean?
 
 ---@class sol.DistanceJointDefinition: sol.JointDefinition
 ---@field isSpringEnabled boolean?
 ---@field isMotorEnabled boolean?
 ---@field isLimitEnabled boolean?
----@field localAnchorA sol.Point?
----@field localAnchorB sol.Point?
 ---@field minLength number?
 ---@field maxLength number?
 ---@field hertz number?
@@ -20,37 +24,30 @@
 ---@field length number?
 
 ---@class sol.MotorJointDefinition: sol.JointDefinition
----@field linearOffset sol.Point?
----@field angularOffset number?
----@field maxForce number?
----@field maxTorque number?
----@field correctionFactor number?
-
----@class sol.MouseJointDefinition: sol.JointDefinition
----@field target sol.Point?
----@field hertz number?
----@field dampingRatio number?
----@field maxForce number?
+---@field linearVelocity sol.Point?
+---@field maxVelocityForce number?
+---@field angularVelocity number?
+---@field maxVelocityTorque number?
+---@field linearHertz number?
+---@field linearDampingRatio number?
+---@field maxSpringForce number?
+---@field angularHertz number?
+---@field angularDampingRatio number?
+---@field maxSpringTorque number?
 
 ---@class sol.PrismaticJointDefinition: sol.JointDefinition
 ---@field isSpringEnabled boolean?
 ---@field isMotorEnabled boolean?
 ---@field isLimitEnabled boolean?
----@field localAnchorA sol.Point?
----@field localAnchorB sol.Point?
----@field localAxisA sol.Point?
 ---@field hertz number?
 ---@field dampingRatio number?
 ---@field maxMotorForce number?
 ---@field motorSpeed number?
----@field reference_angle number?
+---@field targetTranslation number?
 ---@field lowerTranslation number?
 ---@field upperTranslation number?
 
 ---@class sol.WeldJointDefinition: sol.JointDefinition
----@field localAnchorA sol.Point?
----@field localAnchorB sol.Point?
----@field reference_angle number?
 ---@field linearHertz number?
 ---@field angularHertz number?
 ---@field linearDampingRatio number?
@@ -60,9 +57,6 @@
 ---@field isSpringEnabled boolean?
 ---@field isMotorEnabled boolean?
 ---@field isLimitEnabled boolean?
----@field localAnchorA sol.Point?
----@field localAnchorB sol.Point?
----@field localAxisA sol.Point?
 ---@field hertz number?
 ---@field dampingRatio number?
 ---@field maxMotorTorque number?
@@ -196,33 +190,6 @@ function __motor_joint:getCorrectionFactor() end
 
 ---@param correction_factor number
 function __motor_joint:setCorrectionFactor(correction_factor) end
-
----@class sol.MouseJoint: sol.Joint
-local __mouse_joint
-
----@return sol.Point
-function __mouse_joint:getTarget() end
-
----@param target sol.Point
-function __mouse_joint:setTarget(target) end
-
----@return number
-function __mouse_joint:getSpringHertz() end
-
----@param hertz number
-function __mouse_joint:setSpringHertz(hertz) end
-
----@return number
-function __mouse_joint:getSpringDampingRatio() end
-
----@param ratio number
-function __mouse_joint:setSpringDampingRatio(ratio) end
-
----@return number
-function __mouse_joint:getMaxForce() end
-
----@param force number
-function __mouse_joint:setMaxForce(force) end
 
 ---@class sol.PrismaticJoint: sol.Joint
 local __prismatic_joint

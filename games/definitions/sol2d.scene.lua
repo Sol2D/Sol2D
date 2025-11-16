@@ -29,12 +29,11 @@ function __scene:getTileMapObjectByName(name) end
 ---@return sol.TileMapObject[]
 function __scene:getTileMapObjectsByClass(class) end
 
----@param position sol.Point | nil
 ---@param definition sol.BodyDefinition
 ---@param script_path string?
 ---@param script_argument? any
 ---@return sol.Body
-function __scene:createBody(position, definition, script_path, script_argument) end
+function __scene:createBody(definition, script_path, script_argument) end
 
 ---@param body integer | sol.Body
 ---@return boolean
@@ -108,10 +107,6 @@ function __scene:createDistanceJoint(definition) end
 ---@param definition sol.MotorJointDefinition
 ---@return sol.MotorJoint
 function __scene:createMotorJoint(definition) end
-
----@param definition sol.MouseJointDefinition
----@return integer
-function __scene:createMouseJoint(definition) end
 
 ---@param definition sol.PrismaticJointDefinition
 ---@return sol.PrismaticJoint

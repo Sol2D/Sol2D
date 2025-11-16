@@ -16,7 +16,6 @@
 
 #include <Sol2D/Lua/LuaContactApi.h>
 #include <Sol2D/Lua/Aux/LuaTableApi.h>
-#include <Sol2D/Lua/LuaManifoldApi.h>
 
 using namespace Sol2D::World;
 using namespace Sol2D::Lua;
@@ -25,6 +24,8 @@ namespace {
 
 const char g_key_side_a[] = "sideA";
 const char g_key_side_b[] = "sideB";
+const char g_key_point[] = "point";
+const char g_key_normal[] = "normal";
 
 void pushContactSide(lua_State * _lua, const ContactSide & _side)
 {
@@ -66,6 +67,6 @@ void Sol2D::Lua::pushContact(lua_State * _lua, const PreSolveContact & _contact)
     LuaTableApi contact_table = LuaTableApi::pushNew(_lua);
     setContactSide(contact_table, g_key_side_a, _contact.side_a);
     setContactSide(contact_table, g_key_side_b, _contact.side_b);
-    pushManifold(_lua, *_contact.manifold);
-    contact_table.setValueFromTop("manifold");
+    contact_table.setPointValue(g_key_point, _contact.point);
+    contact_table.setPointValue(g_key_normal, _contact.normal);
 }

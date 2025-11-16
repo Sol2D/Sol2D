@@ -219,25 +219,6 @@ std::unique_ptr<BodyDefinition> Sol2D::Lua::tryGetBodyDefinition(lua_State * _lu
     if(!table.isValid())
         return nullptr;
     std::unique_ptr<BodyDefinition> def = std::make_unique<BodyDefinition>();
-    {
-        lua_Integer value;
-        if(!table.tryGetInteger("type", &value))
-            return nullptr;
-        switch(value)
-        {
-        case static_cast<lua_Integer>(BodyType::Static):
-            def->type = BodyType::Static;
-            break;
-        case static_cast<lua_Integer>(BodyType::Dynamic):
-            def->type = BodyType::Dynamic;
-            break;
-        case static_cast<lua_Integer>(BodyType::Kinematic):
-            def->type = BodyType::Kinematic;
-            break;
-        default:
-            return nullptr;
-        }
-    }
     if(table.tryGetValue("physics"))
     {
         tryGetBodyPhysicsDefinition(_lua, -1, def->physics);

@@ -23,14 +23,19 @@ namespace Sol2D {
 
 void detectContentRect(const SDL_Surface & _surface, SDL_Rect & _rect);
 
-inline const b2Vec2 & toBox2D(const SDL_FPoint & _sdl_point)
+inline const b2Vec2 & asBox2D(const SDL_FPoint & _sdl_point)
 {
     return *reinterpret_cast<const b2Vec2 *>(&_sdl_point);
 }
 
-inline const SDL_FPoint & toSDL(const b2Vec2 & _b2_vec)
+inline const SDL_FPoint & asSDL(const b2Vec2 & _b2_vec)
 {
     return *reinterpret_cast<const SDL_FPoint *>(&_b2_vec);
+}
+
+inline SDL_FPoint & asSDL(b2Vec2 & _b2_vec)
+{
+    return *reinterpret_cast<SDL_FPoint *>(&_b2_vec);
 }
 
 } // namespace Sol2D

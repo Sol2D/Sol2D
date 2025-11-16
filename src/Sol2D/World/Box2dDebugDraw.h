@@ -48,7 +48,7 @@ private:
     static void drawCircle(b2Vec2 _center, float _radius, b2HexColor _color, void * _context);
     static void drawSolidCircle(b2Transform _transform, float _radius, b2HexColor _color, void * _context);
     static void drawPoint(b2Vec2 _point, float _size, b2HexColor _color, void * _context);
-    static void drawSegment(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void * _context);
+    static void drawLine(b2Vec2 _p1, b2Vec2 _p2, b2HexColor _color, void * _context);
     static void drawSolidCapsule(b2Vec2 _p1, b2Vec2 _p2, float _radius, b2HexColor _color, void * _context);
 
 private:

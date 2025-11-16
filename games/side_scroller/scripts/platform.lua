@@ -61,9 +61,11 @@ local function createPlatform(scene, position, options)
         }
     )
     local body = scene:createBody(
-        position,
         {
-            type = options.bodyType,
+            physics = {
+                position = position,
+                type = options.bodyType
+            },
             shapes = {
                 [options.shapeKey] = {
                     type = sol.BodyShapeType.POLYGON,

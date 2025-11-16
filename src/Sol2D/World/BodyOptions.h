@@ -25,12 +25,6 @@ namespace Sol2D::World {
 
 struct BodyOptions
 {
-    BodyOptions() :
-        type(BodyType::Static)
-    {
-    }
-
-    BodyType type;
     std::optional<std::string> shape_key;
     BodyPhysicsDefinition body_physics;
     BodyShapePhysicsDefinition shape_physics;

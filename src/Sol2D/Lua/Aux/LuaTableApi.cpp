@@ -62,7 +62,7 @@ bool LuaTableApi::tryGetString(const char * _key, std::string & _value) const
     return result;
 }
 
-bool LuaTableApi::tryGetPoint(const char * _key, std::optional<SDL_FPoint> & _value)
+bool LuaTableApi::tryGetPoint(const char * _key, std::optional<SDL_FPoint> & _value) const
 {
     SDL_FPoint point;
     if(tryGetPoint(_key, point))
@@ -73,7 +73,7 @@ bool LuaTableApi::tryGetPoint(const char * _key, std::optional<SDL_FPoint> & _va
     return false;
 }
 
-bool LuaTableApi::tryGetPoint(const char * _key, SDL_FPoint & _value)
+bool LuaTableApi::tryGetPoint(const char * _key, SDL_FPoint & _value) const
 {
     if(!tryGetTable(_key))
         return false;
@@ -82,7 +82,7 @@ bool LuaTableApi::tryGetPoint(const char * _key, SDL_FPoint & _value)
     return result;
 }
 
-bool LuaTableApi::tryGetSize(const char * _key, std::optional<FSize> & _value)
+bool LuaTableApi::tryGetSize(const char * _key, std::optional<FSize> & _value) const
 {
     FSize size;
     if(tryGetSize(_key, size))
@@ -93,7 +93,7 @@ bool LuaTableApi::tryGetSize(const char * _key, std::optional<FSize> & _value)
     return false;
 }
 
-bool LuaTableApi::tryGetSize(const char * _key, FSize & _value)
+bool LuaTableApi::tryGetSize(const char * _key, FSize & _value) const
 {
     if(!tryGetTable(_key))
         return false;
@@ -102,7 +102,7 @@ bool LuaTableApi::tryGetSize(const char * _key, FSize & _value)
     return result;
 }
 
-bool LuaTableApi::tryGetRect(const char * _key, std::optional<SDL_FRect> & _value)
+bool LuaTableApi::tryGetRect(const char * _key, std::optional<SDL_FRect> & _value) const
 {
     SDL_FRect rect;
     if(tryGetRect(_key, rect))
@@ -113,7 +113,7 @@ bool LuaTableApi::tryGetRect(const char * _key, std::optional<SDL_FRect> & _valu
     return false;
 }
 
-bool LuaTableApi::tryGetRect(const char * _key, SDL_FRect & _value)
+bool LuaTableApi::tryGetRect(const char * _key, SDL_FRect & _value) const
 {
     if(!tryGetTable(_key))
         return false;
@@ -122,7 +122,7 @@ bool LuaTableApi::tryGetRect(const char * _key, SDL_FRect & _value)
     return result;
 }
 
-bool LuaTableApi::tryGetColor(const char * _key, std::optional<SDL_FColor> & _value)
+bool LuaTableApi::tryGetColor(const char * _key, std::optional<SDL_FColor> & _value) const
 {
     SDL_FColor color;
     if(tryGetColor(_key, color))
@@ -133,12 +133,73 @@ bool LuaTableApi::tryGetColor(const char * _key, std::optional<SDL_FColor> & _va
     return false;
 }
 
-bool LuaTableApi::tryGetColor(const char * _key, SDL_FColor & _value)
+bool LuaTableApi::tryGetColor(const char * _key, SDL_FColor & _value) const
 {
     if(!tryGetTable(_key))
         return false;
     bool result = Lua::tryGetColor(m_lua, -1, _value);
     lua_pop(m_lua, 1);
+    return result;
+}
+
+bool LuaTableApi::tryGetTranform(const char * _key, std::optional<b2Transform> & _value) const
+{
+    bool result = false;
+    if(tryGetTable(_key))
+    {
+        LuaTableApi transform_table(m_lua, -1);
+        b2Transform tranfsorm = b2Transform_identity;
+        if(
+            transform_table.tryGetPoint("translation", asSDL(tranfsorm.p)) ||
+            transform_table.tryGetRotation("rotation", tranfsorm.q))
+        {
+            _value = tranfsorm;
+            result = true;
+        }
+        lua_pop(m_lua, 1);
+    }
+    return result;
+}
+
+bool LuaTableApi::tryGetRotation(const char * _key, b2Rot & _value) const
+{
+    std::optional<b2Rot> rotation;
+    if(tryGetRotation(_key, rotation))
+    {
+        _value.c = rotation->c;
+        _value.s = rotation->s;
+        return true;
+    }
+    return false;
+}
+
+bool LuaTableApi::tryGetRotation(const char * _key, std::optional<b2Rot> & _value) const
+{
+    bool result = false;
+    if(tryGetValue(_key))
+    {
+        if(lua_isnumber(m_lua, -1))
+        {
+            float rad = static_cast<float>(lua_tonumber(m_lua, -1));
+            _value = b2Rot
+            {
+                .c = std::cos(rad),
+                .s = std::sin(rad)
+            };
+            result = true;
+        }
+        else if(lua_istable(m_lua, -1))
+        {
+            LuaTableApi inner_table(m_lua, -1);
+            b2Rot rotation = {};
+            if(inner_table.tryGetNumber("cosine", &rotation.c) && inner_table.tryGetNumber("sine", &rotation.s))
+            {
+                _value = rotation;
+                result = true;
+            }
+        }
+        lua_pop(m_lua, 1);
+    }
     return result;
 }
 

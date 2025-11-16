@@ -16,23 +16,20 @@
 
 #pragma once
 
+#include <Sol2D/MediaLayer/MediaLayer.h>
 #include <optional>
 
 namespace Sol2D::World {
 
 struct BodyShapePhysicsDefinition
 {
-    BodyShapePhysicsDefinition() :
-        is_sensor(false),
-        is_pre_solve_enabled(false)
-    {
-    }
-
     std::optional<float> density;
-    std::optional<float> restitution;
-    std::optional<float> friction;
-    bool is_sensor;
-    bool is_pre_solve_enabled;
+    std::optional<b2SurfaceMaterial> material;
+    bool is_sensor = false;
+    bool are_pre_solve_events_enabled = false;
+    bool are_sensor_events_enabled = false;
+    bool are_contact_events_enabled = false;
+    bool are_hit_events_enabled = false;
 };
 
 } // namespace Sol2D::World

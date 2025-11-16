@@ -23,32 +23,22 @@ namespace Sol2D::World {
 
 struct JointDefinition
 {
-    JointDefinition() :
-        body_a_id(UINT64_MAX),
-        body_b_id(UINT64_MAX),
-        is_collide_connected_enabled(false)
-    {
-    }
-
-    uint64_t body_a_id;
-    uint64_t body_b_id;
-    bool is_collide_connected_enabled;
+    uint64_t body_a_id = UINT64_MAX;
+    uint64_t body_b_id = UINT64_MAX;
+    std::optional<b2Transform> local_frame_a;
+    std::optional<b2Transform> local_frame_b;
+    std::optional<float> force_threshold;
+    std::optional<float> torque_threshold;
+    std::optional<float> constraint_hertz;
+    std::optional<float> constraint_damping_ratio;
+    bool is_collide_connected_enabled = false;
 };
 
 struct DistanceJointDefinition : JointDefinition
 {
-    DistanceJointDefinition() :
-        is_spring_enabled(false),
-        is_motor_enabled(false),
-        is_limit_enabled(false)
-    {
-    }
-
-    bool is_spring_enabled;
-    bool is_motor_enabled;
-    bool is_limit_enabled;
-    std::optional<SDL_FPoint> local_anchor_a;
-    std::optional<SDL_FPoint> local_anchor_b;
+    bool is_spring_enabled = false;
+    bool is_motor_enabled = false;
+    bool is_limit_enabled = false;
     std::optional<float> min_length;
     std::optional<float> max_length;
     std::optional<float> hertz;
@@ -60,39 +50,26 @@ struct DistanceJointDefinition : JointDefinition
 
 struct MotorJointDefinition : JointDefinition
 {
-    std::optional<SDL_FPoint> linear_offset;
-    std::optional<float> angular_offset;
-    std::optional<float> max_force;
-    std::optional<float> max_torque;
-    std::optional<float> correction_factor;
-};
-
-struct MouseJointDefinition : JointDefinition
-{
-    std::optional<SDL_FPoint> target;
-    std::optional<float> hertz;
-    std::optional<float> damping_ratio;
-    std::optional<float> max_force;
+    std::optional<SDL_FPoint> linear_velocity;
+    std::optional<float> max_velocity_force;
+    std::optional<float> angular_velocity;
+    std::optional<float> max_velocity_torque;
+    std::optional<float> linear_hertz;
+    std::optional<float> linear_damping_ratio;
+    std::optional<float> max_spring_force;
+    std::optional<float> angular_hertz;
+    std::optional<float> angular_damping_ratio;
+    std::optional<float> max_spring_torque;
 };
 
 struct PrismaticJointDefinition : JointDefinition
 {
-    PrismaticJointDefinition() :
-        is_spring_enabled(false),
-        is_motor_enabled(false),
-        is_limit_enabled(false)
-    {
-    }
-
-    bool is_spring_enabled;
-    bool is_motor_enabled;
-    bool is_limit_enabled;
-    std::optional<SDL_FPoint> local_anchor_a;
-    std::optional<SDL_FPoint> local_anchor_b;
-    std::optional<SDL_FPoint> local_axis_a;
-    std::optional<float> reference_angle;
+    bool is_spring_enabled = false;
+    bool is_motor_enabled = false;
+    bool is_limit_enabled = false;
     std::optional<float> hertz;
     std::optional<float> damping_ratio;
+    std::optional<float> target_translation;
     std::optional<float> lower_translation;
     std::optional<float> upper_translation;
     std::optional<float> max_motor_force;
@@ -101,9 +78,6 @@ struct PrismaticJointDefinition : JointDefinition
 
 struct WeldJointDefinition : JointDefinition
 {
-    std::optional<SDL_FPoint> local_anchor_a;
-    std::optional<SDL_FPoint> local_anchor_b;
-    std::optional<float> reference_angle;
     std::optional<float> linear_hertz;
     std::optional<float> angular_hertz;
     std::optional<float> linear_damping_ratio;
@@ -112,19 +86,9 @@ struct WeldJointDefinition : JointDefinition
 
 struct WheelJointDefinition : JointDefinition
 {
-    WheelJointDefinition() :
-        is_spring_enabled(false),
-        is_motor_enabled(false),
-        is_limit_enabled(false)
-    {
-    }
-
-    bool is_spring_enabled;
-    bool is_motor_enabled;
-    bool is_limit_enabled;
-    std::optional<SDL_FPoint> local_anchor_a;
-    std::optional<SDL_FPoint> local_anchor_b;
-    std::optional<SDL_FPoint> local_axis_a;
+    bool is_spring_enabled = false;
+    bool is_motor_enabled = false;
+    bool is_limit_enabled = false;
     std::optional<float> hertz;
     std::optional<float> damping_ratio;
     std::optional<float> lower_translation;

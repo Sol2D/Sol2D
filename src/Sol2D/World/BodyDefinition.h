@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <Sol2D/World/BodyType.h>
 #include <Sol2D/World/BodyShapeType.h>
 #include <Sol2D/World/BodyShapePhysicsDefinition.h>
 #include <Sol2D/World/BodyPhysicsDefinition.h>
@@ -82,12 +81,6 @@ using BodyVariantShapeDefinition =
 
 struct BodyDefinition
 {
-    BodyDefinition() :
-        type(BodyType::Static)
-    {
-    }
-
-    BodyType type;
     BodyPhysicsDefinition physics;
     std::vector<std::pair<std::string, BodyVariantShapeDefinition>> shapes;
 };

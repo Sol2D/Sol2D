@@ -45,7 +45,8 @@ struct PreSolveContact
 {
     ContactSide side_a;
     ContactSide side_b;
-    const b2Manifold * manifold;
+    SDL_FPoint point;
+    SDL_FPoint normal;
 };
 
 class ContactObserver

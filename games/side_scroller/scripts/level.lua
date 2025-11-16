@@ -56,14 +56,12 @@ local function createLevel(game)
             return true
         end
 
-        if contact.manifold.normal.y * sign < 0.95 then
+        if contact.normal.y * sign < 0.95 then
             return false;
         end
 
-        for _, point in ipairs(contact.manifold.points) do
-            if point.separation > -0.2 then
-                return true
-            end
+        if contact.point.y > 0.2 then
+            return true
         end
 
         return false

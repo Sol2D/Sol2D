@@ -77,11 +77,10 @@ public:
         Node & _node,
         const SceneOptions & _options,
         const Workspace & _workspace,
-        Renderer & _renderer
-    );
+        Renderer & _renderer);
     ~Scene() override;
     void setGravity(const SDL_FPoint & _vector);
-    uint64_t createBody(const SDL_FPoint & _position, const BodyDefinition & _definition);
+    uint64_t createBody(const BodyDefinition & _definition);
     void createBodiesFromMapObjects(const std::string & _class, const BodyOptions & _body_options);
     Body * getBody(uint64_t _body_id);
     bool destroyBody(uint64_t _body_id);
@@ -91,30 +90,26 @@ public:
     GraphicsPack * getBodyShapeGraphicsPack(
         uint64_t _body_id,
         const Utils::PreHashedKey<std::string> & _shape_key,
-        const Utils::PreHashedKey<std::string> & _graphics_key
-    );
+        const Utils::PreHashedKey<std::string> & _graphics_key);
     bool setBodyShapeCurrentGraphics(
         uint64_t _body_id,
         const Utils::PreHashedKey<std::string> & _shape_key,
-        const Utils::PreHashedKey<std::string> & _graphic_key
-    );
+        const Utils::PreHashedKey<std::string> & _graphic_key);
     GraphicsPack * getBodyShapeCurrentGraphics(uint64_t _body_id, const Utils::PreHashedKey<std::string> & _shape_key);
     bool flipBodyShapeGraphics(
         uint64_t _body_id,
         const Utils::PreHashedKey<std::string> & _shape_key,
         const Utils::PreHashedKey<std::string> & _graphic_key,
         bool _flip_horizontally,
-        bool _flip_vertically
-    );
+        bool _flip_vertically);
     uint64_t createJoint(const DistanceJointDefinition & _definition);
+    bool initBaseJointDef(const JointDefinition & _def, b2JointDef & _b2_joint_def);
     uint64_t createJoint(const MotorJointDefinition & _definition);
-    uint64_t createJoint(const MouseJointDefinition & _definition);
     uint64_t createJoint(const PrismaticJointDefinition & _definition);
     uint64_t createJoint(const WeldJointDefinition & _definition);
     uint64_t createJoint(const WheelJointDefinition & _definition);
     std::optional<DistanceJoint> getDistanceJoint(uint64_t _id) const;
     std::optional<MotorJoint> getMotorJoint(uint64_t _id) const;
-    std::optional<MouseJoint> getMouseJoint(uint64_t _id) const;
     std::optional<PrismaticJoint> getPrismaticJoint(uint64_t _id) const;
     std::optional<WeldJoint> getWeldJoint(uint64_t _id) const;
     std::optional<WheelJoint> getWheelJoint(uint64_t _id) const;
@@ -130,8 +125,7 @@ public:
         uint64_t _body_id,
         const SDL_FPoint & _destination,
         bool _allow_diagonal_steps,
-        bool _avoid_sensors
-    ) const;
+        bool _avoid_sensors) const;
 
 protected:
     const char * getTextureName() const override;
@@ -140,21 +134,19 @@ private:
     float physicalToGraphical(float _value);
     float graphicalToPhysical(float _value);
     void deinitializeTileMap();
-    static b2BodyType mapBodyType(BodyType _type);
     static bool box2dPreSolveContact(
         b2ShapeId _shape_id_a,
         b2ShapeId _shape_id_b,
-        b2Manifold * _manifold,
-        void * _context
-    );
+        b2Vec2 _point,
+        b2Vec2 _normal,
+        void * _context);
     void handleBox2dContactEvents();
     static bool tryGetContactSide(b2ShapeId _shape_id, ContactSide & _contact_side);
     void syncWorldWithFollowedBody();
     void drawLayersAndBodies(
         const Tiles::TileMapLayerContainer & _container,
         std::unordered_set<uint64_t> & _bodies_to_render,
-        std::chrono::milliseconds _delta_time
-    );
+        std::chrono::milliseconds _delta_time);
     b2BodyId findBox2dBody(uint64_t _body_id) const;
     b2JointId findJoint(uint64_t _joint_id) const;
     void drawBody(b2BodyId _body_id, std::chrono::milliseconds _delta_time);

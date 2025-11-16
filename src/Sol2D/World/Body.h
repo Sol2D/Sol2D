@@ -51,14 +51,14 @@ public:
     {
         m_action_queue.enqueueAction([this, _position]() {
             if(B2_IS_NON_NULL(m_b2_body_id))
-                b2Body_SetTransform(m_b2_body_id, toBox2D(_position), b2Body_GetRotation(m_b2_body_id));
+                b2Body_SetTransform(m_b2_body_id, asBox2D(_position), b2Body_GetRotation(m_b2_body_id));
         });
     }
 
     std::optional<SDL_FPoint> getPosition() const
     {
         if(B2_IS_NON_NULL(m_b2_body_id))
-            return toSDL(b2Body_GetPosition(m_b2_body_id));
+            return asSDL(b2Body_GetPosition(m_b2_body_id));
         return std::nullopt;
     }
 
@@ -71,14 +71,14 @@ public:
 
     SDL_FPoint getLinearVelocity() const
     {
-        return toSDL(b2Body_GetLinearVelocity(m_b2_body_id));
+        return asSDL(b2Body_GetLinearVelocity(m_b2_body_id));
     }
 
     bool setLinearVelocity(const SDL_FPoint & _velocity) const
     {
         if(B2_IS_NULL(m_b2_body_id))
             return false;
-        b2Body_SetLinearVelocity(m_b2_body_id, toBox2D(_velocity));
+        b2Body_SetLinearVelocity(m_b2_body_id, asBox2D(_velocity));
         return true;
     }
 
@@ -86,7 +86,7 @@ public:
     {
         m_action_queue.enqueueAction([this, _force]() {
             if(B2_IS_NON_NULL(m_b2_body_id))
-                b2Body_ApplyForceToCenter(m_b2_body_id, toBox2D(_force), true); // TODO: what is wake?
+                b2Body_ApplyForceToCenter(m_b2_body_id, asBox2D(_force), true); // TODO: what is wake?
         });
     }
 
@@ -94,7 +94,7 @@ public:
     {
         m_action_queue.enqueueAction([this, _impulse]() {
             if(B2_IS_NON_NULL(m_b2_body_id))
-                b2Body_ApplyLinearImpulseToCenter(m_b2_body_id, toBox2D(_impulse), true); // TODO: what is wake?
+                b2Body_ApplyLinearImpulseToCenter(m_b2_body_id, asBox2D(_impulse), true); // TODO: what is wake?
         });
     }
 

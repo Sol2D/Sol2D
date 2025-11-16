@@ -23,7 +23,6 @@ namespace Sol2D::Lua {
 
 bool tryGetDistanceJointDefinition(lua_State * _lua, int _idx, World::DistanceJointDefinition & _result);
 bool tryGetMotorJointDefinition(lua_State * _lua, int _idx, World::MotorJointDefinition & _result);
-bool tryGetMouseJointDefinition(lua_State * _lua, int _idx, World::MouseJointDefinition & _result);
 bool tryGetPrismaticJointDefinition(lua_State * _lua, int _idx, World::PrismaticJointDefinition & _result);
 bool tryGetWeldJointDefinition(lua_State * _lua, int _idx, World::WeldJointDefinition & _result);
 bool tryGetWheelJointDefinition(lua_State * _lua, int _idx, World::WheelJointDefinition & _result);

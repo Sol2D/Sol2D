@@ -194,7 +194,7 @@ local function construct()
     end
 
     ---@param key string
-    ---@return sol.SoundEffect
+    ---@return sol.Audio
     function resources.getSoundEffect(key)
         local sound_effect = getStore():getAudio(key)
         if not sound_effect then

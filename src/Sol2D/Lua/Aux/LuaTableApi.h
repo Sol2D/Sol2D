@@ -30,13 +30,9 @@ public:
     S2_DEFAULT_COPY_AND_MOVE(LuaTableApi)
 
     explicit LuaTableApi(lua_State * _lua);
-
     LuaTableApi(lua_State * _lua, int _idx);
-
     static LuaTableApi pushNew(lua_State * _lua);
-
     lua_State * getLua() const;
-
     bool isValid() const;
 
     template<std::floating_point T>
@@ -64,47 +60,29 @@ public:
     bool tryGetDuration(const char * _key, std::optional<std::chrono::duration<Rep, Period>> & _duration);
 
     bool tryGetBoolean(const char * _key, bool * _value) const;
-
     bool tryGetBoolean(const char * _key, std::optional<bool> _value) const;
-
     bool tryGetString(const char * _key, std::string & _value) const;
-
     bool tryGetString(const char * _key, std::optional<std::string> & _value) const;
-
-    bool tryGetPoint(const char * _key, SDL_FPoint & _value);
-
-    bool tryGetPoint(const char * _key, std::optional<SDL_FPoint> & _value);
-
-    bool tryGetSize(const char * _key, FSize & _value);
-
-    bool tryGetSize(const char * _key, std::optional<FSize> & _value);
-
-    bool tryGetRect(const char * _key, SDL_FRect & _value);
-
-    bool tryGetRect(const char * _key, std::optional<SDL_FRect> & _value);
-
-    bool tryGetColor(const char * _key, SDL_FColor & _value);
-
-    bool tryGetColor(const char * _key, std::optional<SDL_FColor> & _value);
-
+    bool tryGetPoint(const char * _key, SDL_FPoint & _value) const;
+    bool tryGetPoint(const char * _key, std::optional<SDL_FPoint> & _value) const;
+    bool tryGetSize(const char * _key, FSize & _value) const;
+    bool tryGetSize(const char * _key, std::optional<FSize> & _value) const;
+    bool tryGetRect(const char * _key, SDL_FRect & _value) const;
+    bool tryGetRect(const char * _key, std::optional<SDL_FRect> & _value) const;
+    bool tryGetColor(const char * _key, SDL_FColor & _value) const;
+    bool tryGetColor(const char * _key, std::optional<SDL_FColor> & _value) const;
+    bool tryGetTranform(const char * _key, std::optional<b2Transform> & _value) const;
+    bool tryGetRotation(const char * _key, b2Rot & _value) const;
+    bool tryGetRotation(const char * _key, std::optional<b2Rot> & _value) const;
     bool tryGetTable(const char * _key) const;
-
     bool tryGetValue(const char * _key) const;
-
     void setValueFromTop(const char * _key);
-
     void setIntegerValue(const char * _key, lua_Integer _value);
-
     void setNumberValue(const char * _key, lua_Number _value);
-
     void setBooleanValue(const char * _key, bool _value);
-
     void setStringValue(const char * _key, const char * _value);
-
     void setNullValue(const char * _key);
-
     void setStringValue(const char * _key, const std::string & _value);
-
     void setPointValue(const char * _key, const SDL_FPoint & _point);
 
 private:

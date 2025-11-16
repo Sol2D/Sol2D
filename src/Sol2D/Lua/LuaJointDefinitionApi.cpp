@@ -44,14 +44,20 @@ bool tryGetBodyIdFromJointDefinition(const LuaTableApi & _table, const char * _f
 
 bool tryGetJointDefinition(const LuaTableApi & _table, World::JointDefinition & _result)
 {
-    if(!_table.isValid())
-        return false;
     uint64_t body_a, body_b;
-    if(!tryGetBodyIdFromJointDefinition(_table, "bodyA", &body_a) ||
-       !tryGetBodyIdFromJointDefinition(_table, "bodyB", &body_b))
+    if(
+        !_table.isValid() ||
+        !tryGetBodyIdFromJointDefinition(_table, "bodyA", &body_a) ||
+        !tryGetBodyIdFromJointDefinition(_table, "bodyB", &body_b))
     {
         return false;
     }
+    _table.tryGetNumber("forceThreshold", _result.force_threshold);
+    _table.tryGetNumber("torqueThreshold", _result.torque_threshold);
+    _table.tryGetNumber("constraintHertz", _result.constraint_hertz);
+    _table.tryGetNumber("constraintDampingRatio", _result.constraint_damping_ratio);
+    _table.tryGetTranform("localFrameA", _result.local_frame_a);
+    _table.tryGetTranform("localFrameB", _result.local_frame_b);
     _table.tryGetBoolean("isCollideConnectedEnabled", &_result.is_collide_connected_enabled);
     _result.body_a_id = body_a;
     _result.body_b_id = body_b;
@@ -68,8 +74,6 @@ bool Sol2D::Lua::tryGetDistanceJointDefinition(lua_State * _lua, int _idx, World
     table.tryGetBoolean("isSpringEnabled", &_result.is_spring_enabled);
     table.tryGetBoolean("isMotorEnabled", &_result.is_motor_enabled);
     table.tryGetBoolean("isLimitEnabled", &_result.is_limit_enabled);
-    table.tryGetPoint("localAnchorA", _result.local_anchor_a);
-    table.tryGetPoint("localAnchorB", _result.local_anchor_b);
     table.tryGetNumber("minLength", _result.min_length);
     table.tryGetNumber("maxLength", _result.max_length);
     table.tryGetNumber("hertz", _result.hertz);
@@ -85,23 +89,16 @@ bool Sol2D::Lua::tryGetMotorJointDefinition(lua_State * _lua, int _idx, World::M
     LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
-    table.tryGetPoint("linearOffset", _result.linear_offset);
-    table.tryGetNumber("angularOffset", _result.angular_offset);
-    table.tryGetNumber("maxForce", _result.max_force);
-    table.tryGetNumber("maxTorque", _result.max_torque);
-    table.tryGetNumber("correctionFactor", _result.correction_factor);
-    return true;
-}
-
-bool Sol2D::Lua::tryGetMouseJointDefinition(lua_State * _lua, int _idx, World::MouseJointDefinition & _result)
-{
-    LuaTableApi table(_lua, _idx);
-    if(!tryGetJointDefinition(table, _result))
-        return false;
-    table.tryGetPoint("target", _result.target);
-    table.tryGetNumber("hertz", _result.hertz);
-    table.tryGetNumber("dampingRatio", _result.damping_ratio);
-    table.tryGetNumber("maxForce", _result.max_force);
+    table.tryGetPoint("linearVelocity", _result.linear_velocity);
+    table.tryGetNumber("maxVelocityForce", _result.max_velocity_force);
+    table.tryGetNumber("angularVelocity", _result.angular_velocity);
+    table.tryGetNumber("maxVelocityTorque", _result.max_velocity_torque);
+    table.tryGetNumber("linearHertz", _result.linear_hertz);
+    table.tryGetNumber("linearDampingRatio", _result.linear_damping_ratio);
+    table.tryGetNumber("maxSpringForce", _result.max_spring_force);
+    table.tryGetNumber("angularHertz", _result.angular_hertz);
+    table.tryGetNumber("angularDampingRatio", _result.angular_damping_ratio);
+    table.tryGetNumber("maxSpringTorque", _result.max_spring_torque);
     return true;
 }
 
@@ -113,14 +110,11 @@ bool Sol2D::Lua::tryGetPrismaticJointDefinition(lua_State * _lua, int _idx, Worl
     table.tryGetBoolean("isSpringEnabled", &_result.is_spring_enabled);
     table.tryGetBoolean("isMotorEnabled", &_result.is_motor_enabled);
     table.tryGetBoolean("isLimitEnabled", &_result.is_limit_enabled);
-    table.tryGetPoint("localAnchorA", _result.local_anchor_a);
-    table.tryGetPoint("localAnchorB", _result.local_anchor_b);
-    table.tryGetPoint("localAxisA", _result.local_axis_a);
     table.tryGetNumber("hertz", _result.hertz);
     table.tryGetNumber("dampingRatio", _result.damping_ratio);
     table.tryGetNumber("maxMotorForce", _result.max_motor_force);
     table.tryGetNumber("motorSpeed", _result.motor_speed);
-    table.tryGetNumber("reference_angle", _result.reference_angle);
+    table.tryGetNumber("targetTranslation", _result.target_translation);
     table.tryGetNumber("lowerTranslation", _result.lower_translation);
     table.tryGetNumber("upperTranslation", _result.upper_translation);
     return true;
@@ -131,9 +125,6 @@ bool Sol2D::Lua::tryGetWeldJointDefinition(lua_State * _lua, int _idx, World::We
     LuaTableApi table(_lua, _idx);
     if(!tryGetJointDefinition(table, _result))
         return false;
-    table.tryGetPoint("localAnchorA", _result.local_anchor_a);
-    table.tryGetPoint("localAnchorB", _result.local_anchor_b);
-    table.tryGetNumber("reference_angle", _result.reference_angle);
     table.tryGetNumber("linearHertz", _result.linear_hertz);
     table.tryGetNumber("angularHertz", _result.angular_hertz);
     table.tryGetNumber("linearDampingRatio", _result.linear_damping_ratio);
@@ -149,9 +140,6 @@ bool Sol2D::Lua::tryGetWheelJointDefinition(lua_State * _lua, int _idx, World::W
     table.tryGetBoolean("isSpringEnabled", &_result.is_spring_enabled);
     table.tryGetBoolean("isMotorEnabled", &_result.is_motor_enabled);
     table.tryGetBoolean("isLimitEnabled", &_result.is_limit_enabled);
-    table.tryGetPoint("localAnchorA", _result.local_anchor_a);
-    table.tryGetPoint("localAnchorB", _result.local_anchor_b);
-    table.tryGetPoint("localAxisA", _result.local_axis_a);
     table.tryGetNumber("hertz", _result.hertz);
     table.tryGetNumber("dampingRatio", _result.damping_ratio);
     table.tryGetNumber("maxMotorTorque", _result.max_motor_torque);

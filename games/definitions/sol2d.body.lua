@@ -1,11 +1,9 @@
 ---@meta
 
 ---@class sol.BodyOptions
----@field type integer?
 ---@field shapeKey string?
 ---@field bodyPhysics sol.BodyPhysicsDefinition?
 ---@field shapePhysics sol.BodyShapePhysicsDefinition?
----@see sol.BodyType
 
 ---@class sol.BodyShapeGraphicsOptions
 ---@field position sol.Point?
@@ -13,19 +11,40 @@
 ---@field isFlippedVertically boolean?
 
 ---@class sol.BodyPhysicsDefinition
+---@field type integer?
+---@field position sol.Point?
 ---@field linearDamping number?
+---@field linearVelocity sol.Point?
 ---@field angularDamping number?
----@field fixedRotation boolean?
+---@field angularVelocity number?
+---@field rotation sol.Rotation?
+---@field gravityScale number?
+---@field sleepThreshold number?
+---@field isRotationAllowed boolean?
+---@field isMotionXAllowed boolean?
+---@field isMotionYAllowed boolean?
+---@field isSleepEnabled boolean?
+---@field isAwake boolean?
+---@field isBullet boolean?
+---@field isEnabled boolean?
+---@field isFastRotationAllowed boolean?
+---@see sol.BodyType
+
+---@class sol.SurfaceMaterial
+---@field friction number?
+---@field restitution number?
+---@field rollingResistance number?
+---@field tangentSpeed number?
 
 ---@class sol.BodyShapePhysicsDefinition
----@field density number?
----@field restitution number?
----@field friction number?
----@field isSensor boolean?
----@field isPreSolveEnabled boolean?
+---@field material sol.SurfaceMaterial?
+---@field isSensor boolean?c
+---@field arePreSolveEventsEnabled boolean?
+---@field areSensorEventsEnabled boolean?
+---@field areContactEventsEnabled boolean?
+---@field areHitEventsEnabled boolean?
 
 ---@class sol.BodyDefinition
----@field type integer
 ---@field script string?
 ---@field physics sol.BodyPhysicsDefinition?
 ---@field shapes table<string, sol.BodyShapeRectDefinition | sol.BodyShapePolygonDefinition | sol.BodyShapeCircleDefinition | sol.BodyShapeCapsuleDefinition>?

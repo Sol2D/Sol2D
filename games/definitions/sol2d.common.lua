@@ -19,3 +19,9 @@
 ---@field y number
 ---@field w number
 ---@field h number
+
+---@alias sol.Rotation number | { cosine: number, sine: number }
+
+---@class sol.Transform
+---@field translation sol.Point?
+---@field rotation sol.Rotation?

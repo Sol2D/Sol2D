@@ -24,6 +24,13 @@ namespace Sol2D::World {
 
 class Joint
 {
+public:
+    struct ConstraintTuning
+    {
+        float hertz;
+        float damping_ratio;
+    };
+
 protected:
     S2_DEFAULT_COPY_AND_MOVE(Joint)
 
@@ -60,14 +67,24 @@ public:
         return B2_IS_NULL(m_b2_body_id) ? 0 : getUserData(m_b2_body_id)->getGid();
     }
 
-    SDL_FPoint getLocalAnchorA() const
+    b2Transform getLocalFrameA() const
     {
-        return toSDL(b2Joint_GetLocalAnchorA(m_b2_joint_id));
+        return b2Joint_GetLocalFrameA(m_b2_joint_id);
     }
 
-    SDL_FPoint getLocalAnchorB() const
+    void setLocalFrameA(const b2Transform & _local_frame)
     {
-        return toSDL(b2Joint_GetLocalAnchorB(m_b2_joint_id));
+        return b2Joint_SetLocalFrameA(m_b2_joint_id, _local_frame);
+    }
+
+    b2Transform getLocalFrameB() const
+    {
+        return b2Joint_GetLocalFrameB(m_b2_joint_id);
+    }
+
+    void setLocalFrameB(const b2Transform & _local_frame)
+    {
+        return b2Joint_SetLocalFrameB(m_b2_joint_id, _local_frame);
     }
 
     bool isCollideConnectedEnabled() const
@@ -78,6 +95,58 @@ public:
     void enableCollideConnected(bool _enable)
     {
         b2Joint_SetCollideConnected(m_b2_joint_id, _enable);
+    }
+
+    SDL_FPoint getConstraintForce() const
+    {
+        return asSDL(b2Joint_GetConstraintForce(m_b2_joint_id));
+    }
+
+    float getConstraintTorque() const
+    {
+        return b2Joint_GetConstraintTorque(m_b2_joint_id);
+    }
+
+    float getLinearSeparation() const
+    {
+        return b2Joint_GetLinearSeparation(m_b2_joint_id);
+    }
+
+    float getAngularSeparation() const
+    {
+        return b2Joint_GetAngularSeparation(m_b2_joint_id);
+    }
+
+    void setConstraintTuning(const ConstraintTuning & _tuning)
+    {
+        b2Joint_SetConstraintTuning(m_b2_joint_id, _tuning.hertz, _tuning.damping_ratio);
+    }
+
+    ConstraintTuning getConstraintTuning() const
+    {
+        ConstraintTuning tuning;
+        b2Joint_GetConstraintTuning(m_b2_joint_id, &tuning.hertz, &tuning.damping_ratio);
+        return tuning;
+    }
+
+    float getForceThreshold() const
+    {
+        return b2Joint_GetForceThreshold(m_b2_joint_id);
+    }
+
+    void setForceThreshold(float _threshold)
+    {
+        b2Joint_SetForceThreshold(m_b2_joint_id, _threshold);
+    }
+
+    float getTorqueThreshold() const
+    {
+        return b2Joint_GetTorqueThreshold(m_b2_joint_id);
+    }
+
+    void setTorqueThreshold(float _threshold)
+    {
+        b2Joint_SetTorqueThreshold(m_b2_joint_id, _threshold);
     }
 
     void wakeBodies()
@@ -95,6 +164,13 @@ private:
 
 class DistanceJoint : public Joint
 {
+public:
+    struct SpringForceRange
+    {
+        float lower_force;
+        float upper_force;
+    };
+
 public:
     S2_DEFAULT_COPY_AND_MOVE(DistanceJoint)
 
@@ -207,6 +283,18 @@ public:
     {
         b2DistanceJoint_SetMaxMotorForce(m_b2_joint_id, _force);
     }
+
+    SpringForceRange getSpringForceRange() const
+    {
+        SpringForceRange range;
+        b2DistanceJoint_GetSpringForceRange(m_b2_joint_id, &range.lower_force, &range.upper_force);
+        return range;
+    }
+
+    void setSpringForceRange(const SpringForceRange & _range)
+    {
+        b2DistanceJoint_SetSpringForceRange(m_b2_joint_id, _range.lower_force, _range.upper_force);
+    }
 };
 
 class MotorJoint : public Joint
@@ -219,105 +307,104 @@ public:
     {
     }
 
-    SDL_FPoint getLinearOffset() const
+    SDL_FPoint getLinearVelocity() const
     {
-        return toSDL(b2MotorJoint_GetLinearOffset(m_b2_joint_id));
+        return asSDL(b2MotorJoint_GetLinearVelocity(m_b2_joint_id));
     }
 
-    void setLinearOffset(SDL_FPoint _offset)
+    void setLinearVelocity(const SDL_FPoint & _velocity)
     {
-        b2MotorJoint_SetLinearOffset(m_b2_joint_id, toBox2D(_offset));
+        b2MotorJoint_SetLinearVelocity(m_b2_joint_id, asBox2D(_velocity));
     }
 
-    float getAngularOffset() const
+    float getAngularVelocity() const
     {
-        return b2MotorJoint_GetAngularOffset(m_b2_joint_id);
+        return b2MotorJoint_GetAngularVelocity(m_b2_joint_id);
     }
 
-    void setAngularOffset(float _offset)
+    void setAngularVelocity(float _velocity)
     {
-        b2MotorJoint_SetAngularOffset(m_b2_joint_id, _offset);
+        b2MotorJoint_SetAngularVelocity(m_b2_joint_id, _velocity);
     }
 
-    float getMaxForce() const
+    float getMaxVelocityForce() const
     {
-        return b2MotorJoint_GetMaxForce(m_b2_joint_id);
+        return b2MotorJoint_GetMaxVelocityForce(m_b2_joint_id);
     }
 
-    void setMaxForce(float _force)
+    void setMaxVelocityForce(float _max_force)
     {
-        b2MotorJoint_SetMaxForce(m_b2_joint_id, _force);
+        b2MotorJoint_SetMaxVelocityForce(m_b2_joint_id, _max_force);
     }
 
-    float getMaxTorque() const
+    float getMaxVelocityTorque() const
     {
-        return b2MotorJoint_GetMaxForce(m_b2_joint_id);
+        return b2MotorJoint_GetMaxVelocityTorque(m_b2_joint_id);
     }
 
-    void setMaxTorque(float _torque)
+    void setMaxVelocityTorque(float _max_torque)
     {
-        b2MotorJoint_SetMaxTorque(m_b2_joint_id, _torque);
+        b2MotorJoint_SetMaxVelocityTorque(m_b2_joint_id, _max_torque);
     }
 
-    float getCorrectionFactor() const
+    float getLinearHertz() const
     {
-        return b2MotorJoint_GetCorrectionFactor(m_b2_joint_id);
+        return b2MotorJoint_GetLinearHertz(m_b2_joint_id);
     }
 
-    void setCorrectionFactor(float _correction_factor)
+    void setLinearHertz(float _hertz)
     {
-        b2MotorJoint_SetCorrectionFactor(m_b2_joint_id, _correction_factor);
-    }
-};
-
-class MouseJoint : public Joint
-{
-public:
-    S2_DEFAULT_COPY_AND_MOVE(MouseJoint)
-
-    explicit MouseJoint(b2JointId _b2_joint_id) :
-        Joint(_b2_joint_id)
-    {
+        b2MotorJoint_SetLinearHertz(m_b2_joint_id, _hertz);
     }
 
-    SDL_FPoint getTarget() const
+    float getLinearDampingRatio() const
     {
-        return toSDL(b2MouseJoint_GetTarget(m_b2_joint_id));
+        return b2MotorJoint_GetLinearDampingRatio(m_b2_joint_id);
     }
 
-    void setTarget(SDL_FPoint _target)
+    void setLinearDampingRatio(float _damping)
     {
-        b2MouseJoint_SetTarget(m_b2_joint_id, toBox2D(_target));
+        b2MotorJoint_SetLinearDampingRatio(m_b2_joint_id, _damping);
     }
 
-    float getSpringHertz() const
+    float getAngularHertz() const
     {
-        return b2MouseJoint_GetSpringHertz(m_b2_joint_id);
+        return b2MotorJoint_GetAngularHertz(m_b2_joint_id);
     }
 
-    void setSpringHertz(float _hertz)
+    void setAngularHertz(float _hertz)
     {
-        b2MouseJoint_SetSpringHertz(m_b2_joint_id, _hertz);
+        b2MotorJoint_SetAngularHertz(m_b2_joint_id, _hertz);
     }
 
-    float getSpringDampingRatio() const
+    float getAngularDampingRatio() const
     {
-        return b2MouseJoint_GetSpringDampingRatio(m_b2_joint_id);
+        return b2MotorJoint_GetAngularDampingRatio(m_b2_joint_id);
     }
 
-    void setSpringDampingRatio(float _ratio)
+    void setAngularDampingRatio(float _damping)
     {
-        b2MouseJoint_SetSpringDampingRatio(m_b2_joint_id, _ratio);
+        b2MotorJoint_SetAngularDampingRatio(m_b2_joint_id, _damping);
     }
 
-    float getMaxForce() const
+    float getMaxSpringForce() const
     {
-        return b2MouseJoint_GetMaxForce(m_b2_joint_id);
+        return b2MotorJoint_GetMaxSpringForce(m_b2_joint_id);
     }
 
-    void setMaxForce(float _max_force)
+    void setMaxSpringForce(float _max_force)
     {
-        b2MouseJoint_SetMaxForce(m_b2_joint_id, _max_force);
+        b2MotorJoint_SetMaxSpringForce(m_b2_joint_id, _max_force);
+    }
+
+    float getMaxSpringTorque() const
+    {
+        return b2MotorJoint_GetMaxSpringTorque(m_b2_joint_id);
+    }
+
+    void setMaxSpringTorque(float _max_torque)
+    {
+        b2MotorJoint_SetMaxSpringTorque(m_b2_joint_id, _max_torque);
     }
 };
 
@@ -419,6 +506,26 @@ public:
     void setMaxMotorForce(float _force)
     {
         b2PrismaticJoint_SetMaxMotorForce(m_b2_joint_id, _force);
+    }
+
+    float getSpeed() const
+    {
+        return b2PrismaticJoint_GetSpeed(m_b2_joint_id);
+    }
+
+    float getTargetTranslation() const
+    {
+        return b2PrismaticJoint_GetTargetTranslation(m_b2_joint_id);
+    }
+
+    void setTargetTranslation(float _translation)
+    {
+        b2PrismaticJoint_SetTargetTranslation(m_b2_joint_id, _translation);
+    }
+
+    float getTranslation() const
+    {
+        return b2PrismaticJoint_GetTranslation(m_b2_joint_id);
     }
 };
 
@@ -526,6 +633,16 @@ public:
     {
         b2RevoluteJoint_SetMaxMotorTorque(m_b2_joint_id, _torque);
     }
+
+    float getTargetAngle() const
+    {
+        return b2RevoluteJoint_GetTargetAngle(m_b2_joint_id);
+    }
+
+    void setTargetAngle(float _angle)
+    {
+        b2RevoluteJoint_SetTargetAngle(m_b2_joint_id, _angle);
+    }
 };
 
 class WeldJoint : public Joint
@@ -536,16 +653,6 @@ public:
     explicit WeldJoint(b2JointId _b2_joint_id) :
         Joint(_b2_joint_id)
     {
-    }
-
-    float getReferenceAngle() const
-    {
-        return b2WeldJoint_GetReferenceAngle(m_b2_joint_id);
-    }
-
-    void setReferenceAngle(float _angle_in_radians)
-    {
-        b2WeldJoint_SetReferenceAngle(m_b2_joint_id, _angle_in_radians);
     }
 
     float getLinearHertz() const
@@ -634,6 +741,11 @@ public:
         return b2WheelJoint_IsLimitEnabled(m_b2_joint_id);
     }
 
+    void enableLimit(bool _enable)
+    {
+        b2WheelJoint_EnableLimit(m_b2_joint_id, _enable);
+    }
+
     float getLowerLimit() const
     {
         return b2WheelJoint_GetLowerLimit(m_b2_joint_id);
@@ -647,11 +759,6 @@ public:
     void setLimits(float _lower, float _upper)
     {
         b2WheelJoint_SetLimits(m_b2_joint_id, _lower, _upper);
-    }
-
-    void enableLimit(bool _enable)
-    {
-        b2WheelJoint_EnableLimit(m_b2_joint_id, _enable);
     }
 
     bool isMotorEnabled() const

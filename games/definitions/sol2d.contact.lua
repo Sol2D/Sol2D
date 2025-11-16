@@ -11,20 +11,8 @@
 ---@class sol.PreSolveContact
 ---@field sideA sol.ContactSide
 ---@field sideB sol.ContactSide
----@field manifold sol.Manifold
-
----@class sol.Manifold
----@field normal sol.Point
----@field points sol.ManifoldPoint[]
-
----@class sol.ManifoldPoint
 ---@field point sol.Point
----@field anchorA sol.Point
----@field anchorB sol.Point
----@field separation number
----@field normalImpulse number
----@field tangentImpulse number
----@field normalVelocity number
+---@field normal sol.Point
 
 ---@class sol.ContactSide
 ---@field bodyId integer
