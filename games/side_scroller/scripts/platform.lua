@@ -70,7 +70,8 @@ local function createPlatform(scene, position, options)
                 [options.shapeKey] = {
                     type = sol.BodyShapeType.POLYGON,
                     physics = {
-                        isPreSolveEnabled = true,
+                        arePreSolveEventsEnabled = true,
+                        areSensorEventsEnabled = true,
                         restitution = 0.2,
                         density = 100
                     },

@@ -302,7 +302,6 @@ void Scene::createBodiesFromMapObjects(const std::string & _class, const BodyOpt
 
         m_bodies.insert(std::make_pair(body->getGid(), b2_body_id));
         b2ShapeDef b2_shape_def = mapShapePhysics(_body_options.shape_physics);
-
         const std::string shape_key =
             _body_options.shape_key.value_or(__map_object.getName().empty() ? _class : __map_object.getName());
         switch(__map_object.getObjectType())

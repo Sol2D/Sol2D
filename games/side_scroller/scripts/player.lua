@@ -171,8 +171,8 @@ local function getDefinition(position)
     local radius = hit_box.w / 2
     ---@type sol.BodyDefinition
     local definition = {
-        type = sol.BodyType.DYNAMIC,
         physics = {
+            type = sol.BodyType.DYNAMIC,
             position = position,
             isRotationAllowed = false
         },
@@ -182,8 +182,9 @@ local function getDefinition(position)
                 physics = {
                     material = {
                         friction = 1.1,
-                        density = 80
-                    }
+                    },
+                    density = 80,
+                    areSensorEventsEnabled = true
                 },
                 radius = radius,
                 center1 = { x = hit_box.x + radius, y = hit_box.y + radius },
@@ -193,7 +194,8 @@ local function getDefinition(position)
             [module.keys.shapes.BOTTOM_SENSOR] = {
                 type = sol.BodyShapeType.POLYGON,
                 physics = {
-                    isSensor = true
+                    isSensor = true,
+                    areSensorEventsEnabled = true
                 },
                 rect = {
                     x = hit_box.x + 2,

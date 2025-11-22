@@ -114,14 +114,27 @@ local function createLevel(game)
     function level:run(view, on_finish)
         ---@type sol.Scene
         level.scene = self:createScene(view)
-        level.scene:createBodiesFromMapObjects('obstacle')
-        level.scene:createBodiesFromMapObjects('sensor', { shapePhysics = { isSensor = true } })
+        level.scene:createBodiesFromMapObjects(
+            'obstacle',
+            {
+                shapePhysics = {
+                    areSensorEventsEnabled = true
+                }
+            }
+        )
+        level.scene:createBodiesFromMapObjects('sensor', {
+            shapePhysics = {
+                isSensor = true,
+                areSensorEventsEnabled = true
+            }
+        })
         level.scene:createBodiesFromMapObjects(
             'one-way-platform',
             {
                 shapeKey = keys.shapes.ONE_WAY_PLATFORM,
                 shapePhysics = {
-                    isPreSolveEnabled = true
+                    arePreSolveEventsEnabled = true,
+                    areSensorEventsEnabled = true
                 }
             }
         )
@@ -130,7 +143,8 @@ local function createLevel(game)
             {
                 shapeKey = keys.shapes.WATER,
                 shapePhysics = {
-                    isSensor = true
+                    isSensor = true,
+                    areSensorEventsEnabled = true
                 }
             }
         )
