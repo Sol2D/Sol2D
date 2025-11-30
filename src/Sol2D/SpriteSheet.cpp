@@ -187,7 +187,7 @@ bool SpriteSheet::loadFromAtlas(const std::filesystem::path & _path)
     {
         std::filesystem::path texture_path(loader.getTextureName());
         if(texture_path.is_relative())
-            texture_path = _path / texture_path;
+            texture_path = _path.parent_path() / texture_path;
         SDL_Surface * surface = IMG_Load(texture_path.c_str());
         if(!surface)
             return false;

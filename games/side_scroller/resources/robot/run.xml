@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<atlas version="1" texture="run.png">
+    <frame name="000" tx="0" ty="0" tw="483" th="257" sx="69" sy="0" sw="366" sh="495" rotated="true"/>
+    <frame name="001" tx="483" ty="0" tw="492" th="254" sx="43" sy="0" sw="366" sh="495" rotated="true"/>
+    <frame name="002" tx="975" ty="0" tw="463" th="327" sx="34" sy="1" sw="366" sh="495" rotated="true"/>
+    <frame name="003" tx="1438" ty="0" tw="474" th="310" sx="18" sy="0" sw="366" sh="495" rotated="true"/>
+    <frame name="004" tx="0" ty="327" tw="475" th="296" sx="56" sy="0" sw="366" sh="495" rotated="true"/>
+    <frame name="005" tx="475" ty="327" tw="495" th="335" sx="31" sy="0" sw="366" sh="495" rotated="true"/>
+    <frame name="006" tx="970" ty="327" tw="470" th="366" sx="0" sy="1" sw="366" sh="495" rotated="true"/>
+    <frame name="007" tx="1440" ty="327" tw="477" th="313" sx="51" sy="0" sw="366" sh="495" rotated="true"/>
+</atlas>

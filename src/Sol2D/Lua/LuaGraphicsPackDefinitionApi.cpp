@@ -108,7 +108,7 @@ bool Sol2D::Lua::tryGetGraphicsPackSpriteDefinition(lua_State * _lua, int _idx, 
             if(sprite_sheet && sprite_definition_table.tryGetInteger("spriteIndex", &sprite_index))
             {
                 _result.sprite =
-                    GraphicsPackSpriteSheetSpriteDefinition(sprite_sheet, static_cast<size_t>(sprite_index));
+                    GraphicsPackSpriteSheetSpriteDefinition(sprite_sheet, static_cast<size_t>(sprite_index)); // TODO: 1-based index
             }
             else
             {

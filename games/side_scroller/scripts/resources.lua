@@ -57,10 +57,117 @@ local keys = {
                 'attack-10:knight',
                 rect = { x = 43, y = 40, w = 495, h = 620 }
             },
+        },
+        robot = {
+            dead = {
+                'dead-1:robot',
+                'dead-2:robot',
+                'dead-3:robot',
+                'dead-4:robot',
+                'dead-5:robot',
+                'dead-6:robot',
+                'dead-7:robot',
+                'dead-8:robot',
+                'dead-9:robot',
+                'dead-10:robot'
+            },
+            idle = {
+                'idle-1:robot',
+                'idle-2:robot',
+                'idle-3:robot',
+                'idle-4:robot',
+                'idle-5:robot',
+                'idle-6:robot',
+                'idle-7:robot',
+                'idle-8:robot',
+                'idle-9:robot',
+                'idle-10:robot',
+                rect = { x = 126, y = 52, w = 275, h = 470 }
+            },
+            jump = {
+                'jump-1:robot',
+                'jump-2:robot',
+                'jump-3:robot',
+                'jump-4:robot',
+                'jump-5:robot',
+                'jump-6:robot',
+                'jump-7:robot',
+                'jump-8:robot',
+                'jump-9:robot',
+                'jump-10:robot'
+            },
+            jumpMelee = {
+                'jump-melee-1:robot',
+                'jump-melee-2:robot',
+                'jump-melee-3:robot',
+                'jump-melee-4:robot',
+                'jump-melee-5:robot',
+                'jump-melee-6:robot',
+                'jump-melee-7:robot',
+                'jump-melee-8:robot'
+            },
+            jumpShoot = {
+                'jump-shoot-1:robot',
+                'jump-shoot-2:robot',
+                'jump-shoot-3:robot',
+                'jump-shoot-4:robot',
+                'jump-shoot-5:robot'
+            },
+            melee = {
+                'melee-1:robot',
+                'melee-2:robot',
+                'melee-3:robot',
+                'melee-4:robot',
+                'melee-5:robot',
+                'melee-6:robot',
+                'melee-7:robot',
+                'melee-8:robot'
+            },
+            run = {
+                'run-1:robot',
+                'run-2:robot',
+                'run-3:robot',
+                'run-4:robot',
+                'run-5:robot',
+                'run-6:robot',
+                'run-7:robot',
+                'run-8:robot'
+            },
+            runShoot = {
+                'run-shoot-1:robot',
+                'run-shoot-2:robot',
+                'run-shoot-3:robot',
+                'run-shoot-4:robot',
+                'run-shoot-5:robot',
+                'run-shoot-6:robot',
+                'run-shoot-7:robot',
+                'run-shoot-8:robot',
+                'run-shoot-9:robot'
+            },
+            shoot = {
+                'shoot-1:robot',
+                'shoot-2:robot',
+                'shoot-3:robot',
+                'shoot-4:robot'
+            },
+            slide = {
+                'slide-1:robot',
+                'slide-2:robot',
+                'slide-3:robot',
+                'slide-4:robot',
+                'slide-5:robot',
+                'slide-6:robot',
+                'slide-7:robot',
+                'slide-8:robot',
+                'slide-9:robot',
+                'slide-10:robot'
+            }
         }
     },
     spriteSheets = {
-        PLATFORM = 'platform'
+        PLATFORM = 'platform',
+        ROBOT_IDLE = 'robot:idle',
+        ROBOT_RUN = 'robot:run'
     },
     soundEffects = {
         ARMOR = 'armor',
@@ -87,6 +194,15 @@ local function loadSpriteSheet(store, key, file, options)
     local sprite_sheet = store:createSpriteSheet(key)
     if (not sprite_sheet:loadFromFile(file, options)) then
         error('Unable to load sprite sheet from ' .. file)
+    end
+end
+
+---@param store sol.Store
+---@param file string
+local function loadAtlas(store, key, file)
+    local sprite_sheet = store:createSpriteSheet(key)
+    if not sprite_sheet:loadFromAtlas(file) then
+        error('Unable to load sprite sheet from atlas ' .. file)
     end
 end
 
@@ -142,6 +258,18 @@ local function load(store)
         keys.spriteSheets.PLATFORM,
         'sprites/platform/platform.png',
         { colCount = 3, rowCount = 1, spriteWidth = 128, spriteHeight = 64 }
+    )
+
+    loadAtlas(
+        store,
+        keys.spriteSheets.ROBOT_IDLE,
+        'robot/idle.xml'
+    )
+
+    loadAtlas(
+        store,
+        keys.spriteSheets.ROBOT_RUN,
+        'robot/run.xml'
     )
 
     loadSoundEffect(store, keys.soundEffects.ARMOR, 'sounds/sound-effects/rpg-sound-pack/inventory/armor-light.wav')

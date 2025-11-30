@@ -84,7 +84,7 @@ void Sol2D::Lua::pushSpriteSheetApi(
         {
             { "__gc", UserData::luaGC},
             { "loadFromFile", luaApi_LoadFromFile },
-            { "lFromAtlas", luaApi_LoadFromAtlas },
+            { "loadFromAtlas", luaApi_LoadFromAtlas },
             { nullptr, nullptr }
         };
         luaL_setfuncs(_lua, funcs, 0);

@@ -1,4 +1,5 @@
 local Player = require 'player'
+local Robot = require 'robot'
 local Platform = require 'platform'
 
 local layers = {
@@ -160,6 +161,8 @@ local function createLevel(game)
         level.scene:setFollowedBody(level.player.body)
         level.scene:subscribeToPreSolveContact(preSolveContact)
         level.scene:subscribeToSensorBeginContact(createSensorContactListener(on_finish))
+
+        local robot = Robot.new(level.scene, pixelPontToMeters({x = 500, y = 2000 }))
 
         if self.createMusic then
             local music = self:createMusic()
