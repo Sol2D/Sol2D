@@ -183,34 +183,49 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
 bool SpriteSheet::loadFromAtlas(const std::filesystem::path & _path)
 {
     AtlasXmlLoader loader(_path);
-    if(loader.load())
+    if(!loader.load())
+        return false;
+
+    std::filesystem::path texture_path(loader.getTextureName());
+    if(texture_path.is_relative())
+        texture_path = _path.parent_path() / texture_path;
+    SDL_Surface * surface = IMG_Load(texture_path.c_str());
+    if(!surface)
+        return false;
+    m_texture = m_renderer->createTexture(
+        *surface,
+        std::format("Atlas {}", texture_path.filename().string()).c_str());
+    std::optional<SDL_Color> color_to_alpha = loader.getColorToAlpha();
+    if(color_to_alpha.has_value())
     {
-        std::filesystem::path texture_path(loader.getTextureName());
-        if(texture_path.is_relative())
-            texture_path = _path.parent_path() / texture_path;
-        SDL_Surface * surface = IMG_Load(texture_path.c_str());
-        if(!surface)
-            return false;
-        m_texture = m_renderer->createTexture(
-            *surface,
-            std::format("Atlas {}", texture_path.filename().string()).c_str());
-        std::optional<SDL_Color> color_to_alpha = loader.getColorToAlpha();
-        if(color_to_alpha.has_value())
-        {
-            const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
-            SDL_SetSurfaceColorKey(surface, true, SDL_MapRGBA(
-                pixel_format,
-                nullptr,
-                color_to_alpha->r,
-                color_to_alpha->g,
-                color_to_alpha->b,
-                color_to_alpha->a));
-        }
-        SDL_DestroySurface(surface);
-        const auto & frames = loader.getFrames();
-        m_frames.clear();
-        m_frames.assign(frames.begin(), frames.end());
-        return true;
+        const SDL_PixelFormatDetails * pixel_format = SDL_GetPixelFormatDetails(surface->format);
+        SDL_SetSurfaceColorKey(surface, true, SDL_MapRGBA(
+            pixel_format,
+            nullptr,
+            color_to_alpha->r,
+            color_to_alpha->g,
+            color_to_alpha->b,
+            color_to_alpha->a));
     }
-    return false;
+    SDL_DestroySurface(surface);
+    const auto & frames = loader.getFrames();
+    m_frames.clear();
+    m_frames.assign(frames.begin(), frames.end());
+    return true;
 }
+
+Sprite SpriteSheet::toSprite(size_t _idx) const
+{
+    if(m_frames.empty() || _idx >= m_frames.size())
+    {
+        return Sprite(*m_renderer);
+    }
+    const SpriteSheetFrame & frame = m_frames[_idx];
+    SpritePaddings paddings( // TODO: static data, must be calculated once
+        frame.sprite_point.y,
+        frame.sprite_size.w - frame.texture_rect.w - frame.sprite_point.x,
+        frame.sprite_point.x,
+        frame.sprite_size.h - frame.texture_rect.h - frame.sprite_point.y);
+    return Sprite(*m_renderer, m_texture, m_frames[_idx].texture_rect, paddings);
+}
+
