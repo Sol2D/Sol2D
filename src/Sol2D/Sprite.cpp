@@ -19,6 +19,22 @@
 
 using namespace Sol2D;
 
+Sprite::Sprite(
+    Renderer & _renderer,
+    const Texture & _texture,
+    const SDL_FRect & _rect,
+    const SpritePaddings & _paddings,
+    const Rotation * _rotation
+) :
+    m_renderer(&_renderer),
+    m_texture(_texture),
+    m_source_rect(_rect),
+    m_paddings(_paddings),
+    m_rotation(_rotation ? *_rotation : Rotation()),
+    m_desination_rect(.0f + _paddings.left, .0f + _paddings.top, _rect.w + _paddings.left, _rect.h + _paddings.top)
+{
+}
+
 bool Sprite::loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options /*= SpriteOptions()*/)
 {
     SDL_Surface * surface = IMG_Load(_path.c_str());
@@ -108,5 +124,10 @@ void Sprite::render(const SDL_FPoint & _point, const Rotation & _rotation, SDL_F
         .w = m_desination_rect.w,
         .h = m_desination_rect.h
     };
-    m_renderer->renderTexture(TextureRenderingData(dest_rect, m_texture, m_source_rect, _rotation, _flip_mode));
+    m_renderer->renderTexture(TextureRenderingData(
+        dest_rect,
+        m_texture,
+        m_source_rect,
+        m_rotation.isZero() ? _rotation : m_rotation + _rotation,
+        _flip_mode));
 }

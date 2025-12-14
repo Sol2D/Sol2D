@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <atlas version="1" texture="idle.png">
-    <frame name="000" tx="0" ty="0" tw="273" th="468" sx="1" sy="1" sw="275" sh="470"/>
-    <frame name="001" tx="0" ty="468" tw="273" th="466" sx="1" sy="3" sw="275" sh="470"/>
-    <frame name="002" tx="0" ty="934" tw="273" th="465" sx="1" sy="4" sw="275" sh="470"/>
-    <frame name="003" tx="0" ty="1399" tw="273" th="463" sx="1" sy="6" sw="275" sh="470"/>
-    <frame name="004" tx="273" ty="0" tw="273" th="463" sx="1" sy="6" sw="275" sh="470"/>
-    <frame name="005" tx="273" ty="463" tw="273" th="463" sx="1" sy="6" sw="275" sh="470"/>
-    <frame name="006" tx="273" ty="926" tw="273" th="464" sx="1" sy="5" sw="275" sh="470"/>
-    <frame name="007" tx="273" ty="1390" tw="273" th="465" sx="1" sy="4" sw="275" sh="470"/>
-    <frame name="008" tx="546" ty="0" tw="273" th="466" sx="1" sy="3" sw="275" sh="470"/>
-    <frame name="009" tx="546" ty="466" tw="273" th="467" sx="1" sy="2" sw="275" sh="470"/>
+    <frame name="Idle (1)" tx="0" ty="0" tw="273" th="468" sx="127" sy="53" sw="567" sh="556"/>
+    <frame name="Idle (2)" tx="273" ty="0" tw="273" th="466" sx="127" sy="55" sw="567" sh="556"/>
+    <frame name="Idle (3)" tx="273" ty="466" tw="273" th="465" sx="127" sy="56" sw="567" sh="556"/>
+    <frame name="Idle (4)" tx="0" ty="468" tw="273" th="463" sx="127" sy="58" sw="567" sh="556"/>
+    <frame name="Idle (5)" tx="546" ty="0" tw="273" th="463" sx="127" sy="58" sw="567" sh="556"/>
+    <frame name="Idle (6)" tx="546" ty="463" tw="273" th="463" sx="127" sy="58" sw="567" sh="556"/>
+    <frame name="Idle (7)" tx="546" ty="926" tw="273" th="464" sx="127" sy="57" sw="567" sh="556"/>
+    <frame name="Idle (8)" tx="0" ty="931" tw="273" th="465" sx="127" sy="56" sw="567" sh="556"/>
+    <frame name="Idle (9)" tx="273" ty="931" tw="273" th="466" sx="127" sy="55" sw="567" sh="556"/>
+    <frame name="Idle (10)" tx="0" ty="1396" tw="273" th="467" sx="127" sy="54" sw="567" sh="556"/>
 </atlas>

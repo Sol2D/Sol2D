@@ -50,6 +50,20 @@ struct Rotation
         reset(_angle, _unit);
     }
 
+    Rotation operator + (const Rotation & _rhs)
+    {
+        return Rotation(
+            sine * _rhs.cosine + cosine * _rhs.sine,
+            cosine * _rhs.cosine - sine * _rhs.sine);
+    }
+
+    Rotation operator - (const Rotation & _rhs)
+    {
+        return Rotation(
+            sine * _rhs.cosine - cosine * _rhs.sine,
+            cosine * _rhs.cosine + sine * _rhs.sine);
+    }
+
     bool isZero() const
     {
         return sine == 0.0f;

@@ -40,7 +40,7 @@ struct SpriteSheetFrame
 {
     SDL_FRect texture_rect;
     FSize sprite_size;
-    SDL_FPoint sprite_point;
+    SDL_FPoint sprite_paddings;
     bool is_rotated;
 };
 

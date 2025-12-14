@@ -77,7 +77,8 @@ public:
         Renderer & _renderer,
         const Texture & _texture,
         const SDL_FRect & _rect,
-        const SpritePaddings & _paddings = .0f);
+        const SpritePaddings & _paddings = .0f,
+        const Rotation * _rotation = nullptr);
     bool loadFromFile(const std::filesystem::path & _path, const SpriteOptions & _options = SpriteOptions());
     bool isValid() const;
     void scaleTo(const FSize & _size);
@@ -90,6 +91,7 @@ private:
     Texture m_texture;
     SDL_FRect m_source_rect;
     SpritePaddings m_paddings;
+    Rotation m_rotation;
     SDL_FRect m_desination_rect;
 };
 
@@ -97,20 +99,6 @@ inline Sprite::Sprite(Renderer & _renderer) :
     m_renderer(&_renderer),
     m_source_rect(.0f, .0f, .0f, .0f),
     m_desination_rect(.0f, .0f, .0f, .0f)
-{
-}
-
-inline Sprite::Sprite(
-    Renderer & _renderer,
-    const Texture & _texture,
-    const SDL_FRect & _rect,
-    const SpritePaddings & _paddings
-) :
-    m_renderer(&_renderer),
-    m_texture(_texture),
-    m_source_rect(_rect),
-    m_paddings(_paddings),
-    m_desination_rect(.0f, .0f, _rect.w, _rect.h)
 {
 }
 

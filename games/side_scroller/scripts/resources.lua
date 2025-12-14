@@ -82,7 +82,7 @@ local keys = {
                 'idle-8:robot',
                 'idle-9:robot',
                 'idle-10:robot',
-                rect = { x = 126, y = 52, w = 275, h = 470 }
+                rect = { x = 127, y = 53, w = 273, h = 468 }
             },
             jump = {
                 'jump-1:robot',
@@ -131,7 +131,8 @@ local keys = {
                 'run-5:robot',
                 'run-6:robot',
                 'run-7:robot',
-                'run-8:robot'
+                'run-8:robot',
+                rect = { x = 78, y = 54, w = 366, h = 495 }
             },
             runShoot = {
                 'run-shoot-1:robot',

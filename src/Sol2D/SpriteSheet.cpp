@@ -1,7 +1,7 @@
 // Sol2D Game Engine
 // Copyright (C) 2023-2025 Sergey Smolyannikov aka brainstream
-//
 // This program is free software: you can redistribute it and/or modify it under
+//
 // the terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation, either version 3 of the License, or (at your option) any
 // later version.
@@ -97,7 +97,7 @@ bool AtlasXmlLoader::load()
             .sprite_size = FSize(
                 static_cast<float>(xml_frame->IntAttribute("sw")),
                 static_cast<float>(xml_frame->IntAttribute("sh"))),
-            .sprite_point =
+            .sprite_paddings =
             {
                 .x = static_cast<float>(xml_frame->IntAttribute("sx")),
                 .y = static_cast<float>(xml_frame->IntAttribute("sy")),
@@ -172,7 +172,7 @@ bool SpriteSheet::loadFromFile(const std::filesystem::path & _path, const Sprite
                 {
                     .texture_rect = rect,
                     .sprite_size = FSize(rect.w, rect.h),
-                    .sprite_point = { .x = .0f, .y = .0f },
+                    .sprite_paddings = { .x = .0f, .y = .0f },
                     .is_rotated = false
                 });
         }
@@ -221,11 +221,17 @@ Sprite SpriteSheet::toSprite(size_t _idx) const
         return Sprite(*m_renderer);
     }
     const SpriteSheetFrame & frame = m_frames[_idx];
-    SpritePaddings paddings( // TODO: static data, must be calculated once
-        frame.sprite_point.y,
-        frame.sprite_size.w - frame.texture_rect.w - frame.sprite_point.x,
-        frame.sprite_point.x,
-        frame.sprite_size.h - frame.texture_rect.h - frame.sprite_point.y);
-    return Sprite(*m_renderer, m_texture, m_frames[_idx].texture_rect, paddings);
+    SpritePaddings paddings(
+        frame.sprite_paddings.y,
+        frame.sprite_size.w - frame.texture_rect.w - frame.sprite_paddings.x,
+        frame.sprite_size.h - frame.texture_rect.h - frame.sprite_paddings.y,
+        frame.sprite_paddings.x);
+    Rotation rotation = frame.is_rotated ? Rotation(1, 0) : Rotation();
+    return Sprite(
+        *m_renderer,
+        m_texture,
+        m_frames[_idx].texture_rect,
+        paddings,
+        &rotation);
 }
 
